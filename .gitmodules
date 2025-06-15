@@ -25,3 +25,6 @@
 [submodule "dependencies/elevation_mapping_cupy"]
 	path = dependencies/elevation_mapping_cupy
 	url = git@github.com:lnotspotl/elevation_mapping_cupy.git
+[submodule "dependencies/teleop_twist_keyboard"]
+	path = dependencies/teleop_twist_keyboard
+	url = https://github.com/ros-teleop/teleop_twist_keyboard.git

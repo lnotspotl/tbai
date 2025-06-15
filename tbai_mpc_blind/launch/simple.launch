@@ -6,6 +6,8 @@
     <arg name="tbai_config_path"    default="$(find tbai_mpc_blind)/config/default_config.yaml"/>
     <arg name="description_name"    default="robot_description"/>
     <arg name="description_file"    default="$(find tbai_description)/urdf/anymal_d_gazebo.urdf.xacro"/>
+    <!-- true if you want to control the robot with joystick/ false to control with keyboard -->
+    <arg name="joystick"               default="true"/> 
 
     <arg name="sqp_settings_file" default="$(find tbai_mpc_blind)/config/sqp.info"/>
     <arg name="frame_declaration_file" default="$(find tbai_mpc_blind)/config/frame_declarations.info"/>
@@ -22,10 +24,13 @@
     <arg name="z" default="3.0"/>
 
     <!-- Joystick node -->
-    <arg name="joystick_dev" default="/dev/input/js0"/>
-    <node name="joy_node" pkg="joy" type="joy_node" output="screen">
+    <arg if="$(arg joystick)" name="joystick_dev" default="/dev/input/js0"/>
+    <node if="$(arg joystick)" name="joy_node" pkg="joy" type="joy_node" output="screen">
         <param name="dev" value="$(arg joystick_dev)"/>
     </node>
+    <node unless="$(arg joystick)" name="teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen" launch-prefix="gnome-terminal --">
+    </node>
+
 
     <!-- Upload config path to ROS param server -->
     <param name="tbai_config_path" type="string" value="$(arg tbai_config_path)"/>
