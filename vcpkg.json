@@ -1,0 +1,31 @@
+{
+    "name": "tbai",
+    "version": "2.0.0",
+    "dependencies": [
+        "fmt",
+        "yaml-cpp",
+        "spdlog",
+        "eigen3"
+    ],
+    "builtin-baseline": "a9eee3b18df395dbb8be71a31bd78ea441056e42",
+    "overrides": [
+        {
+            "name": "eigen3",
+            "version": "3.3.7#8"
+        }
+    ],
+    "features": {
+        "tests": {
+            "description": "Build the tests",
+            "dependencies": [
+                "gtest"
+            ]
+        },
+        "python": {
+            "description": "Build the Python bindings",
+            "dependencies": [
+                "pybind11"
+            ]
+        }
+    }
+}
