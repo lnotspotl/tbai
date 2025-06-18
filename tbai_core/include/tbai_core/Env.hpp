@@ -15,7 +15,7 @@ T getEnvAs(const std::string &var, bool allowDefault = false, T defaultValue = T
         if (allowDefault) {
             return defaultValue;
         }
-        TBAI_THROW("Environment variable " + var + " is not set. Defaults are not allowed.");
+        TBAI_THROW("Environment variable {} is not set. Defaults are not allowed.", var);
     }
     return value;
 }
@@ -25,7 +25,7 @@ T getEnvAsChecked(const std::string &var, const std::vector<T> &allowedValues, b
                   T defaultValue = T()) {
     T value = getEnvAs<T>(var, allowDefault, defaultValue);
     if (std::find(allowedValues.begin(), allowedValues.end(), value) == allowedValues.end()) {
-        TBAI_THROW("Environment variable " + var + " has invalid value: " + std::to_string(value));
+        TBAI_THROW("Environment variable {} has invalid value: {}.\nExpected one of ", var, value, allowedValues);
     }
     return value;
 }
