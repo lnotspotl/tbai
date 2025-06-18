@@ -9,4 +9,10 @@ void setEnv(const std::string &var, const std::string &value) {
     }
 }
 
+void unsetEnv(const std::string &var) {
+    if (unsetenv(var.c_str()) != 0) {
+        TBAI_THROW("Failed to unset environment variable " + var);
+    }
+}
+
 }  // namespace tbai

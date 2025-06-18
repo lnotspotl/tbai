@@ -9,7 +9,7 @@
 namespace tbai {
 
 template <typename T>
-T getEnvAs(const std::string &var, T defaultValue, bool allowDefault = true) {
+T getEnvAs(const std::string &var, bool allowDefault = false, T defaultValue = T()) {
     const char *value = std::getenv(var.c_str());
     if (value == nullptr) {
         if (allowDefault) {
@@ -21,9 +21,9 @@ T getEnvAs(const std::string &var, T defaultValue, bool allowDefault = true) {
 }
 
 template <typename T>
-T getEnvAsChecked(const std::string &var, T defaultValue, const std::vector<T> &allowedValues,
-                  bool allowDefault = true) {
-    T value = getEnvAs<T>(var, defaultValue, allowDefault);
+T getEnvAsChecked(const std::string &var, const std::vector<T> &allowedValues, bool allowDefault = false,
+                  T defaultValue = T()) {
+    T value = getEnvAs<T>(var, allowDefault, defaultValue);
     if (std::find(allowedValues.begin(), allowedValues.end(), value) == allowedValues.end()) {
         TBAI_THROW("Environment variable " + var + " has invalid value: " + std::to_string(value));
     }
@@ -31,5 +31,6 @@ T getEnvAsChecked(const std::string &var, T defaultValue, const std::vector<T> &
 }
 
 void setEnv(const std::string &var, const std::string &value);
+void unsetEnv(const std::string &var);
 
 }  // namespace tbai

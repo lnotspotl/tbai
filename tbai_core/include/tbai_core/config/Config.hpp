@@ -96,8 +96,7 @@ T fromConfig(const std::string &path, const std::string &configPath) {
 /*********************************************************************************************************************/
 template <typename T>
 T fromGlobalConfig(const std::string &path) {
-    const std::string configPath = getEnvAs<std::string>("TBAI_GLOBAL_CONFIG_PATH", "");
-    TBAI_THROW_UNLESS(!configPath.empty(), "TBAI_GLOBAL_CONFIG_PATH is not set");
+    const std::string configPath = getEnvAs<std::string>("TBAI_GLOBAL_CONFIG_PATH");
     return fromConfig<T>(path, configPath);
 }
 
