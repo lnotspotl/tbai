@@ -34,6 +34,8 @@ message(STATUS "[tbai_bob] Torch package: ${Torch_PACKAGE_DIR}")
 message(STATUS "[tbai_bob] Torch package version: ${Torch_PACKAGE_VERSION}")
 message(STATUS "[tbai_bob] Torch package include dir: ${Torch_PACKAGE_INCLUDE_DIRS}")
 
+find_package(pinocchio REQUIRED)
+
 add_library(tbai_bob
     src/BobController.cpp
     src/CentralPatternGenerator.cpp
@@ -52,6 +54,7 @@ target_link_libraries(tbai_bob
         tbai_reference
     PRIVATE
         ${TORCH_LIBRARIES}
+        pinocchio::pinocchio
 )
 
 ## Installation rules
