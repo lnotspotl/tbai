@@ -2,8 +2,8 @@
 
 #include <pinocchio/fwd.hpp>
 #include <pinocchio/math/rpy.hpp>
-#include <tbai/core/Throws.hpp>
-#include <tbai/core/Types.hpp>
+#include <tbai_core/Throws.hpp>
+#include <tbai_core/Types.hpp>
 
 namespace tbai {
 

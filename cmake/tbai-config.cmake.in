@@ -1,0 +1,25 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# Set up vcpkg toolchain if available
+if(EXISTS "@PACKAGE_tbai_VCPKG_TOOLCHAIN_FILE@")
+    set(CMAKE_TOOLCHAIN_FILE "@PACKAGE_tbai_VCPKG_TOOLCHAIN_FILE@" CACHE STRING "Vcpkg toolchain file" FORCE)
+endif()
+
+find_package(Eigen3 REQUIRED)
+find_package(yaml-cpp REQUIRED) 
+find_package(fmt REQUIRED)
+find_package(spdlog REQUIRED)
+
+# Get list of target files
+file(GLOB target_files "${CMAKE_CURRENT_LIST_DIR}/*-targets.cmake")
+
+# Include each target file
+foreach(target_file ${target_files})
+    include("${target_file}")
+endforeach()
+
+# Set variables for backward compatibility
+set(tbai_FOUND TRUE)
+set(tbai_VERSION @tbai_VERSION@)

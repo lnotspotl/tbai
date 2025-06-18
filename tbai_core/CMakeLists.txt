@@ -8,6 +8,7 @@ project(tbai_core)
 find_package(Eigen3 REQUIRED)
 find_package(yaml-cpp REQUIRED) 
 find_package(fmt REQUIRED)
+find_package(spdlog REQUIRED)
 
 add_library(tbai_core 
     src/Files.cpp
@@ -25,6 +26,7 @@ target_link_libraries(tbai_core PUBLIC
     Eigen3::Eigen
     yaml-cpp::yaml-cpp
     fmt::fmt
+    spdlog::spdlog
 )
 
 ## Tests
@@ -47,4 +49,10 @@ install(TARGETS tbai_core
 
 install(DIRECTORY include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(EXPORT tbai_core-targets
+    NAMESPACE tbai::
+    FILE tbai-core-targets.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/tbai
 )
