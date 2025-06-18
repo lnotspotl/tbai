@@ -50,6 +50,7 @@ target_link_libraries(tbai_bob
     PUBLIC
         tbai_core
         tbai_reference
+    PRIVATE
         ${TORCH_LIBRARIES}
 )
 
