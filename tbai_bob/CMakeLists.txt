@@ -9,7 +9,7 @@ project(tbai_bob)
 include(FetchContent)
 
 # Download and configure libtorch CPU
-set(PYTORCH_VERSION "2.1.0")
+set(PYTORCH_VERSION "2.7.0")
 set(PYTORCH_URL "https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-${PYTORCH_VERSION}%2Bcpu.zip")
 
 FetchContent_Declare(
