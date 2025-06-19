@@ -1,0 +1,36 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup CMake
+      uses: jwlawson/actions-setup-cmake@v1.13
+      with:
+        cmake-version: '3.16.0'
+        
+    - name: Configure CMake
+      run: |
+        cmake -B build \
+          -S . \
+          -DTBAI_BUILD_TESTS=ON \
+          -DTBAI_BUILD_BOB=ON \
+          -DTBAI_BUILD_PYTHON=OFF
+          
+    - name: Build
+      run: cmake --build build --config Release --parallel
+      
+    - name: Run tests
+      run: |
+        cd build
+        ctest --output-on-failure --verbose 
