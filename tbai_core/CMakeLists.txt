@@ -10,11 +10,10 @@ find_package(yaml-cpp REQUIRED)
 find_package(fmt REQUIRED)
 find_package(spdlog REQUIRED)
 
-add_library(tbai_core 
+add_library(tbai_core
     src/Files.cpp
     src/Utils.cpp
     src/Env.cpp
-    src/control/CentralController.cpp
 )
 
 target_include_directories(tbai_core PUBLIC
@@ -22,11 +21,14 @@ target_include_directories(tbai_core PUBLIC
     $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(tbai_core PUBLIC
+target_link_libraries(tbai_core 
     Eigen3::Eigen
     yaml-cpp::yaml-cpp
     fmt::fmt
     spdlog::spdlog
+)
+target_include_directories(tbai_core INTERFACE
+    ${fmt_INCLUDE_DIRS}
 )
 
 ## Tests

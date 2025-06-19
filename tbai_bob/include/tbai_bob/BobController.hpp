@@ -16,8 +16,8 @@
 #include <tbai_bob/CentralPatternGenerator.hpp>
 #include <tbai_bob/InverseKinematics.hpp>
 #include <tbai_bob/State.hpp>
-#include <tbai_core/control/Controller.hpp>
-#include <tbai_core/control/StateSubscriber.hpp>
+#include <tbai_core/control/Controllers.hpp>
+#include <tbai_core/control/Subscribers.hpp>
 #include <tbai_reference/ReferenceVelocityGenerator.hpp>
 #include <torch/script.h>
 

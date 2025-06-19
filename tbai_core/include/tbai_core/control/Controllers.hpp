@@ -4,7 +4,7 @@
 #include <vector>
 
 #include <tbai_core/Types.hpp>
-#include <tbai_core/control/CommandPublisher.hpp>
+#include <tbai_core/control/Publishers.hpp>
 
 namespace tbai {
 
@@ -64,6 +64,20 @@ class Controller {
      * @return false : if controller is not stable
      */
     virtual bool checkStability() const = 0;
+
+    /**
+     * @brief Check is system is ok and ready to run
+     *
+     * @return true : if controller is ok
+     * @return false : if controller is not ok
+     */
+    virtual bool ok() const = 0;
+
+    /**
+     * @brief Trigger callbacks
+     *
+     */
+    virtual void triggerCallbacks() = 0;
 };
 
 }  // namespace tbai

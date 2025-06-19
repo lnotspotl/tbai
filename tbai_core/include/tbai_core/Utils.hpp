@@ -12,7 +12,8 @@ void writeInitTime();
 void writeInitTime(const long seconds, const long nanoseconds);
 void writeInitTime(const scalar_t time);
 
-inline scalar_t convertToScalar(const std::chrono::system_clock::time_point &time) {
+template <typename TIMEPOINT>
+inline scalar_t convertToScalar(const TIMEPOINT &time) {
     auto seconds = std::chrono::duration_cast<std::chrono::seconds>(time.time_since_epoch()).count();
     auto nanoseconds =
         std::chrono::duration_cast<std::chrono::nanoseconds>(time.time_since_epoch() % std::chrono::seconds(1)).count();
