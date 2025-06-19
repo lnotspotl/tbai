@@ -49,8 +49,8 @@ void writeInitTime(const scalar_t time) {
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 scalar_t readInitTime() {
-    TBAI_THROW_UNLESS(std::filesystem::exists(INIT_TIME_FILE),
-                      fmt::format("Initialization time file does not exist: {}", INIT_TIME_FILE));
+    TBAI_THROW_UNLESS(std::filesystem::exists(INIT_TIME_FILE), "Initialization time file does not exist: {}",
+                      INIT_TIME_FILE);
 
     // Get lock of the file
     auto filelock = FileLock::lock(INIT_TIME_FILE);
@@ -81,8 +81,7 @@ std::string downloadFromHuggingFace(const std::string &repo_id, const std::strin
     // Execute the command
     int result = system(command.c_str());
     TBAI_THROW_UNLESS(
-        result == 0,
-        fmt::format("Failed to download file from Hugging Face: {}\nMake sure huggingface-cli is installed.", command));
+        result == 0, "Failed to download file from Hugging Face: {}\nMake sure huggingface-cli is installed.", command);
 
     std::string path = cache_dir + "/" + filename;
     return path;
