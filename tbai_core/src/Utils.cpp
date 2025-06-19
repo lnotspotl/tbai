@@ -16,25 +16,32 @@ static constexpr const char *TBAI_HF_CACHE_DIR = "/tmp/tbai_hf_cache";
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 void writeInitTime() {
-    scalar_t initTime = std::chrono::duration<scalar_t>(std::chrono::system_clock::now().time_since_epoch()).count();
-    writeInitTime(initTime);
+    auto now = std::chrono::system_clock::now();
+    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
+    auto nanoseconds =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch() % std::chrono::seconds(1)).count();
+    writeInitTime(seconds, nanoseconds);
 }
 
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
-void writeInitTime(scalar_t initTime) {
+void writeInitTime(const long seconds, const long nanoseconds) {
+    writeInitTime(static_cast<scalar_t>(seconds) + static_cast<scalar_t>(nanoseconds) * 1e-9);
+}
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+void writeInitTime(const scalar_t time) {
     // Remove the file if it exists
     if (std::filesystem::exists(INIT_TIME_FILE)) {
         std::filesystem::remove(INIT_TIME_FILE);
     }
 
-    // Get lock of the file
     auto filelock = FileLock::lock(INIT_TIME_FILE, true);
 
-    // Write the initialization time to the file
     std::ofstream file(INIT_TIME_FILE);
-    file << std::fixed << std::setprecision(20) << initTime;
+    file << std::fixed << std::setprecision(20) << time;
     file.close();
 }
 
