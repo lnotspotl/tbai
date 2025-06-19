@@ -13,7 +13,7 @@ class StateSubscriber {
     virtual void waitTillInitialized() = 0;
     virtual const vector_t &getLatestRbdState() = 0;
     virtual const scalar_t getLatestRbdStamp() = 0;
-    virtual const std::vector<bool> &getContactFlags() = 0;
+    virtual const std::vector<bool> getContactFlags() = 0;
 };
 
 }  // namespace tbai
