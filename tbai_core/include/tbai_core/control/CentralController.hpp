@@ -28,7 +28,7 @@ class CentralController {
      */
     void addController(std::unique_ptr<Controller> controller, bool makeActive = false);
 
-   private:
+   protected:
     std::vector<std::unique_ptr<Controller>> controllers_;
 
     Controller *activeController_ = nullptr;
