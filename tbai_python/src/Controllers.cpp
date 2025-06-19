@@ -47,10 +47,31 @@ void PyCentralController::start() {
 
         stateSubscriberPtr_->updateState();
 
-        rate.sleep();
+        if (containsFallbackController_ && !activeController_->checkStability()) {
+            switchToFallbackController();
+        }
 
-        // Get current time
         scalar_t currentTime_ = getCurrentTime();
+        scalar_t dt = lastTime_ - currentTime_;
+
+        auto commands = activeController_->getMotorCommands(currentTime_, dt);
+        commandPublisherPtr_->publish(commands);
+
+        activeController_->visualize();
+
+        auto t2 = std::chrono::high_resolution_clock::now();
+        rate.sleep();
+        auto t3 = std::chrono::high_resolution_clock::now();
+
+        auto duration1 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        auto duration2 = std::chrono::duration_cast<std::chrono::milliseconds>(t3 - t2).count();
+
+        TBAI_LOG_INFO_THROTTLE(2.0, "Time taken: " + std::to_string(duration1) + "ms, " + std::to_string(duration2) + "ms");
+
+        auto sleepPercentage = (duration2 / duration1) * 100.0;
+        TBAI_LOG_INFO_THROTTLE(2.0, "Sleep percentage: " + std::to_string(sleepPercentage) + "%");
+
+        lastTime_ = currentTime_;
     }
 }
 
@@ -65,6 +86,25 @@ bool PyCentralController::checkForFallbackController() {
 
 scalar_t PyCentralController::getCurrentTime() {
     return std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count() - initTime_;
+}
+
+void PyCentralController::switchToFallbackController() {
+    switchToController(fallbackControllerType_);
+}
+
+void PyCentralController::switchToController(const std::string &controllerType) {
+    for (auto &controller : controllers_) {
+        if (controller->isSupported(controllerType)) {
+            if (activeController_ != controller.get()) {
+                activeController_->stopController();  // Stop current controller
+            }
+            activeController_ = controller.get();  // Set new active controller
+            activeController_->changeController(controllerType, getCurrentTime());
+            TBAI_LOG_INFO("Controller changed to " + controllerType);
+            return;
+        }
+    }
+    TBAI_LOG_WARN("Controller " + controllerType + " not supported");
 }
 
 }  // namespace python

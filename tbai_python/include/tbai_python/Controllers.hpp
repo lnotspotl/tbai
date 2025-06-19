@@ -68,6 +68,10 @@ class PyCentralController : public ::tbai::CentralController {
     std::shared_ptr<tbai::CommandPublisher> commandPublisherPtr_;
 
     scalar_t getCurrentTime();
+
+    void switchToFallbackController();
+
+    void switchToController(const std::string &controllerType);
 };
 
 class PyRate {
