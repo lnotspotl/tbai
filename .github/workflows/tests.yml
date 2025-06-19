@@ -24,7 +24,7 @@ jobs:
         cmake -B build \
           -S . \
           -DTBAI_BUILD_TESTS=ON \
-          -DTBAI_BUILD_BOB=ON \
+          -DTBAI_BUILD_BOB=OFF \
           -DTBAI_BUILD_PYTHON=OFF
           
     - name: Build
