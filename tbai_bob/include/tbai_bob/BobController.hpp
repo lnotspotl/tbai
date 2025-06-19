@@ -28,8 +28,11 @@ using torch::jit::script::Module;
 
 class BobController : public tbai::Controller {
    public:
+    BobController(const std::string &urdfString, const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
+                  const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen);
+
     BobController(const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
-                  std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> refVelGen);
+                  const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen);
 
     std::vector<tbai::MotorCommand> getMotorCommands(scalar_t currentTime, scalar_t dt) override;
 
@@ -41,9 +44,9 @@ class BobController : public tbai::Controller {
 
     bool checkStability() const override;
 
-    virtual void atPositions(const matrix_t &positions) = 0;
+    virtual void atPositions(matrix_t &positions) = 0;
 
-   private:
+   protected:
     std::shared_ptr<tbai::StateSubscriber> stateSubscriberPtr_;
 
     scalar_t kp_;
@@ -78,7 +81,7 @@ class BobController : public tbai::Controller {
 
     at::Tensor getNNInput(const State &state, scalar_t currentTime, scalar_t dt);
 
-    void setupPinocchioModel();
+    void setupPinocchioModel(const std::string &urdfString);
     std::vector<tbai::MotorCommand> getMotorCommands(const vector_t &jointAngles);
     pinocchio::Model pinocchioModel_;
     pinocchio::Data pinocchioData_;

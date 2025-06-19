@@ -8,9 +8,10 @@
 #define TBAI_THROW(...)                                                                                            \
     do {                                                                                                           \
         std::string message = fmt::format(__VA_ARGS__);                                                            \
-        std::cerr << "\n"                                                                                          \
+        std::cerr << "\033[31m\n"                                                                                  \
                   << "Exception thrown in file " << __FILE__ << " on line " << __LINE__ << ": " << message << "\n" \
-                  << std::endl;                                                                                    \
+                  << std::endl                                                                                     \
+                  << "\033[0m";                                                                                    \
         throw std::runtime_error(message);                                                                         \
     } while (0);
 

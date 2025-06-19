@@ -20,7 +20,8 @@ class CentralController {
     // Constructor
     CentralController(std::shared_ptr<StateSubscriber> stateSubscriberPtr,
                       std::shared_ptr<CommandPublisher> commandPublisherPtr,
-                      std::shared_ptr<ChangeControllerSubscriber> changeControllerSubscriberPtr) : loopRate_(1) {
+                      std::shared_ptr<ChangeControllerSubscriber> changeControllerSubscriberPtr)
+        : loopRate_(1) {
         stateSubscriberPtr_ = stateSubscriberPtr;
         commandPublisherPtr_ = commandPublisherPtr;
         changeControllerSubscriberPtr_ = changeControllerSubscriberPtr;
@@ -83,6 +84,7 @@ class CentralController {
 
             // Check stability and switch to fallback controller if necessary
             if (containsFallbackController_ && !activeController_->checkStability()) {
+                TBAI_LOG_WARN("Stability check failed, switching to fallback controller: {}", fallbackControllerType_);
                 switchToFallbackController();
             }
 
@@ -107,7 +109,7 @@ class CentralController {
             auto duration2 = std::chrono::duration_cast<std::chrono::microseconds>(t3 - t2).count();
             auto sleepTimePercentage = 100.0 * duration2 / (duration1 + duration2);
 
-            TBAI_LOG_INFO_THROTTLE(5.0, "Loop duration: {} us, Sleep duration: {} us, Sleep time percentage: {} %",
+            TBAI_LOG_INFO_THROTTLE(10.0, "Loop duration: {} us, Sleep duration: {} us, Sleep time percentage: {} %",
                                    duration1, duration2, sleepTimePercentage);
         }
     }
@@ -133,7 +135,8 @@ class CentralController {
                 activeController_ = controller.get();  // Set new active controller
                 activeController_->changeController(controllerType, getCurrentTime());
                 loopRate_ = RATE(activeController_->getRate());
-                TBAI_LOG_INFO("Controller changed to {}, loop rate: {} Hz", controllerType, activeController_->getRate());
+                TBAI_LOG_INFO("Controller changed to {}, loop rate: {} Hz", controllerType,
+                              activeController_->getRate());
                 return;
             }
         }

@@ -11,6 +11,7 @@
 #include <tbai_core/Env.hpp>
 #include <tbai_core/Logging.hpp>
 #include <tbai_core/Rotations.hpp>
+#include <tbai_core/Utils.hpp>
 #include <tbai_core/config/Config.hpp>
 
 namespace tbai {
@@ -22,11 +23,17 @@ static inline int mod(int a, int b) {
     return (a % b + b) % b;
 }
 
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
 BobController::BobController(const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
-                             std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> refVelGen)
+                             const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen)
+    : BobController::BobController(tbai::fromGlobalConfig<std::string>("TBAI_ROBOT_DESCRIPTION_PATH"),
+                                   stateSubscriberPtr, refVelGen) {}
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+BobController::BobController(const std::string &urdfString,
+                             const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
+                             const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen)
     : stateSubscriberPtr_(stateSubscriberPtr), refVelGen_(refVelGen) {
     // Load parameters
     kp_ = tbai::fromGlobalConfig<scalar_t>("bob_controller/kp");
@@ -37,11 +44,15 @@ BobController::BobController(const std::shared_ptr<tbai::StateSubscriber> &state
     ik_ = getInverseKinematicsUnique();
     cpg_ = getCentralPatternGeneratorUnique();
 
-    setupPinocchioModel();
+    setupPinocchioModel(urdfString);
     generateSamplingPositions();
 
-    auto modelPath = tbai::fromGlobalConfig<std::string>("bob_controller/model_path");
-    TBAI_LOG_INFO("[BobController] Loading model from: {}", modelPath);
+    auto hfRepo = tbai::fromGlobalConfig<std::string>("bob_controller/hf_repo");
+    auto hfModel = tbai::fromGlobalConfig<std::string>("bob_controller/hf_model");
+
+    TBAI_LOG_INFO("Loading HF model: {}/{}", hfRepo, hfModel);
+    auto modelPath = tbai::downloadFromHuggingFace(hfRepo, hfModel);
+    TBAI_LOG_INFO("Model downloaded to: {}", modelPath);
 
     try {
         model_ = torch::jit::load(modelPath);
@@ -49,6 +60,8 @@ BobController::BobController(const std::shared_ptr<tbai::StateSubscriber> &state
         std::cerr << "Could not load model from: " << modelPath << std::endl;
         throw std::runtime_error("Could not load model");
     }
+
+    TBAI_LOG_INFO("Model loaded");
 
     std::vector<torch::jit::IValue> stack;
     model_.get_method("set_hidden_size")(stack);
@@ -65,15 +78,15 @@ BobController::BobController(const std::shared_ptr<tbai::StateSubscriber> &state
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
-void BobController::setupPinocchioModel() {
-    auto urdfPath = tbai::getEnvAs<std::string>("TBAI_ROBOT_DESCRIPTION_PATH");
-    pinocchio::urdf::buildModel(urdfPath, pinocchio::JointModelFreeFlyer(), pinocchioModel_);
+void BobController::setupPinocchioModel(const std::string &urdfString) {
+    pinocchio::urdf::buildModelFromXML(urdfString, pinocchio::JointModelFreeFlyer(), pinocchioModel_);
     pinocchioData_ = pinocchio::Data(pinocchioModel_);
 }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
-/***********************************************************************************************************************/
+/**********************************************************************************************
+ * *************************/
 bool BobController::isSupported(const std::string &controllerType) {
     if (controllerType == "BOB") {
         return true;
@@ -112,16 +125,10 @@ std::vector<tbai::MotorCommand> BobController::getMotorCommands(scalar_t current
 
     cpg_->step(dt);
 
-    TBAI_LOG_INFO_THROTTLE(1.0, "NN input computation took: {} ms",
-                           std::chrono::duration_cast<std::chrono::microseconds>(t2 - ts1).count() / 1000.0);
-
     // perform forward pass
     auto ts3 = std::chrono::high_resolution_clock::now();
     at::Tensor out = model_.forward({nnInput.view({1, getNNInputSize()})}).toTensor().squeeze();
     auto t4 = std::chrono::high_resolution_clock::now();
-
-    TBAI_LOG_INFO_THROTTLE(1.0, "NN forward pass took: {} ms",
-                           std::chrono::duration_cast<std::chrono::microseconds>(t4 - ts3).count() / 1000.0);
 
     // action from NN
     at::Tensor action = out.index({Slice(0, COMMAND_SIZE)});
@@ -159,6 +166,13 @@ std::vector<tbai::MotorCommand> BobController::getMotorCommands(scalar_t current
 
     // update central pattern generator
     cpg_->step(dt);
+    auto t5 = std::chrono::high_resolution_clock::now();
+
+    TBAI_LOG_INFO_THROTTLE(
+        10.0, "NN input preparations took {} ms, NN forward pass took: {} ms. Total controller step took: {} ms",
+        std::chrono::duration_cast<std::chrono::microseconds>(t2 - ts1).count() / 1000.0,
+        std::chrono::duration_cast<std::chrono::microseconds>(t4 - ts3).count() / 1000.0,
+        std::chrono::duration_cast<std::chrono::microseconds>(t5 - ts1).count() / 1000.0);
 
     return ret;
 }
