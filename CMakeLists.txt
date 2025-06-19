@@ -5,10 +5,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(TBAI_BUILD_TESTS "Build the tests" OFF)
 option(TBAI_BUILD_BOB "Build the bob" ON)
+option(TBAI_BUILD_PYTHON "Build the Python bindings" OFF)
 
 if(TBAI_BUILD_TESTS)
   enable_testing()
   list(APPEND VCPKG_MANIFEST_FEATURES "tests")
+endif()
+
+if(TBAI_BUILD_PYTHON)
+  list(APPEND VCPKG_MANIFEST_FEATURES "python")
 endif()
 
 set(VCPKG_VERSION)
@@ -21,6 +26,10 @@ add_subdirectory(tbai_reference)
 
 if(TBAI_BUILD_BOB)
   add_subdirectory(tbai_bob)
+endif()
+
+if(TBAI_BUILD_PYTHON)
+  add_subdirectory(tbai_python)
 endif()
 
 include(CMakePackageConfigHelpers)
