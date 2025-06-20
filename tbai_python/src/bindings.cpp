@@ -1,8 +1,10 @@
+#include <iostream>
+
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <iostream>
 #include <tbai_bob/BobController.hpp>
+#include <tbai_core/Rotations.hpp>
 #include <tbai_core/Types.hpp>
 #include <tbai_core/Utils.hpp>
 #include <tbai_core/control/CentralController.hpp>
@@ -18,9 +20,7 @@ class PyStateSubscriber : public tbai::StateSubscriber {
    public:
     using StateSubscriber::StateSubscriber;
 
-    void waitTillInitialized() override {
-        PYBIND11_OVERRIDE_PURE(void, tbai::StateSubscriber, waitTillInitialized);
-    }
+    void waitTillInitialized() override { PYBIND11_OVERRIDE_PURE(void, tbai::StateSubscriber, waitTillInitialized); }
     const vector_t &getLatestRbdState() override {
         PYBIND11_OVERRIDE_PURE(const vector_t &, tbai::StateSubscriber, getLatestRbdState);
     }
@@ -156,4 +156,24 @@ PYBIND11_MODULE(tbai_python, m) {
                 std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> refVelGen) {
                  self->addController(std::make_unique<tbai::PyBobController>(stateSubscriberPtr, refVelGen));
              });
+
+    // Bind rotation helper functions
+    py::module rotations_module = m.def_submodule("rotations");
+    rotations_module.def("rpy2quat", [](const tbai::vector3_t &rpy) {
+        tbai::quaternion_t q = tbai::rpy2quat(rpy);
+        return tbai::vector4_t(q.x(), q.y(), q.z(), q.w());
+    }, "Convert roll-pitch-yaw euler angles to quaternion (returns xyzw vector)");
+    rotations_module.def("quat2mat", &tbai::quat2mat, "Convert quaternion to rotation matrix");
+    rotations_module.def("mat2rpy", &tbai::mat2rpy, "Convert rotation matrix to roll-pitch-yaw euler angles");
+    rotations_module.def("mat2ocs2rpy", &tbai::mat2oc2rpy,
+                         "Convert rotation matrix to ocs2-style roll-pitch-yaw euler angles");
+    rotations_module.def(
+        "ocs2rpy2quat",
+        [](const tbai::vector3_t &rpy) {
+            tbai::quaternion_t q = tbai::ocs2rpy2quat(rpy);
+            return tbai::vector4_t(q.x(), q.y(), q.z(), q.w());
+        },
+        "Convert ocs2-style roll-pitch-yaw angles to quaternion (returns xyzw vector)");
+    rotations_module.def("rpy2mat", &tbai::rpy2mat, "Convert roll-pitch-yaw euler angles to rotation matrix");
+    rotations_module.def("mat2aa", &tbai::mat2aa, "Convert rotation matrix to axis-angle representation");
 }
