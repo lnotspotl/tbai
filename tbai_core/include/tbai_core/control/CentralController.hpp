@@ -22,17 +22,22 @@ class CentralController {
                       std::shared_ptr<CommandPublisher> commandPublisherPtr,
                       std::shared_ptr<ChangeControllerSubscriber> changeControllerSubscriberPtr)
         : loopRate_(1) {
+        
+        // Initialize logger
+        logger_ = tbai::getLogger("central_controller");
+
         stateSubscriberPtr_ = stateSubscriberPtr;
         commandPublisherPtr_ = commandPublisherPtr;
         changeControllerSubscriberPtr_ = changeControllerSubscriberPtr;
 
         // Set changeControllerSubscriber callback function
+        TBAI_LOG_INFO(logger_, "Setting changeControllerSubscriber callback function");
         changeControllerSubscriberPtr_->setCallbackFunction(
             std::bind(&CentralController<RATE, TIME>::changeController, this, std::placeholders::_1));
 
         initTime_ = tbai::readInitTime();
         fallbackControllerType_ = "SIT";
-        logger_ = tbai::getLogger("central_controller");
+        TBAI_LOG_INFO(logger_, "Init time: {} | Fallback controller type: {}", initTime_, fallbackControllerType_);
         controllers_ = std::vector<std::unique_ptr<Controller>>();
     }
 

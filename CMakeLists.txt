@@ -23,6 +23,7 @@ project(tbai VERSION 2.0.0)
 
 add_subdirectory(tbai_core)
 add_subdirectory(tbai_reference)
+add_subdirectory(tbai_static)
 
 if(TBAI_BUILD_BOB)
   add_subdirectory(tbai_bob)

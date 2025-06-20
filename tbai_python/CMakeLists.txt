@@ -16,6 +16,7 @@ target_link_libraries(tbai_python
         tbai_core
         tbai_bob
         tbai_reference
+        tbai_static
         pinocchio::pinocchio
 )
 target_include_directories(tbai_python

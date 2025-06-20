@@ -11,7 +11,10 @@
 #include <tbai_core/control/Controllers.hpp>
 #include <tbai_core/control/Rate.hpp>
 #include <tbai_core/control/Subscribers.hpp>
+#include <tbai_static/StaticController.hpp>
 #include <tbai_reference/ReferenceVelocityGenerator.hpp>
+
+#include <pybind11/functional.h> 
 
 // Python wrappers around virtual classes
 namespace tbai {
@@ -50,6 +53,21 @@ class PyChangeControllerSubscriber : public tbai::ChangeControllerSubscriber {
     }
     void triggerCallbacks() override {
         PYBIND11_OVERRIDE_PURE(void, tbai::ChangeControllerSubscriber, triggerCallbacks);
+    }
+};
+
+class PyStaticController : public tbai::static_::StaticController {
+   public:
+    using static_::StaticController::StaticController;
+
+    void visualize() override {
+        // Do nothing
+    }
+
+    bool ok() const override { return true; }
+
+    void triggerCallbacks() override {
+        // Do nothing
     }
 };
 
@@ -128,8 +146,8 @@ PYBIND11_MODULE(tbai_python, m) {
     py::class_<tbai::ChangeControllerSubscriber, tbai::PyChangeControllerSubscriber,
                std::shared_ptr<tbai::ChangeControllerSubscriber>>(m, "ChangeControllerSubscriber")
         .def(py::init<>())
-        .def("set_callback_function", &tbai::ChangeControllerSubscriber::setCallbackFunction)
-        .def("trigger_callbacks", &tbai::ChangeControllerSubscriber::triggerCallbacks);
+        .def("setCallbackFunction", &tbai::ChangeControllerSubscriber::setCallbackFunction)
+        .def("triggerCallbacks", &tbai::ChangeControllerSubscriber::triggerCallbacks);
 
     py::class_<tbai::reference::ReferenceVelocity>(m, "ReferenceVelocity")
         .def(py::init<>())
@@ -155,6 +173,10 @@ PYBIND11_MODULE(tbai_python, m) {
              [](tbai::CentralControllerPython *self, std::shared_ptr<tbai::StateSubscriber> stateSubscriberPtr,
                 std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> refVelGen) {
                  self->addController(std::make_unique<tbai::PyBobController>(stateSubscriberPtr, refVelGen));
+             })
+        .def("add_static_controller",
+             [](tbai::CentralControllerPython *self, std::shared_ptr<tbai::StateSubscriber> stateSubscriberPtr) {
+                 self->addController(std::make_unique<tbai::PyStaticController>(stateSubscriberPtr));
              });
 
     // Bind rotation helper functions
