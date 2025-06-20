@@ -79,7 +79,7 @@ class CentralController {
         TBAI_LOG_INFO(logger_, "Starting! Current time: {}", getCurrentTime());
 
         scalar_t lastTime = getCurrentTime();
-        while (activeController_->ok()) {
+        while (activeController_->ok() && running_) {
             // Keep track of time for stats
             auto t1 = std::chrono::high_resolution_clock::now();
 
@@ -121,6 +121,15 @@ class CentralController {
                                       "Loop duration: {} us, Sleep duration: {} us, Sleep time percentage: {} %",
                                       duration1, duration2, sleepTimePercentage);
         }
+    }
+
+    void startThread() {
+        controllerThread_ = std::thread([this]() { start(); });
+    }
+
+    void stopThread() {
+        running_ = false;
+        controllerThread_.join();
     }
 
    protected:
@@ -168,6 +177,9 @@ class CentralController {
 
     std::string fallbackControllerType_;
     std::shared_ptr<spdlog::logger> logger_;
+
+    std::thread controllerThread_;
+    bool running_ = true;
 };
 
 }  // namespace tbai

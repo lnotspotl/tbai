@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <pybind11/eigen.h>
+#include <pybind11/functional.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <tbai_bob/BobController.hpp>
@@ -11,10 +12,8 @@
 #include <tbai_core/control/Controllers.hpp>
 #include <tbai_core/control/Rate.hpp>
 #include <tbai_core/control/Subscribers.hpp>
-#include <tbai_static/StaticController.hpp>
 #include <tbai_reference/ReferenceVelocityGenerator.hpp>
-
-#include <pybind11/functional.h> 
+#include <tbai_static/StaticController.hpp>
 
 // Python wrappers around virtual classes
 namespace tbai {
@@ -169,6 +168,8 @@ PYBIND11_MODULE(tbai_python, m) {
                                                                                changeControllerSubscriberPtr);
                     })
         .def("start", &tbai::CentralControllerPython::start)
+        .def("startThread", &tbai::CentralControllerPython::startThread)
+        .def("stopThread", &tbai::CentralControllerPython::stopThread)
         .def("add_bob_controller",
              [](tbai::CentralControllerPython *self, std::shared_ptr<tbai::StateSubscriber> stateSubscriberPtr,
                 std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> refVelGen) {
