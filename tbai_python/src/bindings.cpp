@@ -1,35 +1,35 @@
+#include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <iostream>
+#include <tbai_bob/BobController.hpp>
 #include <tbai_core/Types.hpp>
-#include <tbai_core/control/CommandPublisher.hpp>
-#include <tbai_core/control/StateSubscriber.hpp>
-#include <tbai_python/Controllers.hpp>
-#include <tbai_reference/ReferenceVelocity.hpp>
+#include <tbai_core/Utils.hpp>
+#include <tbai_core/control/CentralController.hpp>
+#include <tbai_core/control/Controllers.hpp>
+#include <tbai_core/control/Rate.hpp>
+#include <tbai_core/control/Subscribers.hpp>
 #include <tbai_reference/ReferenceVelocityGenerator.hpp>
 
-namespace py = pybind11;
-
+// Python wrappers around virtual classes
 namespace tbai {
-namespace python {
 
-class PyStateSubscriber : public ::tbai::python::MyPyStateSubscriber {
+class PyStateSubscriber : public tbai::StateSubscriber {
    public:
-    using MyPyStateSubscriber::MyPyStateSubscriber;
+    using StateSubscriber::StateSubscriber;
 
-    void updateState() override { PYBIND11_OVERRIDE_PURE(void, MyPyStateSubscriber, updateState); }
-
-    void waitTillInitialized() override { PYBIND11_OVERRIDE_PURE(void, MyPyStateSubscriber, waitTillInitialized); }
-
+    void waitTillInitialized() override {
+        std::cout << "Calling waitTillInitialized from C++" << std::endl;
+        PYBIND11_OVERRIDE_PURE(void, tbai::StateSubscriber, waitTillInitialized);
+    }
     const vector_t &getLatestRbdState() override {
-        PYBIND11_OVERRIDE_PURE(const vector_t &, MyPyStateSubscriber, getLatestRbdState);
+        PYBIND11_OVERRIDE_PURE(const vector_t &, tbai::StateSubscriber, getLatestRbdState);
     }
-
     const scalar_t getLatestRbdStamp() override {
-        PYBIND11_OVERRIDE_PURE(scalar_t, MyPyStateSubscriber, getLatestRbdStamp);
+        PYBIND11_OVERRIDE_PURE(const scalar_t, tbai::StateSubscriber, getLatestRbdStamp);
     }
-
     const std::vector<bool> getContactFlags() override {
-        PYBIND11_OVERRIDE_PURE(const std::vector<bool>, MyPyStateSubscriber, getContactFlags);
+        PYBIND11_OVERRIDE_PURE(const std::vector<bool>, tbai::StateSubscriber, getContactFlags);
     }
 };
 
@@ -37,35 +37,75 @@ class PyCommandPublisher : public tbai::CommandPublisher {
    public:
     using CommandPublisher::CommandPublisher;
 
-    void publish(const std::vector<tbai::MotorCommand> &commands) override {
-        PYBIND11_OVERRIDE_PURE(void, CommandPublisher, publish, commands);
+    void publish(const std::vector<MotorCommand> &commands) override {
+        PYBIND11_OVERRIDE_PURE(void, tbai::CommandPublisher, publish, commands);
+    }
+};
+
+class PyChangeControllerSubscriber : public tbai::ChangeControllerSubscriber {
+   public:
+    using ChangeControllerSubscriber::ChangeControllerSubscriber;
+
+    void setCallbackFunction(std::function<void(const std::string &controllerType)> callbackFunction) override {
+        PYBIND11_OVERRIDE(void, tbai::ChangeControllerSubscriber, setCallbackFunction, callbackFunction);
+    }
+    void triggerCallbacks() override {
+        PYBIND11_OVERRIDE_PURE(void, tbai::ChangeControllerSubscriber, triggerCallbacks);
+    }
+};
+
+class PyBobController : public tbai::BobController {
+   public:
+    using BobController::BobController;
+
+    void visualize() override {
+        // Do nothing
+    }
+
+    void changeController(const std::string &controllerType, scalar_t currentTime) override {
+        // Do nothing
+    }
+
+    void atPositions(matrix_t &positions) override {
+        // Do nothing
+    }
+
+    bool ok() const override { return true; }
+
+    void triggerCallbacks() override {
+        // Do nothing
     }
 };
 
 class PyReferenceVelocityGenerator : public tbai::reference::ReferenceVelocityGenerator {
    public:
-    using ReferenceVelocityGenerator::ReferenceVelocityGenerator;
+    using reference::ReferenceVelocityGenerator::ReferenceVelocityGenerator;
 
-    tbai::reference::ReferenceVelocity getReferenceVelocity(scalar_t time, scalar_t dt) override {
-        PYBIND11_OVERRIDE_PURE(tbai::reference::ReferenceVelocity, ReferenceVelocityGenerator, getReferenceVelocity,
-                               time, dt);
+    virtual tbai::reference::ReferenceVelocity getReferenceVelocity(scalar_t time, scalar_t dt) override {
+        PYBIND11_OVERRIDE_PURE(tbai::reference::ReferenceVelocity, tbai::reference::ReferenceVelocityGenerator,
+                               getReferenceVelocity, time, dt);
     }
 };
 
-}  // namespace python
+typedef tbai::CentralController<tbai::SystemRate<scalar_t>, tbai::SystemTime<std::chrono::high_resolution_clock>>
+    CentralControllerPython;
+
+class PyCentralController : public CentralControllerPython {
+   public:
+    using CentralControllerPython::CentralController;
+};
+
 }  // namespace tbai
 
-PYBIND11_MODULE(tbai_python, m) {
-    py::class_<tbai::python::MyPyStateSubscriber, std::shared_ptr<tbai::python::MyPyStateSubscriber>>(
-        m, "StateSubscriber")
-        .def("waitTillInitialized", &tbai::python::MyPyStateSubscriber::waitTillInitialized)
-        .def("getLatestRbdState", &tbai::python::MyPyStateSubscriber::getLatestRbdState, py::return_value_policy::reference)
-        .def("getLatestRbdStamp", &tbai::python::MyPyStateSubscriber::getLatestRbdStamp)
-        .def("getContactFlags", &tbai::python::MyPyStateSubscriber::getContactFlags, py::return_value_policy::reference);
+namespace py = pybind11;
 
-    // Bind MotorCommand struct
+PYBIND11_MODULE(tbai_python, m) {
+    m.def("write_init_time", py::overload_cast<>(&tbai::writeInitTime));
+    m.def("write_init_time", py::overload_cast<const long, const long>(&tbai::writeInitTime));
+    m.def("write_init_time", py::overload_cast<const double>(&tbai::writeInitTime));
+    m.def("read_init_time", &tbai::readInitTime);
+
     py::class_<tbai::MotorCommand>(m, "MotorCommand")
-        .def(py::init<>())
         .def_readwrite("kp", &tbai::MotorCommand::kp)
         .def_readwrite("desired_position", &tbai::MotorCommand::desired_position)
         .def_readwrite("kd", &tbai::MotorCommand::kd)
@@ -73,23 +113,52 @@ PYBIND11_MODULE(tbai_python, m) {
         .def_readwrite("torque_ff", &tbai::MotorCommand::torque_ff)
         .def_readwrite("joint_name", &tbai::MotorCommand::joint_name);
 
-    // Bind CommandPublisher class
-    py::class_<tbai::CommandPublisher, std::shared_ptr<tbai::CommandPublisher>, tbai::python::PyCommandPublisher>(
+    py::class_<tbai::StateSubscriber, tbai::PyStateSubscriber, std::shared_ptr<tbai::StateSubscriber>>(
+        m, "StateSubscriber")
+        .def(py::init<>())
+        .def("waitTillInitialized", &tbai::StateSubscriber::waitTillInitialized)
+        .def("get_latest_rbd_state", &tbai::StateSubscriber::getLatestRbdState)
+        .def("get_latest_rbd_stamp", &tbai::StateSubscriber::getLatestRbdStamp)
+        .def("get_contact_flags", &tbai::StateSubscriber::getContactFlags);
+
+    py::class_<tbai::CommandPublisher, tbai::PyCommandPublisher, std::shared_ptr<tbai::CommandPublisher>>(
         m, "CommandPublisher")
         .def(py::init<>())
         .def("publish", &tbai::CommandPublisher::publish);
 
-    // Bind ReferenceVelocity struct
+    py::class_<tbai::ChangeControllerSubscriber, tbai::PyChangeControllerSubscriber,
+               std::shared_ptr<tbai::ChangeControllerSubscriber>>(m, "ChangeControllerSubscriber")
+        .def(py::init<>())
+        .def("set_callback_function", &tbai::ChangeControllerSubscriber::setCallbackFunction)
+        .def("trigger_callbacks", &tbai::ChangeControllerSubscriber::triggerCallbacks);
+
     py::class_<tbai::reference::ReferenceVelocity>(m, "ReferenceVelocity")
         .def(py::init<>())
         .def_readwrite("velocity_x", &tbai::reference::ReferenceVelocity::velocity_x)
         .def_readwrite("velocity_y", &tbai::reference::ReferenceVelocity::velocity_y)
         .def_readwrite("yaw_rate", &tbai::reference::ReferenceVelocity::yaw_rate);
 
-    // Bind ReferenceVelocityGenerator class
-    py::class_<tbai::reference::ReferenceVelocityGenerator,
-               std::shared_ptr<tbai::reference::ReferenceVelocityGenerator>,
-               tbai::python::PyReferenceVelocityGenerator>(m, "ReferenceVelocityGenerator")
+    py::class_<tbai::reference::ReferenceVelocityGenerator, tbai::PyReferenceVelocityGenerator,
+               std::shared_ptr<tbai::reference::ReferenceVelocityGenerator>>(m, "ReferenceVelocityGenerator")
         .def(py::init<>())
         .def("getReferenceVelocity", &tbai::reference::ReferenceVelocityGenerator::getReferenceVelocity);
+
+    py::class_<tbai::CentralControllerPython, std::shared_ptr<tbai::CentralControllerPython>>(m, "CentralController")
+        .def_static("create",
+                    [](std::shared_ptr<tbai::StateSubscriber> stateSubscriberPtr,
+                       std::shared_ptr<tbai::CommandPublisher> commandPublisherPtr,
+                       std::shared_ptr<tbai::ChangeControllerSubscriber> changeControllerSubscriberPtr) {
+                        return std::make_shared<tbai::CentralControllerPython>(stateSubscriberPtr, commandPublisherPtr,
+                                                                               changeControllerSubscriberPtr);
+                    })
+        .def("start", &tbai::CentralControllerPython::start)
+        .def("add_bob_controller",
+             [](tbai::CentralControllerPython *self, std::shared_ptr<tbai::StateSubscriber> stateSubscriberPtr,
+                std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> refVelGen) {
+                 std::cout << "Adding bob controller" << std::endl;
+                 auto bobController = std::make_unique<tbai::PyBobController>(stateSubscriberPtr, refVelGen);
+                 std::cout << "Bob controller initialized" << std::endl;
+                 self->addController(std::move(bobController));
+                 std::cout << "Bob controller added" << std::endl;
+             });
 }

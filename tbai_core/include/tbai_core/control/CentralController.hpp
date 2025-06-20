@@ -33,14 +33,19 @@ class CentralController {
         initTime_ = tbai::readInitTime();
         fallbackControllerType_ = "SIT";
         logger_ = tbai::getLogger("central_controller");
+        controllers_ = std::vector<std::unique_ptr<Controller>>();
     }
 
     // Add a new controller
     void addController(std::unique_ptr<Controller> controllerPtr, bool makeActive = false) {
+        std::cout << "Adding controller" << std::endl;
+        std::cout << controllerPtr->getRate() << std::endl;
         controllers_.push_back(std::move(controllerPtr));
+        std::cout << "Controller added" << std::endl;
         if (makeActive || controllers_.size() == 1) {
             activeController_ = controllers_.back().get();
         }
+        std::cout << "Controller added" << std::endl;
     }
 
     const std::shared_ptr<StateSubscriber> &getStateSubscriberPtr() { return stateSubscriberPtr_; }
@@ -117,7 +122,7 @@ class CentralController {
         }
     }
 
-   private:
+   protected:
     bool checkForFallbackController() {
         for (const auto &controller : controllers_) {
             if (controller->isSupported(fallbackControllerType_)) {

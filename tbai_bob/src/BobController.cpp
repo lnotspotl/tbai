@@ -13,6 +13,7 @@
 #include <tbai_core/Rotations.hpp>
 #include <tbai_core/Utils.hpp>
 #include <tbai_core/config/Config.hpp>
+#include <tbai_core/Env.hpp>
 
 namespace tbai {
 
@@ -25,7 +26,7 @@ static inline int mod(int a, int b) {
 
 BobController::BobController(const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
                              const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen)
-    : BobController::BobController(tbai::fromGlobalConfig<std::string>("TBAI_ROBOT_DESCRIPTION_PATH"),
+    : BobController::BobController(tbai::getEnvAs<std::string>("TBAI_ROBOT_DESCRIPTION_PATH"),
                                    stateSubscriberPtr, refVelGen) {}
 
 /***********************************************************************************************************************/
@@ -46,7 +47,16 @@ BobController::BobController(const std::string &urdfString,
     ik_ = getInverseKinematicsUnique();
     cpg_ = getCentralPatternGeneratorUnique();
 
-    setupPinocchioModel(urdfString);
+    // Load URDF string from file
+    std::ifstream urdfFile(urdfString);
+    if (!urdfFile.is_open()) {
+        throw std::runtime_error("Could not open URDF file: " + urdfString);
+    }
+    std::stringstream buffer;
+    buffer << urdfFile.rdbuf();
+    std::string urdfString_ = buffer.str();
+
+    setupPinocchioModel(urdfString_);
     generateSamplingPositions();
 
     auto hfRepo = tbai::fromGlobalConfig<std::string>("bob_controller/hf_repo");
@@ -67,14 +77,25 @@ BobController::BobController(const std::string &urdfString,
 
     std::vector<torch::jit::IValue> stack;
     model_.get_method("set_hidden_size")(stack);
-    resetHistory();
 
+    TBAI_LOG_INFO(logger_, "Resetting history");
+    resetHistory();
+    TBAI_LOG_INFO(logger_, "History reset");
+
+    TBAI_LOG_INFO(logger_, "Solving IK");
     auto legHeights = cpg_->legHeights();
     jointAngles2_ = ik_->solve(legHeights);
 
+    TBAI_LOG_INFO(logger_, "Solved IK");
+
     standJointAngles_ = tbai::fromGlobalConfig<vector_t>("static_controller/stand_controller/joint_angles");
+    TBAI_LOG_INFO(logger_, "Stand joint angles loaded");
+
     ACTION_SCALE = tbai::fromGlobalConfig<scalar_t>("bob_controller/action_scale");
+    TBAI_LOG_INFO(logger_, "Action scale: {}", ACTION_SCALE);
+
     LIN_VEL_SCALE = tbai::fromGlobalConfig<scalar_t>("bob_controller/lin_vel_scale");
+    TBAI_LOG_INFO(logger_, "Lin vel scale: {}", LIN_VEL_SCALE);
 }
 
 /***********************************************************************************************************************/

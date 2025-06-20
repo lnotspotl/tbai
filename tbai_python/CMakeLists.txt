@@ -10,7 +10,6 @@ find_package(pinocchio CONFIG REQUIRED)
 
 pybind11_add_module(tbai_python 
     src/bindings.cpp
-    src/Controllers.cpp
 )
 target_link_libraries(tbai_python
     PUBLIC
