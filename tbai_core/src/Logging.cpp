@@ -16,7 +16,7 @@ std::shared_ptr<spdlog::logger> getLogger(const std::string &name) {
 
     auto logger = std::make_shared<spdlog::logger>(name, sinks.begin(), sinks.end());
     logger->set_level(spdlog::level::from_str(logLevel));
-    logger->set_pattern("[%H:%M:%S.%e] [%^%L%$] [%s:%#] %v");
+    logger->set_pattern("[%H:%M:%S.%e] [%^%l%$] [%s:%#] %v");
     return logger;
 }
 
