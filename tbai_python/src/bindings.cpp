@@ -159,10 +159,13 @@ PYBIND11_MODULE(tbai_python, m) {
 
     // Bind rotation helper functions
     py::module rotations_module = m.def_submodule("rotations");
-    rotations_module.def("rpy2quat", [](const tbai::vector3_t &rpy) {
-        tbai::quaternion_t q = tbai::rpy2quat(rpy);
-        return tbai::vector4_t(q.x(), q.y(), q.z(), q.w());
-    }, "Convert roll-pitch-yaw euler angles to quaternion (returns xyzw vector)");
+    rotations_module.def(
+        "rpy2quat",
+        [](const tbai::vector3_t &rpy) {
+            tbai::quaternion_t q = tbai::rpy2quat(rpy);
+            return tbai::vector4_t(q.x(), q.y(), q.z(), q.w());
+        },
+        "Convert roll-pitch-yaw euler angles to quaternion (returns xyzw vector)");
     rotations_module.def("quat2mat", &tbai::quat2mat, "Convert quaternion to rotation matrix");
     rotations_module.def("mat2rpy", &tbai::mat2rpy, "Convert rotation matrix to roll-pitch-yaw euler angles");
     rotations_module.def("mat2ocs2rpy", &tbai::mat2oc2rpy,
