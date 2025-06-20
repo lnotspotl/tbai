@@ -120,6 +120,8 @@ class CentralController {
                                    "Loop duration: {} us, Sleep duration: {} us, Sleep time percentage: {} %",
                                    duration1, duration2, sleepTimePercentage);
         }
+
+        TBAI_LOG_INFO(logger_, "Central controller loop stopped.");
     }
 
     void startThread() {
