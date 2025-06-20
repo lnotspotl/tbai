@@ -22,7 +22,6 @@ class CentralController {
                       std::shared_ptr<CommandPublisher> commandPublisherPtr,
                       std::shared_ptr<ChangeControllerSubscriber> changeControllerSubscriberPtr)
         : loopRate_(1) {
-        
         // Initialize logger
         logger_ = tbai::getLogger("central_controller");
 
@@ -92,7 +91,7 @@ class CentralController {
             // Check stability and switch to fallback controller if necessary
             if (containsFallbackController_ && !activeController_->checkStability()) {
                 TBAI_LOG_WARN(logger_, "Stability check failed, switching to fallback controller: {}",
-                                 fallbackControllerType_);
+                              fallbackControllerType_);
                 switchToFallbackController();
             }
 
@@ -118,8 +117,8 @@ class CentralController {
             auto sleepTimePercentage = 100.0 * duration2 / (duration1 + duration2);
 
             TBAI_LOG_INFO_THROTTLE(logger_, 10.0,
-                                      "Loop duration: {} us, Sleep duration: {} us, Sleep time percentage: {} %",
-                                      duration1, duration2, sleepTimePercentage);
+                                   "Loop duration: {} us, Sleep duration: {} us, Sleep time percentage: {} %",
+                                   duration1, duration2, sleepTimePercentage);
         }
     }
 
@@ -154,7 +153,7 @@ class CentralController {
                 activeController_->changeController(controllerType, getCurrentTime());
                 loopRate_ = RATE(activeController_->getRate());
                 TBAI_LOG_INFO(logger_, "Controller changed to {}, loop rate: {} Hz", controllerType,
-                                 activeController_->getRate());
+                              activeController_->getRate());
                 return;
             }
         }
