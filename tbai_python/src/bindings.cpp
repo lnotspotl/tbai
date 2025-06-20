@@ -19,7 +19,6 @@ class PyStateSubscriber : public tbai::StateSubscriber {
     using StateSubscriber::StateSubscriber;
 
     void waitTillInitialized() override {
-        std::cout << "Calling waitTillInitialized from C++" << std::endl;
         PYBIND11_OVERRIDE_PURE(void, tbai::StateSubscriber, waitTillInitialized);
     }
     const vector_t &getLatestRbdState() override {
@@ -155,10 +154,6 @@ PYBIND11_MODULE(tbai_python, m) {
         .def("add_bob_controller",
              [](tbai::CentralControllerPython *self, std::shared_ptr<tbai::StateSubscriber> stateSubscriberPtr,
                 std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> refVelGen) {
-                 std::cout << "Adding bob controller" << std::endl;
-                 auto bobController = std::make_unique<tbai::PyBobController>(stateSubscriberPtr, refVelGen);
-                 std::cout << "Bob controller initialized" << std::endl;
-                 self->addController(std::move(bobController));
-                 std::cout << "Bob controller added" << std::endl;
+                 self->addController(std::make_unique<tbai::PyBobController>(stateSubscriberPtr, refVelGen));
              });
 }
