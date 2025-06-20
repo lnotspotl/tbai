@@ -9,6 +9,7 @@ find_package(Eigen3 REQUIRED)
 find_package(yaml-cpp REQUIRED) 
 find_package(fmt REQUIRED)
 find_package(spdlog REQUIRED)
+find_package(pinocchio REQUIRED)
 
 add_library(tbai_core
     src/Files.cpp
@@ -27,6 +28,7 @@ target_link_libraries(tbai_core
     yaml-cpp::yaml-cpp
     fmt::fmt
     spdlog::spdlog
+    pinocchio::pinocchio
 )
 target_include_directories(tbai_core INTERFACE
     ${fmt_INCLUDE_DIRS}

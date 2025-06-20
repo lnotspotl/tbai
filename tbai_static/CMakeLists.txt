@@ -5,8 +5,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(tbai_static)
 
-find_package(pinocchio REQUIRED)
-
 add_library(tbai_static
     src/StaticController.cpp
 )
@@ -20,7 +18,6 @@ target_include_directories(tbai_static
 target_link_libraries(tbai_static
     PUBLIC
         tbai_core
-        pinocchio::pinocchio
 )
 
 ## Installation rules
