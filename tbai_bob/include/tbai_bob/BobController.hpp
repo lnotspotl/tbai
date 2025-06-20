@@ -21,6 +21,8 @@
 #include <tbai_reference/ReferenceVelocityGenerator.hpp>
 #include <torch/script.h>
 
+#include <tbai_core/Logging.hpp>
+
 namespace tbai {
 
 using namespace torch::indexing;  // NOLINT
@@ -136,6 +138,8 @@ class BobController : public tbai::Controller {
     std::vector<std::string> jointNames_;
 
     bool blind_;
+
+    std::shared_ptr<spdlog::logger> logger_;
 };
 
 }  // namespace tbai

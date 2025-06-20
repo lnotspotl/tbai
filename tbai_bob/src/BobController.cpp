@@ -35,6 +35,8 @@ BobController::BobController(const std::string &urdfString,
                              const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
                              const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen)
     : stateSubscriberPtr_(stateSubscriberPtr), refVelGen_(refVelGen) {
+    logger_ = tbai::getLogger("bob_controller");
+
     // Load parameters
     kp_ = tbai::fromGlobalConfig<scalar_t>("bob_controller/kp");
     kd_ = tbai::fromGlobalConfig<scalar_t>("bob_controller/kd");
@@ -50,9 +52,9 @@ BobController::BobController(const std::string &urdfString,
     auto hfRepo = tbai::fromGlobalConfig<std::string>("bob_controller/hf_repo");
     auto hfModel = tbai::fromGlobalConfig<std::string>("bob_controller/hf_model");
 
-    TBAI_LOG_INFO("Loading HF model: {}/{}", hfRepo, hfModel);
+    TBAI_LOG_INFO(logger_, "Loading HF model: {}/{}", hfRepo, hfModel);
     auto modelPath = tbai::downloadFromHuggingFace(hfRepo, hfModel);
-    TBAI_LOG_INFO("Model downloaded to: {}", modelPath);
+    TBAI_LOG_INFO(logger_, "Model downloaded to: {}", modelPath);
 
     try {
         model_ = torch::jit::load(modelPath);
@@ -61,7 +63,7 @@ BobController::BobController(const std::string &urdfString,
         throw std::runtime_error("Could not load model");
     }
 
-    TBAI_LOG_INFO("Model loaded");
+    TBAI_LOG_INFO(logger_, "Model loaded");
 
     std::vector<torch::jit::IValue> stack;
     model_.get_method("set_hidden_size")(stack);
@@ -168,7 +170,7 @@ std::vector<tbai::MotorCommand> BobController::getMotorCommands(scalar_t current
     cpg_->step(dt);
     auto t5 = std::chrono::high_resolution_clock::now();
 
-    TBAI_LOG_INFO_THROTTLE(
+    TBAI_LOG_INFO_THROTTLE(logger_,
         10.0, "NN input preparations took {} ms, NN forward pass took: {} ms. Total controller step took: {} ms",
         std::chrono::duration_cast<std::chrono::microseconds>(t2 - ts1).count() / 1000.0,
         std::chrono::duration_cast<std::chrono::microseconds>(t4 - ts3).count() / 1000.0,

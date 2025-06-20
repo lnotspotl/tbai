@@ -14,6 +14,7 @@ add_library(tbai_core
     src/Files.cpp
     src/Utils.cpp
     src/Env.cpp
+    src/Logging.cpp
 )
 
 target_include_directories(tbai_core PUBLIC

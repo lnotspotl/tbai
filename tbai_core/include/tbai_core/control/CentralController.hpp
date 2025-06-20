@@ -32,6 +32,7 @@ class CentralController {
 
         initTime_ = tbai::readInitTime();
         fallbackControllerType_ = "SIT";
+        logger_ = tbai::getLogger("central_controller");
     }
 
     // Add a new controller
@@ -47,29 +48,29 @@ class CentralController {
     inline scalar_t getCurrentTime() const { return TIME::rightNow() - initTime_; }
 
     void start() {
-        TBAI_LOG_INFO("Starting central controller loop");
+        TBAI_LOG_INFO(logger_, "Starting central controller loop");
 
         if (activeController_ == nullptr) {
             TBAI_THROW("No active controller found!");
         }
 
-        TBAI_LOG_INFO("Active controller found!");
+        TBAI_LOG_INFO(logger_, "Active controller found!");
 
         // Check if fallback controller is available
         containsFallbackController_ = checkForFallbackController();
         if (!containsFallbackController_) {
-            TBAI_LOG_WARN("Fallback controller not found, no stability checks will be performed!");
+            TBAI_LOG_WARN(logger_, "Fallback controller not found, no stability checks will be performed!");
         } else {
-            TBAI_LOG_INFO("Fallback controller: {}", fallbackControllerType_);
+            TBAI_LOG_INFO(logger_, "Fallback controller: {}", fallbackControllerType_);
         }
 
         // Wait for initial state message
         stateSubscriberPtr_->waitTillInitialized();
-        TBAI_LOG_INFO("State subscriber is initialized now");
+        TBAI_LOG_INFO(logger_, "State subscriber is initialized now");
 
         loopRate_ = RATE(activeController_->getRate());
-        TBAI_LOG_INFO("Active controller's rate is {} Hz", activeController_->getRate());
-        TBAI_LOG_INFO("Starting! Current time: {}", getCurrentTime());
+        TBAI_LOG_INFO(logger_, "Active controller's rate is {} Hz", activeController_->getRate());
+        TBAI_LOG_INFO(logger_, "Starting! Current time: {}", getCurrentTime());
 
         scalar_t lastTime = getCurrentTime();
         while (activeController_->ok()) {
@@ -84,7 +85,8 @@ class CentralController {
 
             // Check stability and switch to fallback controller if necessary
             if (containsFallbackController_ && !activeController_->checkStability()) {
-                TBAI_LOG_WARN("Stability check failed, switching to fallback controller: {}", fallbackControllerType_);
+                TBAI_LOG_WARN(logger_, "Stability check failed, switching to fallback controller: {}",
+                                 fallbackControllerType_);
                 switchToFallbackController();
             }
 
@@ -109,8 +111,9 @@ class CentralController {
             auto duration2 = std::chrono::duration_cast<std::chrono::microseconds>(t3 - t2).count();
             auto sleepTimePercentage = 100.0 * duration2 / (duration1 + duration2);
 
-            TBAI_LOG_INFO_THROTTLE(10.0, "Loop duration: {} us, Sleep duration: {} us, Sleep time percentage: {} %",
-                                   duration1, duration2, sleepTimePercentage);
+            TBAI_LOG_INFO_THROTTLE(logger_, 10.0,
+                                      "Loop duration: {} us, Sleep duration: {} us, Sleep time percentage: {} %",
+                                      duration1, duration2, sleepTimePercentage);
         }
     }
 
@@ -135,13 +138,13 @@ class CentralController {
                 activeController_ = controller.get();  // Set new active controller
                 activeController_->changeController(controllerType, getCurrentTime());
                 loopRate_ = RATE(activeController_->getRate());
-                TBAI_LOG_INFO("Controller changed to {}, loop rate: {} Hz", controllerType,
-                              activeController_->getRate());
+                TBAI_LOG_INFO(logger_, "Controller changed to {}, loop rate: {} Hz", controllerType,
+                                 activeController_->getRate());
                 return;
             }
         }
 
-        TBAI_LOG_WARN("Invalid controller type: {} | Controller was not changed!", controllerType);
+        TBAI_LOG_WARN(logger_, "Invalid controller type: {} | Controller was not changed!", controllerType);
     }
 
     // All the controllers
@@ -158,6 +161,7 @@ class CentralController {
     RATE loopRate_;
 
     std::string fallbackControllerType_;
+    std::shared_ptr<spdlog::logger> logger_;
 };
 
 }  // namespace tbai
