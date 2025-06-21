@@ -85,7 +85,11 @@ class VirtualJoystick(tk.Frame):
 
 
 class UIController:
-    def __init__(self):
+    def __init__(self, stand_callback = lambda: None, sit_callback = lambda: None, bob_callback = lambda: None):
+        self.stand_callback = stand_callback
+        self.sit_callback = sit_callback
+        self.bob_callback = bob_callback
+
         self.root = tk.Tk()
         self.root.title("Virtual Joystick")
         self.root.resizable(False, False)  # Prevent resizing
@@ -116,6 +120,20 @@ class UIController:
         self.right_joystick = VirtualJoystick(right_frame, size=160)
         self.right_joystick.pack()
         self.right_joystick.set_command_callback(self.update_x_yaw_velocity)
+
+        # Add buttons frame
+        buttons_frame = ttk.Frame(main_frame)
+        buttons_frame.pack(pady=10)
+
+        # Create and pack the buttons
+        self.button1 = ttk.Button(buttons_frame, text="Stand", command=self.stand_callback)
+        self.button1.grid(row=0, column=0, padx=10)
+
+        self.button2 = ttk.Button(buttons_frame, text="Sit", command=self.sit_callback)
+        self.button2.grid(row=0, column=1, padx=10)
+
+        self.button3 = ttk.Button(buttons_frame, text="Bob", command=self.bob_callback)
+        self.button3.grid(row=0, column=2, padx=10)
 
         self.linear_x = 0.0
         self.linear_y = 0.0

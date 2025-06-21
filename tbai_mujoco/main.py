@@ -31,6 +31,7 @@ from tbai_python.rotations import rpy2quat, quat2mat, mat2rpy, mat2ocs2rpy, ocs2
 kp = 30
 kd = 0.5
 desired_joint_angles = np.zeros(12)
+running = True
 
 joint2idx = {
     "LF_HAA": 0,
@@ -53,7 +54,7 @@ def pd_controller(q_current, q_desired, v_desired, v_current, kp, kd) -> np.ndar
 
 
 def viewer_fn(window, lock, viewer_dt):
-    while window.is_running():
+    while window.is_running() and running:
         with lock:
             window.sync()
         time.sleep(viewer_dt)
@@ -61,7 +62,7 @@ def viewer_fn(window, lock, viewer_dt):
 
 def physics_fn(model, data, lock, physics_dt):
     global desired_joint_angles
-    while True:
+    while running:
         with lock:
             current_q = data.qpos[7 : 7 + 12]
             desired_q = desired_joint_angles.copy()
@@ -182,11 +183,20 @@ class DummyChangeControllerSubscriber(ChangeControllerSubscriber):
             self._callback(self.new_controller)
             self.new_controller = None
 
+    def stand_callback(self):
+        self.new_controller = "STAND"
+
+    def sit_callback(self):
+        self.new_controller = "SIT"
+
+    def bob_callback(self):
+        self.new_controller = "BOB"
+
 
 class DummyReferenceVelocityGenerator(ReferenceVelocityGenerator):
-    def __init__(self):
+    def __init__(self, ui_controller: UIController):
         super().__init__()
-        self.ui_controller = UIController()
+        self.ui_controller = ui_controller
 
     def getReferenceVelocity(self, time, dt):
         ref = ReferenceVelocity()
@@ -221,10 +231,18 @@ desired_joint_angles = stand_joint_angles.copy()
 window = mujoco.viewer.launch_passive(model, data)
 lock = threading.Lock()
 
+
 subscriber = DummyStateSubscriber(model, data)
 publisher = DummyCommandPublisher(model, data)
 controller_sub = DummyChangeControllerSubscriber()
-ref_vel_gen = DummyReferenceVelocityGenerator()
+
+
+ui_controller = UIController(
+    stand_callback=controller_sub.stand_callback,
+    sit_callback=controller_sub.sit_callback,
+    bob_callback=controller_sub.bob_callback,
+)
+ref_vel_gen = DummyReferenceVelocityGenerator(ui_controller)
 
 tbai_python.write_init_time()
 
@@ -242,11 +260,10 @@ physics_thread.start()
 central_controller.startThread()
 
 try:
-    time.sleep(1)
-    print("!! CHANGING CONTROLLER TO SIT !!")
-    controller_sub.new_controller = "BOB"
-    ref_vel_gen.ui_controller.run()
+    ui_controller.run()
 except KeyboardInterrupt:
+    running = False
+    print("Stopping threads")
     central_controller.stopThread()
     viewer_thread.join()
     physics_thread.join()
