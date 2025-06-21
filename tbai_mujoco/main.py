@@ -154,7 +154,11 @@ class DummyCommandPublisher(CommandPublisher):
         self.data = data
 
     def publish(self, commands):
+        global kp
+        global kd
         global desired_joint_angles
+        kp = commands[0].kp
+        kd = commands[0].kd
         for command in commands:
             desired_joint_angles[joint2idx[command.joint_name]] = command.desired_position
 
@@ -181,7 +185,7 @@ class DummyReferenceVelocityGenerator(ReferenceVelocityGenerator):
 
     def getReferenceVelocity(self, time, dt):
         ref = ReferenceVelocity()
-        ref.velocity_x = 0.5
+        ref.velocity_x = 0.0
         ref.velocity_y = 0.0
         ref.yaw_rate = 0.0
         return ref
@@ -197,7 +201,7 @@ print("Joint names:")
 for i in range(1, 12 + 1):  # first joint is a virtual world->base_link joint
     print(f"  ({i})\t{mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, i)}")
 
-sit_joint_angles = np.array([0.0, 1.806, -2.102, 0.0, 1.806, -2.102, 0.0, 1.996, -2.102, 0.0, 1.996, -2.102])
+sit_joint_angles = np.array([0.0, 0.806, -1.802, 0.0, 0.806, -1.802, 0.0, 0.996, -1.802, 0.0, 0.996, -1.802])
 stand_joint_angles = np.array([0.0, 0.806, -1.802, 0.0, 0.806, -1.802, 0.0, 0.996, -1.802, 0.0, 0.996, -1.802])
 
 data.qpos[-12:] = sit_joint_angles
