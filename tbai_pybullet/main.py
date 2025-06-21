@@ -62,6 +62,7 @@ class PyBulletStateSubscriber(StateSubscriber):
         self.last_joint_angles = np.zeros(12)
         self.last_yaw = 0.0
         self.first_update = True
+        self.needs_update = True
 
     def waitTillInitialized(self):
         self.initialized = True
@@ -70,6 +71,10 @@ class PyBulletStateSubscriber(StateSubscriber):
         return self.current_state
 
     def getLatestRbdState(self):
+        if not self.needs_update:
+            return self.current_state
+        self.needs_update = False
+
         current_time = time.time()
         dt = current_time - self.last_time
 
@@ -192,7 +197,7 @@ class PyBulletCommandPublisher(CommandPublisher):
         for command in commands:
             desired_joint_angles[joint2idx[command.joint_name]] = command.desired_position
 
-def physics_fn(robot_id, dt, lock):
+def physics_fn(robot_id, dt, lock, subscriber):
     global desired_joint_angles
     global running
     
@@ -220,8 +225,8 @@ def physics_fn(robot_id, dt, lock):
                     p.TORQUE_CONTROL,
                     force=torque
                 )
-            
             p.stepSimulation()
+            subscriber.needs_update = True
             time.sleep(dt)
 
 class DummyChangeControllerSubscriber(ChangeControllerSubscriber):
@@ -325,7 +330,7 @@ central_controller.add_bob_controller(subscriber, ref_vel_gen, rerun_logger.visu
 central_controller.add_static_controller(subscriber, rerun_logger.visualize_callback)
 
 # Start physics thread
-physics_thread = threading.Thread(target=physics_fn, args=(robot, dt, lock))
+physics_thread = threading.Thread(target=physics_fn, args=(robot, dt, lock, subscriber))
 physics_thread.start()
 
 central_controller.startThread()

@@ -64,7 +64,7 @@ def viewer_fn(window, lock, viewer_dt):
         time.sleep(viewer_dt)
 
 
-def physics_fn(model, data, lock, physics_dt):
+def physics_fn(model, data, lock, physics_dt, subscriber):
     global desired_joint_angles
     while running:
         with lock:
@@ -74,6 +74,7 @@ def physics_fn(model, data, lock, physics_dt):
             desired_v = np.zeros_like(current_v)
             data.ctrl[:12] = pd_controller(current_q, desired_q, desired_v, current_v, kp, kd)
             mujoco.mj_step(model, data)
+            subscriber.needs_update = True
         time.sleep(physics_dt)
 
 
@@ -134,6 +135,7 @@ class DummyStateSubscriber(StateSubscriber):
         self.last_joint_angles = np.zeros(12)
         self.last_yaw = 0.0
         self.first_update = True
+        self.needs_update = True
 
     def waitTillInitialized(self):
         self.initialized = True
@@ -142,6 +144,9 @@ class DummyStateSubscriber(StateSubscriber):
         return self.current_state
 
     def getLatestRbdState(self):
+        if not self.needs_update:
+            return self.current_state
+        self.needs_update = False
         current_time = time.time()
         dt = current_time - self.last_time
 
@@ -312,7 +317,7 @@ central_controller.add_static_controller(subscriber, rerun_logger.visualize_call
 viewer_thread = threading.Thread(target=viewer_fn, args=(window, lock, 1 / 30))
 viewer_thread.start()
 
-physics_thread = threading.Thread(target=physics_fn, args=(model, data, lock, model.opt.timestep))
+physics_thread = threading.Thread(target=physics_fn, args=(model, data, lock, model.opt.timestep, subscriber))
 physics_thread.start()
 
 central_controller.startThread()
