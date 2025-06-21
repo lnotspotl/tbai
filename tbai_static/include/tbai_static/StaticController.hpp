@@ -72,6 +72,8 @@ class StaticController : public tbai::Controller {
 
     /** Logger */
     std::shared_ptr<spdlog::logger> logger_;
+
+    bool first_;
 };
 
 }  // namespace static_

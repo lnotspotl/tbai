@@ -15,7 +15,7 @@ namespace static_ {
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 StaticController::StaticController(std::shared_ptr<tbai::StateSubscriber> stateSubscriberPtr)
-    : stateSubscriberPtr_(stateSubscriberPtr), alpha_(-1.0), currentControllerType_("SIT") {
+    : stateSubscriberPtr_(stateSubscriberPtr), alpha_(0.0), currentControllerType_("SIT"), first_(true) {
     logger_ = tbai::getLogger("tbai_static");
     loadSettings();
 }
@@ -24,6 +24,11 @@ StaticController::StaticController(std::shared_ptr<tbai::StateSubscriber> stateS
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 std::vector<MotorCommand> StaticController::getMotorCommands(scalar_t currentTime, scalar_t dt) {
+    if (first_) {
+        first_ = false;
+        changeController("SIT", currentTime);
+    }
+
     if (alpha_ != -1.0) {
         return getInterpCommandMessage(dt);
     }
