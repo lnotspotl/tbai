@@ -13,7 +13,6 @@
 #include <tbai_core/Rotations.hpp>
 #include <tbai_core/Utils.hpp>
 #include <tbai_core/config/Config.hpp>
-#include <tbai_core/Env.hpp>
 
 namespace tbai {
 
@@ -26,13 +25,13 @@ static inline int mod(int a, int b) {
 
 BobController::BobController(const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
                              const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen)
-    : BobController::BobController(tbai::getEnvAs<std::string>("TBAI_ROBOT_DESCRIPTION_PATH"),
-                                   stateSubscriberPtr, refVelGen) {}
+    : BobController::BobController(tbai::getEnvAs<std::string>("TBAI_ROBOT_DESCRIPTION_PATH"), stateSubscriberPtr,
+                                   refVelGen) {}
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
-BobController::BobController(const std::string &urdfString,
+BobController::BobController(const std::string &urdfPathOrString,
                              const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
                              const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen)
     : stateSubscriberPtr_(stateSubscriberPtr), refVelGen_(refVelGen) {
@@ -48,15 +47,24 @@ BobController::BobController(const std::string &urdfString,
     cpg_ = getCentralPatternGeneratorUnique();
 
     // Load URDF string from file
-    std::ifstream urdfFile(urdfString);
-    if (!urdfFile.is_open()) {
-        TBAI_THROW("Could not open URDF file: {}", urdfString);
+    bool isFile;
+    try {
+        isFile = std::filesystem::exists(urdfPathOrString);
+    } catch (const std::exception &e) {
+        isFile = false;
     }
-    std::stringstream buffer;
-    buffer << urdfFile.rdbuf();
-    std::string urdfString_ = buffer.str();
 
-    setupPinocchioModel(urdfString_);
+    std::string urdfString = urdfPathOrString;
+    if (isFile) {
+        TBAI_LOG_INFO(logger_, "Loading URDF from file: {}", urdfPathOrString);
+        std::ifstream urdfFile(urdfPathOrString);
+        std::stringstream buffer;
+        buffer << urdfFile.rdbuf();
+        urdfString = buffer.str();
+    } else {
+        TBAI_LOG_INFO(logger_, "Loading URDF from string");
+    }
+    setupPinocchioModel(urdfString);
     generateSamplingPositions();
 
     auto hfRepo = tbai::fromGlobalConfig<std::string>("bob_controller/hf_repo");
@@ -190,8 +198,9 @@ std::vector<tbai::MotorCommand> BobController::getMotorCommands(scalar_t current
     cpg_->step(dt);
     auto t5 = std::chrono::high_resolution_clock::now();
 
-    TBAI_LOG_INFO_THROTTLE(logger_,
-        10.0, "NN input preparations took {} ms, NN forward pass took: {} ms. Total controller step took: {} ms",
+    TBAI_LOG_INFO_THROTTLE(
+        logger_, 10.0,
+        "NN input preparations took {} ms, NN forward pass took: {} ms. Total controller step took: {} ms",
         std::chrono::duration_cast<std::chrono::microseconds>(t2 - ts1).count() / 1000.0,
         std::chrono::duration_cast<std::chrono::microseconds>(t4 - ts3).count() / 1000.0,
         std::chrono::duration_cast<std::chrono::microseconds>(t5 - ts1).count() / 1000.0);

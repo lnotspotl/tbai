@@ -30,7 +30,7 @@ using torch::jit::script::Module;
 
 class BobController : public tbai::Controller {
    public:
-    BobController(const std::string &urdfString, const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
+    BobController(const std::string &urdfPathOrString, const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
                   const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen);
 
     BobController(const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
