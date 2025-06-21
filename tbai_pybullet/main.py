@@ -12,6 +12,11 @@ import pybullet_data
 
 from joystick import UIController
 
+import mpac_logging
+from mpac_logging.rerun.robot_logger import RobotLogger
+from mpac_logging.rerun.utils import rerun_initialize, rerun_store
+
+
 from tbai_python import (
     StateSubscriber,
     CommandPublisher,
@@ -60,6 +65,9 @@ class PyBulletStateSubscriber(StateSubscriber):
 
     def waitTillInitialized(self):
         self.initialized = True
+
+    def getLatestRbdStateViz(self):
+        return self.current_state
 
     def getLatestRbdState(self):
         current_time = time.time()
@@ -121,6 +129,51 @@ class PyBulletStateSubscriber(StateSubscriber):
 
     def getContactFlags(self):
         return [False] * 4
+
+
+class RerunLoggerNode:
+    def __init__(self, state_subscriber: StateSubscriber, freq = 10):
+        rerun_initialize("simple_robot_example", spawn=False)
+        self.robot_logger = RobotLogger.from_zoo("go2_description")
+        self.state_subscriber = state_subscriber
+        self.freq = freq
+        self.last_time = None
+
+    def visualize_callback(self, current_time, dt):
+        if self.last_time is None:
+            self.last_time = current_time
+
+        if current_time - self.last_time < 1 / self.freq:
+            return
+        self.last_time = current_time
+        state = self.state_subscriber.getLatestRbdStateViz()
+        position = state[3:6]
+        orientation = state[0:3]
+        joint_positions = state[12:24]
+
+        joint_positions = {
+            "FL_hip_joint": joint_positions[0],
+            "FL_thigh_joint": joint_positions[1],
+            "FL_calf_joint": joint_positions[2],
+            "RL_hip_joint": joint_positions[3],
+            "RL_thigh_joint": joint_positions[4],
+            "RL_calf_joint": joint_positions[5],
+            "FR_hip_joint": joint_positions[6],
+            "FR_thigh_joint": joint_positions[7],
+            "FR_calf_joint": joint_positions[8],
+            "RR_hip_joint": joint_positions[9],
+            "RR_thigh_joint": joint_positions[10],
+            "RR_calf_joint": joint_positions[11],
+        }
+
+        # Turn orientation
+        orientation = ocs2rpy2quat(orientation)
+
+        # Log the new state
+        self.robot_logger.log_state(
+            logtime=current_time, base_position=position, base_orientation=orientation, joint_positions=joint_positions
+        )
+
 
 class PyBulletCommandPublisher(CommandPublisher):
     def __init__(self, robot_id):
@@ -256,6 +309,8 @@ subscriber = PyBulletStateSubscriber(robot)
 publisher = PyBulletCommandPublisher(robot)
 controller_sub = DummyChangeControllerSubscriber()
 
+rerun_logger = RerunLoggerNode(subscriber)
+
 ui_controller = UIController(
     stand_callback=controller_sub.stand_callback,
     sit_callback=controller_sub.sit_callback,
@@ -266,8 +321,8 @@ ref_vel_gen = DummyReferenceVelocityGenerator(ui_controller)
 tbai_python.write_init_time()
 
 central_controller = tbai_python.CentralController.create(subscriber, publisher, controller_sub)
-central_controller.add_bob_controller(subscriber, ref_vel_gen)
-central_controller.add_static_controller(subscriber)
+central_controller.add_bob_controller(subscriber, ref_vel_gen, rerun_logger.visualize_callback)
+central_controller.add_static_controller(subscriber, rerun_logger.visualize_callback)
 
 # Start physics thread
 physics_thread = threading.Thread(target=physics_fn, args=(robot, dt, lock))
@@ -279,6 +334,7 @@ try:
     ui_controller.run()
 except KeyboardInterrupt:
     running = False
+    rerun_store("go2.rrd")
     print("Stopping threads")
     central_controller.stopThread()
     physics_thread.join()

@@ -4,6 +4,10 @@ sys.path.insert(0, "/home/kuba/Documents/tbai2/build/tbai_python")
 
 import tbai_python
 
+import mpac_logging
+from mpac_logging.rerun.robot_logger import RobotLogger
+from mpac_logging.rerun.utils import rerun_initialize, rerun_store
+
 import mujoco
 import numpy as np
 import time
@@ -73,6 +77,50 @@ def physics_fn(model, data, lock, physics_dt):
         time.sleep(physics_dt)
 
 
+class RerunLoggerNode:
+    def __init__(self, state_subscriber: StateSubscriber, freq = 10):
+        rerun_initialize("simple_robot_example", spawn=False)
+        self.robot_logger = RobotLogger.from_zoo("go2_description")
+        self.state_subscriber = state_subscriber
+        self.freq = freq
+        self.last_time = None
+
+    def visualize_callback(self, current_time, dt):
+        if self.last_time is None:
+            self.last_time = current_time
+
+        if current_time - self.last_time < 1 / self.freq:
+            return
+        self.last_time = current_time
+        state = self.state_subscriber.getLatestRbdStateViz()
+        position = state[3:6]
+        orientation = state[0:3]
+        joint_positions = state[12:24]
+
+        joint_positions = {
+            "FL_hip_joint": joint_positions[0],
+            "FL_thigh_joint": joint_positions[1],
+            "FL_calf_joint": joint_positions[2],
+            "RL_hip_joint": joint_positions[3],
+            "RL_thigh_joint": joint_positions[4],
+            "RL_calf_joint": joint_positions[5],
+            "FR_hip_joint": joint_positions[6],
+            "FR_thigh_joint": joint_positions[7],
+            "FR_calf_joint": joint_positions[8],
+            "RR_hip_joint": joint_positions[9],
+            "RR_thigh_joint": joint_positions[10],
+            "RR_calf_joint": joint_positions[11],
+        }
+
+        # Turn orientation
+        orientation = ocs2rpy2quat(orientation)
+
+        # Log the new state
+        self.robot_logger.log_state(
+            logtime=current_time, base_position=position, base_orientation=orientation, joint_positions=joint_positions
+        )
+
+
 class DummyStateSubscriber(StateSubscriber):
     def __init__(self, model, data):
         super().__init__()
@@ -89,6 +137,9 @@ class DummyStateSubscriber(StateSubscriber):
 
     def waitTillInitialized(self):
         self.initialized = True
+
+    def getLatestRbdStateViz(self):
+        return self.current_state
 
     def getLatestRbdState(self):
         current_time = time.time()
@@ -236,6 +287,8 @@ subscriber = DummyStateSubscriber(model, data)
 publisher = DummyCommandPublisher(model, data)
 controller_sub = DummyChangeControllerSubscriber()
 
+rerun_logger = RerunLoggerNode(subscriber)
+
 
 ui_controller = UIController(
     stand_callback=controller_sub.stand_callback,
@@ -248,8 +301,13 @@ tbai_python.write_init_time()
 
 central_controller = tbai_python.CentralController.create(subscriber, publisher, controller_sub)
 
-central_controller.add_bob_controller(subscriber, ref_vel_gen)
-central_controller.add_static_controller(subscriber)
+
+def callback(currentTime, dt):
+    print(f"currentTime: {currentTime}, dt: {dt}")
+
+
+central_controller.add_bob_controller(subscriber, ref_vel_gen, rerun_logger.visualize_callback)
+central_controller.add_static_controller(subscriber, rerun_logger.visualize_callback)
 
 viewer_thread = threading.Thread(target=viewer_fn, args=(window, lock, 1 / 30))
 viewer_thread.start()
@@ -264,6 +322,7 @@ try:
 except KeyboardInterrupt:
     running = False
     print("Stopping threads")
+    rerun_store("go2_robot.rrd")
     central_controller.stopThread()
     viewer_thread.join()
     physics_thread.join()

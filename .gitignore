@@ -2,3 +2,4 @@ __pycache__/
 build/
 .cache/
 ocs2_robotic_assets/
+*.rrd
