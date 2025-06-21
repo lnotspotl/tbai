@@ -35,13 +35,13 @@ class DummyCommandPublisher(CommandPublisher):
         current_time = time.time()
         dt = current_time - self.last_time
         self.last_time = current_time
-        
+
         # Count number of publish calls
         self.publish_count += 1
         elapsed = current_time - self.start_time
         
         # Print frequency every 100 calls
-        if self.publish_count % 100 == 0:
+        if self.publish_count % 500 == 0:
             freq = self.publish_count / elapsed
             print(f"Publish frequency: {freq:.1f} Hz")
             self.start_time = current_time
@@ -52,14 +52,17 @@ class DummyCommandPublisher(CommandPublisher):
 class DummyChangeControllerSubscriber(ChangeControllerSubscriber):
     def __init__(self):
         super().__init__()
-        self.callback = None
+        self._callback = None
+        self.new_controller = None
+        self.new_controller = "SIT"
 
-    def set_callback_function(self, callback):
-        self.callback = callback
+    def setCallbackFunction(self, callback):
+        self._callback = callback
 
     def triggerCallbacks(self):
-        if self.callback:
-            self.callback("dummy_controller")
+        if self._callback is not None and self.new_controller is not None:
+            self._callback(self.new_controller)
+            self.new_controller = None
 
 class DummyReferenceVelocityGenerator(ReferenceVelocityGenerator):
     def __init__(self):
@@ -80,6 +83,8 @@ publisher = DummyCommandPublisher()
 controller_sub = DummyChangeControllerSubscriber()
 ref_vel_gen = DummyReferenceVelocityGenerator()
 
+tbai_python.write_init_time()
+
 central_controller = tbai_python.CentralController.create(
     subscriber,
     publisher,
@@ -87,4 +92,17 @@ central_controller = tbai_python.CentralController.create(
 )
 
 central_controller.add_bob_controller(subscriber, ref_vel_gen)
-central_controller.start()
+central_controller.add_static_controller(subscriber)
+central_controller.startThread()
+
+import time
+
+try:
+    time.sleep(20)
+    print("Stopping thread")
+    central_controller.stopThread()
+except KeyboardInterrupt:
+    print("Keyboard interrupt")
+    central_controller.stopThread()
+
+

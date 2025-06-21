@@ -1,3 +1,9 @@
+import sys
+
+sys.path.insert(0, "/home/kuba/Documents/tbai2/build/tbai_python")
+
+import tbai_python
+
 import mujoco
 import numpy as np
 import time
@@ -5,101 +11,181 @@ import threading
 
 from mujoco import viewer
 
+import tbai_python
+import numpy as np
 
-def pd_controller(
-    q_current: np.ndarray,
-    q_desired: np.ndarray,
-    v_desired: np.ndarray,
-    v_current: np.ndarray,
-    kp: float,
-    kd: float,
-) -> np.ndarray:
+import time
+
+from tbai_python import (
+    StateSubscriber,
+    CommandPublisher,
+    ChangeControllerSubscriber,
+    ReferenceVelocity,
+    ReferenceVelocityGenerator,
+)
+
+from tbai_python.rotations import rpy2quat, quat2mat, mat2rpy, mat2ocs2rpy, ocs2rpy2quat, rpy2mat, mat2aa
+
+kp = 30
+kd = 0.5
+desired_joint_angles = np.zeros(12)
+
+joint2idx = {
+    "LF_HAA": 0,
+    "LF_HFE": 1,
+    "LF_KFE": 2,
+    "RF_HAA": 3,
+    "RF_HFE": 4,
+    "RF_KFE": 5,
+    "LH_HAA": 6,
+    "LH_HFE": 7,
+    "LH_KFE": 8,
+    "RH_HAA": 9,
+    "RH_HFE": 10,
+    "RH_KFE": 11,
+}
+
+
+def pd_controller(q_current, q_desired, v_desired, v_current, kp, kd) -> np.ndarray:
     return kp * (q_desired - q_current) + kd * (v_desired - v_current)
 
 
-my_ctrl = np.zeros_like(12)
-
-
-class Go2StaticController:
-    def __init__(
-        self,
-        model: mujoco.MjModel,
-        kp: float,
-        kd: float,
-        q_initial: np.ndarray,
-        q_desired: np.ndarray,
-        alpha_speed: float = 1.0,
-    ):
-        self.model = model
-        self.kp = kp
-        self.kd = kd
-        self.q_initial = q_initial
-        self.q_desired = q_desired
-        self.alpha = 0.0
-        self.alpha_speed = alpha_speed
-
-        print(f"q initial: {q_initial}")
-        print(f"q desired: {q_desired}")
-
-    @staticmethod
-    def update_alpha(alpha_current: float, alpha_speed: float, dt: float) -> float:
-        assert alpha_speed > 0, "alpha_speed must be positive"
-        return min(alpha_current + alpha_speed * dt, 1.0)
-
-    @staticmethod
-    def interpolate(from_: np.ndarray, to_: np.ndarray, alpha: float) -> np.ndarray:
-        assert 0 <= alpha <= 1, "alpha must be between 0 and 1"
-        return from_ * (1 - alpha) + to_ * alpha
-
-    @staticmethod
-    def get_joint_positions(model: mujoco.MjModel, data: mujoco.MjData) -> np.ndarray:
-        del model  # unused
-        return data.qpos[-12:]
-
-    @staticmethod
-    def get_joint_velocities(model: mujoco.MjModel, data: mujoco.MjData) -> np.ndarray:
-        del model  # unused
-        return data.qvel[-12:]
-
-    def get_action(self, data: mujoco.MjData, dt: float) -> np.ndarray:
-        self.alpha = self.update_alpha(self.alpha, self.alpha_speed, dt)
-        q = self.get_joint_positions(self.model, data)
-        v = self.get_joint_velocities(self.model, data)
-
-        q_desired = self.interpolate(from_=self.q_initial, to_=self.q_desired, alpha=self.alpha)
-        v_desired = np.zeros_like(v)
-
-        return q_desired
-
-
-def viewer_fn(window, lock, dt):
+def viewer_fn(window, lock, viewer_dt):
     while window.is_running():
         with lock:
             window.sync()
-        time.sleep(dt)
+        time.sleep(viewer_dt)
 
 
-
-def physics_fn(model, data, lock, dt):
-    global my_ctrl
+def physics_fn(model, data, lock, physics_dt):
+    global desired_joint_angles
     while True:
         with lock:
             current_q = data.qpos[7 : 7 + 12]
-            desired_q = my_ctrl.copy()
+            desired_q = desired_joint_angles.copy()
             current_v = data.qvel[6 : 6 + 12]
             desired_v = np.zeros_like(current_v)
-            data.ctrl[:12] = pd_controller(current_q, desired_q, desired_v, current_v, 30, 0.5)
+            data.ctrl[:12] = pd_controller(current_q, desired_q, desired_v, current_v, kp, kd)
             mujoco.mj_step(model, data)
-        time.sleep(dt)
+        time.sleep(physics_dt)
 
 
-def controller_fn(model, data, controller, lock, dt):
-    global my_ctrl
-    while True:
-        with lock:
-            ctrl = controller.get_action(data, dt)
-            my_ctrl = ctrl.copy()
-        time.sleep(dt)
+class DummyStateSubscriber(StateSubscriber):
+    def __init__(self, model, data):
+        super().__init__()
+        self.initialized = False
+        self.current_state = np.zeros((36,), dtype=np.float64)
+        self.model = model
+        self.data = data
+        self.last_time = time.time()
+        self.last_orientation = np.eye(3)
+        self.last_position = np.zeros(3)
+        self.last_joint_angles = np.zeros(12)
+        self.last_yaw = 0.0
+        self.first_update = True
+
+    def waitTillInitialized(self):
+        self.initialized = True
+
+    def getLatestRbdState(self):
+        current_time = time.time()
+        dt = current_time - self.last_time
+
+        # Get base orientation (quat) and convert to rotation matrix
+        base_quat = np.roll(self.data.qpos[3:7], -1)  # roll to make it xyzw
+        R_world_base = quat2mat(base_quat)
+        R_base_world = R_world_base.T
+
+        # Get RPY angles
+        rpy = mat2ocs2rpy(R_world_base, self.last_yaw)
+        self.last_yaw = rpy[2]
+
+        # Base position in world frame
+        base_position = self.data.qpos[0:3]
+
+        if self.first_update:
+            self.last_orientation = R_base_world
+            self.last_position = base_position
+            self.first_update = False
+
+        # Base angular velocity in base frame
+        angular_velocity_world = mat2aa(R_world_base @ self.last_orientation) / dt if dt > 0 else np.zeros(3)
+        angular_velocity_base = R_base_world @ angular_velocity_world
+
+        # Base linear velocity in base frame
+        linear_velocity_world = (base_position - self.last_position) / dt if dt > 0 else np.zeros(3)
+        linear_velocity_base = R_base_world @ linear_velocity_world
+
+        # Joint angles and velocities
+        joint_angles = self.data.qpos[7:19]  # Assuming 12 joints starting at index 7
+        joint_velocities = self.data.qvel[6:18]  # Assuming 12 joint velocities starting at index 6
+
+        # Update state vector
+        self.current_state[0:3] = rpy  # Base orientation (RPY)
+        self.current_state[3:6] = base_position  # Base position
+        self.current_state[6:9] = angular_velocity_base  # Base angular velocity
+        self.current_state[9:12] = linear_velocity_base  # Base linear velocity
+        self.current_state[12:24] = joint_angles  # Joint positions
+        self.current_state[24:36] = joint_velocities  # Joint velocities
+
+        # Update last values
+        self.last_orientation = R_base_world
+        self.last_position = base_position
+        self.last_time = current_time
+
+        return self.current_state
+
+    def getLatestRbdStamp(self):
+        return time.time()
+
+    def getContactFlags(self):
+        # For now returning False for all 4 feet contacts
+        # This could be enhanced by checking actual contact states in Mujoco
+        return [False] * 4
+
+
+class DummyCommandPublisher(CommandPublisher):
+    def __init__(self, model, data):
+        super().__init__()
+        self.last_time = time.time()
+        self.publish_count = 0
+        self.start_time = time.time()
+        self.model = model
+        self.data = data
+
+    def publish(self, commands):
+        global desired_joint_angles
+        for command in commands:
+            desired_joint_angles[joint2idx[command.joint_name]] = command.desired_position
+
+
+class DummyChangeControllerSubscriber(ChangeControllerSubscriber):
+    def __init__(self):
+        super().__init__()
+        self._callback = None
+        self.new_controller = None
+        self.new_controller = "SIT"
+
+    def setCallbackFunction(self, callback):
+        self._callback = callback
+
+    def triggerCallbacks(self):
+        if self._callback is not None and self.new_controller is not None:
+            self._callback(self.new_controller)
+            self.new_controller = None
+
+
+class DummyReferenceVelocityGenerator(ReferenceVelocityGenerator):
+    def __init__(self):
+        super().__init__()
+
+    def getReferenceVelocity(self, time, dt):
+        ref = ReferenceVelocity()
+        ref.velocity_x = 0.5
+        ref.velocity_y = 0.0
+        ref.yaw_rate = 0.0
+        return ref
+
 
 scene_path = "/home/kuba/Documents/mujoco_menagerie/unitree_go2/scene.xml"
 model = mujoco.MjModel.from_xml_path(scene_path)
@@ -115,11 +201,22 @@ sit_joint_angles = np.array([0.0, 1.806, -2.102, 0.0, 1.806, -2.102, 0.0, 1.996,
 stand_joint_angles = np.array([0.0, 0.806, -1.802, 0.0, 0.806, -1.802, 0.0, 0.996, -1.802, 0.0, 0.996, -1.802])
 
 data.qpos[-12:] = sit_joint_angles
-
-static_controller = Go2StaticController(model, 30, 0.5, sit_joint_angles, stand_joint_angles, 1)
+desired_joint_angles = stand_joint_angles.copy()
 
 window = mujoco.viewer.launch_passive(model, data)
 lock = threading.Lock()
+
+subscriber = DummyStateSubscriber(model, data)
+publisher = DummyCommandPublisher(model, data)
+controller_sub = DummyChangeControllerSubscriber()
+ref_vel_gen = DummyReferenceVelocityGenerator()
+
+tbai_python.write_init_time()
+
+central_controller = tbai_python.CentralController.create(subscriber, publisher, controller_sub)
+
+central_controller.add_bob_controller(subscriber, ref_vel_gen)
+central_controller.add_static_controller(subscriber)
 
 viewer_thread = threading.Thread(target=viewer_fn, args=(window, lock, 1 / 30))
 viewer_thread.start()
@@ -127,11 +224,17 @@ viewer_thread.start()
 physics_thread = threading.Thread(target=physics_fn, args=(model, data, lock, model.opt.timestep))
 physics_thread.start()
 
-controller_thread = threading.Thread(target=controller_fn, args=(model, data, static_controller, lock, 1 / 50))
-controller_thread.start()
+central_controller.startThread()
 
-viewer_thread.join()
-physics_thread.join()
-controller_thread.join()
-print(model)
-print(data)
+changed = False
+try:
+    while True:
+        time.sleep(5)
+        if not changed:
+            changed = True
+            print("!! CHANGING CONTROLLER TO SIT !!")
+            controller_sub.new_controller = "BOB"
+except KeyboardInterrupt:
+    central_controller.stopThread()
+    viewer_thread.join()
+    physics_thread.join()

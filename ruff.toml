@@ -1,0 +1,25 @@
+line-length = 120
+indent-width = 4
+
+[format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+[lint]
+extend-select = ["I001", "E501", "D102", "D103"]
+
+# isort rules:
+# I001: unsorted-imports
+
+# pycodestyle rules:
+# E501: line-too-long
+
+# pydocstyle rules:
+# D102: undocumented-public-method
+# D103: undocumented-public-function
+
+# All rules available at: https://docs.astral.sh/ruff/rules/
+
+[lint.pydocstyle]
+convention = "google"
