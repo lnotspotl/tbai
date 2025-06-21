@@ -36,7 +36,7 @@ std::vector<MotorCommand> StaticController::getMotorCommands(scalar_t currentTim
         return getSitCommandMessage();
     }
 
-    throw std::runtime_error("Unsupported controller type: " + currentControllerType_);
+    TBAI_THROW("Unsupported controller type: {}. Available controllers: STAND, SIT", currentControllerType_);
 }
 
 /*********************************************************************************************************************/
@@ -51,8 +51,11 @@ void StaticController::changeController(const std::string &controllerType, scala
     } else if (currentControllerType_ == "SIT") {
         interpTo_ = sitJointAngles_;
     } else {
-        throw std::runtime_error("Unsupported controller type: " + currentControllerType_);
+        TBAI_LOG_ERROR(logger_, "Unsupported controller type: {}. Available controllers: STAND, SIT",
+                       currentControllerType_);
+        return;
     }
+
     TBAI_LOG_INFO(logger_, "Interpolating from: {}", (std::stringstream() << interpFrom_.transpose()).str());
     TBAI_LOG_INFO(logger_, "Interpolating to: {}", (std::stringstream() << interpTo_.transpose()).str());
     TBAI_LOG_INFO(logger_, "Interpolating time: {}", interpolationTime_);

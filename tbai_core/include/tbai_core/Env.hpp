@@ -25,7 +25,7 @@ T getEnvAsChecked(const std::string &var, const std::vector<T> &allowedValues, b
                   T defaultValue = T()) {
     T value = getEnvAs<T>(var, allowDefault, defaultValue);
     if (std::find(allowedValues.begin(), allowedValues.end(), value) == allowedValues.end()) {
-        TBAI_THROW("Environment variable {} has invalid value: {}.\nExpected one of ", var, value, allowedValues);
+        TBAI_THROW("Environment variable {} has invalid value: '{}'.\nExpected one of {}", var, value, allowedValues);
     }
     return value;
 }

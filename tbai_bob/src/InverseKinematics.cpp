@@ -98,7 +98,7 @@ std::unique_ptr<InverseKinematics> getInverseKinematicsUnique() {
         return std::make_unique<Go2InverseKinematics>(d2, a3, a4, defaultStance);
     }
 
-    throw std::runtime_error("Inverse kinematics for robot " + robotName + " not implemented");
+    TBAI_THROW("Inverse kinematics for robot {} not implemented. Available robots: anymal_d, go2", robotName);
 }
 
 /**********************************************************************************************************************/

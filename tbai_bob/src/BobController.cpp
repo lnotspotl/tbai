@@ -50,7 +50,7 @@ BobController::BobController(const std::string &urdfString,
     // Load URDF string from file
     std::ifstream urdfFile(urdfString);
     if (!urdfFile.is_open()) {
-        throw std::runtime_error("Could not open URDF file: " + urdfString);
+        TBAI_THROW("Could not open URDF file: {}", urdfString);
     }
     std::stringstream buffer;
     buffer << urdfFile.rdbuf();
@@ -69,8 +69,7 @@ BobController::BobController(const std::string &urdfString,
     try {
         model_ = torch::jit::load(modelPath);
     } catch (const c10::Error &e) {
-        std::cerr << "Could not load model from: " << modelPath << std::endl;
-        throw std::runtime_error("Could not load model");
+        TBAI_THROW("Could not load model from: {}\nError: {}", modelPath, e.what());
     }
 
     TBAI_LOG_INFO(logger_, "Model loaded");
