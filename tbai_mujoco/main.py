@@ -14,6 +14,8 @@ from mujoco import viewer
 import tbai_python
 import numpy as np
 
+from joystick import UIController
+
 import time
 
 from tbai_python import (
@@ -117,16 +119,18 @@ class DummyStateSubscriber(StateSubscriber):
         linear_velocity_base = R_base_world @ linear_velocity_world
 
         # Joint angles and velocities
-        joint_angles = self.data.qpos[7:19]  # Assuming 12 joints starting at index 7
-        joint_velocities = self.data.qvel[6:18]  # Assuming 12 joint velocities starting at index 6
+        joint_angles = self.data.qpos[7:19].copy()  # Assuming 12 joints starting at index 7
+        joint_angles[3:6], joint_angles[6:9] = joint_angles[3:6], joint_angles[6:9]
+        joint_velocities = self.data.qvel[6:18].copy()  # Assuming 12 joint velocities starting at index 6
+        joint_velocities[3:6], joint_velocities[6:9] = joint_velocities[3:6], joint_velocities[6:9]
 
         # Update state vector
-        self.current_state[0:3] = rpy  # Base orientation (RPY)
-        self.current_state[3:6] = base_position  # Base position
-        self.current_state[6:9] = angular_velocity_base  # Base angular velocity
-        self.current_state[9:12] = linear_velocity_base  # Base linear velocity
-        self.current_state[12:24] = joint_angles  # Joint positions
-        self.current_state[24:36] = joint_velocities  # Joint velocities
+        self.current_state[0:3] = rpy.copy()  # Base orientation (RPY)
+        self.current_state[3:6] = base_position.copy()  # Base position
+        self.current_state[6:9] = angular_velocity_base.copy()  # Base angular velocity
+        self.current_state[9:12] = linear_velocity_base.copy()  # Base linear velocity
+        self.current_state[12:24] = joint_angles.copy()  # Joint positions
+        self.current_state[24:36] = joint_velocities.copy()  # Joint velocities
 
         # Update last values
         self.last_orientation = R_base_world
@@ -182,18 +186,20 @@ class DummyChangeControllerSubscriber(ChangeControllerSubscriber):
 class DummyReferenceVelocityGenerator(ReferenceVelocityGenerator):
     def __init__(self):
         super().__init__()
+        self.ui_controller = UIController()
 
     def getReferenceVelocity(self, time, dt):
         ref = ReferenceVelocity()
-        ref.velocity_x = 0.0
-        ref.velocity_y = 0.0
-        ref.yaw_rate = 0.0
+        ref.velocity_x = self.ui_controller.linear_x
+        ref.velocity_y = self.ui_controller.linear_y
+        ref.yaw_rate = self.ui_controller.angular_z
         return ref
 
 
 scene_path = "/home/kuba/Documents/mujoco_menagerie/unitree_go2/scene.xml"
+# scene_path = "/home/kuba/Documents/mujoco_menagerie/anybotics_anymal_c/scene.xml"
 model = mujoco.MjModel.from_xml_path(scene_path)
-model.opt.timestep = 0.001
+model.opt.timestep = 0.0025
 data = mujoco.MjData(model)
 
 
@@ -203,6 +209,11 @@ for i in range(1, 12 + 1):  # first joint is a virtual world->base_link joint
 
 sit_joint_angles = np.array([0.0, 0.806, -1.802, 0.0, 0.806, -1.802, 0.0, 0.996, -1.802, 0.0, 0.996, -1.802])
 stand_joint_angles = np.array([0.0, 0.806, -1.802, 0.0, 0.806, -1.802, 0.0, 0.996, -1.802, 0.0, 0.996, -1.802])
+
+# stand_joint_angles = np.array([0.0, 0.4, -0.8, 0.0, -0.4, 0.8, 0.0, 0.4, -0.8, 0.0, -0.4, 0.8])
+# sit_joint_angles = np.array([0.0, 1.5, -2.6, 0.0, -1.5, 2.6, 0.0, 1.5, -2.6, 0.0, -1.5, 2.6])
+# stand_joint_angles[3:6], stand_joint_angles[6:9] = sit_joint_angles[3:6], sit_joint_angles[6:9]
+# sit_joint_angles[3:6], sit_joint_angles[6:9] = stand_joint_angles[3:6], stand_joint_angles[6:9]
 
 data.qpos[-12:] = sit_joint_angles
 desired_joint_angles = stand_joint_angles.copy()
@@ -230,14 +241,11 @@ physics_thread.start()
 
 central_controller.startThread()
 
-changed = False
 try:
-    while True:
-        time.sleep(5)
-        if not changed:
-            changed = True
-            print("!! CHANGING CONTROLLER TO SIT !!")
-            controller_sub.new_controller = "BOB"
+    time.sleep(1)
+    print("!! CHANGING CONTROLLER TO SIT !!")
+    controller_sub.new_controller = "BOB"
+    ref_vel_gen.ui_controller.run()
 except KeyboardInterrupt:
     central_controller.stopThread()
     viewer_thread.join()
