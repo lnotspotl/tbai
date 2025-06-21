@@ -1,22 +1,16 @@
-import sys
+#!/usr/bin/env python3
 
+import sys
 sys.path.insert(0, "/home/kuba/Documents/tbai2/build/tbai_python")
 
 import tbai_python
-
-import mujoco
 import numpy as np
 import time
 import threading
-
-from mujoco import viewer
-
-import tbai_python
-import numpy as np
+import pybullet as p
+import pybullet_data
 
 from joystick import UIController
-
-import time
 
 from tbai_python import (
     StateSubscriber,
@@ -48,38 +42,15 @@ joint2idx = {
     "RH_KFE": 11,
 }
 
-
 def pd_controller(q_current, q_desired, v_desired, v_current, kp, kd) -> np.ndarray:
     return kp * (q_desired - q_current) + kd * (v_desired - v_current)
 
-
-def viewer_fn(window, lock, viewer_dt):
-    while window.is_running() and running:
-        with lock:
-            window.sync()
-        time.sleep(viewer_dt)
-
-
-def physics_fn(model, data, lock, physics_dt):
-    global desired_joint_angles
-    while running:
-        with lock:
-            current_q = data.qpos[7 : 7 + 12]
-            desired_q = desired_joint_angles.copy()
-            current_v = data.qvel[6 : 6 + 12]
-            desired_v = np.zeros_like(current_v)
-            data.ctrl[:12] = pd_controller(current_q, desired_q, desired_v, current_v, kp, kd)
-            mujoco.mj_step(model, data)
-        time.sleep(physics_dt)
-
-
-class DummyStateSubscriber(StateSubscriber):
-    def __init__(self, model, data):
+class PyBulletStateSubscriber(StateSubscriber):
+    def __init__(self, robot_id):
         super().__init__()
         self.initialized = False
         self.current_state = np.zeros((36,), dtype=np.float64)
-        self.model = model
-        self.data = data
+        self.robot_id = robot_id
         self.last_time = time.time()
         self.last_orientation = np.eye(3)
         self.last_position = np.zeros(3)
@@ -94,8 +65,9 @@ class DummyStateSubscriber(StateSubscriber):
         current_time = time.time()
         dt = current_time - self.last_time
 
-        # Get base orientation (quat) and convert to rotation matrix
-        base_quat = np.roll(self.data.qpos[3:7], -1)  # roll to make it xyzw
+        # Get base orientation and position
+        base_pos, base_quat = p.getBasePositionAndOrientation(self.robot_id)
+        base_quat = np.array([base_quat[0], base_quat[1], base_quat[2], base_quat[3]])  # wxyz to xyzw
         R_world_base = quat2mat(base_quat)
         R_base_world = R_world_base.T
 
@@ -104,34 +76,38 @@ class DummyStateSubscriber(StateSubscriber):
         self.last_yaw = rpy[2]
 
         # Base position in world frame
-        base_position = self.data.qpos[0:3]
+        base_position = np.array(base_pos)
 
         if self.first_update:
             self.last_orientation = R_base_world
             self.last_position = base_position
             self.first_update = False
 
-        # Base angular velocity in base frame
-        angular_velocity_world = mat2aa(R_world_base @ self.last_orientation) / dt if dt > 0 else np.zeros(3)
-        angular_velocity_base = R_base_world @ angular_velocity_world
+        # Get base velocities
+        base_vel, base_ang_vel = p.getBaseVelocity(self.robot_id)
+        
+        # Convert to base frame
+        linear_velocity_base = R_base_world @ np.array(base_vel)
+        angular_velocity_base = R_base_world @ np.array(base_ang_vel)
 
-        # Base linear velocity in base frame
-        linear_velocity_world = (base_position - self.last_position) / dt if dt > 0 else np.zeros(3)
-        linear_velocity_base = R_base_world @ linear_velocity_world
+        # Get joint states
+        joint_angles = []
+        joint_velocities = []
+        for joint_name in joint2idx.keys():
+            joint_state = p.getJointState(self.robot_id, joint_name_to_id[joint_name])
+            joint_angles.append(joint_state[0])
+            joint_velocities.append(joint_state[1])
 
-        # Joint angles and velocities
-        joint_angles = self.data.qpos[7:19].copy()  # Assuming 12 joints starting at index 7
-        joint_angles[3:6], joint_angles[6:9] = joint_angles[3:6], joint_angles[6:9]
-        joint_velocities = self.data.qvel[6:18].copy()  # Assuming 12 joint velocities starting at index 6
-        joint_velocities[3:6], joint_velocities[6:9] = joint_velocities[3:6], joint_velocities[6:9]
+        joint_angles = np.array(joint_angles)
+        joint_velocities = np.array(joint_velocities)
 
         # Update state vector
-        self.current_state[0:3] = rpy.copy()  # Base orientation (RPY)
-        self.current_state[3:6] = base_position.copy()  # Base position
-        self.current_state[6:9] = angular_velocity_base.copy()  # Base angular velocity
-        self.current_state[9:12] = linear_velocity_base.copy()  # Base linear velocity
-        self.current_state[12:24] = joint_angles.copy()  # Joint positions
-        self.current_state[24:36] = joint_velocities.copy()  # Joint velocities
+        self.current_state[0:3] = rpy  # Base orientation (RPY)
+        self.current_state[3:6] = base_position  # Base position
+        self.current_state[6:9] = angular_velocity_base  # Base angular velocity
+        self.current_state[9:12] = linear_velocity_base  # Base linear velocity
+        self.current_state[12:24] = joint_angles  # Joint positions
+        self.current_state[24:36] = joint_velocities  # Joint velocities
 
         # Update last values
         self.last_orientation = R_base_world
@@ -144,19 +120,15 @@ class DummyStateSubscriber(StateSubscriber):
         return time.time()
 
     def getContactFlags(self):
-        # For now returning False for all 4 feet contacts
-        # This could be enhanced by checking actual contact states in Mujoco
         return [False] * 4
 
-
-class DummyCommandPublisher(CommandPublisher):
-    def __init__(self, model, data):
+class PyBulletCommandPublisher(CommandPublisher):
+    def __init__(self, robot_id):
         super().__init__()
+        self.robot_id = robot_id
         self.last_time = time.time()
         self.publish_count = 0
         self.start_time = time.time()
-        self.model = model
-        self.data = data
 
     def publish(self, commands):
         global kp
@@ -167,6 +139,37 @@ class DummyCommandPublisher(CommandPublisher):
         for command in commands:
             desired_joint_angles[joint2idx[command.joint_name]] = command.desired_position
 
+def physics_fn(robot_id, dt, lock):
+    global desired_joint_angles
+    global running
+    
+    while running:
+        with lock:
+            for joint_name, joint_idx in joint2idx.items():
+                joint_state = p.getJointState(robot_id, joint_name_to_id[joint_name])
+                current_pos = joint_state[0]
+                current_vel = joint_state[1]
+                
+                desired_pos = desired_joint_angles[joint_idx]
+                desired_vel = 0
+                
+                torque = pd_controller(current_pos, desired_pos, desired_vel, current_vel, kp, kd)
+                p.setJointMotorControl2(
+                    robot_id,
+                    joint_name_to_id[joint_name], 
+                    p.VELOCITY_CONTROL,
+                    targetVelocity=0,
+                    force=0
+                )
+                p.setJointMotorControl2(
+                    robot_id,
+                    joint_name_to_id[joint_name],
+                    p.TORQUE_CONTROL,
+                    force=torque
+                )
+            
+            p.stepSimulation()
+            time.sleep(dt)
 
 class DummyChangeControllerSubscriber(ChangeControllerSubscriber):
     def __init__(self):
@@ -205,37 +208,53 @@ class DummyReferenceVelocityGenerator(ReferenceVelocityGenerator):
         ref.yaw_rate = self.ui_controller.angular_z
         return ref
 
+# Set up PyBullet
+p.connect(p.GUI)
+p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
+p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
-scene_path = "/home/kuba/Documents/mujoco_menagerie/unitree_go2/scene.xml"
-# scene_path = "/home/kuba/Documents/mujoco_menagerie/anybotics_anymal_c/scene.xml"
-model = mujoco.MjModel.from_xml_path(scene_path)
-model.opt.timestep = 0.0025
-data = mujoco.MjData(model)
+# Load robot and ground
+robot = p.loadURDF("./ocs2_robotic_assets/resources/go2/urdf/go2_description.urdf", [0, 0, 0.5])
+ground = p.loadURDF("plane.urdf")
 
+# Get joint IDs
+joint_name_to_id = {}
+for j in range(p.getNumJoints(robot)):
+    info = p.getJointInfo(robot, j)
+    joint_id = info[0]
+    joint_name = info[1].decode('UTF-8')
+    joint_type = info[2]
+    
+    if joint_type == p.JOINT_REVOLUTE:
+        print(f"Adding joint {joint_name} with id {joint_id}")
+        joint_name_to_id[joint_name] = joint_id
 
-print("Joint names:")
-for i in range(1, 12 + 1):  # first joint is a virtual world->base_link joint
-    print(f"  ({i})\t{mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, i)}")
+# Set simulation parameters
+dt = 0.001
+p.setTimeStep(dt)
+p.setGravity(0, 0, -9.81)
+p.setPhysicsEngineParameter(
+    fixedTimeStep=dt,
+    numSolverIterations=100,
+    numSubSteps=1
+)
 
+# Initialize joint positions
 sit_joint_angles = np.array([0.0, 0.806, -1.802, 0.0, 0.806, -1.802, 0.0, 0.996, -1.802, 0.0, 0.996, -1.802])
 stand_joint_angles = np.array([0.0, 0.806, -1.802, 0.0, 0.806, -1.802, 0.0, 0.996, -1.802, 0.0, 0.996, -1.802])
 
-# stand_joint_angles = np.array([0.0, 0.4, -0.8, 0.0, -0.4, 0.8, 0.0, 0.4, -0.8, 0.0, -0.4, 0.8])
-# sit_joint_angles = np.array([0.0, 1.5, -2.6, 0.0, -1.5, 2.6, 0.0, 1.5, -2.6, 0.0, -1.5, 2.6])
-# stand_joint_angles[3:6], stand_joint_angles[6:9] = sit_joint_angles[3:6], sit_joint_angles[6:9]
-# sit_joint_angles[3:6], sit_joint_angles[6:9] = stand_joint_angles[3:6], stand_joint_angles[6:9]
+for joint_name in joint2idx.keys():
+    p.resetJointState(robot, joint_name_to_id[joint_name], sit_joint_angles[joint2idx[joint_name]])
+    p.setJointMotorControl2(robot, joint_name_to_id[joint_name], p.VELOCITY_CONTROL, targetVelocity=0, force=0)
 
-data.qpos[-12:] = sit_joint_angles
 desired_joint_angles = stand_joint_angles.copy()
 
-window = mujoco.viewer.launch_passive(model, data)
 lock = threading.Lock()
 
-
-subscriber = DummyStateSubscriber(model, data)
-publisher = DummyCommandPublisher(model, data)
+# Initialize tbai components
+subscriber = PyBulletStateSubscriber(robot)
+publisher = PyBulletCommandPublisher(robot)
 controller_sub = DummyChangeControllerSubscriber()
-
 
 ui_controller = UIController(
     stand_callback=controller_sub.stand_callback,
@@ -247,14 +266,11 @@ ref_vel_gen = DummyReferenceVelocityGenerator(ui_controller)
 tbai_python.write_init_time()
 
 central_controller = tbai_python.CentralController.create(subscriber, publisher, controller_sub)
-
 central_controller.add_bob_controller(subscriber, ref_vel_gen)
 central_controller.add_static_controller(subscriber)
 
-viewer_thread = threading.Thread(target=viewer_fn, args=(window, lock, 1 / 30))
-viewer_thread.start()
-
-physics_thread = threading.Thread(target=physics_fn, args=(model, data, lock, model.opt.timestep))
+# Start physics thread
+physics_thread = threading.Thread(target=physics_fn, args=(robot, dt, lock))
 physics_thread.start()
 
 central_controller.startThread()
@@ -265,5 +281,5 @@ except KeyboardInterrupt:
     running = False
     print("Stopping threads")
     central_controller.stopThread()
-    viewer_thread.join()
     physics_thread.join()
+    p.disconnect()
