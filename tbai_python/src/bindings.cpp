@@ -59,7 +59,7 @@ class PyStaticController : public tbai::static_::StaticController {
    public:
     using static_::StaticController::StaticController;
 
-    void visualize() override {
+    void visualize(scalar_t currentTime, scalar_t dt) override {
         // Do nothing
     }
 
@@ -74,7 +74,7 @@ class PyBobController : public tbai::BobController {
    public:
     using BobController::BobController;
 
-    void visualize() override {
+    void visualize(scalar_t currentTime, scalar_t dt) override {
         // Do nothing
     }
 

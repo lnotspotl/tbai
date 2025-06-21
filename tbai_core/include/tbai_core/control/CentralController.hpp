@@ -104,7 +104,7 @@ class CentralController {
             commandPublisherPtr_->publish(commands);
 
             // Allow controller to visualize stuff
-            activeController_->visualize();
+            activeController_->visualize(currentTime, dt);
 
             lastTime = currentTime;
 

@@ -25,8 +25,10 @@ class Controller {
     /**
      * @brief Visualize robot (typically in RViz)
      *
+     * @param currentTime : Current time in seconds
+     * @param dt : Time since last call in seconds, should be roughly 1/rate
      */
-    virtual void visualize() = 0;
+    virtual void visualize(scalar_t currentTime, scalar_t dt) {}
 
     /**
      * @brief Change controller to specified controller type. Note that this controllers isSupported() should evaluate

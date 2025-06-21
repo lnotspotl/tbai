@@ -23,7 +23,7 @@ class StaticController : public tbai::Controller {
 
     void changeController(const std::string &controllerType, scalar_t currentTime) override;
 
-   private:
+   protected:
     void loadSettings();
 
     /** Get command message during interpolation phase */
