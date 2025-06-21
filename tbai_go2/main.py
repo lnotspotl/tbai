@@ -1,6 +1,11 @@
 import time
+
 import sys
+
+sys.path.insert(0, "/home/kuba/Documents/tbai2/build/tbai_python")
 import numpy as np
+
+from collections import OrderedDict
 
 from unitree_sdk2py.core.channel import ChannelPublisher, ChannelFactoryInitialize
 from unitree_sdk2py.core.channel import ChannelSubscriber, ChannelFactoryInitialize
@@ -16,6 +21,8 @@ from unitree_sdk2py.go2.sport.sport_client import SportClient
 import mpac_logging
 from mpac_logging.rerun.robot_logger import RobotLogger
 from mpac_logging.rerun.utils import rerun_initialize, rerun_store
+
+from tbai_python.rotations import rpy2quat, quat2mat, mat2rpy, mat2ocs2rpy, ocs2rpy2quat, rpy2mat, mat2aa
 
 LegID = {
     "FR_0": 0,  # Front right hip
@@ -77,6 +84,7 @@ class Custom:
 
         self.log_freq = 10
         self.last_log_time = None
+        self.last_yaw = 0.0
 
         self.crc = CRC()
 
@@ -130,27 +138,85 @@ class Custom:
 
         if self.last_log_time is None:
             self.last_log_time = time.time()
-        
+
         if time.time() - self.last_log_time < 1 / self.log_freq:
             return
         self.last_log_time = time.time()
 
         position = np.array([0.0, 0.0, 0.27])
         orientation_xyz = np.roll(np.array(self.low_state.imu_state.quaternion), -1)
-        joint_positions = {
-            "FL_hip_joint": self.low_state.motor_state[LegID["FL_0"]].q,
-            "FL_thigh_joint": self.low_state.motor_state[LegID["FL_1"]].q,
-            "FL_calf_joint": self.low_state.motor_state[LegID["FL_2"]].q,
-            "RL_hip_joint": self.low_state.motor_state[LegID["RL_0"]].q,
-            "RL_thigh_joint": self.low_state.motor_state[LegID["RL_1"]].q,
-            "RL_calf_joint": self.low_state.motor_state[LegID["RL_2"]].q,
-            "RR_hip_joint": self.low_state.motor_state[LegID["RR_0"]].q,
-            "RR_thigh_joint": self.low_state.motor_state[LegID["RR_1"]].q,
-            "RR_calf_joint": self.low_state.motor_state[LegID["RR_2"]].q,
-            "FR_hip_joint": self.low_state.motor_state[LegID["FR_0"]].q,
-            "FR_thigh_joint": self.low_state.motor_state[LegID["FR_1"]].q,
-            "FR_calf_joint": self.low_state.motor_state[LegID["FR_2"]].q,
+        joint_positions = OrderedDict()
+        joint_positions["FL_hip_joint"] = self.low_state.motor_state[LegID["FL_0"]].q
+        joint_positions["FL_thigh_joint"] = self.low_state.motor_state[LegID["FL_1"]].q
+        joint_positions["FL_calf_joint"] = self.low_state.motor_state[LegID["FL_2"]].q
+        joint_positions["RL_hip_joint"] = self.low_state.motor_state[LegID["RL_0"]].q
+        joint_positions["RL_thigh_joint"] = self.low_state.motor_state[LegID["RL_1"]].q
+        joint_positions["RL_calf_joint"] = self.low_state.motor_state[LegID["RL_2"]].q
+        joint_positions["FR_hip_joint"] = self.low_state.motor_state[LegID["FR_0"]].q
+        joint_positions["FR_thigh_joint"] = self.low_state.motor_state[LegID["FR_1"]].q
+        joint_positions["FR_calf_joint"] = self.low_state.motor_state[LegID["FR_2"]].q
+        joint_positions["RR_hip_joint"] = self.low_state.motor_state[LegID["RR_0"]].q
+        joint_positions["RR_thigh_joint"] = self.low_state.motor_state[LegID["RR_1"]].q
+        joint_positions["RR_calf_joint"] = self.low_state.motor_state[LegID["RR_2"]].q
+
+        joint_velocities = OrderedDict()
+        joint_velocities["FL_hip_joint"] = self.low_state.motor_state[LegID["FL_0"]].dq
+        joint_velocities["FL_thigh_joint"] = self.low_state.motor_state[LegID["FL_1"]].dq
+        joint_velocities["FL_calf_joint"] = self.low_state.motor_state[LegID["FL_2"]].dq
+        joint_velocities["RL_hip_joint"] = self.low_state.motor_state[LegID["RL_0"]].dq
+        joint_velocities["RL_thigh_joint"] = self.low_state.motor_state[LegID["RL_1"]].dq
+        joint_velocities["RL_calf_joint"] = self.low_state.motor_state[LegID["RL_2"]].dq
+        joint_velocities["FR_hip_joint"] = self.low_state.motor_state[LegID["FR_0"]].dq
+        joint_velocities["FR_thigh_joint"] = self.low_state.motor_state[LegID["FR_1"]].dq
+        joint_velocities["FR_calf_joint"] = self.low_state.motor_state[LegID["FR_2"]].dq
+        joint_velocities["RR_hip_joint"] = self.low_state.motor_state[LegID["RR_0"]].dq
+        joint_velocities["RR_thigh_joint"] = self.low_state.motor_state[LegID["RR_1"]].dq
+        joint_velocities["RR_calf_joint"] = self.low_state.motor_state[LegID["RR_2"]].dq
+
+        base_position = np.array([0.0, 0.0, 0.27])  # this should not be necessary
+        R_world_base = quat2mat(orientation_xyz)
+        rpy = mat2ocs2rpy(R_world_base, self.last_yaw)
+        self.last_yaw = rpy[2]
+
+        angular_velocity_base = self.low_state.imu_state.gyroscope
+        linear_velocity_base = np.array([0.0, 0.0, 0.0])  # this should not be necessary
+
+        joint_positions_ocs2 = np.array(list(joint_positions.values()))
+        joint_velocities_ocs2 = np.array(list(joint_velocities.values()))
+
+        ocs2state = np.concatenate(
+            (rpy, base_position, angular_velocity_base, linear_velocity_base, joint_positions_ocs2, joint_velocities_ocs2)
+        )
+
+        position_ocs2 = ocs2state[3:6]
+        orientation_ocs2 = ocs2state[0:3]
+        joint_positions_ocs2 = ocs2state[12:24]
+
+        joint_positions_rerun = {
+            "FL_hip_joint": joint_positions_ocs2[0],
+            "FL_thigh_joint": joint_positions_ocs2[1],
+            "FL_calf_joint": joint_positions_ocs2[2],
+            "RL_hip_joint": joint_positions_ocs2[3],
+            "RL_thigh_joint": joint_positions_ocs2[4],
+            "RL_calf_joint": joint_positions_ocs2[5],
+            "FR_hip_joint": joint_positions_ocs2[6],
+            "FR_thigh_joint": joint_positions_ocs2[7],
+            "FR_calf_joint": joint_positions_ocs2[8],
+            "RR_hip_joint": joint_positions_ocs2[9],
+            "RR_thigh_joint": joint_positions_ocs2[10],
+            "RR_calf_joint": joint_positions_ocs2[11],
         }
+
+        # Turn orientation
+        orientation_ocs2 = ocs2rpy2quat(orientation_ocs2)
+
+        # Log the new state
+        self.rerun_logger.log_state(
+            logtime=time.time(),
+            base_position=position_ocs2,
+            base_orientation=orientation_ocs2,
+            joint_positions=joint_positions_rerun,
+        )
 
         self.rerun_logger.log_state(
             logtime=time.time(),
@@ -158,8 +224,6 @@ class Custom:
             base_orientation=orientation_xyz,
             joint_positions=joint_positions,
         )
-
-
 
         # print("FR_0 motor state: ", msg.motor_state[LegID["FR_0"]])
         # print("IMU state: ", msg.imu_state)
