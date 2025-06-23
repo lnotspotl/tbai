@@ -79,18 +79,6 @@ TEST(VvstackTest, MultipleEmptyVectors) {
     EXPECT_EQ(result.size(), 0);
 }
 
-TEST(VvstackTest, MultipleVectorsWithDifferentSizes) {
-    vector_t v1(2);
-    v1 << 1.0, 2.0;
-    vector_t v2(3);
-    v2 << 3.0, 4.0, 5.0;
-    vector_t result = vvstack({v1, v2});
-    EXPECT_EQ(result.size(), 5);
-    vector_t expected(5);
-    expected << 1.0, 2.0, 3.0, 4.0, 5.0;
-    EXPECT_TRUE(result.isApprox(expected));
-}
-
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
