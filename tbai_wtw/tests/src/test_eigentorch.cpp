@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <tbai_wtw/eigtorch.hpp>
+#include <tbai_wtw/EigenTorch.hpp>
 
 using namespace tbai;
 
