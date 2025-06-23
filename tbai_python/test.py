@@ -1,3 +1,8 @@
+import os
+import sys
+
+sys.path.insert(0, "/home/kuba/Documents/tbai2/build/tbai_python/")
+
 import tbai_python
 import numpy as np
 
@@ -54,7 +59,7 @@ class DummyChangeControllerSubscriber(ChangeControllerSubscriber):
         super().__init__()
         self._callback = None
         self.new_controller = None
-        self.new_controller = "SIT"
+        # self.new_controller = "SIT"
 
     def setCallbackFunction(self, callback):
         self._callback = callback
@@ -91,6 +96,7 @@ central_controller = tbai_python.CentralController.create(
     controller_sub
 )
 
+central_controller.add_wtw_controller(subscriber, ref_vel_gen)
 central_controller.add_bob_controller(subscriber, ref_vel_gen)
 central_controller.add_static_controller(subscriber)
 central_controller.startThread()
@@ -98,7 +104,7 @@ central_controller.startThread()
 import time
 
 try:
-    time.sleep(20)
+    time.sleep(200)
     print("Stopping thread")
     central_controller.stopThread()
 except KeyboardInterrupt:

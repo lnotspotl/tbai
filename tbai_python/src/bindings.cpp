@@ -5,6 +5,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <tbai_bob/BobController.hpp>
+#include <tbai_wtw/WtwController.hpp>
 #include <tbai_core/Rotations.hpp>
 #include <tbai_core/Types.hpp>
 #include <tbai_core/Utils.hpp>
@@ -106,6 +107,36 @@ class PyBobController : public tbai::BobController {
     std::function<void(scalar_t, scalar_t)> visualizeCallback_ = nullptr;
 };
 
+class PyWtwController : public tbai::WtwController {
+   public:
+    PyWtwController(const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
+                    const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen,
+                    std::function<void(scalar_t, scalar_t)> visualizeCallback = nullptr)
+        : tbai::WtwController(stateSubscriberPtr, refVelGen), visualizeCallback_(visualizeCallback) {}
+
+    void visualize(scalar_t currentTime, scalar_t dt) override {
+        if (visualizeCallback_) {
+            visualizeCallback_(currentTime, dt);
+        }
+    }
+
+    void changeController(const std::string &controllerType, scalar_t currentTime) override {
+        // Do nothing
+    }
+
+    void atPositions(matrix_t &positions) override {
+        // Do nothing
+    }
+
+    bool ok() const override { return true; }
+
+    void triggerCallbacks() override {
+        // Do nothing
+    }
+
+    std::function<void(scalar_t, scalar_t)> visualizeCallback_ = nullptr;
+};
+
 class PyReferenceVelocityGenerator : public tbai::reference::ReferenceVelocityGenerator {
    public:
     using reference::ReferenceVelocityGenerator::ReferenceVelocityGenerator;
@@ -183,19 +214,31 @@ PYBIND11_MODULE(tbai_python, m) {
         .def("start", &tbai::CentralControllerPython::start)
         .def("startThread", &tbai::CentralControllerPython::startThread)
         .def("stopThread", &tbai::CentralControllerPython::stopThread)
-        .def("add_bob_controller",
-             [](tbai::CentralControllerPython *self, const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
-                const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen,
-                std::function<void(tbai::scalar_t, tbai::scalar_t)> visualizeCallback = nullptr) {
-                 self->addController(
-                     std::make_unique<tbai::PyBobController>(stateSubscriberPtr, refVelGen, visualizeCallback));
-             }, py::arg("stateSubscriberPtr"), py::arg("refVelGen"),
-             py::arg("visualizeCallback") = nullptr)
-        .def("add_static_controller",
-             [](tbai::CentralControllerPython *self, std::shared_ptr<tbai::StateSubscriber> stateSubscriberPtr,
-                std::function<void(tbai::scalar_t, tbai::scalar_t)> visualizeCallback = nullptr) {
-                 self->addController(std::make_unique<tbai::PyStaticController>(stateSubscriberPtr, visualizeCallback));
-             }, py::arg("stateSubscriberPtr"), py::arg("visualizeCallback") = nullptr);
+        .def(
+            "add_bob_controller",
+            [](tbai::CentralControllerPython *self, const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
+               const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen,
+               std::function<void(tbai::scalar_t, tbai::scalar_t)> visualizeCallback = nullptr) {
+                self->addController(
+                    std::make_unique<tbai::PyBobController>(stateSubscriberPtr, refVelGen, visualizeCallback));
+            },
+            py::arg("stateSubscriberPtr"), py::arg("refVelGen"), py::arg("visualizeCallback") = nullptr)
+        .def(
+            "add_wtw_controller",
+            [](tbai::CentralControllerPython *self, const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
+               const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen,
+               std::function<void(tbai::scalar_t, tbai::scalar_t)> visualizeCallback = nullptr) {
+                self->addController(
+                    std::make_unique<tbai::PyWtwController>(stateSubscriberPtr, refVelGen, visualizeCallback));
+            },
+            py::arg("stateSubscriberPtr"), py::arg("refVelGen"), py::arg("visualizeCallback") = nullptr)
+        .def(
+            "add_static_controller",
+            [](tbai::CentralControllerPython *self, std::shared_ptr<tbai::StateSubscriber> stateSubscriberPtr,
+               std::function<void(tbai::scalar_t, tbai::scalar_t)> visualizeCallback = nullptr) {
+                self->addController(std::make_unique<tbai::PyStaticController>(stateSubscriberPtr, visualizeCallback));
+            },
+            py::arg("stateSubscriberPtr"), py::arg("visualizeCallback") = nullptr);
 
     // Bind rotation helper functions
     py::module rotations_module = m.def_submodule("rotations");

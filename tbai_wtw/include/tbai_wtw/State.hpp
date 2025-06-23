@@ -4,6 +4,7 @@
 #include <tbai_core/Types.hpp>
 
 namespace tbai {
+namespace wtw {
 
 struct State {
     using Vector3 = Eigen::Matrix<scalar_t, 3, 1>;
@@ -44,4 +45,5 @@ struct State {
     Vector3 rhFootPositionWorld;
 };
 
+}  // namespace wtw
 }  // namespace tbai

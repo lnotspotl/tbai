@@ -251,7 +251,7 @@ class DummyChangeControllerSubscriber(ChangeControllerSubscriber):
         self.new_controller = "SIT"
 
     def bob_callback(self):
-        self.new_controller = "BOB"
+        self.new_controller = "WTW"
 
 
 class DummyReferenceVelocityGenerator(ReferenceVelocityGenerator):
@@ -328,6 +328,7 @@ tbai_python.write_init_time()
 central_controller = tbai_python.CentralController.create(subscriber, publisher, controller_sub)
 central_controller.add_bob_controller(subscriber, ref_vel_gen, rerun_logger.visualize_callback)
 central_controller.add_static_controller(subscriber, rerun_logger.visualize_callback)
+central_controller.add_wtw_controller(subscriber, ref_vel_gen, rerun_logger.visualize_callback)
 
 # Start physics thread
 physics_thread = threading.Thread(target=physics_fn, args=(robot, dt, lock, subscriber))

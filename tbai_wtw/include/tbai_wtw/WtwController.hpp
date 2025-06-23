@@ -14,8 +14,9 @@
 #include <tbai_core/control/Controllers.hpp>
 #include <tbai_core/control/Subscribers.hpp>
 #include <tbai_reference/ReferenceVelocityGenerator.hpp>
-#include <torch/script.h>
+#include <tbai_wtw/HistoryBuffer.hpp>
 #include <tbai_wtw/State.hpp>
+#include <torch/script.h>
 
 namespace tbai {
 
@@ -50,15 +51,25 @@ class WtwController : public tbai::Controller {
 
     std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> refVelGen_;
 
-    Module model_;
+    Module adaptationModule_;
+    Module bodyModule_;
+
+    at::Tensor forward(at::Tensor &input) {
+        torch::NoGradGuard no_grad;
+        input = input.reshape({1, -1});
+        auto latent = adaptationModule_.forward({input}).toTensor();
+        at::Tensor concatenated = torch::cat({input, latent}, -1);
+        at::Tensor action = bodyModule_.forward({concatenated}).toTensor();
+        return action;
+    }
 
     void setupPinocchioModel(const std::string &urdfString);
     std::vector<tbai::MotorCommand> getMotorCommands(const vector_t &jointAngles);
     pinocchio::Model pinocchioModel_;
     pinocchio::Data pinocchioData_;
-    State getWtwState();
+    wtw::State getWtwState();
 
-    at::Tensor getNNInput(const State &state, scalar_t currentTime, scalar_t dt);
+    at::Tensor getNNInput(const wtw::State &state, scalar_t currentTime, scalar_t dt);
 
     constexpr static int GRAVITY_START_INDEX = 0;
     constexpr static int COMMAND_START_INDEX = 3;
@@ -69,25 +80,34 @@ class WtwController : public tbai::Controller {
     constexpr static int CLOCK_INPUTS_START_INDEX = 66;
 
     // Observations:
-// gravity - 3
-// commands - 15
-// dof residuals - 12
-// dof velocities - 12
-// last action - 12
-// last last action - 12
-// clock inputs - 4
+    // gravity - 3
+    // commands - 15
+    // dof residuals - 12
+    // dof velocities - 12
+    // last action - 12
+    // last last action - 12
+    // clock inputs - 4
 
-    void fillGravity(vector_t &input, const State &state);
-    void fillCommand(vector_t &input, const State &state, scalar_t currentTime, scalar_t dt);
-    void fillJointResiduals(vector_t &input, const State &state);
-    void fillJointVelocities(vector_t &input, const State &state);
-    void fillLastAction(vector_t &input, const State &state);
-    void fillLastLastAction(vector_t &input, const State &state);
+    void fillGravity(vector_t &input, const wtw::State &state);
+    void fillCommand(vector_t &input, const wtw::State &state, scalar_t currentTime, scalar_t dt);
+    void fillJointResiduals(vector_t &input, const wtw::State &state);
+    void fillJointVelocities(vector_t &input, const wtw::State &state);
+    void fillLastAction(vector_t &input, const wtw::State &state);
+    void fillLastLastAction(vector_t &input, const wtw::State &state);
     void fillClockInputs(vector_t &input, scalar_t currentTime, scalar_t dt);
 
     std::vector<std::string> jointNames_;
 
+    vector_t lastAction_;
+    vector_t lastLastAction_;
+
+    wtw::HistoryBuffer historyBuffer_;
+
     std::shared_ptr<spdlog::logger> logger_;
+
+    vector_t defaultJointAngles_;
+
+    scalar_t gaitIndex_;
 };
 
 }  // namespace tbai

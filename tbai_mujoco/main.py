@@ -246,7 +246,7 @@ class DummyChangeControllerSubscriber(ChangeControllerSubscriber):
         self.new_controller = "SIT"
 
     def bob_callback(self):
-        self.new_controller = "BOB"
+        self.new_controller = "WTW"
 
 
 class DummyReferenceVelocityGenerator(ReferenceVelocityGenerator):
@@ -310,7 +310,7 @@ central_controller = tbai_python.CentralController.create(subscriber, publisher,
 def callback(currentTime, dt):
     print(f"currentTime: {currentTime}, dt: {dt}")
 
-
+central_controller.add_wtw_controller(subscriber, ref_vel_gen, rerun_logger.visualize_callback)
 central_controller.add_bob_controller(subscriber, ref_vel_gen, rerun_logger.visualize_callback)
 central_controller.add_static_controller(subscriber, rerun_logger.visualize_callback)
 

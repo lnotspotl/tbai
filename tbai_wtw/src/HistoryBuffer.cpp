@@ -24,6 +24,7 @@ tbai::vector_t HistoryBuffer::getFinalObservation() {
         const std::size_t index = (currentIndex_ - 1 - i + historyLength_) % historyLength_;
         historyRefs.push_back(history_[index]);
     }
+    std::reverse(historyRefs.begin(), historyRefs.end());
     return tbai::vvstack(historyRefs);
 }
 
