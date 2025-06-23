@@ -27,6 +27,11 @@ TEST(HistoryWrapperTest, TestHistoryWrapper) {
     finalObservation = historyBuffer.getFinalObservation();
     std::cout << finalObservation.transpose() << std::endl;
     testEq(finalObservation, ((tbai::vector_t(6) << 5, 6, 3, 4, 1, 2).finished()));
+
+    historyBuffer.addObservation((tbai::vector_t(2) << 7, 8).finished());
+    finalObservation = historyBuffer.getFinalObservation();
+    std::cout << finalObservation.transpose() << std::endl;
+    testEq(finalObservation, ((tbai::vector_t(6) << 7, 8, 5, 6, 3, 4).finished()));
 }
 
 int main(int argc, char **argv) {
