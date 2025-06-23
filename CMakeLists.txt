@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(TBAI_BUILD_TESTS "Build the tests" OFF)
 option(TBAI_BUILD_BOB "Build the bob" ON)
+option(TBAI_BUILD_WTW "Build the wtw" ON)
 option(TBAI_BUILD_PYTHON "Build the Python bindings" OFF)
 
 if(TBAI_BUILD_TESTS)
@@ -25,8 +26,16 @@ add_subdirectory(tbai_core)
 add_subdirectory(tbai_reference)
 add_subdirectory(tbai_static)
 
+if(TBAI_BUILD_BOB OR TBAI_BUILD_WTW)
+  include(cmake/torch.cmake)
+endif()
+
 if(TBAI_BUILD_BOB)
   add_subdirectory(tbai_bob)
+endif()
+
+if(TBAI_BUILD_WTW)
+  add_subdirectory(tbai_wtw)
 endif()
 
 if(TBAI_BUILD_PYTHON)

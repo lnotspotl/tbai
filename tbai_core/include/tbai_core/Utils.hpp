@@ -1,6 +1,8 @@
 #pragma once
 
 #include <filesystem>
+#include <vector>
+#include <functional>
 
 #include <tbai_core/Types.hpp>
 
@@ -23,5 +25,12 @@ inline scalar_t convertToScalar(const TIMEPOINT &time) {
 scalar_t readInitTime();
 
 std::string downloadFromHuggingFace(const std::string &repo_id, const std::string &filename);
+
+/**
+ * @brief Stack vectors vertically
+ * @param vectors The vectors to stack
+ * @return The stacked vector
+ */
+tbai::vector_t vvstack(const std::vector<std::reference_wrapper<const tbai::vector_t>>& vectors);
 
 }  // namespace tbai

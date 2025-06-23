@@ -86,5 +86,41 @@ std::string downloadFromHuggingFace(const std::string &repo_id, const std::strin
     std::string path = cache_dir + "/" + filename;
     return path;
 }
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+tbai::vector_t vvstack(const std::vector<std::reference_wrapper<const tbai::vector_t>> &vectors) {
+    Eigen::Index total_rows = 0;
+    std::vector<std::reference_wrapper<const tbai::vector_t>> non_empty_vectors;
+    for (const auto &vec : vectors) {
+        if (vec.get().cols() > 0) {
+            total_rows += vec.get().rows();
+            non_empty_vectors.push_back(vec);
+        }
+    }
+
+    // If all vectors are empty or input is empty, return empty vector
+    if (non_empty_vectors.empty()) {
+        return tbai::vector_t(0);
+    }
+
+    // If only one non-empty vector, return it
+    if (non_empty_vectors.size() == 1) {
+        return non_empty_vectors[0].get();
+    }
+
+    // Create result vector with total rows
+    tbai::vector_t result(total_rows);
+    Eigen::Index current_row = 0;
+
+    // Copy each vector's data into result
+    for (const auto &vec : non_empty_vectors) {
+        const auto &v = vec.get();
+        result.segment(current_row, v.rows()) = v;
+        current_row += v.rows();
+    }
+
+    return result;
+}
 
 }  // namespace tbai
