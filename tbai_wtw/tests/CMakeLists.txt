@@ -11,4 +11,4 @@ function(add_tbai_test TEST_NAME)
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
 endfunction()
 
-add_tbai_test(test_history_wrapper src/test_history_wrapper.cpp)
+add_tbai_test(test_history_buffer src/test_history_buffer.cpp)

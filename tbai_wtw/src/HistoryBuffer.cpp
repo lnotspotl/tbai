@@ -1,7 +1,7 @@
 #include <functional>
 #include <iostream>
 
-#include <tbai_wtw/HistoryWrapper.hpp>
+#include <tbai_wtw/HistoryBuffer.hpp>
 
 namespace tbai {
 namespace wtw {
