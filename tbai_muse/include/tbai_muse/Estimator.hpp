@@ -1,54 +1,45 @@
-#ifndef ESTIMATOR_HPP
-#define ESTIMATOR_HPP
+#pragma once
 
-#include <tbai_muse/lib.hpp>
+#include <tbai_core/Types.hpp>
 
-namespace state_estimator {
+namespace tbai {
+namespace muse {
 
 class EstimatorBase {
-public:
+   public:
+    EstimatorBase() : EstimatorBase(std::string("")) {}
+    EstimatorBase(std::string name) : name_(name) {}
 
-	EstimatorBase() : EstimatorBase(std::string("")) { }
-	EstimatorBase(std::string name) : name_(name) { }
-	
-	std::string getName() const {
-                return name_;
-	}
+    std::string getName() const { return name_; }
 
-	void setName(std::string name) {
-                this->name_=name;
-	}
+    void setName(std::string name) { this->name_ = name; }
 
-	virtual unsigned int getNumStates() const { return 0; }
-	virtual bool hasP() const { return false; }
-	virtual unsigned int getNumMeasurments() const { return 0; }
-	virtual unsigned int getNumOutputs() const { return 0; }
+    virtual unsigned int getNumStates() const { return 0; }
+    virtual bool hasP() const { return false; }
+    virtual unsigned int getNumMeasurments() const { return 0; }
+    virtual unsigned int getNumOutputs() const { return 0; }
 
-	
-	
-	virtual Eigen::MatrixXd getPgen() const {
-		Eigen::MatrixXd ret;
-		return ret;
-	}
+    virtual matrix_t getPgen() const {
+        matrix_t ret;
+        return ret;
+    }
 
-	virtual Eigen::MatrixXd getXgen() const {
-		Eigen::MatrixXd ret;
-		return ret;
-	}
+    virtual matrix_t getXgen() const {
+        matrix_t ret;
+        return ret;
+    }
 
-virtual void updateGen(double t, Eigen::MatrixXd &u, Eigen::MatrixXd &z) { }
+    virtual void updateGen(scalar_t t, matrix_t &u, matrix_t &z) {}
 
-protected:
-
-        std::string name_;
+   protected:
+    std::string name_;
 };
 
-template <typename T, unsigned int N> class Estimator : public EstimatorBase{
-public:
-	virtual unsigned int getNumStates() const override { return N; }
- };
+template <typename T, unsigned int N>
+class Estimator : public EstimatorBase {
+   public:
+    virtual unsigned int getNumStates() const override { return N; }
+};
 
-} //namespace state_estimator
-
-
-#endif
+}  // namespace muse
+}  // namespace tbai

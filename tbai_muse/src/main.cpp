@@ -5,7 +5,7 @@ int main(int argc, char **argv) {
     tbai::writeInitTime();
 
     std::vector<std::string> footNames = {"FL_foot", "FR_foot", "RL_foot", "RR_foot"};
-    tbai::TbaiEstimator estimator(footNames);
+    tbai::muse::TbaiEstimator estimator(footNames);
 
     tbai::vector4_t quatBase = {0.0, 0.0, 0.0, 1.0};
     tbai::vector_t jointPositions =

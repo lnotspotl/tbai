@@ -1,12 +1,12 @@
+#include <pinocchio/algorithm/frames.hpp>
+#include <pinocchio/algorithm/kinematics.hpp>
 #include <pinocchio/parsers/urdf.hpp>
 #include <tbai_core/Rotations.hpp>
 #include <tbai_core/Utils.hpp>
 #include <tbai_muse/TbaiEstimator.hpp>
 
-#include <pinocchio/algorithm/kinematics.hpp>
-#include <pinocchio/algorithm/frames.hpp>
-
 namespace tbai {
+namespace muse {
 TbaiEstimator::TbaiEstimator(std::vector<std::string> footNames) {
     logger_ = tbai::getLogger("TbaiEstimator");
 
@@ -47,7 +47,7 @@ TbaiEstimator::TbaiEstimator(std::vector<std::string> footNames) {
     Eigen::Matrix<double, 6, 1> xhat0 = Eigen::Matrix<double, 6, 1>::Zero();
     scalar_t initTime = readInitTime();
 
-    sensorFusion_ = std::make_unique<state_estimator::KFSensorFusion>(initTime, xhat0, P, Q, R, false, false);
+    sensorFusion_ = std::make_unique<KFSensorFusion>(initTime, xhat0, P, Q, R, false, false);
 
     for (const auto &footName : footNames) {
         bool exists = model_.existBodyName(footName);
@@ -62,13 +62,13 @@ TbaiEstimator::TbaiEstimator(std::vector<std::string> footNames) {
         legIndices_.push_back(model_.getBodyId(footName));
     }
 
-	TBAI_LOG_INFO(logger_, "Joint indices from Pinocchio model:");
-	for(size_t i=0; i < model_.frames.size(); ++i) {
-		const auto& frame = model_.frames[i];
-		TBAI_LOG_INFO(logger_, "Frame '{}': {}", frame.name, i);
-	}
+    TBAI_LOG_INFO(logger_, "Joint indices from Pinocchio model:");
+    for (size_t i = 0; i < model_.frames.size(); ++i) {
+        const auto &frame = model_.frames[i];
+        TBAI_LOG_INFO(logger_, "Frame '{}': {}", frame.name, i);
+    }
 
-	TBAI_LOG_INFO(logger_, "Initialization complete");
+    TBAI_LOG_INFO(logger_, "Initialization complete");
 }
 
 void TbaiEstimator::computeLinPosVel(scalar_t currentTime, scalar_t dt, Eigen::Vector3d &acc, Eigen::Matrix3d &w_R_b,
@@ -114,45 +114,42 @@ void TbaiEstimator::update(scalar_t currentTime, scalar_t dt, const vector4_t &q
 
     pinocchio::forwardKinematics(model_, data_, qPinocchio, vPinocchio);
     pinocchio::updateFramePlacements(model_, data_);
-    std::vector<Eigen::Vector3d> foot_vels;
+    std::vector<Eigen::Vector3d> footVels;
 
     for (size_t i = 0; i < legIndices_.size(); ++i) {
-        std::size_t frame_id = legIndices_[i];
+        // Foot velocity expressed in the world frame
+        const size_t frameId = legIndices_[i];
+        const auto rf = pinocchio::LOCAL_WORLD_ALIGNED;
+        pinocchio::Motion footVelGlobal = pinocchio::getFrameVelocity(model_, data_, frameId, rf);
 
-        // Get spatial velocity in LOCAL_WORLD_ALIGNED frame
-        pinocchio::Motion foot_vel_global =
-            pinocchio::getFrameVelocity(model_, data_, frame_id, pinocchio::LOCAL_WORLD_ALIGNED);
-
-        // Get position of the foot in the base frame
-        Eigen::Vector3d foot_pos_base = data_.oMf[frame_id].translation();  // Position of foot in world
-        Eigen::Vector3d omega_rotated = omega;
+        // Foot position w.r.t. base frame
+        Eigen::Vector3d footPosBase = data_.oMf[frameId].translation();
 
         // Compute velocity contribution from base angular motion: ω x r
-        Eigen::Vector3d omega_cross_r = omega_rotated.cross(foot_pos_base);
+        Eigen::Vector3d omegaCrossR = omega.cross(footPosBase);
 
         // Compute linear velocity of the foot relative to base
-        Eigen::Vector3d rel_vel = -(foot_vel_global.linear() - omega_cross_r);
-        foot_vels.push_back(rel_vel);
+        Eigen::Vector3d relVel = -(footVelGlobal.linear() - omegaCrossR);
+        footVels.push_back(relVel);
     }
 
-    Eigen::Vector3d lin_leg_lf = foot_vels[0];
-    Eigen::Vector3d lin_leg_rf = foot_vels[1];
-    Eigen::Vector3d lin_leg_lh = foot_vels[2];
-    Eigen::Vector3d lin_leg_rh = foot_vels[3];
+    double stanceSum = 0.0;
+    for (size_t i = 0; i < contacts.size(); i++) {
+        stanceSum += static_cast<double>(contacts[i]);
+    }
 
-	double stance_lf = static_cast<double>(contacts[0]);
-    double stance_rf = static_cast<double>(contacts[1]);
-    double stance_lh = static_cast<double>(contacts[2]);
-    double stance_rh = static_cast<double>(contacts[3]);
+    Eigen::Vector3d baseVelocity = Eigen::Vector3d::Zero();
+    for (size_t i = 0; i < contacts.size(); i++) {
+        baseVelocity.noalias() += (footVels[i] * static_cast<double>(contacts[i])) / (stanceSum + 1e-5);
+    }
 
-    double sum_stance = stance_lf + stance_rf + stance_lh + stance_rh;
-    Eigen::Vector3d base_velocity =
-        (stance_lf * lin_leg_lf + stance_rf * lin_leg_rf + stance_lh * lin_leg_lh + stance_rh * lin_leg_rh) /
-        (sum_stance + 1e-5);
+    // This is the base velocity expressed w.r.t. to the base frame
+    baseVelocity /= (stanceSum + 1e-5);
 
-    base_velocity = w_R_b * base_velocity;
+    // This is the base velocity expressed w.r.t. to the world frame
+    baseVelocity = w_R_b * baseVelocity;
 
-    computeLinPosVel(currentTime, dt, acc, w_R_b, base_velocity);
+    computeLinPosVel(currentTime, dt, acc, w_R_b, baseVelocity);
 }
 
 void TbaiEstimator::setupPinocchioModel() {
@@ -161,4 +158,5 @@ void TbaiEstimator::setupPinocchioModel() {
     data_ = pinocchio::Data(model_);
 }
 
+}  // namespace muse
 }  // namespace tbai

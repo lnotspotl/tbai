@@ -12,9 +12,9 @@
 #include <tbai_core/control/Controllers.hpp>
 #include <tbai_core/control/Rate.hpp>
 #include <tbai_core/control/Subscribers.hpp>
+#include <tbai_muse/TbaiEstimator.hpp>
 #include <tbai_reference/ReferenceVelocityGenerator.hpp>
 #include <tbai_static/StaticController.hpp>
-#include <tbai_muse/TbaiEstimator.hpp>
 
 // Python wrappers around virtual classes
 namespace tbai {
@@ -184,19 +184,22 @@ PYBIND11_MODULE(tbai_python, m) {
         .def("start", &tbai::CentralControllerPython::start)
         .def("startThread", &tbai::CentralControllerPython::startThread)
         .def("stopThread", &tbai::CentralControllerPython::stopThread)
-        .def("add_bob_controller",
-             [](tbai::CentralControllerPython *self, const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
-                const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen,
-                std::function<void(tbai::scalar_t, tbai::scalar_t)> visualizeCallback = nullptr) {
-                 self->addController(
-                     std::make_unique<tbai::PyBobController>(stateSubscriberPtr, refVelGen, visualizeCallback));
-             }, py::arg("stateSubscriberPtr"), py::arg("refVelGen"),
-             py::arg("visualizeCallback") = nullptr)
-        .def("add_static_controller",
-             [](tbai::CentralControllerPython *self, std::shared_ptr<tbai::StateSubscriber> stateSubscriberPtr,
-                std::function<void(tbai::scalar_t, tbai::scalar_t)> visualizeCallback = nullptr) {
-                 self->addController(std::make_unique<tbai::PyStaticController>(stateSubscriberPtr, visualizeCallback));
-             }, py::arg("stateSubscriberPtr"), py::arg("visualizeCallback") = nullptr);
+        .def(
+            "add_bob_controller",
+            [](tbai::CentralControllerPython *self, const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
+               const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen,
+               std::function<void(tbai::scalar_t, tbai::scalar_t)> visualizeCallback = nullptr) {
+                self->addController(
+                    std::make_unique<tbai::PyBobController>(stateSubscriberPtr, refVelGen, visualizeCallback));
+            },
+            py::arg("stateSubscriberPtr"), py::arg("refVelGen"), py::arg("visualizeCallback") = nullptr)
+        .def(
+            "add_static_controller",
+            [](tbai::CentralControllerPython *self, std::shared_ptr<tbai::StateSubscriber> stateSubscriberPtr,
+               std::function<void(tbai::scalar_t, tbai::scalar_t)> visualizeCallback = nullptr) {
+                self->addController(std::make_unique<tbai::PyStaticController>(stateSubscriberPtr, visualizeCallback));
+            },
+            py::arg("stateSubscriberPtr"), py::arg("visualizeCallback") = nullptr);
 
     // Bind rotation helper functions
     py::module rotations_module = m.def_submodule("rotations");
@@ -227,9 +230,9 @@ PYBIND11_MODULE(tbai_python, m) {
     rotations_module.def("rpy2mat", &tbai::rpy2mat, "Convert roll-pitch-yaw euler angles to rotation matrix");
     rotations_module.def("mat2aa", &tbai::mat2aa, "Convert rotation matrix to axis-angle representation");
 
-    py::class_<tbai::TbaiEstimator>(m, "TbaiEstimator")
+    py::class_<tbai::muse::TbaiEstimator>(m, "TbaiEstimator")
         .def(py::init<std::vector<std::string>>())
-        .def("update", &tbai::TbaiEstimator::update)
-        .def("getBasePosition", &tbai::TbaiEstimator::getBasePosition)
-        .def("getBaseVelocity", &tbai::TbaiEstimator::getBaseVelocity);
+        .def("update", &tbai::muse::TbaiEstimator::update)
+        .def("getBasePosition", &tbai::muse::TbaiEstimator::getBasePosition)
+        .def("getBaseVelocity", &tbai::muse::TbaiEstimator::getBaseVelocity);
 }
