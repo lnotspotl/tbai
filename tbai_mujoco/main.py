@@ -1,4 +1,5 @@
 import sys
+import copy
 
 sys.path.insert(0, "/home/kuba/Documents/tbai2/build/tbai_python")
 
@@ -136,6 +137,8 @@ class DummyStateSubscriber(StateSubscriber):
         self.last_yaw = 0.0
         self.first_update = True
         self.needs_update = True
+        self.ekf = tbai_python.TbaiEstimator(["FL_foot", "FR_foot", "RL_foot", "RR_foot"])
+        self.last_velocity_base = None
 
     def waitTillInitialized(self):
         self.initialized = True
@@ -191,8 +194,62 @@ class DummyStateSubscriber(StateSubscriber):
 
         # Update last values
         self.last_orientation = R_base_world
-        self.last_position = base_position
+        self.last_position = base_position.copy()
         self.last_time = current_time
+
+        if self.last_velocity_base is None:
+            self.last_velocity_base = linear_velocity_base.copy()
+
+        contact_bodies = ["FL_calf", "FR_calf", "RL_calf", "RR_calf"]
+
+        contacts = [False for _ in range(4)]
+
+        with lock:
+            for i in range(data.ncon):  # ncon is the number of detected contacts
+                contact = data.contact[i]
+                geom1 = model.geom(contact.geom1)  # First geom involved in the contact
+                geom2 = model.geom(contact.geom2)  # Second geom involved in the contact
+                geom1_name = geom1.name
+                geom2_name = geom2.name
+
+                if geom1_name == "FL" or geom2_name == "FL":
+                    contacts[0] = True
+
+                if geom1_name == "RL" or geom2_name == "RL":
+                    contacts[1] = True
+
+                if geom1_name == "FR" or geom2_name == "FR":
+                    contacts[2] = True
+
+                if geom1_name == "RR" or geom2_name == "RR":
+                    contacts[3] = True
+
+        print(f"contacts: {contacts}")
+        acceleration_base = (linear_velocity_base - self.last_velocity_base) / dt if dt > 0 else np.zeros(3)
+        self.last_velocity_base = linear_velocity_base.copy()
+
+        acceleration_base = acceleration_base + R_base_world @ np.array([0.0, 0.0, 9.81])
+
+        print("Current velocity base: ", linear_velocity_base)
+        self.ekf.update(
+            current_time,
+            dt,
+            base_quat,
+            joint_angles,
+            joint_velocities,
+            acceleration_base,
+            angular_velocity_base, 
+            contacts,
+        )
+        print("Predicted position base: ", self.ekf.getBasePosition())
+        print("Actual position base: ", base_position)
+        # print("Predicted velocity base: ", self.ekf.getBaseVelocity())
+        print()
+
+        # print(f"state: {self.kalman_filter.getState()[3:6]}")
+
+        self.current_state[3:6] = self.ekf.getBasePosition()
+        self.current_state[9:12] = R_base_world @ self.ekf.getBaseVelocity()
 
         return self.current_state
 
@@ -267,7 +324,6 @@ scene_path = "/home/kuba/Documents/mujoco_menagerie/unitree_go2/scene.xml"
 model = mujoco.MjModel.from_xml_path(scene_path)
 model.opt.timestep = 0.0025
 data = mujoco.MjData(model)
-
 
 print("Joint names:")
 for i in range(1, 12 + 1):  # first joint is a virtual world->base_link joint

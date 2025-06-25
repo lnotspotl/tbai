@@ -14,6 +14,7 @@
 #include <tbai_core/control/Subscribers.hpp>
 #include <tbai_reference/ReferenceVelocityGenerator.hpp>
 #include <tbai_static/StaticController.hpp>
+#include <tbai_muse/TbaiEstimator.hpp>
 
 // Python wrappers around virtual classes
 namespace tbai {
@@ -225,4 +226,10 @@ PYBIND11_MODULE(tbai_python, m) {
         "Convert ocs2-style roll-pitch-yaw angles to quaternion (returns xyzw vector)");
     rotations_module.def("rpy2mat", &tbai::rpy2mat, "Convert roll-pitch-yaw euler angles to rotation matrix");
     rotations_module.def("mat2aa", &tbai::mat2aa, "Convert rotation matrix to axis-angle representation");
+
+    py::class_<tbai::TbaiEstimator>(m, "TbaiEstimator")
+        .def(py::init<std::vector<std::string>>())
+        .def("update", &tbai::TbaiEstimator::update)
+        .def("getBasePosition", &tbai::TbaiEstimator::getBasePosition)
+        .def("getBaseVelocity", &tbai::TbaiEstimator::getBaseVelocity);
 }
