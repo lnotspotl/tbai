@@ -27,27 +27,23 @@ TbaiEstimator::TbaiEstimator(std::vector<std::string> footNames) {
          0.0, 0.0, 0.0, 1.0e-4, 0.0, 0.0,
          0.0, 0.0, 0.0, 0.0, 1.0e-4, 0.0,
          0.0, 0.0, 0.0, 0.0, 0.0, 1.0e-4;
-    // clang-format on
 
-    // clang-format off
     Q << 1.0e-9, 0.0, 0.0, 0.0, 0.0, 0.0,
          0.0, 1.0e-9, 0.0, 0.0, 0.0, 0.0,
          0.0, 0.0, 1.0e-9, 0.0, 0.0, 0.0,
          0.0, 0.0, 0.0, 1.0e-9, 0.0, 0.0,
          0.0, 0.0, 0.0, 0.0, 1.0e-9, 0.0,
          0.0, 0.0, 0.0, 0.0, 0.0, 1.0e-9;
-    // clang-format on
 
-    // clang-format off
     R << 1.0e-11, 0.0, 0.0,
          0.0, 1.0e-11, 0.0,
          0.0, 0.0, 1.0e-11;
     // clang-format on
 
-    Eigen::Matrix<double, 6, 1> xhat0 = Eigen::Matrix<double, 6, 1>::Zero();
-    scalar_t initTime = readInitTime();
+    Eigen::Matrix<double, 6, 1> xhat0;
+    xhat0 << 0.0, 0.0, 0.27, 0.0, 0.0, 0.0;
 
-    sensorFusion_ = std::make_unique<KFSensorFusion>(initTime, xhat0, P, Q, R, false, false);
+    sensorFusion_ = std::make_unique<KFSensorFusion>(xhat0, P, Q, R, false, false);
 
     for (const auto &footName : footNames) {
         bool exists = model_.existBodyName(footName);
@@ -83,7 +79,7 @@ void TbaiEstimator::computeLinPosVel(scalar_t currentTime, scalar_t dt, Eigen::V
     Eigen::Vector3d u = f_w + gravity;
 
     // prediction
-    sensorFusion_->predict(currentTime, u);
+    sensorFusion_->predict(dt, u);
 
     // reading leg odometry
     Eigen::Vector3d w_v_b = v_b;
@@ -92,7 +88,7 @@ void TbaiEstimator::computeLinPosVel(scalar_t currentTime, scalar_t dt, Eigen::V
     z_proprio << w_v_b;
 
     // correction
-    sensorFusion_->update(currentTime, z_proprio);
+    sensorFusion_->update(dt, z_proprio);
 }
 
 void TbaiEstimator::update(scalar_t currentTime, scalar_t dt, const vector4_t &quatBase, const vector_t &jointPositions,

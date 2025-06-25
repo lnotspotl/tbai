@@ -1,8 +1,8 @@
 #pragma once
 
 #include <math.h>
-#include <Eigen/Dense>
 
+#include <Eigen/Dense>
 #include <tbai_muse/Estimator.hpp>
 
 namespace tbai {
@@ -11,8 +11,7 @@ namespace muse {
 template <typename T, unsigned int N, unsigned int M, unsigned int O>
 class Observer : public Estimator<T, N> {
    public:
-    Observer(T t0, const Eigen::Matrix<T, N, 1> &xhat0) {
-        this->t_prev = t0;
+    Observer(const Eigen::Matrix<T, N, 1> &xhat0) {
         this->xhat = xhat0;
         Estimator<T, N>::name_ = std::string("Observer");
     }
@@ -44,12 +43,9 @@ class Observer : public Estimator<T, N> {
         return ret;
     }
 
-    T getT() const { return t_prev; }
-
    protected:
     // EIGEN_MAKE_ALIGNED_OPERATOR_NEW ?
     Eigen::Matrix<T, N, 1> xhat;
-    T t_prev;
 };
 
 }  // namespace muse

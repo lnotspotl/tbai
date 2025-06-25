@@ -25,9 +25,9 @@ namespace muse {
 template <typename T, unsigned int N1, unsigned int N2, unsigned int N3, unsigned int N4, unsigned int N5, unsigned int N6, unsigned int N7>
 class EKFBase : public Observer<T, N1, N2, N3> {
    public:
-    EKFBase(T t0, const Eigen::Matrix<T, N1, 1> &xhat0, const Eigen::Matrix<T, N6, N6> &P0,
-            const Eigen::Matrix<T, N7, N7> &Qi, const Eigen::Matrix<T, N5, N5> &Ri)
-        : Observer<T, N1, N2, N3>(t0, xhat0) {
+    EKFBase(const Eigen::Matrix<T, N1, 1> &xhat0, const Eigen::Matrix<T, N6, N6> &P0, const Eigen::Matrix<T, N7, N7> &Qi,
+            const Eigen::Matrix<T, N5, N5> &Ri)
+        : Observer<T, N1, N2, N3>(xhat0) {
         P = P0;
         Q = Qi;
         R = Ri;

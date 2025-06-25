@@ -9,25 +9,23 @@ namespace muse {
 //   N1,N2,N3,N4,N5,N6,N7
 class KFSensorFusion : public EKFBase<double, 6, 3, 3, 6, 3, 6, 6> {
    public:
-    KFSensorFusion(double t0, const Eigen::Matrix<double, 6, 1> &xhat0, const Eigen::Matrix<double, 6, 6> &P0,
+    KFSensorFusion(const Eigen::Matrix<double, 6, 1> &xhat0, const Eigen::Matrix<double, 6, 6> &P0,
                    const Eigen::Matrix<double, 6, 6> &Q, const Eigen::Matrix<double, 3, 3> &R, bool lidar,
                    bool slippage);
     ~KFSensorFusion();
 
-    void predict(double t, const Eigen::Matrix<double, 3, 1> &u) override;
-    void update(double t, const Eigen::Matrix<double, 3, 1> &z);
+    void predict(double dt, const Eigen::Matrix<double, 3, 1> &u) override;
+    void update(double dt, const Eigen::Matrix<double, 3, 1> &z);
     void setMatricesSF(bool slippage);
 
    protected:
-    Eigen::Matrix<double, 6, 1> calc_f(double t, const Eigen::Matrix<double, 6, 1> &x,
+    Eigen::Matrix<double, 6, 1> calc_f(double dt, const Eigen::Matrix<double, 6, 1> &x,
                                        const Eigen::Matrix<double, 3, 1> &u) override;
-    Eigen::Matrix<double, 6, 6> calc_F(double t, const Eigen::Matrix<double, 6, 1> &x,
+    Eigen::Matrix<double, 6, 6> calc_F(double dt, const Eigen::Matrix<double, 6, 1> &x,
                                        const Eigen::Matrix<double, 3, 1> &u) override;
-    Eigen::Matrix<double, 3, 1> calc_h(double t, const Eigen::Matrix<double, 6, 1> &x);
-    Eigen::Matrix<double, 3, 6> calc_H(double t, const Eigen::Matrix<double, 6, 1> &x);
+    Eigen::Matrix<double, 3, 1> calc_h(double dt, const Eigen::Matrix<double, 6, 1> &x);
+    Eigen::Matrix<double, 3, 6> calc_H(double dt, const Eigen::Matrix<double, 6, 1> &x);
 
-    // predict-related members
-    double dt;
     Eigen::Matrix<double, 6, 1> fx{Eigen::Matrix<double, 6, 1>::Zero()};
     Eigen::Matrix<double, 6, 6> F{Eigen::Matrix<double, 6, 6>::Zero()};
     Eigen::Matrix<double, 6, 6> G{Eigen::Matrix<double, 6, 6>::Identity()};
@@ -48,21 +46,19 @@ class KFSensorFusion : public EKFBase<double, 6, 3, 3, 6, 3, 6, 6> {
 
 // --- Inline implementations ---
 
-inline KFSensorFusion::KFSensorFusion(double t0, const Eigen::Matrix<double, 6, 1> &xhat0,
-                                      const Eigen::Matrix<double, 6, 6> &P0, const Eigen::Matrix<double, 6, 6> &Q,
-                                      const Eigen::Matrix<double, 3, 3> &R, bool lidar, bool slippage)
-    : EKFBase(t0, xhat0, P0, Q, R) {
+inline KFSensorFusion::KFSensorFusion(const Eigen::Matrix<double, 6, 1> &xhat0, const Eigen::Matrix<double, 6, 6> &P0,
+                                      const Eigen::Matrix<double, 6, 6> &Q, const Eigen::Matrix<double, 3, 3> &R,
+                                      bool lidar, bool slippage)
+    : EKFBase(xhat0, P0, Q, R) {
     // Optionally call setMatricesSF(slippage) if needed:
     // setMatricesSF(slippage);
 }
 
 inline KFSensorFusion::~KFSensorFusion() {}
 
-inline void KFSensorFusion::predict(double t, const Eigen::Matrix<double, 3, 1> &u) {
-    dt = t - this->t_prev;
-
-    fx = calc_f(t, this->xhat, u);
-    F = calc_F(t, this->xhat, u);
+inline void KFSensorFusion::predict(double dt, const Eigen::Matrix<double, 3, 1> &u) {
+    fx = calc_f(dt, this->xhat, u);
+    F = calc_F(dt, this->xhat, u);
 
     // Set up G: first three diagonal elements to -1, rest 1 (from Identity initialization)
     for (int i = 0; i < 3; i++) {
@@ -83,13 +79,11 @@ inline void KFSensorFusion::predict(double t, const Eigen::Matrix<double, 3, 1> 
     this->P = Phi * this->P * Phi.transpose() + Gamma * this->Q * Gamma.transpose();
     this->xhat = this->xhat + fx * dt;
     this->fixP();
-
-    this->t_prev = t;
 }
 
-inline void KFSensorFusion::update(double t, const Eigen::Matrix<double, 3, 1> &z) {
-    yhat = calc_h(t, this->xhat);
-    H = calc_H(t, this->xhat);
+inline void KFSensorFusion::update(double dt, const Eigen::Matrix<double, 3, 1> &z) {
+    yhat = calc_h(dt, this->xhat);
+    H = calc_H(dt, this->xhat);
 
     K = this->P * H.transpose() * (H * this->P * H.transpose() + this->R).inverse();
 
@@ -101,7 +95,7 @@ inline void KFSensorFusion::update(double t, const Eigen::Matrix<double, 3, 1> &
     this->fixP();
 }
 
-inline Eigen::Matrix<double, 6, 1> KFSensorFusion::calc_f(double t, const Eigen::Matrix<double, 6, 1> &x,
+inline Eigen::Matrix<double, 6, 1> KFSensorFusion::calc_f(double dt, const Eigen::Matrix<double, 6, 1> &x,
                                                           const Eigen::Matrix<double, 3, 1> &u) {
     // x is composed of [position; velocity], so extract velocity:
     v = x.tail(3);
@@ -110,7 +104,7 @@ inline Eigen::Matrix<double, 6, 1> KFSensorFusion::calc_f(double t, const Eigen:
     return fx_local;
 }
 
-inline Eigen::Matrix<double, 6, 6> KFSensorFusion::calc_F(double t, const Eigen::Matrix<double, 6, 1> &x,
+inline Eigen::Matrix<double, 6, 6> KFSensorFusion::calc_F(double dt, const Eigen::Matrix<double, 6, 1> &x,
                                                           const Eigen::Matrix<double, 3, 1> &u) {
     Eigen::Matrix<double, 6, 6> F_local;
     F_local << 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
@@ -118,12 +112,12 @@ inline Eigen::Matrix<double, 6, 6> KFSensorFusion::calc_F(double t, const Eigen:
     return F_local;
 }
 
-inline Eigen::Matrix<double, 3, 1> KFSensorFusion::calc_h(double t, const Eigen::Matrix<double, 6, 1> &x) {
+inline Eigen::Matrix<double, 3, 1> KFSensorFusion::calc_h(double dt, const Eigen::Matrix<double, 6, 1> &x) {
     // Estimated velocity measurement from the state vector
     return x.tail(3);
 }
 
-inline Eigen::Matrix<double, 3, 6> KFSensorFusion::calc_H(double t, const Eigen::Matrix<double, 6, 1> &x) {
+inline Eigen::Matrix<double, 3, 6> KFSensorFusion::calc_H(double dt, const Eigen::Matrix<double, 6, 1> &x) {
     Eigen::Matrix<double, 3, 6> H_local;
     H_local << 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0;
     return H_local;
