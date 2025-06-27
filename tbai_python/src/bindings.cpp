@@ -56,6 +56,10 @@ class PyStaticController : public tbai::static_::StaticController {
 
     bool ok() const override { return true; }
 
+    void preStep(scalar_t currentTime, scalar_t dt) override {
+        state_ = stateSubscriberPtr_->getLatestState();
+    }
+
     void postStep(scalar_t currentTime, scalar_t dt) override {
         if (visualizeCallback_) {
             visualizeCallback_(currentTime, dt);

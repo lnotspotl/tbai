@@ -25,6 +25,7 @@ import time
 
 from tbai_python import (
     StateSubscriber,
+    State,
     CommandPublisher,
     ChangeControllerSubscriber,
     ReferenceVelocity,
@@ -142,23 +143,12 @@ class DummyStateSubscriber(StateSubscriber):
         self.needs_update = True
         self.ekf = tbai_python.TbaiEstimator(["FL_foot", "FR_foot", "RL_foot", "RR_foot"])
         self.last_velocity_base = None
-        self.current_state = None
-
-    def updateStateThread(self):
-        while running:
-            self.getLatestRbdState()
-            time.sleep(0.0025)
 
     def waitTillInitialized(self):
+        self.getLatestState()
         self.initialized = True
 
     def getLatestState(self):
-        return self.current_state
-
-    def getLatestRbdState(self):
-        if not self.needs_update:
-            return self.current_state
-        self.needs_update = False
         current_time = time.time()
         dt = current_time - self.last_time
 
@@ -233,13 +223,13 @@ class DummyStateSubscriber(StateSubscriber):
                 if geom1_name == "RR" or geom2_name == "RR":
                     contacts[3] = True
 
-        print(f"contacts: {contacts}")
+        # print(f"contacts: {contacts}")
         acceleration_base = (linear_velocity_base - self.last_velocity_base) / dt if dt > 0 else np.zeros(3)
         self.last_velocity_base = linear_velocity_base.copy()
 
         acceleration_base = acceleration_base + R_base_world @ np.array([0.0, 0.0, 9.81])
 
-        print("Current velocity base: ", linear_velocity_base)
+        # print("Current velocity base: ", linear_velocity_base)
         self.ekf.update(
             current_time,
             dt,
@@ -250,25 +240,21 @@ class DummyStateSubscriber(StateSubscriber):
             angular_velocity_base,
             contacts,
         )
-        print("Predicted position base: ", self.ekf.getBasePosition())
-        print("Actual position base: ", base_position)
+        # print("Predicted position base: ", self.ekf.getBasePosition())
+        # print("Actual position base: ", base_position)
         # print("Predicted velocity base: ", self.ekf.getBaseVelocity())
-        print()
+        # print()
 
         # print(f"state: {self.kalman_filter.getState()[3:6]}")
 
-        self.current_state[3:6] = self.ekf.getBasePosition()
-        self.current_state[9:12] = R_base_world @ self.ekf.getBaseVelocity()
+        # self.current_state[3:6] = self.ekf.getBasePosition()
+        # self.current_state[9:12] = R_base_world @ self.ekf.getBaseVelocity()
 
-        return self.current_state
-
-    def getLatestRbdStamp(self):
-        return time.time()
-
-    def getContactFlags(self):
-        # For now returning False for all 4 feet contacts
-        # This could be enhanced by checking actual contact states in Mujoco
-        return [False] * 4
+        state = tbai_python.State()
+        state.x = self.current_state
+        state.contact_flags = contacts
+        state.timestamp = time.time()
+        return state
 
 
 class DummyCommandPublisher(CommandPublisher):
@@ -295,14 +281,13 @@ class DummyChangeControllerSubscriber(ChangeControllerSubscriber):
         super().__init__()
         self._callback = None
         self.new_controller = None
-        self.new_controller = "SIT"
 
     def setCallbackFunction(self, callback):
         self._callback = callback
 
     def triggerCallbacks(self):
         if self._callback is not None and self.new_controller is not None:
-            self._callback(self.new_controller)
+            self._callback(str(self.new_controller))
             self.new_controller = None
 
     def stand_callback(self):
@@ -369,15 +354,15 @@ ref_vel_gen = DummyReferenceVelocityGenerator(ui_controller)
 
 tbai_python.write_init_time()
 
-central_controller = tbai_python.CentralController.create(subscriber, publisher, controller_sub)
+central_controller = tbai_python.CentralController.create(publisher, controller_sub)
 
 
 def callback(currentTime, dt):
     print(f"currentTime: {currentTime}, dt: {dt}")
 
 
-central_controller.add_bob_controller(subscriber, ref_vel_gen, rerun_logger.visualize_callback)
 central_controller.add_static_controller(subscriber, rerun_logger.visualize_callback)
+central_controller.add_bob_controller(subscriber, ref_vel_gen, rerun_logger.visualize_callback)
 
 viewer_thread = threading.Thread(target=viewer_fn, args=(window, lock, 1 / 30))
 viewer_thread.start()

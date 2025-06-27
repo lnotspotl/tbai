@@ -23,6 +23,7 @@ from tbai_python import (
     ChangeControllerSubscriber,
     ReferenceVelocity,
     ReferenceVelocityGenerator,
+    State,
 )
 
 from tbai_python.rotations import rpy2quat, quat2mat, mat2rpy, mat2ocs2rpy, ocs2rpy2quat, rpy2mat, mat2aa
@@ -67,14 +68,7 @@ class PyBulletStateSubscriber(StateSubscriber):
     def waitTillInitialized(self):
         self.initialized = True
 
-    def getLatestRbdStateViz(self):
-        return self.current_state
-
-    def getLatestRbdState(self):
-        if not self.needs_update:
-            return self.current_state
-        self.needs_update = False
-
+    def getLatestState(self):
         current_time = time.time()
         dt = current_time - self.last_time
 
@@ -127,13 +121,12 @@ class PyBulletStateSubscriber(StateSubscriber):
         self.last_position = base_position
         self.last_time = current_time
 
-        return self.current_state
-
-    def getLatestRbdStamp(self):
-        return time.time()
-
-    def getContactFlags(self):
-        return [False] * 4
+        state = State()
+        state.x = self.current_state
+        state.contact_flags = [False] * 4
+        state.timestamp = current_time
+        return state
+    
 
 
 class RerunLoggerNode:
@@ -151,7 +144,7 @@ class RerunLoggerNode:
         if current_time - self.last_time < 1 / self.freq:
             return
         self.last_time = current_time
-        state = self.state_subscriber.getLatestRbdStateViz()
+        state = self.state_subscriber.getLatestState().x
         position = state[3:6]
         orientation = state[0:3]
         joint_positions = state[12:24]
@@ -234,7 +227,6 @@ class DummyChangeControllerSubscriber(ChangeControllerSubscriber):
         super().__init__()
         self._callback = None
         self.new_controller = None
-        self.new_controller = "SIT"
 
     def setCallbackFunction(self, callback):
         self._callback = callback
@@ -274,6 +266,12 @@ p.setAdditionalSearchPath(pybullet_data.getDataPath())
 # Load robot and ground
 robot = p.loadURDF("./ocs2_robotic_assets/resources/go2/urdf/go2_description.urdf", [0, 0, 0.5])
 ground = p.loadURDF("plane.urdf")
+
+# Set friction for ground plane
+p.changeDynamics(ground, -1,
+                 lateralFriction=1.43,
+                 rollingFriction=0.005,
+                 spinningFriction=0.005)
 
 # Get joint IDs
 joint_name_to_id = {}
@@ -325,7 +323,7 @@ ref_vel_gen = DummyReferenceVelocityGenerator(ui_controller)
 
 tbai_python.write_init_time()
 
-central_controller = tbai_python.CentralController.create(subscriber, publisher, controller_sub)
+central_controller = tbai_python.CentralController.create(publisher, controller_sub)
 central_controller.add_bob_controller(subscriber, ref_vel_gen, rerun_logger.visualize_callback)
 central_controller.add_static_controller(subscriber, rerun_logger.visualize_callback)
 
