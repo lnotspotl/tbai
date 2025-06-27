@@ -15,8 +15,6 @@ class StaticController : public tbai::Controller {
 
     void waitTillInitialized() override { stateSubscriberPtr_->waitTillInitialized(); }
 
-    void preStep(scalar_t currentTime, scalar_t dt) override { state_ = stateSubscriberPtr_->getLatestState(); }
-
     bool isSupported(const std::string &controllerType) override;
 
     // Default implementation for tbai's quadruped robots
@@ -27,6 +25,8 @@ class StaticController : public tbai::Controller {
     scalar_t getRate() const override;
 
     bool checkStability() const override { return true; }
+
+    std::string getName() const override { return "StaticController"; }
 
     void changeController(const std::string &controllerType, scalar_t currentTime) override;
 

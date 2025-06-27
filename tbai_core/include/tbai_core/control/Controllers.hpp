@@ -88,6 +88,13 @@ class Controller {
      *
      */
     virtual void waitTillInitialized() = 0;
+
+    /**
+     * @brief Get the type of the controller
+     *
+     * @return std::string : type of the controller
+     */
+    virtual std::string getName() const = 0;
 };
 
 }  // namespace tbai

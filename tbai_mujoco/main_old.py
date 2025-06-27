@@ -142,6 +142,7 @@ class DummyStateSubscriber(StateSubscriber):
         self.needs_update = True
         self.ekf = tbai_python.TbaiEstimator(["FL_foot", "FR_foot", "RL_foot", "RR_foot"])
         self.last_velocity_base = None
+        self.current_state = None
 
     def updateStateThread(self):
         while running:

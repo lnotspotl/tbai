@@ -99,7 +99,8 @@ class CentralController {
         initialize();
 
         loopRate_ = RATE(activeController_->getRate());
-        TBAI_LOG_INFO(logger_, "Active controller's rate is {} Hz", activeController_->getRate());
+        TBAI_LOG_INFO(logger_, "Active controller: {} | Rate: {} Hz", activeController_->getName(),
+                      activeController_->getRate());
         TBAI_LOG_INFO(logger_, "Starting! Current time: {}", getCurrentTime());
 
         scalar_t lastTime = getCurrentTime();
@@ -124,15 +125,17 @@ class CentralController {
             auto sleepTimePercentage = 100.0 * duration2 / (duration1 + duration2);
 
             TBAI_LOG_INFO_THROTTLE(logger_, 10.0,
-                                   "Loop duration: {} us, Sleep duration: {} us, Sleep time percentage: {} %",
-                                   duration1, duration2, sleepTimePercentage);
+                                   "Loop duration: {} us, Sleep duration: {} us, Sleep time percentage: {} % Current "
+                                   "controller running: {}",
+                                   duration1, duration2, sleepTimePercentage, activeController_->getName());
         }
 
         TBAI_LOG_INFO(logger_, "Central controller loop stopped.");
     }
 
     void startThread() {
-        controllerThread_ = std::thread([this]() { start(); });
+        auto threadFunction = [this]() { start(); };
+        controllerThread_ = std::thread(threadFunction);
     }
 
     void stopThread() {

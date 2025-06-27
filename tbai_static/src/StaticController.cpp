@@ -49,7 +49,7 @@ std::vector<MotorCommand> StaticController::getMotorCommands(scalar_t currentTim
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 void StaticController::changeController(const std::string &controllerType, scalar_t currentTime) {
-    state_ = stateSubscriberPtr_->getLatestState();
+    preStep(currentTime, 0.0);
     currentControllerType_ = controllerType;
     alpha_ = 0.0;
     interpFrom_ = jointAnglesFromState(state_);
