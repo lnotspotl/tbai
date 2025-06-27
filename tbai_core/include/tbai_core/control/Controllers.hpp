@@ -14,7 +14,15 @@ class Controller {
     virtual ~Controller() = default;
 
     /**
-     * @brief Produce command message for robot
+     * @brief Pre-step callback
+     *
+     * @param currentTime : Current time in seconds
+     * @param dt : Time since last call in seconds, should be roughly 1/rate
+     */
+    virtual void preStep(scalar_t currentTime, scalar_t dt) {}
+
+    /**
+     * @brief Produce command message for robot (step)
      *
      * @param currentTime : Current time in seconds
      * @param dt : Time since last call in seconds, should be roughly 1/rate
@@ -23,12 +31,12 @@ class Controller {
     virtual std::vector<MotorCommand> getMotorCommands(scalar_t currentTime, scalar_t dt) = 0;
 
     /**
-     * @brief Visualize robot (typically in RViz)
+     * @brief Post-step callback
      *
      * @param currentTime : Current time in seconds
      * @param dt : Time since last call in seconds, should be roughly 1/rate
      */
-    virtual void visualize(scalar_t currentTime, scalar_t dt) {}
+    virtual void postStep(scalar_t currentTime, scalar_t dt) {}
 
     /**
      * @brief Change controller to specified controller type. Note that this controllers isSupported() should evaluate
@@ -76,10 +84,10 @@ class Controller {
     virtual bool ok() const = 0;
 
     /**
-     * @brief Trigger callbacks
+     * @brief Wait till controller is initialized
      *
      */
-    virtual void triggerCallbacks() = 0;
+    virtual void waitTillInitialized() = 0;
 };
 
 }  // namespace tbai

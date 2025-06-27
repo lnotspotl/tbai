@@ -1,8 +1,8 @@
 #pragma once
 
-#include <tbai_core/control/Subscribers.hpp>
-#include <tbai_core/control/Controllers.hpp>
 #include <tbai_core/Logging.hpp>
+#include <tbai_core/control/Controllers.hpp>
+#include <tbai_core/control/Subscribers.hpp>
 
 namespace tbai {
 namespace static_ {
@@ -13,7 +13,14 @@ class StaticController : public tbai::Controller {
 
     std::vector<MotorCommand> getMotorCommands(scalar_t currentTime, scalar_t dt) override;
 
+    void waitTillInitialized() override { stateSubscriberPtr_->waitTillInitialized(); }
+
+    void preStep(scalar_t currentTime, scalar_t dt) override { state_ = stateSubscriberPtr_->getLatestState(); }
+
     bool isSupported(const std::string &controllerType) override;
+
+    // Default implementation for tbai's quadruped robots
+    virtual vector_t jointAnglesFromState(const State &state) { return state.x.segment<12>(3 + 3 + 3 + 3); }
 
     void stopController() override {}
 
@@ -74,6 +81,8 @@ class StaticController : public tbai::Controller {
     std::shared_ptr<spdlog::logger> logger_;
 
     bool first_;
+
+    State state_;
 };
 
 }  // namespace static_

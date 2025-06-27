@@ -128,12 +128,11 @@ bool BobController::isSupported(const std::string &controllerType) {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 bool BobController::checkStability() const {
-    const auto &state = stateSubscriberPtr_->getLatestRbdState();
-    scalar_t roll = state[0];
+    scalar_t roll = state_.x[0];
     if (roll >= 1.57 || roll <= -1.57) {
         return false;
     }
-    scalar_t pitch = state[1];
+    scalar_t pitch = state_.x[1];
     if (pitch >= 1.57 || pitch <= -1.57) {
         return false;
     }
@@ -244,36 +243,35 @@ void BobController::resetHistory() {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
-State BobController::getBobnetState() {
-    const vector_t &stateSubscriberState = stateSubscriberPtr_->getLatestRbdState();
-    State ret;
+BobState BobController::getBobnetState() {
+    BobState ret;
 
     // Base position
-    ret.basePositionWorld = stateSubscriberState.segment<3>(3);
+    ret.basePositionWorld = state_.x.segment<3>(3);
 
     // Base orientation
     // Pinocchio and ocs2 both use a different euler angle logic
     // https://github.com/stack-of-tasks/pinocchio/blob/ac0b1aa6b18931bed60d0657de3c7680a4037dd3/include/pinocchio/math/rpy.hxx#L51
     // https://github.com/leggedrobotics/ocs2/blob/164c26b46bed5d24cd03d90588db8980d03a4951/ocs2_robotic_examples/ocs2_perceptive_anymal/ocs2_anymal_commands/src/TerrainAdaptation.cpp#L20
-    vector3_t ocs2rpy = stateSubscriberState.segment<3>(0);
+    vector3_t ocs2rpy = state_.x.segment<3>(0);
     tbai::quaternion_t q = tbai::ocs2rpy2quat(ocs2rpy);
     auto Rwb = q.toRotationMatrix();
-    ret.baseOrientationWorld = (State::Vector4() << q.x(), q.y(), q.z(), q.w()).finished();
+    ret.baseOrientationWorld = (BobState::Vector4() << q.x(), q.y(), q.z(), q.w()).finished();
 
     // Base angular velocity
-    ret.baseAngularVelocityBase = stateSubscriberState.segment<3>(6);
+    ret.baseAngularVelocityBase = state_.x.segment<3>(6);
 
     // Base linear velocity
-    ret.baseLinearVelocityBase = stateSubscriberState.segment<3>(9);
+    ret.baseLinearVelocityBase = state_.x.segment<3>(9);
 
     // Normalized gravity vector
     ret.normalizedGravityBase = Rwb.transpose() * (vector3_t() << 0, 0, -1).finished();
 
     // Joint positions
-    ret.jointPositions = stateSubscriberState.segment<12>(12);
+    ret.jointPositions = state_.x.segment<12>(12);
 
     // Joint velocities
-    ret.jointVelocities = stateSubscriberState.segment<12>(12 + 12);
+    ret.jointVelocities = state_.x.segment<12>(12 + 12);
 
     // pinocchio state vector
 
@@ -297,7 +295,7 @@ State BobController::getBobnetState() {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
-at::Tensor BobController::getNNInput(const State &state, scalar_t currentTime, scalar_t dt) {
+at::Tensor BobController::getNNInput(const BobState &state, scalar_t currentTime, scalar_t dt) {
     at::Tensor input = at::empty(getNNInputSize());
 
     // Fill individual sections of the nn input tensor
@@ -326,7 +324,7 @@ void BobController::fillCommand(at::Tensor &input, scalar_t currentTime, scalar_
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
-void BobController::fillGravity(at::Tensor &input, const State &state) {
+void BobController::fillGravity(at::Tensor &input, const BobState &state) {
     input[3] = state.normalizedGravityBase[0] * GRAVITY_SCALE;
     input[4] = state.normalizedGravityBase[1] * GRAVITY_SCALE;
     input[5] = state.normalizedGravityBase[2] * GRAVITY_SCALE;
@@ -335,7 +333,7 @@ void BobController::fillGravity(at::Tensor &input, const State &state) {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
-void BobController::fillBaseLinearVelocity(at::Tensor &input, const State &state) {
+void BobController::fillBaseLinearVelocity(at::Tensor &input, const BobState &state) {
     input[6] = state.baseLinearVelocityBase[0] * LIN_VEL_SCALE;
     input[7] = state.baseLinearVelocityBase[1] * LIN_VEL_SCALE;
     input[8] = state.baseLinearVelocityBase[2] * LIN_VEL_SCALE;
@@ -344,7 +342,7 @@ void BobController::fillBaseLinearVelocity(at::Tensor &input, const State &state
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
-void BobController::fillBaseAngularVelocity(at::Tensor &input, const State &state) {
+void BobController::fillBaseAngularVelocity(at::Tensor &input, const BobState &state) {
     input[9] = state.baseAngularVelocityBase[0] * ANG_VEL_SCALE;
     input[10] = state.baseAngularVelocityBase[1] * ANG_VEL_SCALE;
     input[11] = state.baseAngularVelocityBase[2] * ANG_VEL_SCALE;
@@ -353,7 +351,7 @@ void BobController::fillBaseAngularVelocity(at::Tensor &input, const State &stat
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
-void BobController::fillJointResiduals(at::Tensor &input, const State &state) {
+void BobController::fillJointResiduals(at::Tensor &input, const BobState &state) {
     // fill joint residuals
     for (size_t i = 0; i < 12; ++i) {
         input[12 + i] = (state.jointPositions[i] - jointAngles2_[i]) * JOINT_POS_SCALE;
@@ -363,7 +361,7 @@ void BobController::fillJointResiduals(at::Tensor &input, const State &state) {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
-void BobController::fillJointVelocities(at::Tensor &input, const State &state) {
+void BobController::fillJointVelocities(at::Tensor &input, const BobState &state) {
     // fill joint velocities
     for (size_t i = 0; i < 12; ++i) {
         input[24 + i] = state.jointVelocities[i] * JOINT_VEL_SCALE;
@@ -394,7 +392,7 @@ void BobController::fillCpg(at::Tensor &input) {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
-void BobController::fillHeights(at::Tensor &input, const State &state) {
+void BobController::fillHeights(at::Tensor &input, const BobState &state) {
     const size_t startIdx = 36 + POSITION_HISTORY_SIZE * POSITION_SIZE + VELOCITY_HISTORY_SIZE * VELOCITY_SIZE +
                             COMMAND_HISTORY_SIZE * COMMAND_SIZE + 8;
 
@@ -478,7 +476,7 @@ void BobController::fillHistoryActions(at::Tensor &input) {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
-void BobController::updateHistory(const at::Tensor &input, const at::Tensor &action, const State &state) {
+void BobController::updateHistory(const at::Tensor &input, const at::Tensor &action, const BobState &state) {
     // update position history
     for (int i = 0; i < 12; ++i) {
         historyResiduals_[historyResidualsIndex_][i] = (state.jointPositions[i] - jointAngles2_[i]) * JOINT_POS_SCALE;

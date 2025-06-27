@@ -29,13 +29,13 @@ from tbai_python import (
     ChangeControllerSubscriber,
     ReferenceVelocity,
     ReferenceVelocityGenerator,
-    State
 )
 
 from tbai_python.rotations import rpy2quat, quat2mat, mat2rpy, mat2ocs2rpy, ocs2rpy2quat, rpy2mat, mat2aa
 
-commands = []
-
+kp = 30
+kd = 0.5
+desired_joint_angles = np.zeros(12)
 running = True
 
 joint2idx = {
@@ -65,47 +65,17 @@ def viewer_fn(window, lock, viewer_dt):
         time.sleep(viewer_dt)
 
 
-def physics_fn(model, data, lock, physics_dt, central_controller, subscriber):
-    global commands
-    last_time_subscriber = (
-        data.time - 1 / subscriber.getRate() - 1e-5
-    )  # This will trigger the subscriber node update
-    last_time_controller = (
-        data.time - 1 / central_controller.getRate() - 1e-5
-    )  # This will trigger the controller node update
-    central_controller.initialize()
+def physics_fn(model, data, lock, physics_dt, subscriber):
+    global desired_joint_angles
     while running:
         with lock:
-            current_time = data.time
-
-            # Update state
-            dt = current_time - last_time_subscriber
-            if dt > 1 / subscriber.getRate():
-                subscriber.updateState(current_time, dt)
-
-            # Get control input
-            dt = current_time - last_time_controller
-            if dt > 1.0 / central_controller.getRate():
-                print("Calling step")
-                central_controller.step(current_time, dt)
-                last_time_controller = current_time
-                print("Step done")
-
             current_q = data.qpos[7 : 7 + 12]
+            desired_q = desired_joint_angles.copy()
             current_v = data.qvel[6 : 6 + 12]
-
-            desired_q = np.array([command.desired_position for command in commands])
-            desired_v = np.array([command.desired_velocity for command in commands])
-
-            # Kp and kd are the same for all joints
-            kp = commands[0].kp
-            kd = commands[0].kd
-
-            tau = pd_controller(current_q, desired_q, desired_v, current_v, kp, kd)
-            data.ctrl[:12] = tau
-
+            desired_v = np.zeros_like(current_v)
+            data.ctrl[:12] = pd_controller(current_q, desired_q, desired_v, current_v, kp, kd)
             mujoco.mj_step(model, data)
-
+            subscriber.needs_update = True
         time.sleep(physics_dt)
 
 
@@ -169,23 +139,28 @@ class DummyStateSubscriber(StateSubscriber):
         self.last_joint_angles = np.zeros(12)
         self.last_yaw = 0.0
         self.first_update = True
+        self.needs_update = True
         self.ekf = tbai_python.TbaiEstimator(["FL_foot", "FR_foot", "RL_foot", "RR_foot"])
         self.last_velocity_base = None
 
-        self.cc = State()
+    def updateStateThread(self):
+        while running:
+            self.getLatestRbdState()
+            time.sleep(0.0025)
 
     def waitTillInitialized(self):
-        self.updateState(time.time(), 0.0)
-        assert self.current_state is not None
+        self.initialized = True
 
     def getLatestState(self):
-        print(f"cc: {self.cc}")
-        return self.cc
-    
-    def getRate(self):
-        return 1000.0
+        return self.current_state
 
-    def updateState(self, current_time, dt):
+    def getLatestRbdState(self):
+        if not self.needs_update:
+            return self.current_state
+        self.needs_update = False
+        current_time = time.time()
+        dt = current_time - self.last_time
+
         # Get base orientation (quat) and convert to rotation matrix
         base_quat = np.roll(self.data.qpos[3:7], -1)  # roll to make it xyzw
         R_world_base = quat2mat(base_quat)
@@ -237,24 +212,25 @@ class DummyStateSubscriber(StateSubscriber):
 
         contacts = [False for _ in range(4)]
 
-        for i in range(data.ncon):  # ncon is the number of detected contacts
-            contact = data.contact[i]
-            geom1 = model.geom(contact.geom1)  # First geom involved in the contact
-            geom2 = model.geom(contact.geom2)  # Second geom involved in the contact
-            geom1_name = geom1.name
-            geom2_name = geom2.name
+        with lock:
+            for i in range(data.ncon):  # ncon is the number of detected contacts
+                contact = data.contact[i]
+                geom1 = model.geom(contact.geom1)  # First geom involved in the contact
+                geom2 = model.geom(contact.geom2)  # Second geom involved in the contact
+                geom1_name = geom1.name
+                geom2_name = geom2.name
 
-            if geom1_name == "FL" or geom2_name == "FL":
-                contacts[0] = True
+                if geom1_name == "FL" or geom2_name == "FL":
+                    contacts[0] = True
 
-            if geom1_name == "RL" or geom2_name == "RL":
-                contacts[1] = True
+                if geom1_name == "RL" or geom2_name == "RL":
+                    contacts[1] = True
 
-            if geom1_name == "FR" or geom2_name == "FR":
-                contacts[2] = True
+                if geom1_name == "FR" or geom2_name == "FR":
+                    contacts[2] = True
 
-            if geom1_name == "RR" or geom2_name == "RR":
-                contacts[3] = True
+                if geom1_name == "RR" or geom2_name == "RR":
+                    contacts[3] = True
 
         print(f"contacts: {contacts}")
         acceleration_base = (linear_velocity_base - self.last_velocity_base) / dt if dt > 0 else np.zeros(3)
@@ -283,9 +259,15 @@ class DummyStateSubscriber(StateSubscriber):
         self.current_state[3:6] = self.ekf.getBasePosition()
         self.current_state[9:12] = R_base_world @ self.ekf.getBaseVelocity()
 
-        self.cc.x = self.current_state
-        self.cc.timestamp = current_time
-        self.cc.contact_flags = contacts
+        return self.current_state
+
+    def getLatestRbdStamp(self):
+        return time.time()
+
+    def getContactFlags(self):
+        # For now returning False for all 4 feet contacts
+        # This could be enhanced by checking actual contact states in Mujoco
+        return [False] * 4
 
 
 class DummyCommandPublisher(CommandPublisher):
@@ -297,9 +279,15 @@ class DummyCommandPublisher(CommandPublisher):
         self.model = model
         self.data = data
 
-    def publish(self, output_commands):
-        global commands
-        commands = output_commands
+    def publish(self, commands):
+        global kp
+        global kd
+        global desired_joint_angles
+        kp = commands[0].kp
+        kd = commands[0].kd
+        for command in commands:
+            desired_joint_angles[joint2idx[command.joint_name]] = command.desired_position
+
 
 class DummyChangeControllerSubscriber(ChangeControllerSubscriber):
     def __init__(self):
@@ -309,15 +297,12 @@ class DummyChangeControllerSubscriber(ChangeControllerSubscriber):
         self.new_controller = "SIT"
 
     def setCallbackFunction(self, callback):
-        print(f"Setting callback function")
         self._callback = callback
 
     def triggerCallbacks(self):
-        print(f"Triggering callbacks")
         if self._callback is not None and self.new_controller is not None:
             self._callback(self.new_controller)
             self.new_controller = None
-        print(f"Callbacks triggered")
 
     def stand_callback(self):
         self.new_controller = "STAND"
@@ -355,6 +340,11 @@ for i in range(1, 12 + 1):  # first joint is a virtual world->base_link joint
 sit_joint_angles = np.array([0.0, 0.806, -1.802, 0.0, 0.806, -1.802, 0.0, 0.996, -1.802, 0.0, 0.996, -1.802])
 stand_joint_angles = np.array([0.0, 0.806, -1.802, 0.0, 0.806, -1.802, 0.0, 0.996, -1.802, 0.0, 0.996, -1.802])
 
+# stand_joint_angles = np.array([0.0, 0.4, -0.8, 0.0, -0.4, 0.8, 0.0, 0.4, -0.8, 0.0, -0.4, 0.8])
+# sit_joint_angles = np.array([0.0, 1.5, -2.6, 0.0, -1.5, 2.6, 0.0, 1.5, -2.6, 0.0, -1.5, 2.6])
+# stand_joint_angles[3:6], stand_joint_angles[6:9] = sit_joint_angles[3:6], sit_joint_angles[6:9]
+# sit_joint_angles[3:6], sit_joint_angles[6:9] = stand_joint_angles[3:6], stand_joint_angles[6:9]
+
 data.qpos[-12:] = sit_joint_angles
 desired_joint_angles = stand_joint_angles.copy()
 
@@ -378,7 +368,11 @@ ref_vel_gen = DummyReferenceVelocityGenerator(ui_controller)
 
 tbai_python.write_init_time()
 
-central_controller = tbai_python.CentralController.create(publisher, controller_sub)
+central_controller = tbai_python.CentralController.create(subscriber, publisher, controller_sub)
+
+
+def callback(currentTime, dt):
+    print(f"currentTime: {currentTime}, dt: {dt}")
 
 
 central_controller.add_bob_controller(subscriber, ref_vel_gen, rerun_logger.visualize_callback)
@@ -387,8 +381,10 @@ central_controller.add_static_controller(subscriber, rerun_logger.visualize_call
 viewer_thread = threading.Thread(target=viewer_fn, args=(window, lock, 1 / 30))
 viewer_thread.start()
 
-physics_thread = threading.Thread(target=physics_fn, args=(model, data, lock, model.opt.timestep, central_controller, subscriber))
+physics_thread = threading.Thread(target=physics_fn, args=(model, data, lock, model.opt.timestep, subscriber))
 physics_thread.start()
+
+central_controller.startThread()
 
 try:
     ui_controller.run()
@@ -396,5 +392,6 @@ except KeyboardInterrupt:
     running = False
     print("Stopping threads")
     rerun_store("go2_robot.rrd")
+    central_controller.stopThread()
     viewer_thread.join()
     physics_thread.join()

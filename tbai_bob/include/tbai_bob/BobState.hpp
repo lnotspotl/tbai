@@ -5,7 +5,7 @@
 
 namespace tbai {
 
-struct State {
+struct BobState {
     using Vector3 = Eigen::Matrix<scalar_t, 3, 1>;
     using Vector4 = Eigen::Matrix<scalar_t, 4, 1>;
     using Vector12 = Eigen::Matrix<scalar_t, 12, 1>;

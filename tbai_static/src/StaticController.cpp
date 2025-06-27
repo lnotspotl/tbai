@@ -24,6 +24,7 @@ StaticController::StaticController(std::shared_ptr<tbai::StateSubscriber> stateS
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 std::vector<MotorCommand> StaticController::getMotorCommands(scalar_t currentTime, scalar_t dt) {
+    // Change to SIT controller on the first call
     if (first_) {
         first_ = false;
         changeController("SIT", currentTime);
@@ -48,9 +49,10 @@ std::vector<MotorCommand> StaticController::getMotorCommands(scalar_t currentTim
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 void StaticController::changeController(const std::string &controllerType, scalar_t currentTime) {
+    state_ = stateSubscriberPtr_->getLatestState();
     currentControllerType_ = controllerType;
     alpha_ = 0.0;
-    interpFrom_ = stateSubscriberPtr_->getLatestRbdState().segment<12>(3 + 3 + 3 + 3);
+    interpFrom_ = jointAnglesFromState(state_);
     if (currentControllerType_ == "STAND") {
         interpTo_ = standJointAngles_;
     } else if (currentControllerType_ == "SIT") {

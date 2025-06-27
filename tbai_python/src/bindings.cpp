@@ -24,22 +24,14 @@ class PyStateSubscriber : public tbai::StateSubscriber {
     using StateSubscriber::StateSubscriber;
 
     void waitTillInitialized() override { PYBIND11_OVERRIDE_PURE(void, tbai::StateSubscriber, waitTillInitialized); }
-    const vector_t &getLatestRbdState() override {
-        PYBIND11_OVERRIDE_PURE(const vector_t &, tbai::StateSubscriber, getLatestRbdState);
-    }
-    const scalar_t getLatestRbdStamp() override {
-        PYBIND11_OVERRIDE_PURE(const scalar_t, tbai::StateSubscriber, getLatestRbdStamp);
-    }
-    const std::vector<bool> getContactFlags() override {
-        PYBIND11_OVERRIDE_PURE(const std::vector<bool>, tbai::StateSubscriber, getContactFlags);
-    }
+    State getLatestState() override { PYBIND11_OVERRIDE_PURE(State, tbai::StateSubscriber, getLatestState); }
 };
 
 class PyCommandPublisher : public tbai::CommandPublisher {
    public:
     using CommandPublisher::CommandPublisher;
 
-    void publish(const std::vector<MotorCommand> &commands) override {
+    void publish(std::vector<MotorCommand> commands) override {
         PYBIND11_OVERRIDE_PURE(void, tbai::CommandPublisher, publish, commands);
     }
 };
@@ -62,16 +54,12 @@ class PyStaticController : public tbai::static_::StaticController {
                        std::function<void(scalar_t, scalar_t)> visualizeCallback = nullptr)
         : tbai::static_::StaticController(stateSubscriberPtr), visualizeCallback_(visualizeCallback) {}
 
-    void visualize(scalar_t currentTime, scalar_t dt) override {
+    bool ok() const override { return true; }
+
+    void postStep(scalar_t currentTime, scalar_t dt) override {
         if (visualizeCallback_) {
             visualizeCallback_(currentTime, dt);
         }
-    }
-
-    bool ok() const override { return true; }
-
-    void triggerCallbacks() override {
-        // Do nothing
     }
 
     std::function<void(scalar_t, scalar_t)> visualizeCallback_ = nullptr;
@@ -84,7 +72,7 @@ class PyBobController : public tbai::BobController {
                     std::function<void(scalar_t, scalar_t)> visualizeCallback = nullptr)
         : tbai::BobController(stateSubscriberPtr, refVelGen), visualizeCallback_(visualizeCallback) {}
 
-    void visualize(scalar_t currentTime, scalar_t dt) override {
+    void postStep(scalar_t currentTime, scalar_t dt) override {
         if (visualizeCallback_) {
             visualizeCallback_(currentTime, dt);
         }
@@ -99,10 +87,6 @@ class PyBobController : public tbai::BobController {
     }
 
     bool ok() const override { return true; }
-
-    void triggerCallbacks() override {
-        // Do nothing
-    }
 
     std::function<void(scalar_t, scalar_t)> visualizeCallback_ = nullptr;
 };
@@ -143,13 +127,17 @@ PYBIND11_MODULE(tbai_python, m) {
         .def_readwrite("torque_ff", &tbai::MotorCommand::torque_ff)
         .def_readwrite("joint_name", &tbai::MotorCommand::joint_name);
 
+    py::class_<tbai::State>(m, "State")
+        .def(py::init<>())
+        .def_readwrite("x", &tbai::State::x)
+        .def_readwrite("timestamp", &tbai::State::timestamp)
+        .def_readwrite("contact_flags", &tbai::State::contactFlags);
+
     py::class_<tbai::StateSubscriber, tbai::PyStateSubscriber, std::shared_ptr<tbai::StateSubscriber>>(
         m, "StateSubscriber")
         .def(py::init<>())
         .def("waitTillInitialized", &tbai::StateSubscriber::waitTillInitialized)
-        .def("get_latest_rbd_state", &tbai::StateSubscriber::getLatestRbdState)
-        .def("get_latest_rbd_stamp", &tbai::StateSubscriber::getLatestRbdStamp)
-        .def("get_contact_flags", &tbai::StateSubscriber::getContactFlags);
+        .def("getLatestState", &tbai::StateSubscriber::getLatestState);
 
     py::class_<tbai::CommandPublisher, tbai::PyCommandPublisher, std::shared_ptr<tbai::CommandPublisher>>(
         m, "CommandPublisher")
@@ -175,10 +163,9 @@ PYBIND11_MODULE(tbai_python, m) {
 
     py::class_<tbai::CentralControllerPython, std::shared_ptr<tbai::CentralControllerPython>>(m, "CentralController")
         .def_static("create",
-                    [](std::shared_ptr<tbai::StateSubscriber> stateSubscriberPtr,
-                       std::shared_ptr<tbai::CommandPublisher> commandPublisherPtr,
+                    [](std::shared_ptr<tbai::CommandPublisher> commandPublisherPtr,
                        std::shared_ptr<tbai::ChangeControllerSubscriber> changeControllerSubscriberPtr) {
-                        return std::make_shared<tbai::CentralControllerPython>(stateSubscriberPtr, commandPublisherPtr,
+                        return std::make_shared<tbai::CentralControllerPython>(commandPublisherPtr,
                                                                                changeControllerSubscriberPtr);
                     })
         .def("start", &tbai::CentralControllerPython::start)
@@ -199,7 +186,10 @@ PYBIND11_MODULE(tbai_python, m) {
                std::function<void(tbai::scalar_t, tbai::scalar_t)> visualizeCallback = nullptr) {
                 self->addController(std::make_unique<tbai::PyStaticController>(stateSubscriberPtr, visualizeCallback));
             },
-            py::arg("stateSubscriberPtr"), py::arg("visualizeCallback") = nullptr);
+            py::arg("stateSubscriberPtr"), py::arg("visualizeCallback") = nullptr)
+        .def("initialize", &tbai::CentralControllerPython::initialize)
+        .def("step", &tbai::CentralControllerPython::step)
+        .def("getRate", &tbai::CentralControllerPython::getRate);
 
     // Bind rotation helper functions
     py::module rotations_module = m.def_submodule("rotations");

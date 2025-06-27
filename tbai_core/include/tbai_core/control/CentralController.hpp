@@ -1,9 +1,6 @@
 #pragma once
 
-#include <functional>
-#include <memory>
 #include <string>
-#include <vector>
 
 #include <tbai_core/Logging.hpp>
 #include <tbai_core/Throws.hpp>
@@ -18,14 +15,12 @@ template <typename RATE, typename TIME>
 class CentralController {
    public:
     // Constructor
-    CentralController(std::shared_ptr<StateSubscriber> stateSubscriberPtr,
-                      std::shared_ptr<CommandPublisher> commandPublisherPtr,
+    CentralController(std::shared_ptr<CommandPublisher> commandPublisherPtr,
                       std::shared_ptr<ChangeControllerSubscriber> changeControllerSubscriberPtr)
         : loopRate_(1) {
         // Initialize logger
         logger_ = tbai::getLogger("central_controller");
 
-        stateSubscriberPtr_ = stateSubscriberPtr;
         commandPublisherPtr_ = commandPublisherPtr;
         changeControllerSubscriberPtr_ = changeControllerSubscriberPtr;
 
@@ -48,11 +43,9 @@ class CentralController {
         }
     }
 
-    const std::shared_ptr<StateSubscriber> &getStateSubscriberPtr() { return stateSubscriberPtr_; }
-
     inline scalar_t getCurrentTime() const { return TIME::rightNow() - initTime_; }
 
-    void start() {
+    inline void initialize() {
         TBAI_LOG_INFO(logger_, "Starting central controller loop");
 
         if (activeController_ == nullptr) {
@@ -69,9 +62,41 @@ class CentralController {
             TBAI_LOG_INFO(logger_, "Fallback controller: {}", fallbackControllerType_);
         }
 
-        // Wait for initial state message
-        stateSubscriberPtr_->waitTillInitialized();
-        TBAI_LOG_INFO(logger_, "State subscriber is initialized now");
+        TBAI_LOG_INFO(logger_, "Waiting for controllers to initialize");
+        for (auto &controller : controllers_) {
+            controller->waitTillInitialized();
+        }
+        TBAI_LOG_INFO(logger_, "All controllers initialized");
+    }
+
+    inline void step(scalar_t currentTime, scalar_t dt) {
+        // Trigger all change controller callbacks
+        changeControllerSubscriberPtr_->triggerCallbacks();
+
+        // Trigger all callbacks this controller wants to trigger
+        activeController_->preStep(currentTime, dt);
+
+        // Check stability and switch to fallback controller if necessary
+        if (containsFallbackController_ && !activeController_->checkStability()) {
+            TBAI_LOG_WARN(logger_, "Stability check failed, switching to fallback controller: {}",
+                          fallbackControllerType_);
+            switchToFallbackController();
+            activeController_->preStep(currentTime, dt);
+        }
+
+        // Step controller
+        auto commands = activeController_->getMotorCommands(currentTime, dt);
+        commandPublisherPtr_->publish(std::move(commands));
+
+        // Allow controller to visualize stuff and what not
+        activeController_->postStep(currentTime, dt);
+    }
+
+    inline scalar_t getRate() const { return activeController_->getRate(); }
+
+    void start() {
+        // Prepare the central controller
+        initialize();
 
         loopRate_ = RATE(activeController_->getRate());
         TBAI_LOG_INFO(logger_, "Active controller's rate is {} Hz", activeController_->getRate());
@@ -82,29 +107,11 @@ class CentralController {
             // Keep track of time for stats
             auto t1 = std::chrono::high_resolution_clock::now();
 
-            // Trigger all change controller callbacks
-            changeControllerSubscriberPtr_->triggerCallbacks();
-
-            // Trigger all callbacks this controller wants to trigger
-            activeController_->triggerCallbacks();
-
-            // Check stability and switch to fallback controller if necessary
-            if (containsFallbackController_ && !activeController_->checkStability()) {
-                TBAI_LOG_WARN(logger_, "Stability check failed, switching to fallback controller: {}",
-                              fallbackControllerType_);
-                switchToFallbackController();
-            }
-
             // Compute current time and time since last call
             scalar_t currentTime = getCurrentTime();
             scalar_t dt = currentTime - lastTime;
 
-            // Step controller
-            auto commands = activeController_->getMotorCommands(currentTime, dt);
-            commandPublisherPtr_->publish(commands);
-
-            // Allow controller to visualize stuff
-            activeController_->visualize(currentTime, dt);
+            step(currentTime, dt);
 
             lastTime = currentTime;
 
