@@ -1,4 +1,5 @@
 import sys
+import copy
 
 sys.path.insert(0, "/home/kuba/Documents/tbai2/build/tbai_python")
 
@@ -24,6 +25,7 @@ import time
 
 from tbai_python import (
     StateSubscriber,
+    State,
     CommandPublisher,
     ChangeControllerSubscriber,
     ReferenceVelocity,
@@ -79,7 +81,7 @@ def physics_fn(model, data, lock, physics_dt, subscriber):
 
 
 class RerunLoggerNode:
-    def __init__(self, state_subscriber: StateSubscriber, freq = 10):
+    def __init__(self, state_subscriber: StateSubscriber, freq=10):
         rerun_initialize("simple_robot_example", spawn=False)
         self.robot_logger = RobotLogger.from_zoo("go2_description")
         self.state_subscriber = state_subscriber
@@ -90,13 +92,15 @@ class RerunLoggerNode:
         if self.last_time is None:
             self.last_time = current_time
 
+        return 
         if current_time - self.last_time < 1 / self.freq:
             return
+
+        current_state = self.state_subscriber.getLatestState()
         self.last_time = current_time
-        state = self.state_subscriber.getLatestRbdStateViz()
-        position = state[3:6]
-        orientation = state[0:3]
-        joint_positions = state[12:24]
+        position = current_state.x[3:6]
+        orientation = current_state.x[0:3]
+        joint_positions = current_state.x[12:24]
 
         joint_positions = {
             "FL_hip_joint": joint_positions[0],
@@ -116,9 +120,11 @@ class RerunLoggerNode:
         # Turn orientation
         orientation = ocs2rpy2quat(orientation)
 
+        logtime = current_state.timestamp
+
         # Log the new state
         self.robot_logger.log_state(
-            logtime=current_time, base_position=position, base_orientation=orientation, joint_positions=joint_positions
+            logtime=logtime, base_position=position, base_orientation=orientation, joint_positions=joint_positions
         )
 
 
@@ -136,17 +142,14 @@ class DummyStateSubscriber(StateSubscriber):
         self.last_yaw = 0.0
         self.first_update = True
         self.needs_update = True
+        self.ekf = tbai_python.TbaiEstimator(["FL_foot", "FR_foot", "RL_foot", "RR_foot"])
+        self.last_velocity_base = None
 
     def waitTillInitialized(self):
+        self.getLatestState()
         self.initialized = True
 
-    def getLatestRbdStateViz(self):
-        return self.current_state
-
-    def getLatestRbdState(self):
-        if not self.needs_update:
-            return self.current_state
-        self.needs_update = False
+    def getLatestState(self):
         current_time = time.time()
         dt = current_time - self.last_time
 
@@ -191,18 +194,68 @@ class DummyStateSubscriber(StateSubscriber):
 
         # Update last values
         self.last_orientation = R_base_world
-        self.last_position = base_position
+        self.last_position = base_position.copy()
         self.last_time = current_time
 
-        return self.current_state
+        if self.last_velocity_base is None:
+            self.last_velocity_base = linear_velocity_base.copy()
 
-    def getLatestRbdStamp(self):
-        return time.time()
+        contact_bodies = ["FL_calf", "FR_calf", "RL_calf", "RR_calf"]
 
-    def getContactFlags(self):
-        # For now returning False for all 4 feet contacts
-        # This could be enhanced by checking actual contact states in Mujoco
-        return [False] * 4
+        contacts = [False for _ in range(4)]
+
+        with lock:
+            for i in range(data.ncon):  # ncon is the number of detected contacts
+                contact = data.contact[i]
+                geom1 = model.geom(contact.geom1)  # First geom involved in the contact
+                geom2 = model.geom(contact.geom2)  # Second geom involved in the contact
+                geom1_name = geom1.name
+                geom2_name = geom2.name
+
+                if geom1_name == "FL" or geom2_name == "FL":
+                    contacts[0] = True
+
+                if geom1_name == "RL" or geom2_name == "RL":
+                    contacts[1] = True
+
+                if geom1_name == "FR" or geom2_name == "FR":
+                    contacts[2] = True
+
+                if geom1_name == "RR" or geom2_name == "RR":
+                    contacts[3] = True
+
+        # print(f"contacts: {contacts}")
+        acceleration_base = (linear_velocity_base - self.last_velocity_base) / dt if dt > 0 else np.zeros(3)
+        self.last_velocity_base = linear_velocity_base.copy()
+
+        acceleration_base = acceleration_base + R_base_world @ np.array([0.0, 0.0, 9.81])
+
+        # print("Current velocity base: ", linear_velocity_base)
+        self.ekf.update(
+            current_time,
+            dt,
+            base_quat,
+            joint_angles,
+            joint_velocities,
+            acceleration_base,
+            angular_velocity_base,
+            contacts,
+        )
+        # print("Predicted position base: ", self.ekf.getBasePosition())
+        # print("Actual position base: ", base_position)
+        # print("Predicted velocity base: ", self.ekf.getBaseVelocity())
+        # print()
+
+        # print(f"state: {self.kalman_filter.getState()[3:6]}")
+
+        self.current_state[3:6] = self.ekf.getBasePosition()
+        self.current_state[9:12] = R_base_world @ self.ekf.getBaseVelocity()
+
+        state = tbai_python.State()
+        state.x = self.current_state
+        state.contact_flags = contacts
+        state.timestamp = time.time()
+        return state
 
 
 class DummyCommandPublisher(CommandPublisher):
@@ -229,14 +282,13 @@ class DummyChangeControllerSubscriber(ChangeControllerSubscriber):
         super().__init__()
         self._callback = None
         self.new_controller = None
-        self.new_controller = "SIT"
 
     def setCallbackFunction(self, callback):
         self._callback = callback
 
     def triggerCallbacks(self):
         if self._callback is not None and self.new_controller is not None:
-            self._callback(self.new_controller)
+            self._callback(str(self.new_controller))
             self.new_controller = None
 
     def stand_callback(self):
@@ -246,7 +298,7 @@ class DummyChangeControllerSubscriber(ChangeControllerSubscriber):
         self.new_controller = "SIT"
 
     def bob_callback(self):
-        self.new_controller = "WTW"
+        self.new_controller = "BOB"
 
 
 class DummyReferenceVelocityGenerator(ReferenceVelocityGenerator):
@@ -267,7 +319,6 @@ scene_path = "/home/kuba/Documents/mujoco_menagerie/unitree_go2/scene.xml"
 model = mujoco.MjModel.from_xml_path(scene_path)
 model.opt.timestep = 0.0025
 data = mujoco.MjData(model)
-
 
 print("Joint names:")
 for i in range(1, 12 + 1):  # first joint is a virtual world->base_link joint
@@ -304,15 +355,16 @@ ref_vel_gen = DummyReferenceVelocityGenerator(ui_controller)
 
 tbai_python.write_init_time()
 
-central_controller = tbai_python.CentralController.create(subscriber, publisher, controller_sub)
+central_controller = tbai_python.CentralController.create(publisher, controller_sub)
 
 
 def callback(currentTime, dt):
     print(f"currentTime: {currentTime}, dt: {dt}")
 
-central_controller.add_wtw_controller(subscriber, ref_vel_gen, rerun_logger.visualize_callback)
-central_controller.add_bob_controller(subscriber, ref_vel_gen, rerun_logger.visualize_callback)
+
+# central_controller.add_wtw_controller(subscriber, ref_vel_gen, rerun_logger.visualize_callback)
 central_controller.add_static_controller(subscriber, rerun_logger.visualize_callback)
+central_controller.add_bob_controller(subscriber, ref_vel_gen, rerun_logger.visualize_callback)
 
 viewer_thread = threading.Thread(target=viewer_fn, args=(window, lock, 1 / 30))
 viewer_thread.start()

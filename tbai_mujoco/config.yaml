@@ -31,7 +31,7 @@ bob_controller:
   kd: 0.5
 
   hf_repo: "kubjonai/tbai-models"
-  hf_model: "go2_blind.pt"
+  hf_model: "go2_blind_no_vel_noise.pt"
   
   action_scale: 0.25
   lin_vel_scale: 2.0

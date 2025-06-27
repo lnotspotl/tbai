@@ -13,15 +13,14 @@
 #include <pinocchio/algorithm/kinematics.hpp>
 #include <pinocchio/multibody/data.hpp>
 #include <pinocchio/multibody/model.hpp>
+#include <tbai_bob/BobState.hpp>
 #include <tbai_bob/CentralPatternGenerator.hpp>
 #include <tbai_bob/InverseKinematics.hpp>
-#include <tbai_bob/State.hpp>
+#include <tbai_core/Logging.hpp>
 #include <tbai_core/control/Controllers.hpp>
 #include <tbai_core/control/Subscribers.hpp>
 #include <tbai_reference/ReferenceVelocityGenerator.hpp>
 #include <torch/script.h>
-
-#include <tbai_core/Logging.hpp>
 
 namespace tbai {
 
@@ -36,9 +35,15 @@ class BobController : public tbai::Controller {
     BobController(const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
                   const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen);
 
+    void waitTillInitialized() override { stateSubscriberPtr_->waitTillInitialized(); }
+
+    void preStep(scalar_t currentTime, scalar_t dt) override { state_ = stateSubscriberPtr_->getLatestState(); }
+
     std::vector<tbai::MotorCommand> getMotorCommands(scalar_t currentTime, scalar_t dt) override;
 
     bool isSupported(const std::string &controllerType) override;
+
+    std::string getName() const override { return "BobController"; }
 
     void stopController() override {}
 
@@ -47,6 +52,17 @@ class BobController : public tbai::Controller {
     bool checkStability() const override;
 
     virtual void atPositions(matrix_t &positions) = 0;
+
+    // Base orientation - ZYX Euler angles - 3
+    // Base position in world frame - 3
+    // Base angular velocity in base frame - 3
+    // Base linear velocity in base frame - 3
+    // Joint angles - 12
+    // Joint velocities - 12
+    constexpr static int N_STATES = 36;
+
+    // We assume this is a quadrupedal robot
+    constexpr static int N_CONTACTS = 4;
 
    protected:
     std::shared_ptr<tbai::StateSubscriber> stateSubscriberPtr_;
@@ -81,29 +97,29 @@ class BobController : public tbai::Controller {
 
     constexpr long int getNNInputSize() { return 3 + 3 + 3 + 3 + 12 + 12 + 3 * 12 + 2 * 12 + 2 * 12 + 8 + 4 * 52; }
 
-    at::Tensor getNNInput(const State &state, scalar_t currentTime, scalar_t dt);
+    at::Tensor getNNInput(const BobState &state, scalar_t currentTime, scalar_t dt);
 
     void setupPinocchioModel(const std::string &urdfString);
     std::vector<tbai::MotorCommand> getMotorCommands(const vector_t &jointAngles);
     pinocchio::Model pinocchioModel_;
     pinocchio::Data pinocchioData_;
-    State getBobnetState();
+    BobState getBobnetState();
 
     void fillCommand(at::Tensor &input, scalar_t currentTime, scalar_t dt);
-    void fillGravity(at::Tensor &input, const State &state);
-    void fillBaseLinearVelocity(at::Tensor &input, const State &state);
-    void fillBaseAngularVelocity(at::Tensor &input, const State &state);
-    void fillJointResiduals(at::Tensor &input, const State &state);
-    void fillJointVelocities(at::Tensor &input, const State &state);
+    void fillGravity(at::Tensor &input, const BobState &state);
+    void fillBaseLinearVelocity(at::Tensor &input, const BobState &state);
+    void fillBaseAngularVelocity(at::Tensor &input, const BobState &state);
+    void fillJointResiduals(at::Tensor &input, const BobState &state);
+    void fillJointVelocities(at::Tensor &input, const BobState &state);
     void fillHistory(at::Tensor &input);
     void fillCpg(at::Tensor &input);
-    void fillHeights(at::Tensor &input, const State &state);
+    void fillHeights(at::Tensor &input, const BobState &state);
 
     void fillHistoryResiduals(at::Tensor &input);
     void fillHistoryVelocities(at::Tensor &input);
     void fillHistoryActions(at::Tensor &input);
 
-    void updateHistory(const at::Tensor &input, const at::Tensor &action, const State &state);
+    void updateHistory(const at::Tensor &input, const at::Tensor &action, const BobState &state);
     void resetHistory();
 
     const Slice commandSlice_ = Slice(0, 3);
@@ -138,6 +154,8 @@ class BobController : public tbai::Controller {
     std::vector<std::string> jointNames_;
 
     bool blind_;
+
+    tbai::State state_;
 
     std::shared_ptr<spdlog::logger> logger_;
 };

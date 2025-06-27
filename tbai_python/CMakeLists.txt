@@ -18,6 +18,7 @@ target_link_libraries(tbai_python
         tbai_wtw
         tbai_reference
         tbai_static
+        tbai_muse
         pinocchio::pinocchio
 )
 target_include_directories(tbai_python

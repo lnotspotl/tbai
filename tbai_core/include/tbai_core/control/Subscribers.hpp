@@ -1,19 +1,38 @@
 #pragma once
 
+#include <mutex>
 #include <vector>
 
 #include <tbai_core/Types.hpp>
 
 namespace tbai {
 
+struct State {
+    vector_t x;
+    scalar_t timestamp;
+    std::vector<bool> contactFlags;
+};
 class StateSubscriber {
    public:
     virtual ~StateSubscriber() = default;
 
     virtual void waitTillInitialized() = 0;
-    virtual const vector_t &getLatestRbdState() = 0;
-    virtual const scalar_t getLatestRbdStamp() = 0;
-    virtual const std::vector<bool> getContactFlags() = 0;
+    virtual State getLatestState() = 0;
+};
+
+class ThreadedStateSubscriber : public StateSubscriber {
+   public:
+    State getLatestState() override {
+        std::lock_guard<std::mutex> lock(stateMutex_);
+        return state_;
+    }
+
+    virtual void startThreads() = 0;
+    virtual void stopThreads() = 0;
+
+   protected:
+    State state_;
+    std::mutex stateMutex_;
 };
 
 class ChangeControllerSubscriber {

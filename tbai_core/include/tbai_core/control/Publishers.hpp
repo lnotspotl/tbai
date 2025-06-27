@@ -20,7 +20,7 @@ class CommandPublisher {
    public:
     virtual ~CommandPublisher() = default;
 
-    virtual void publish(const std::vector<MotorCommand> &commands) = 0;
+    virtual void publish(std::vector<MotorCommand> commands) = 0;
 };
 
 }  // namespace tbai

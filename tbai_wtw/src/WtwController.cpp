@@ -124,12 +124,11 @@ bool WtwController::isSupported(const std::string &controllerType) {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 bool WtwController::checkStability() const {
-    const auto &state = stateSubscriberPtr_->getLatestRbdState();
-    scalar_t roll = state[0];
+    scalar_t roll = state_.x[0];
     if (roll >= 1.57 || roll <= -1.57) {
         return false;
     }
-    scalar_t pitch = state[1];
+    scalar_t pitch = state_.x[1];
     if (pitch >= 1.57 || pitch <= -1.57) {
         return false;
     }
@@ -227,10 +226,10 @@ void WtwController::fillCommand(vector_t &input, const wtw::State &state, scalar
     input[COMMAND_START_INDEX + 3] = 0.0 * BODY_HEIGHT_SCALE;
 
     // TODO: Fill these
-    input[COMMAND_START_INDEX + 4] = 2.0; // step frequency
-    input[COMMAND_START_INDEX + 5] = 0.5; // gait 1
-    input[COMMAND_START_INDEX + 6] = 0.0; // gait 2 phase
-    input[COMMAND_START_INDEX + 7] = 0.0; // gait 2 offset
+    input[COMMAND_START_INDEX + 4] = 2.0;  // step frequency
+    input[COMMAND_START_INDEX + 5] = 0.5;  // gait 1
+    input[COMMAND_START_INDEX + 6] = 0.0;  // gait 2 phase
+    input[COMMAND_START_INDEX + 7] = 0.0;  // gait 2 offset
     input[COMMAND_START_INDEX + 8] = 0.8;
 
     input[COMMAND_START_INDEX + 9] = 0.10 * SWING_HEIGHT_SCALE;
@@ -246,7 +245,6 @@ void WtwController::fillCommand(vector_t &input, const wtw::State &state, scalar
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 void WtwController::fillJointResiduals(vector_t &input, const wtw::State &state) {
-
     constexpr scalar_t JOINT_RESIDUAL_SCALE = 1.00;
     // https://github.com/Teddy-Liao/walk-these-ways-go2/blob/ed4cedecfc4f18f4d1cccd1a605cedc5bd111af9/go2_gym/envs/go2/go2_config.py#L12
     std::map<std::string, scalar_t> defaultJointAngles;
@@ -433,7 +431,7 @@ std::vector<tbai::MotorCommand> WtwController::getMotorCommands(const vector_t &
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 wtw::State WtwController::getWtwState() {
-    const vector_t &stateSubscriberState = stateSubscriberPtr_->getLatestRbdState();
+    const vector_t &stateSubscriberState = state_.x;
     wtw::State ret;
 
     // Base position

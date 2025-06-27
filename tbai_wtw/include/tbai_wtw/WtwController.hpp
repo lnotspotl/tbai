@@ -41,6 +41,10 @@ class WtwController : public tbai::Controller {
 
     bool checkStability() const override;
 
+    void postStep(scalar_t currentTime, scalar_t dt) override {}
+
+    std::string getName() const override { return "WTW"; }
+
     virtual void atPositions(matrix_t &positions) = 0;
 
    protected:
@@ -108,6 +112,8 @@ class WtwController : public tbai::Controller {
     vector_t defaultJointAngles_;
 
     scalar_t gaitIndex_;
+
+    State state_;
 };
 
 }  // namespace tbai
