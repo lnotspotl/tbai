@@ -7,11 +7,11 @@
 
 namespace tbai {
 namespace muse {
-TbaiEstimator::TbaiEstimator(std::vector<std::string> footNames) {
+TbaiEstimator::TbaiEstimator(std::vector<std::string> footNames, const std::string &urdf) {
     logger_ = tbai::getLogger("TbaiEstimator");
 
     TBAI_LOG_INFO(logger_, "Initializing Pinocchio model");
-    setupPinocchioModel();
+    setupPinocchioModel(urdf);
 
     TBAI_LOG_INFO(logger_, "Initializing sensor fusion");
     Eigen::Matrix<double, 6, 6, Eigen::RowMajor> P;
@@ -21,23 +21,23 @@ TbaiEstimator::TbaiEstimator(std::vector<std::string> footNames) {
     // From config: https://github.com/iit-DLSLab/muse/blob/main/muse_ws/src/state_estimator/config/sensor_fusion.yaml
 
     // clang-format off
-    P << 1.0e-3, 0.0, 0.0, 0.0, 0.0, 0.0,
-         0.0, 1.0e-3, 0.0, 0.0, 0.0, 0.0,
-         0.0, 0.0, 1.0e-3, 0.0, 0.0, 0.0,
-         0.0, 0.0, 0.0, 1.0e-4, 0.0, 0.0,
-         0.0, 0.0, 0.0, 0.0, 1.0e-4, 0.0,
-         0.0, 0.0, 0.0, 0.0, 0.0, 1.0e-4;
+    P << 1.0e-9, 0.0, 0.0, 0.0, 0.0, 0.0,
+         0.0, 1.0e-9, 0.0, 0.0, 0.0, 0.0,
+         0.0, 0.0, 1.0e-9, 0.0, 0.0, 0.0,
+         0.0, 0.0, 0.0, 1.0e-11, 0.0, 0.0,
+         0.0, 0.0, 0.0, 0.0, 1.0e-11, 0.0,
+         0.0, 0.0, 0.0, 0.0, 0.0, 1.0e-11;
 
     Q << 1.0e-9, 0.0, 0.0, 0.0, 0.0, 0.0,
          0.0, 1.0e-9, 0.0, 0.0, 0.0, 0.0,
          0.0, 0.0, 1.0e-9, 0.0, 0.0, 0.0,
-         0.0, 0.0, 0.0, 1.0e-9, 0.0, 0.0,
-         0.0, 0.0, 0.0, 0.0, 1.0e-9, 0.0,
-         0.0, 0.0, 0.0, 0.0, 0.0, 1.0e-9;
+         0.0, 0.0, 0.0, 1.0e-11, 0.0, 0.0,
+         0.0, 0.0, 0.0, 0.0, 1.0e-11, 0.0,
+         0.0, 0.0, 0.0, 0.0, 0.0, 1.0e-11;
 
-    R << 1.0e-11, 0.0, 0.0,
-         0.0, 1.0e-11, 0.0,
-         0.0, 0.0, 1.0e-11;
+    R << 1.0e-12, 0.0, 0.0,
+         0.0, 1.0e-12, 0.0,
+         0.0, 0.0, 1.0e-12;
     // clang-format on
 
     Eigen::Matrix<double, 6, 1> xhat0;
@@ -148,9 +148,13 @@ void TbaiEstimator::update(scalar_t currentTime, scalar_t dt, const vector4_t &q
     computeLinPosVel(currentTime, dt, acc, w_R_b, baseVelocity);
 }
 
-void TbaiEstimator::setupPinocchioModel() {
-    auto urdfPath = tbai::getEnvAs<std::string>("TBAI_ROBOT_DESCRIPTION_PATH");
-    pinocchio::urdf::buildModel(urdfPath, model_);
+void TbaiEstimator::setupPinocchioModel(const std::string &urdf) {
+    if (urdf.empty()) {
+        auto urdfPath = tbai::getEnvAs<std::string>("TBAI_ROBOT_DESCRIPTION_PATH");
+        pinocchio::urdf::buildModel(urdfPath, model_);
+    } else {
+        pinocchio::urdf::buildModelFromXML(urdf, model_);
+    }
     data_ = pinocchio::Data(model_);
 }
 

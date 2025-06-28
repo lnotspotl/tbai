@@ -22,6 +22,7 @@ class StateSubscriber {
 
 class ThreadedStateSubscriber : public StateSubscriber {
    public:
+    virtual ~ThreadedStateSubscriber() = default;
     State getLatestState() override {
         std::lock_guard<std::mutex> lock(stateMutex_);
         return state_;

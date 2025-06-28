@@ -13,7 +13,7 @@ namespace tbai {
 namespace muse {
 class TbaiEstimator {
    public:
-    TbaiEstimator(std::vector<std::string> footNames);
+    TbaiEstimator(std::vector<std::string> footNames, const std::string &urdf = "");
 
     void update(scalar_t currentTime, scalar_t dt, const vector4_t &quatBase, const vector_t &jointPositions,
                 const vector_t &jointVelocities, const vector3_t &linearAccBase, const vector3_t &angularVelBase,
@@ -24,7 +24,7 @@ class TbaiEstimator {
 
     std::unique_ptr<KFSensorFusion> sensorFusion_;
 
-    void setupPinocchioModel();
+    void setupPinocchioModel(const std::string &urdf = "");
 
     vector3_t getBasePosition() { return sensorFusion_->getX().head<3>(); }
     vector3_t getBaseVelocity() { return sensorFusion_->getX().segment<3>(3); }
