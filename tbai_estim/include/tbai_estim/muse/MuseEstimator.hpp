@@ -7,13 +7,13 @@
 #include <tbai_core/Env.hpp>
 #include <tbai_core/Logging.hpp>
 #include <tbai_core/Types.hpp>
-#include <tbai_muse/SensorFusion.hpp>
+#include <tbai_estim/muse/SensorFusion.hpp>
 
 namespace tbai {
 namespace muse {
-class TbaiEstimator {
+class MuseEstimator {
    public:
-    TbaiEstimator(std::vector<std::string> footNames, const std::string &urdf = "");
+    MuseEstimator(std::vector<std::string> footNames, const std::string &urdf = "");
 
     void update(scalar_t currentTime, scalar_t dt, const vector4_t &quatBase, const vector_t &jointPositions,
                 const vector_t &jointVelocities, const vector3_t &linearAccBase, const vector3_t &angularVelBase,

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <tbai_muse/EKF.hpp>
+#include <tbai_estim/muse/EKF.hpp>
 #include <unsupported/Eigen/MatrixFunctions>
 
 namespace tbai {

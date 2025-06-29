@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Eigen/Dense>
-#include <tbai_muse/Observer.hpp>
+#include <tbai_estim/muse/Observer.hpp>
 
 namespace tbai {
 namespace muse {

@@ -3,12 +3,12 @@
 #include <pinocchio/parsers/urdf.hpp>
 #include <tbai_core/Rotations.hpp>
 #include <tbai_core/Utils.hpp>
-#include <tbai_muse/TbaiEstimator.hpp>
+#include <tbai_estim/muse/MuseEstimator.hpp>
 
 namespace tbai {
 namespace muse {
-TbaiEstimator::TbaiEstimator(std::vector<std::string> footNames, const std::string &urdf) {
-    logger_ = tbai::getLogger("TbaiEstimator");
+MuseEstimator::MuseEstimator(std::vector<std::string> footNames, const std::string &urdf) {
+    logger_ = tbai::getLogger("MuseEstimator");
 
     TBAI_LOG_INFO(logger_, "Initializing Pinocchio model");
     setupPinocchioModel(urdf);
@@ -67,7 +67,7 @@ TbaiEstimator::TbaiEstimator(std::vector<std::string> footNames, const std::stri
     TBAI_LOG_INFO(logger_, "Initialization complete");
 }
 
-void TbaiEstimator::computeLinPosVel(scalar_t currentTime, scalar_t dt, Eigen::Vector3d &acc, Eigen::Matrix3d &w_R_b,
+void MuseEstimator::computeLinPosVel(scalar_t currentTime, scalar_t dt, Eigen::Vector3d &acc, Eigen::Matrix3d &w_R_b,
                                      Eigen::Vector3d &v_b) {
     // reading acceleration from imu
     Eigen::Vector3d f_b = acc;
@@ -91,7 +91,7 @@ void TbaiEstimator::computeLinPosVel(scalar_t currentTime, scalar_t dt, Eigen::V
     sensorFusion_->update(dt, z_proprio);
 }
 
-void TbaiEstimator::update(scalar_t currentTime, scalar_t dt, const vector4_t &quatBase, const vector_t &jointPositions,
+void MuseEstimator::update(scalar_t currentTime, scalar_t dt, const vector4_t &quatBase, const vector_t &jointPositions,
                            const vector_t &jointVelocities, const vector3_t &linearAccBase,
                            const vector3_t &angularVelBase, std::vector<bool> contacts) {
     Eigen::Vector3d acc = linearAccBase;
@@ -148,7 +148,7 @@ void TbaiEstimator::update(scalar_t currentTime, scalar_t dt, const vector4_t &q
     computeLinPosVel(currentTime, dt, acc, w_R_b, baseVelocity);
 }
 
-void TbaiEstimator::setupPinocchioModel(const std::string &urdf) {
+void MuseEstimator::setupPinocchioModel(const std::string &urdf) {
     if (urdf.empty()) {
         auto urdfPath = tbai::getEnvAs<std::string>("TBAI_ROBOT_DESCRIPTION_PATH");
         pinocchio::urdf::buildModel(urdfPath, model_);

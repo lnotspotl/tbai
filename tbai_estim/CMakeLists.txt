@@ -3,24 +3,28 @@ cmake_minimum_required(VERSION 3.16.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project(tbai_muse)
+project(tbai_estim)
 
-add_library(tbai_muse src/TbaiEstimator.cpp)
-target_link_libraries(tbai_muse PUBLIC tbai_core)
-target_include_directories(tbai_muse
+add_library(tbai_estim 
+    # Muse estimator
+    src/muse/MuseEstimator.cpp
+
+)
+target_link_libraries(tbai_estim PUBLIC tbai_core)
+target_include_directories(tbai_estim
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
 
 add_executable(main src/main.cpp)
-target_link_libraries(main PUBLIC tbai_muse)
+target_link_libraries(main PUBLIC tbai_estim)
 
 ## Installation rules
 include(GNUInstallDirs)
 
-install(TARGETS tbai_muse
-    EXPORT tbai_muse-targets
+install(TARGETS tbai_estim
+    EXPORT tbai_estim-targets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -31,8 +35,8 @@ install(DIRECTORY include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-install(EXPORT tbai_muse-targets
+install(EXPORT tbai_estim-targets
     NAMESPACE tbai::
-    FILE tbai-muse-targets.cmake
+    FILE tbai-estimator-targets.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/tbai
 )

@@ -32,7 +32,7 @@ if(TBAI_BUILD_BOB OR TBAI_BUILD_WTW)
 endif()
 
 if(TBAI_BUILD_MUSE)
-  add_subdirectory(tbai_muse)
+  add_subdirectory(tbai_estim)
 endif()
 
 if(TBAI_BUILD_BOB)

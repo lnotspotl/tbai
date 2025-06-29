@@ -1,11 +1,11 @@
 #include <tbai_core/Utils.hpp>
-#include <tbai_muse/TbaiEstimator.hpp>
+#include <tbai_estim/muse/MuseEstimator.hpp>
 
 int main(int argc, char **argv) {
     tbai::writeInitTime();
 
     std::vector<std::string> footNames = {"FL_foot", "FR_foot", "RL_foot", "RR_foot"};
-    tbai::muse::TbaiEstimator estimator(footNames);
+    tbai::muse::MuseEstimator estimator(footNames);
 
     tbai::vector4_t quatBase = {0.0, 0.0, 0.0, 1.0};
     tbai::vector_t jointPositions =

@@ -12,7 +12,7 @@
 #include <tbai_core/control/Controllers.hpp>
 #include <tbai_core/control/Rate.hpp>
 #include <tbai_core/control/Subscribers.hpp>
-#include <tbai_muse/TbaiEstimator.hpp>
+#include <tbai_estim/muse/MuseEstimator.hpp>
 #include <tbai_reference/ReferenceVelocityGenerator.hpp>
 #include <tbai_static/StaticController.hpp>
 #include <tbai_wtw/WtwController.hpp>
@@ -262,9 +262,9 @@ PYBIND11_MODULE(tbai_python, m) {
     rotations_module.def("rpy2mat", &tbai::rpy2mat, "Convert roll-pitch-yaw euler angles to rotation matrix");
     rotations_module.def("mat2aa", &tbai::mat2aa, "Convert rotation matrix to axis-angle representation");
 
-    py::class_<tbai::muse::TbaiEstimator>(m, "TbaiEstimator")
+    py::class_<tbai::muse::MuseEstimator>(m, "MuseEstimator")
         .def(py::init<std::vector<std::string>>())
-        .def("update", &tbai::muse::TbaiEstimator::update)
-        .def("getBasePosition", &tbai::muse::TbaiEstimator::getBasePosition)
-        .def("getBaseVelocity", &tbai::muse::TbaiEstimator::getBaseVelocity);
+        .def("update", &tbai::muse::MuseEstimator::update)
+        .def("getBasePosition", &tbai::muse::MuseEstimator::getBasePosition)
+        .def("getBaseVelocity", &tbai::muse::MuseEstimator::getBaseVelocity);
 }

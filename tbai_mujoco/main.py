@@ -142,7 +142,7 @@ class DummyStateSubscriber(StateSubscriber):
         self.last_yaw = 0.0
         self.first_update = True
         self.needs_update = True
-        self.ekf = tbai_python.TbaiEstimator(["FL_foot", "FR_foot", "RL_foot", "RR_foot"])
+        self.ekf = tbai_python.MuseEstimator(["FL_foot", "FR_foot", "RL_foot", "RR_foot"])
         self.last_velocity_base = None
 
     def waitTillInitialized(self):
