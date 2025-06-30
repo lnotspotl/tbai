@@ -30,6 +30,10 @@ class RosStaticController : public tbai::static_::StaticController {
         state_ = stateSubscriberPtr_->getLatestState();
     }
 
+    void changeController(const std::string &controllerType, scalar_t currentTime) override {
+        tbai::static_::StaticController::changeController(controllerType, currentTime);
+    }
+
    private:
     /** Publish odom->base transforms */
     void publishOdomBaseTransforms(const vector_t &currentState, const ros::Time &currentTime);

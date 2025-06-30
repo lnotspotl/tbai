@@ -23,17 +23,17 @@ anymal_d:
       type: tbai_ros_gazebo/JointController
       joints: *jn
 
-estimator_type: "ground_truth"
+estimator_type: "muse"
 
 gazebo:
   contact_sensor:
-    enabled: false
+    enabled: true
     update_rate: 1000 # Hz
 
   ground_truth_state_publisher:
-    enabled: true
+    enabled: false
     update_rate: 400 # Hz
 
   muse_state_publisher:
-    enabled: false
+    enabled: true
     update_rate: 1000 # Hz

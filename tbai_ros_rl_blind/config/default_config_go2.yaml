@@ -1,6 +1,9 @@
 robot_name: 'go2'
 
-joint_names: &jn ["LF_HAA", "LF_HFE", "LF_KFE", "LH_HAA", "LH_HFE", "LH_KFE", "RF_HAA", "RF_HFE", "RF_KFE", "RH_HAA", "RH_HFE", "RH_KFE"]
+joint_names: &jn ["FL_hip_joint", "FL_thigh_joint", "FL_calf_joint",
+        "RL_hip_joint", "RL_thigh_joint", "RL_calf_joint",
+        "FR_hip_joint", "FR_thigh_joint", "FR_calf_joint", 
+        "RR_hip_joint", "RR_thigh_joint", "RR_calf_joint"]
 base_name: "base"
 
 state_topic: "anymal_d/state"
@@ -72,17 +75,17 @@ anymal_d:
       type: tbai_ros_gazebo/JointController
       joints: *jn
 
-estimator_type: "ground_truth"
+estimator_type: "muse"
 
 gazebo:
   contact_sensor:
-    enabled: false
+    enabled: true
     update_rate: 1000 # Hz
 
   ground_truth_state_publisher:
-    enabled: true
+    enabled: false
     update_rate: 400 # Hz
 
   muse_state_publisher:
-    enabled: false
+    enabled: true
     update_rate: 1000 # Hz

@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     std::shared_ptr<tbai::StateSubscriber> stateSubscriber;
     if (estimatorType == "muse") {
         stateSubscriber =
-            std::shared_ptr<tbai::StateSubscriber>(new tbai::MuseRosStateSubscriber(nh, stateTopic, urdfString));
+            std::shared_ptr<tbai::StateSubscriber>(new tbai::InekfRosStateSubscriber(nh, stateTopic, urdfString));
     } else if (estimatorType == "ground_truth") {
         stateSubscriber = std::shared_ptr<tbai::StateSubscriber>(new tbai::RosStateSubscriber(nh, stateTopic));
     } else {

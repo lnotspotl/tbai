@@ -13,6 +13,8 @@
 #include <tbai_core/Logging.hpp>
 #include <tbai_core/Types.hpp>
 #include <tbai_core/control/Subscribers.hpp>
+#include <tbai_estim/dfki/DfkiEstimator.hpp>
+#include <tbai_estim/inekf/InEKFEstimator.hpp>
 #include <tbai_estim/muse/MuseEstimator.hpp>
 namespace tbai {
 
@@ -80,6 +82,42 @@ class MuseRosStateSubscriber : public tbai::ThreadedStateSubscriber {
 
     ros::CallbackQueue thisQueue_;
     std::unique_ptr<tbai::muse::MuseEstimator> estimator_;
+
+    std::shared_ptr<spdlog::logger> logger_;
+    ros::Time lastStateTime_;
+    bool firstState_ = true;
+    scalar_t lastYaw_ = 0.0;
+};
+
+class InekfRosStateSubscriber : public tbai::ThreadedStateSubscriber {
+   public:
+    InekfRosStateSubscriber(ros::NodeHandle &nhtemp, const std::string &stateTopic, const std::string &urdf = "",
+                            std::unique_ptr<tbai::dfki::DfkiEstimator> estimator = nullptr);
+    ~InekfRosStateSubscriber() override { stopThreads(); }
+    void waitTillInitialized() override;
+
+    void startThreads() override;
+    void stopThreads() override;
+
+    void reset() override {
+        // estimator_->reset();
+    }
+
+   private:
+    /** State message subscriber */
+    ros::Subscriber stateSubscriber_;
+
+    /** State message callback */
+    void stateMessageCallback(const tbai_ros_msgs::RobotState::Ptr &msg);
+
+    void threadFunction();
+    std::thread stateThread_;
+
+    std::atomic_bool isRunning_ = false;
+    std::atomic_bool isInitialized_ = false;
+
+    ros::CallbackQueue thisQueue_;
+    std::unique_ptr<tbai::dfki::DfkiEstimator> estimator_;
 
     std::shared_ptr<spdlog::logger> logger_;
     ros::Time lastStateTime_;
