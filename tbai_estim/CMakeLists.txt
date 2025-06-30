@@ -9,6 +9,13 @@ add_library(tbai_estim
     # Muse estimator
     src/muse/MuseEstimator.cpp
 
+    # InEKF
+    src/inekf/InEKF.cpp
+    src/inekf/LieGroup.cpp
+    src/inekf/NoiseParams.cpp
+    src/inekf/RobotState.cpp
+    src/inekf/InEKFEstimator.cpp
+
 )
 target_link_libraries(tbai_estim PUBLIC tbai_core)
 target_include_directories(tbai_estim
