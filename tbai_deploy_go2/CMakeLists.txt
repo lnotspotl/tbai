@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(tbai_deploy_go2)
 
+find_package(unitree_sdk2 CONFIG REQUIRED)
+
 add_library(tbai_deploy_go2
     src/Go2RobotInterface.cpp
 )
@@ -18,6 +20,7 @@ target_include_directories(tbai_deploy_go2
 target_link_libraries(tbai_deploy_go2
     PUBLIC
         tbai_core
+        unitree_sdk2
 )
 
 

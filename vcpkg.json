@@ -7,7 +7,6 @@
         "spdlog",
         "eigen3"
     ],
-    "builtin-baseline": "a9eee3b18df395dbb8be71a31bd78ea441056e42",
     "overrides": [
         {
             "name": "eigen3",
@@ -33,6 +32,12 @@
             "description": "Build the Python bindings",
             "dependencies": [
                 "pybind11"
+            ]
+        },
+        "deploy-go2": {
+            "description": "Build the deploy go2",
+            "dependencies": [
+                "unitree-sdk2"
             ]
         }
     }

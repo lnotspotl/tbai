@@ -1,0 +1,9 @@
+{
+    "name": "unitree-sdk2",
+    "version-string": "1.0.0",
+    "description": "Unitree SDK2",
+    "dependencies": [
+        "vcpkg-cmake",
+        "vcpkg-cmake-config"
+    ]
+  }

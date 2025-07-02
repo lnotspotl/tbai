@@ -19,6 +19,10 @@ if(TBAI_BUILD_PYTHON)
   list(APPEND VCPKG_MANIFEST_FEATURES "python")
 endif()
 
+if(TBAI_BUILD_DEPLOY_GO2)
+  list(APPEND VCPKG_MANIFEST_FEATURES "deploy-go2")
+endif()
+
 set(VCPKG_VERSION)
 include(cmake/vcpkg.cmake)
 
