@@ -8,6 +8,7 @@ option(TBAI_BUILD_BOB "Build the bob" ON)
 option(TBAI_BUILD_WTW "Build the wtw" ON)
 option(TBAI_BUILD_MUSE "Build the muse" ON)
 option(TBAI_BUILD_PYTHON "Build the Python bindings" OFF)
+option(TBAI_BUILD_DEPLOY_GO2 "Build the deploy go2" ON)
 
 if(TBAI_BUILD_TESTS)
   enable_testing()
@@ -45,6 +46,10 @@ endif()
 
 if(TBAI_BUILD_PYTHON)
   add_subdirectory(tbai_python)
+endif()
+
+if(TBAI_BUILD_DEPLOY_GO2)
+  add_subdirectory(tbai_deploy_go2)
 endif()
 
 include(CMakePackageConfigHelpers)

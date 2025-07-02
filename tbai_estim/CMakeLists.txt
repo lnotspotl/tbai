@@ -24,9 +24,6 @@ target_include_directories(tbai_estim
         $<INSTALL_INTERFACE:include>
 )
 
-add_executable(main src/main.cpp)
-target_link_libraries(main PUBLIC tbai_estim)
-
 ## Installation rules
 include(GNUInstallDirs)
 
