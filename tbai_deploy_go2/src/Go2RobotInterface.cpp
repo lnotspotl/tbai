@@ -37,8 +37,19 @@ static uint32_t crc32_core(uint32_t *ptr, uint32_t len) {
 
 namespace tbai {
 
-Go2RobotInterface::Go2RobotInterface() {
+Go2RobotInterface::Go2RobotInterface(Go2RobotInterfaceArgs args) {
+    std::cout << "Go2RobotInterface constructor" << std::endl;
+    std::cout << "Network interface: " << args.networkInterface() << std::endl;
     std::cout << "Initializing Go2RobotInterface" << std::endl;
+    std::cout << "Channel init: " << std::to_string(args.channelInit()) << std::endl;
+    if(args.channelInit()) {
+        std::cout << "Initializing channel factory: " << args.networkInterface() << std::endl;
+        unitree::robot::ChannelFactory::Instance()->Init(0, args.networkInterface());
+    } else {
+        throw std::runtime_error("Channel init is disabled");
+    }
+
+    msc = std::make_unique<MotionSwitcherClient>();
 
     // Initialize motor 2 id map
     motor_id_map["RF_HAA"] = 0;
@@ -59,51 +70,53 @@ Go2RobotInterface::Go2RobotInterface() {
     foot_id_map["RH_FOOT"] = 2;
     foot_id_map["LH_FOOT"] = 3;
 
-    // // Initialize low level command
-    // low_cmd.head()[0] = 0xFE;
-    // low_cmd.head()[1] = 0xEF;
-    // low_cmd.level_flag() = 0xFF;
-    // low_cmd.gpio() = 0;
+    // Initialize low level command
+    low_cmd.head()[0] = 0xFE;
+    low_cmd.head()[1] = 0xEF;
+    low_cmd.level_flag() = 0xFF;
+    low_cmd.gpio() = 0;
 
-    // std::cout << "Initializing low level command" << std::endl;
-    // for (int i = 0; i < 20; i++) {
-    //     low_cmd.motor_cmd()[i].mode() = (0x01);  // motor switch to servo (PMSM) mode
-    //     low_cmd.motor_cmd()[i].q() = (PosStopF);
-    //     low_cmd.motor_cmd()[i].kp() = (0);
-    //     low_cmd.motor_cmd()[i].dq() = (VelStopF);
-    //     low_cmd.motor_cmd()[i].kd() = (0);
-    //     low_cmd.motor_cmd()[i].tau() = (0);
-    // }
+    std::cout << "Initializing low level command" << std::endl;
+    for (int i = 0; i < 20; i++) {
+        low_cmd.motor_cmd()[i].mode() = (0x01);  // motor switch to servo (PMSM) mode
+        low_cmd.motor_cmd()[i].q() = (PosStopF);
+        low_cmd.motor_cmd()[i].kp() = (0);
+        low_cmd.motor_cmd()[i].dq() = (VelStopF);
+        low_cmd.motor_cmd()[i].kd() = (0);
+        low_cmd.motor_cmd()[i].tau() = (0);
+    }
 
-    // std::cout << "Initializing publisher" << std::endl;
-    // lowcmd_publisher.reset(new ChannelPublisher<unitree_go::msg::dds_::LowCmd_>(TOPIC_LOWCMD));
-    // lowcmd_publisher->InitChannel();
+    std::cout << "Initializing publisher" << std::endl;
+    lowcmd_publisher.reset(new ChannelPublisher<unitree_go::msg::dds_::LowCmd_>(TOPIC_LOWCMD));
+    lowcmd_publisher->InitChannel();
 
-    // std::cout << "Initializing subscriber" << std::endl;
-    // lowstate_subscriber.reset(new ChannelSubscriber<unitree_go::msg::dds_::LowState_>(TOPIC_LOWSTATE));
-    // lowstate_subscriber->InitChannel(std::bind(&Go2RobotInterface::lowStateCallback, this, std::placeholders::_1),
-    // 1);
 
-    // /*init MotionSwitcherClient*/
-    // msc.SetTimeout(10.0f);
-    // msc.Init();
-    // /*Shut down motion control-related service*/
-    // while (queryMotionStatus()) {
-    //     std::cout << "Try to deactivate the motion control-related service." << std::endl;
-    //     int32_t ret = msc.ReleaseMode();
-    //     if (ret == 0) {
-    //         std::cout << "ReleaseMode succeeded." << std::endl;
-    //     } else {
-    //         std::cout << "ReleaseMode failed. Error code: " << ret << std::endl;
-    //     }
-    //     sleep(5);
-    // }
+    std::cout << "Initializing motion switcher client" << std::endl;
+    /*init MotionSwitcherClient*/
+    msc->SetTimeout(10.0f);
+    msc->Init();
+    /*Shut down motion control-related service*/
+    while (queryMotionStatus()) {
+        std::cout << "Try to deactivate the motion control-related service." << std::endl;
+        int32_t ret = msc->ReleaseMode();
+        if (ret == 0) {
+            std::cout << "ReleaseMode succeeded." << std::endl;
+        } else {
+            std::cout << "ReleaseMode failed. Error code: " << ret << std::endl;
+        }
+        sleep(5);
+    }
 
     // Initialize estimator
     std::cout << "Initializing estimator" << std::endl;
     std::vector<std::string> footNames = {"LF_FOOT", "RF_FOOT", "RH_FOOT", "LH_FOOT"};
     estimator_ = std::make_unique<tbai::inekf::InEKFEstimator>(footNames, "");
     std::cout << "Estimator initialized" << std::endl;
+
+    std::cout << "Initializing subscriber" << std::endl;
+    lowstate_subscriber.reset(new ChannelSubscriber<unitree_go::msg::dds_::LowState_>(TOPIC_LOWSTATE));
+    lowstate_subscriber->InitChannel(std::bind(&Go2RobotInterface::lowStateCallback, this, std::placeholders::_1),
+    1);
 }
 
 Go2RobotInterface::~Go2RobotInterface() {
@@ -122,30 +135,43 @@ std::string Go2RobotInterface::queryServiceName(std::string form, std::string na
     return "";
 }
 
-// int Go2RobotInterface::queryMotionStatus() {
-//     std::string robotForm, motionName;
-//     int motionStatus;
-//     int32_t ret = msc.CheckMode(robotForm, motionName);
-//     if (ret == 0) {
-//         std::cout << "CheckMode succeeded." << std::endl;
-//     } else {
-//         std::cout << "CheckMode failed. Error code: " << ret << std::endl;
-//     }
-//     if (motionName.empty()) {
-//         std::cout << "The motion control-related service is deactivated." << std::endl;
-//         motionStatus = 0;
-//     } else {
-//         std::string serviceName = queryServiceName(robotForm, motionName);
-//         std::cout << "Service: " << serviceName << " is activate" << std::endl;
-//         motionStatus = 1;
-//     }
-//     return motionStatus;
-// }
+int Go2RobotInterface::queryMotionStatus() {
+    std::string robotForm, motionName;
+    int motionStatus;
+    int32_t ret = msc->CheckMode(robotForm, motionName);
+    if (ret == 0) {
+        std::cout << "CheckMode succeeded." << std::endl;
+    } else {
+        std::cout << "CheckMode failed. Error code: " << ret << std::endl;
+    }
+    if (motionName.empty()) {
+        std::cout << "The motion control-related service is deactivated." << std::endl;
+        motionStatus = 0;
+    } else {
+        std::string serviceName = queryServiceName(robotForm, motionName);
+        std::cout << "Service: " << serviceName << " is activate" << std::endl;
+        motionStatus = 1;
+    }
+    return motionStatus;
+}
 
 void Go2RobotInterface::lowStateCallback(const void *message) {
-    // Create a copy of the low level state
-    low_state = *(unitree_go::msg::dds_::LowState_ *)message;
+
+    auto t11 = std::chrono::high_resolution_clock::now();
     timestamp = tbai::SystemTime<std::chrono::high_resolution_clock>::rightNow();
+
+
+    // static scalar_t last_time_limiter = timestamp;
+    // constexpr scalar_t dt_limiter = 1/300.0;
+    // if((timestamp - last_time_limiter) < dt_limiter) {
+    //     return;
+    // }
+    // last_time_limiter = timestamp;
+
+
+    // Create a copy of the low level state
+    unitree_go::msg::dds_::LowState_ &low_state = *(unitree_go::msg::dds_::LowState_ *)message;
+
     initialized = true;
 
     // Calculate callback rate
@@ -153,11 +179,13 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     static int count = 0;
     count++;
 
-    if (count % 100 == 0) {  // Print every 100th callback to avoid spam
+    constexpr int N = 500;
+    if (count % N == 0) {  // Print every 100th callback to avoid spam
         scalar_t time_diff = timestamp - last_time2;
-        double rate = 100.0 / time_diff;
+        double rate = N / time_diff;
         std::cout << "Low state callback rate: " << rate << " Hz (count: " << count << ")" << std::endl;
         last_time2 = timestamp;
+        std::cout << "time_diff: " << std::to_string(time_diff) << std::endl;
     }
 
     // Extract joint positions and velocities from low_state
@@ -218,10 +246,11 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     angularVelBase[1] = low_state.imu_state().gyroscope()[1];
     angularVelBase[2] = low_state.imu_state().gyroscope()[2];
 
+
     // Contact states (assuming all feet are in contact for now)
     // Determine contact states based on ground reaction forces
     std::vector<bool> contacts(4, false);
-    const double contact_threshold = 15.0;  // N, threshold for contact detection
+    const double contact_threshold = 12.0;  // N, threshold for contact detection
     
     // Extract ground reaction forces from foot sensors
     // Assuming the order is: LF, LH, RF, RH
@@ -234,21 +263,34 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     
     // Set contact to true if ground reaction force exceeds threshold
     for (size_t i = 0; i < 4; ++i) {
-        contacts[i] = static_cast<bool>(grf[i] > contact_threshold);
+        contacts[i] = static_cast<bool>(grf[i] >= contact_threshold);
     }
+
+    if(count % N == 0) {
+        std::cout << "LF contact: " << std::to_string(contacts[0]) << " grf: " << std::to_string(grf[0]) << std::endl;
+        std::cout << "LH contact: " << std::to_string(contacts[1]) << " grf: " << std::to_string(grf[1]) << std::endl;
+        std::cout << "RF contact: " << std::to_string(contacts[2]) << " grf: " << std::to_string(grf[2]) << std::endl;
+        std::cout << "RH contact: " << std::to_string(contacts[3]) << " grf: " << std::to_string(grf[3]) << std::endl;
+    }
+
 
     // Calculate dt (assuming this is called at regular intervals)
     static scalar_t last_time3 = timestamp;
     scalar_t dt = timestamp - last_time3;
     last_time3 = timestamp;
 
-    static bool enable_state_estim = false;
+    static bool enable_state_estim = true;
     if (enable_state_estim) {
 
         // Update the state estimator
+        auto t1 = std::chrono::high_resolution_clock::now();
         if (estimator_) {
             estimator_->update(timestamp, dt, quatBase, jointPositions, jointVelocities, linearAccBase, angularVelBase,
                                contacts);
+        }
+        auto t2 = std::chrono::high_resolution_clock::now();
+        if(count % N == 0) {
+            std::cout << "State estimator update time: " << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " us" << std::endl;
         }
 
     }
@@ -258,12 +300,23 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     state.x = vector_t::Zero(36);
 
     // Base orientation - Euler zyx as {roll, pitch, yaw}
-    auto orientation_rot = estimator_->getBaseOrientation();
-    const quaternion_t baseQuaternion(orientation_rot);
-    const tbai::matrix3_t R_world_base = baseQuaternion.toRotationMatrix();
-    const tbai::matrix3_t R_base_world = R_world_base.transpose();
-    const tbai::vector_t rpy = tbai::mat2oc2rpy(R_world_base, lastYaw_);
-    lastYaw_ = rpy[2];
+    tbai::vector_t rpy;
+    tbai::matrix3_t R_base_world;
+    if(enable_state_estim) {
+        auto orientation_rot = estimator_->getBaseOrientation();
+        const quaternion_t baseQuaternion(orientation_rot);
+        const tbai::matrix3_t R_world_base = baseQuaternion.toRotationMatrix();
+        R_base_world = R_world_base.transpose();
+        rpy = tbai::mat2oc2rpy(R_world_base, lastYaw_);
+        lastYaw_ = rpy[2];
+    } else {
+        const quaternion_t baseQuaternion(quatBase);
+        const tbai::matrix3_t R_world_base = baseQuaternion.toRotationMatrix();
+        R_base_world = R_world_base.transpose();
+        rpy = tbai::mat2oc2rpy(R_world_base, lastYaw_);
+        lastYaw_ = rpy[2];
+    }
+
 
     state.x.segment<3>(0) = rpy;
 
@@ -289,9 +342,24 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     state.timestamp = timestamp;
     state.contactFlags = contacts;
 
+    if(count % N == 0) {
+        std::cout << "Base orientation: " << std::to_string(rpy[0]) << " " << std::to_string(rpy[1]) << " " << std::to_string(rpy[2]) << std::endl;
+        std::cout << "Base position: " << std::to_string(state.x.segment<3>(3)[0]) << " " << std::to_string(state.x.segment<3>(3)[1]) << " " << std::to_string(state.x.segment<3>(3)[2]) << std::endl;
+        std::cout << "Base angular velocity: " << std::to_string(state.x.segment<3>(6)[0]) << " " << std::to_string(state.x.segment<3>(6)[1]) << " " << std::to_string(state.x.segment<3>(6)[2]) << std::endl;
+        std::cout << "Base linear velocity: " << std::to_string(state.x.segment<3>(9)[0]) << " " << std::to_string(state.x.segment<3>(9)[1]) << " " << std::to_string(state.x.segment<3>(9)[2]) << std::endl;
+    }
+
     // Update the latest state
+    auto t12 = std::chrono::high_resolution_clock::now();
+    if(count % N == 0) {
+        std::cout << "State update time: " << std::chrono::duration_cast<std::chrono::microseconds>(t12 - t11).count() << " us" << std::endl;
+    }
     std::lock_guard<std::mutex> lock(latest_state_mutex_);
     state_ = std::move(state);
+    auto t13 = std::chrono::high_resolution_clock::now();
+    if(count % N == 0) {
+        std::cout << "Total callback time: " << std::chrono::duration_cast<std::chrono::microseconds>(t13 - t11).count() << " us" << std::endl;
+    }
 }
 
 void Go2RobotInterface::publish(std::vector<MotorCommand> commands) {

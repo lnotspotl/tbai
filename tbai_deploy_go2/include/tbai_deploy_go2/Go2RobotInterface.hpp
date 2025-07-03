@@ -1,5 +1,6 @@
 #pragma once
 
+#include <tbai_core/Args.hpp>
 #include <tbai_core/control/RobotInterface.hpp>
 
 // TODO: remove this define, the code does not compile without it though (missing dependency?)
@@ -31,11 +32,18 @@ using namespace unitree::robot::b2;
 constexpr double PosStopF = (2.146E+9f);
 constexpr double VelStopF = (16000.0f);
 
+struct Go2RobotInterfaceArgs {
+    TBAI_ARG_DEFAULT(std::string, networkInterface, "192.168.123.10");
+    TBAI_ARG_DEFAULT(bool, channelInit, true);
+    TBAI_ARG_DEFAULT(bool, enableStateEstim, true);
+};
+
+
 namespace tbai {
 
 class Go2RobotInterface : public RobotInterface {
    public:
-    Go2RobotInterface();
+    Go2RobotInterface(Go2RobotInterfaceArgs args);
     virtual ~Go2RobotInterface();
 
     // virtual methods from RobotInterface
@@ -49,7 +57,9 @@ class Go2RobotInterface : public RobotInterface {
     void lowStateCallback(const void *message);
 
     unitree_go::msg::dds_::LowCmd_ low_cmd{};      // default init
-    unitree_go::msg::dds_::LowState_ low_state{};  // default init
+    // unitree_go::msg::dds_::LowState_ low_state{};  // default init
+
+    std::unique_ptr<MotionSwitcherClient> msc;
 
     /*publisher*/
     ChannelPublisherPtr<unitree_go::msg::dds_::LowCmd_> lowcmd_publisher;

@@ -5,7 +5,8 @@
         "fmt",
         "yaml-cpp",
         "spdlog",
-        "eigen3"
+        "eigen3",
+        "argparse"
     ],
     "overrides": [
         {
