@@ -7,6 +7,10 @@
 
 namespace tbai {
 namespace inekf {
+
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
 InEKFEstimator::InEKFEstimator(std::vector<std::string> footNames, const std::string &urdf) {
     logger_ = tbai::getLogger("inekf_estimator");
 
@@ -62,6 +66,9 @@ InEKFEstimator::InEKFEstimator(std::vector<std::string> footNames, const std::st
     TBAI_LOG_INFO(logger_, "Initialization complete");
 }
 
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
 void InEKFEstimator::update(scalar_t currentTime, scalar_t dt, const vector4_t &quatBase,
                             const vector_t &jointPositions, const vector_t &jointVelocities,
                             const vector3_t &linearAccBase, const vector3_t &angularVelBase, std::vector<bool> contacts,
@@ -119,6 +126,9 @@ void InEKFEstimator::update(scalar_t currentTime, scalar_t dt, const vector4_t &
     // Done :)
 }
 
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
 void InEKFEstimator::setupPinocchioModel(const std::string &urdf) {
     if (urdf.empty()) {
         auto urdfPath = tbai::getEnvAs<std::string>("TBAI_ROBOT_DESCRIPTION_PATH");
