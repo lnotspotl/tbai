@@ -2,6 +2,7 @@
 
 #include <tbai_core/Args.hpp>
 #include <tbai_core/control/RobotInterface.hpp>
+#include <tbai_core/Logging.hpp>
 
 // TODO: remove this define, the code does not compile without it though (missing dependency?)
 #define SCHED_DEADLINE 6
@@ -79,6 +80,8 @@ class Go2RobotInterface : public RobotInterface {
     scalar_t lastYaw_ = 0.0;
     std::mutex latest_state_mutex_;
     State state_;
+
+    std::shared_ptr<spdlog::logger> logger_;
 };
 
 }  // namespace tbai

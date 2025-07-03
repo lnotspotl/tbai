@@ -38,12 +38,13 @@ static uint32_t crc32_core(uint32_t *ptr, uint32_t len) {
 namespace tbai {
 
 Go2RobotInterface::Go2RobotInterface(Go2RobotInterfaceArgs args) {
-    std::cout << "Go2RobotInterface constructor" << std::endl;
-    std::cout << "Network interface: " << args.networkInterface() << std::endl;
-    std::cout << "Initializing Go2RobotInterface" << std::endl;
-    std::cout << "Channel init: " << std::to_string(args.channelInit()) << std::endl;
+    logger_ = tbai::getLogger("tbai_deploy_go2");
+    TBAI_LOG_INFO(logger_, "Go2RobotInterface constructor");
+    TBAI_LOG_INFO(logger_, "Network interface: {}", args.networkInterface());
+    TBAI_LOG_INFO(logger_, "Initializing Go2RobotInterface");
+    TBAI_LOG_INFO(logger_, "Channel init: {}", args.channelInit());
     if(args.channelInit()) {
-        std::cout << "Initializing channel factory: " << args.networkInterface() << std::endl;
+        TBAI_LOG_INFO(logger_, "Initializing channel factory: {}", args.networkInterface());
         unitree::robot::ChannelFactory::Instance()->Init(0, args.networkInterface());
     } else {
         throw std::runtime_error("Channel init is disabled");
@@ -76,7 +77,7 @@ Go2RobotInterface::Go2RobotInterface(Go2RobotInterfaceArgs args) {
     low_cmd.level_flag() = 0xFF;
     low_cmd.gpio() = 0;
 
-    std::cout << "Initializing low level command" << std::endl;
+    TBAI_LOG_INFO(logger_, "Initializing low level command");
     for (int i = 0; i < 20; i++) {
         low_cmd.motor_cmd()[i].mode() = (0x01);  // motor switch to servo (PMSM) mode
         low_cmd.motor_cmd()[i].q() = (PosStopF);
@@ -363,20 +364,35 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
 }
 
 void Go2RobotInterface::publish(std::vector<MotorCommand> commands) {
-    for (const auto &command : commands) {
-        int motor_id = motor_id_map[command.joint_name];
-        low_cmd.motor_cmd()[motor_id].mode() = (0x01);  // motor switch to servo (PMSM) mode
-        low_cmd.motor_cmd()[motor_id].q() = (command.desired_position);
-        low_cmd.motor_cmd()[motor_id].kp() = command.kp;
-        low_cmd.motor_cmd()[motor_id].dq() = (command.desired_velocity);
-        low_cmd.motor_cmd()[motor_id].kd() = command.kd;
-        low_cmd.motor_cmd()[motor_id].tau() = command.torque_ff;
+
+    static auto last_publish_time = std::chrono::high_resolution_clock::now();
+    static int publish_count = 0;
+    publish_count++;
+    
+    constexpr int PUBLISH_N = 100; // Print every 100 publishes (roughly 100 ms at 1kHz)
+    if (publish_count % PUBLISH_N == 0) {
+        auto current_time = std::chrono::high_resolution_clock::now();
+        auto time_diff = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_publish_time).count();
+        double rate = (PUBLISH_N * 1000.0) / time_diff;
+        TBAI_LOG_INFO(logger_, "Publish frequency: {} Hz (count: {})", rate, publish_count);
+        last_publish_time = current_time;
     }
 
-    low_cmd.crc() = crc32_core((uint32_t *)&low_cmd, (sizeof(unitree_go::msg::dds_::LowCmd_) >> 2) - 1);
 
-    // Publish the low level command
-    lowcmd_publisher->Write(low_cmd);
+    // for (const auto &command : commands) {
+    //     int motor_id = motor_id_map[command.joint_name];
+    //     low_cmd.motor_cmd()[motor_id].mode() = (0x01);  // motor switch to servo (PMSM) mode
+    //     low_cmd.motor_cmd()[motor_id].q() = (command.desired_position);
+    //     low_cmd.motor_cmd()[motor_id].kp() = command.kp;
+    //     low_cmd.motor_cmd()[motor_id].dq() = (command.desired_velocity);
+    //     low_cmd.motor_cmd()[motor_id].kd() = command.kd;
+    //     low_cmd.motor_cmd()[motor_id].tau() = command.torque_ff;
+    // }
+
+    // low_cmd.crc() = crc32_core((uint32_t *)&low_cmd, (sizeof(unitree_go::msg::dds_::LowCmd_) >> 2) - 1);
+
+    // // Publish the low level command
+    // lowcmd_publisher->Write(low_cmd);
 }
 
 void Go2RobotInterface::waitTillInitialized() {
