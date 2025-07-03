@@ -20,9 +20,19 @@ target_include_directories(tbai_deploy_go2
 target_link_libraries(tbai_deploy_go2
     PUBLIC
         tbai_core
+        tbai_estim
         unitree_sdk2
 )
 
 
+add_executable(main src/main.cpp)
+target_link_libraries(main
+    PUBLIC
+    unitree_sdk2
+)
 
-
+add_executable(main2 src/main2.cpp)
+target_link_libraries(main2
+    PUBLIC
+        tbai_deploy_go2
+)
