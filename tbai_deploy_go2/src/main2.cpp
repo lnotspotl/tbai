@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
     std::cout << "Initializing Go2RobotInterface" << std::endl;
     std::string networkInterface = program.get<std::string>("--networkInterface");
     std::cout << "Network interface: " << networkInterface << std::endl;
-    tbai::Go2RobotInterface go2(Go2RobotInterfaceArgs().networkInterface(std::move(networkInterface)));
+    tbai::Go2RobotInterface go2(tbai::Go2RobotInterfaceArgs().networkInterface(std::move(networkInterface)));
     std::cout << "Go2RobotInterface initialized" << std::endl;
 
     go2.waitTillInitialized();

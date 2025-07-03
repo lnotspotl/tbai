@@ -49,6 +49,8 @@ std::vector<MotorCommand> StaticController::getMotorCommands(scalar_t currentTim
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 void StaticController::changeController(const std::string &controllerType, scalar_t currentTime) {
+    stateSubscriberPtr_->disable();
+    TBAI_LOG_INFO(logger_, "Disabling state estimator");
     preStep(currentTime, 0.0);
     currentControllerType_ = controllerType;
     alpha_ = 0.0;
@@ -112,6 +114,12 @@ std::vector<MotorCommand> StaticController::getInterpCommandMessage(scalar_t dt)
     // Finish interpolation
     if (alpha_ == 1.0) {
         alpha_ = -1.0;
+
+        // If the current controller is STAND, enable state estimator
+        if (currentControllerType_ == "STAND") {
+            TBAI_LOG_INFO(logger_, "Enabling state estimator");
+            stateSubscriberPtr_->enable();
+        }
     }
 
     return packCommandMessage(jointAngles);

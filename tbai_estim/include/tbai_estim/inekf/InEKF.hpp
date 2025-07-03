@@ -79,6 +79,15 @@ the default.
          * Gets the current state estimate.
          */
         RobotState getState() const;
+
+        /**
+         * Gets the current state estimate.
+         */
+        RobotState &getState() {
+            return state_;
+        }
+
+
         /**
          * Gets the current noise parameters.
          */

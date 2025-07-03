@@ -36,9 +36,3 @@ install(DIRECTORY ${libtorch_SOURCE_DIR}/lib/
 install(DIRECTORY ${libtorch_SOURCE_DIR}/include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
-
-install(EXPORT tbai_bob-targets
-    NAMESPACE tbai::
-    FILE tbai-bob-targets.cmake
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/tbai
-)

@@ -36,6 +36,9 @@ if(TBAI_BUILD_BOB OR TBAI_BUILD_WTW)
   include(cmake/torch.cmake)
 endif()
 
+# # Install vcpkg libraries
+# include(cmake/vcpkg-install.cmake)
+
 if(TBAI_BUILD_MUSE)
   add_subdirectory(tbai_estim)
 endif()
@@ -53,6 +56,7 @@ if(TBAI_BUILD_PYTHON)
 endif()
 
 if(TBAI_BUILD_DEPLOY_GO2)
+  include(cmake/unitree_sdk2.cmake)
   add_subdirectory(tbai_deploy_go2)
 endif()
 

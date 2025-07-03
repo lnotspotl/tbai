@@ -5,8 +5,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(tbai_deploy_go2)
 
-find_package(unitree_sdk2 CONFIG REQUIRED)
-
 add_library(tbai_deploy_go2
     src/Go2RobotInterface.cpp
 )
@@ -35,4 +33,25 @@ add_executable(main2 src/main2.cpp)
 target_link_libraries(main2
     PUBLIC
         tbai_deploy_go2
+)
+
+## Installation rules
+include(GNUInstallDirs)
+
+install(TARGETS tbai_deploy_go2
+    EXPORT tbai_deploy_go2-targets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(DIRECTORY include/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(EXPORT tbai_deploy_go2-targets
+    NAMESPACE tbai::
+    FILE tbai-deploy_go2-targets.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/tbai
 )

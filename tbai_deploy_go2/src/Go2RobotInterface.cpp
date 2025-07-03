@@ -251,7 +251,7 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     // Contact states (assuming all feet are in contact for now)
     // Determine contact states based on ground reaction forces
     std::vector<bool> contacts(4, false);
-    const double contact_threshold = 12.0;  // N, threshold for contact detection
+    const double contact_threshold = 16.0;  // N, threshold for contact detection
     
     // Extract ground reaction forces from foot sensors
     // Assuming the order is: LF, LH, RF, RH
@@ -287,7 +287,7 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
         auto t1 = std::chrono::high_resolution_clock::now();
         if (estimator_) {
             estimator_->update(timestamp, dt, quatBase, jointPositions, jointVelocities, linearAccBase, angularVelBase,
-                               contacts);
+                               contacts, true, enablePositionEstimation_);
         }
         auto t2 = std::chrono::high_resolution_clock::now();
         if(count % N == 0) {
@@ -348,6 +348,7 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
         std::cout << "Base position: " << std::to_string(state.x.segment<3>(3)[0]) << " " << std::to_string(state.x.segment<3>(3)[1]) << " " << std::to_string(state.x.segment<3>(3)[2]) << std::endl;
         std::cout << "Base angular velocity: " << std::to_string(state.x.segment<3>(6)[0]) << " " << std::to_string(state.x.segment<3>(6)[1]) << " " << std::to_string(state.x.segment<3>(6)[2]) << std::endl;
         std::cout << "Base linear velocity: " << std::to_string(state.x.segment<3>(9)[0]) << " " << std::to_string(state.x.segment<3>(9)[1]) << " " << std::to_string(state.x.segment<3>(9)[2]) << std::endl;
+        std::cout << "Base linear acceleration: " << linearAccBase[0] << " " << linearAccBase[1] << " " << linearAccBase[2] << std::endl;
     }
 
     // Update the latest state

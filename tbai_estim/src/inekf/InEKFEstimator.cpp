@@ -66,7 +66,7 @@ InEKFEstimator::InEKFEstimator(std::vector<std::string> footNames, const std::st
 void InEKFEstimator::update(scalar_t currentTime, scalar_t dt, const vector4_t &quatBase,
                             const vector_t &jointPositions, const vector_t &jointVelocities,
                             const vector3_t &linearAccBase, const vector3_t &angularVelBase,
-                            std::vector<bool> contacts) {
+                            std::vector<bool> contacts, bool rectifyOrientation, bool enablePositionEstimation) {
     // Just store the message on the first call
     if (!firstMessageReceived_) {
         firstMessageReceived_ = true;
@@ -75,37 +75,45 @@ void InEKFEstimator::update(scalar_t currentTime, scalar_t dt, const vector4_t &
         return;
     }
 
-    // Propagate IMU measurements
-    Eigen::Matrix<double, 6, 1> imu_measurement;
-    imu_measurement << lastAngularVelocity_, lastLinearAcceleration_;
-    inekf_.Propagate(imu_measurement, dt);
-
-    // Set contacts
-    std::vector<std::pair<int, bool>> contacts_pairs;
-    for (size_t i = 0; i < contacts.size(); i++) {
-        contacts_pairs.push_back(std::make_pair(i, contacts[i]));
-    }
-    inekf_.setContacts(contacts_pairs);
-
-    // Update state based on kinematics
-    std::vector<vector3_t> footPositions(legIndices_.size());
-
-    vector_t qPinocchio = jointPositions;
-    vector_t vPinocchio = jointVelocities;
-    pinocchio::forwardKinematics(model_, data_, qPinocchio);
-
-    for (size_t i = 0; i < legIndices_.size(); i++) {
-        footPositions[i] = pinocchio::updateFramePlacement(model_, data_, legIndices_[i]).translation();
+    if (rectifyOrientation || !enablePositionEstimation) {
+        inekf_.getState().setRotation(Eigen::Quaterniond(quatBase[3], quatBase[0], quatBase[1], quatBase[2]).toRotationMatrix());
     }
 
-    ::inekf::vectorKinematics kinematics;
-    kinematics.reserve(legIndices_.size());
-    for (size_t i = 0; i < legIndices_.size(); i++) {
-        constexpr double foot_noise = 0.01;
-        kinematics.emplace_back(i, Eigen::Affine3d(Eigen::Translation3d(footPositions[i])).matrix(),
-                                            Eigen::Matrix<double, 6, 6>::Identity() * pow(foot_noise, 2));
+
+    if (enablePositionEstimation) {
+        // Propagate IMU measurements
+        Eigen::Matrix<double, 6, 1> imu_measurement;
+        imu_measurement << lastAngularVelocity_, lastLinearAcceleration_;
+        inekf_.Propagate(imu_measurement, dt);
+
+        // Set contacts
+        std::vector<std::pair<int, bool>> contacts_pairs;
+        for (size_t i = 0; i < contacts.size(); i++) {
+            contacts_pairs.push_back(std::make_pair(i, contacts[i]));
+        }
+        inekf_.setContacts(contacts_pairs);
+
+        // Update state based on kinematics
+        std::vector<vector3_t> footPositions(legIndices_.size());
+
+        vector_t qPinocchio = jointPositions;
+        vector_t vPinocchio = jointVelocities;
+        pinocchio::forwardKinematics(model_, data_, qPinocchio);
+
+        for (size_t i = 0; i < legIndices_.size(); i++) {
+            footPositions[i] = pinocchio::updateFramePlacement(model_, data_, legIndices_[i]).translation();
+        }
+
+        ::inekf::vectorKinematics kinematics;
+        kinematics.reserve(legIndices_.size());
+        for (size_t i = 0; i < legIndices_.size(); i++) {
+            constexpr double foot_noise = 0.01;
+            kinematics.emplace_back(i, Eigen::Affine3d(Eigen::Translation3d(footPositions[i])).matrix(),
+                                                Eigen::Matrix<double, 6, 6>::Identity() * pow(foot_noise, 2));
+        }
+        inekf_.CorrectKinematics(kinematics);
     }
-    inekf_.CorrectKinematics(kinematics);
+
 
     lastAngularVelocity_ = angularVelBase;
     lastLinearAcceleration_ = linearAccBase;

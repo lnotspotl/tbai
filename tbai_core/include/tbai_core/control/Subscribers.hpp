@@ -18,6 +18,9 @@ class StateSubscriber {
 
     virtual void waitTillInitialized() = 0;
     virtual State getLatestState() = 0;
+
+    virtual void enable() {}
+    virtual void disable() {}
 };
 
 class ThreadedStateSubscriber : public StateSubscriber {

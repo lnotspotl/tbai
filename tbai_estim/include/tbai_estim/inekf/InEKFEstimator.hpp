@@ -17,7 +17,7 @@ class InEKFEstimator {
 
     void update(scalar_t currentTime, scalar_t dt, const vector4_t &quatBase, const vector_t &jointPositions,
                 const vector_t &jointVelocities, const vector3_t &linearAccBase, const vector3_t &angularVelBase,
-                std::vector<bool> contacts);
+                std::vector<bool> contacts, bool rectifyOrientation = true, bool enablePositionEstimation = true);
 
     void computeLinPosVel(scalar_t currentTime, scalar_t dt, Eigen::Vector3d &acc, Eigen::Matrix3d &w_R_b,
                           Eigen::Vector3d &v_b);
@@ -27,6 +27,7 @@ class InEKFEstimator {
     vector3_t getBasePosition() { return inekf_.getState().getPosition(); }
     vector3_t getBaseVelocity() { return inekf_.getState().getVelocity(); }
     vector4_t getBaseOrientation() { return quaternion_t(inekf_.getState().getRotation()).coeffs(); }
+    inline ::inekf::RobotState &getState() { return inekf_.getState(); }
 
     pinocchio::Model model_;
     pinocchio::Data data_;
@@ -39,6 +40,8 @@ class InEKFEstimator {
     vector3_t lastLinearAcceleration_;
 
     std::shared_ptr<spdlog::logger> logger_;
+
+    
 };
 
 }  // namespace muse

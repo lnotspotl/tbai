@@ -33,14 +33,15 @@ using namespace unitree::robot::b2;
 constexpr double PosStopF = (2.146E+9f);
 constexpr double VelStopF = (16000.0f);
 
+
+
+namespace tbai {
+
 struct Go2RobotInterfaceArgs {
     TBAI_ARG_DEFAULT(std::string, networkInterface, "192.168.123.10");
     TBAI_ARG_DEFAULT(bool, channelInit, true);
     TBAI_ARG_DEFAULT(bool, enableStateEstim, true);
 };
-
-
-namespace tbai {
 
 class Go2RobotInterface : public RobotInterface {
    public:
@@ -82,6 +83,16 @@ class Go2RobotInterface : public RobotInterface {
     State state_;
 
     std::shared_ptr<spdlog::logger> logger_;
+
+    bool enablePositionEstimation_ = false;
+
+    virtual void enable() override {
+        enablePositionEstimation_ = true;
+    }
+
+    virtual void disable() override {
+        enablePositionEstimation_ = false;
+    }
 };
 
 }  // namespace tbai
