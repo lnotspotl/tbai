@@ -40,9 +40,7 @@ class InEKFEstimator {
     vector3_t lastLinearAcceleration_;
 
     std::shared_ptr<spdlog::logger> logger_;
-
-    
 };
 
-}  // namespace muse
+}  // namespace inekf
 }  // namespace tbai

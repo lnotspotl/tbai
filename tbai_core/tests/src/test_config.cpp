@@ -2,8 +2,8 @@
 #include <string>
 
 #include <gtest/gtest.h>
-#include <tbai_core/config/Config.hpp>
 #include <tbai_core/Types.hpp>
+#include <tbai_core/config/Config.hpp>
 
 #define DUMMY_CONFIG_PATH "/tmp/tbai_test_config_abc123.yaml"
 

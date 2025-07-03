@@ -1,13 +1,12 @@
 #include "tbai_deploy_go2/Go2RobotInterface.hpp"
 
-#include <tbai_core/Rotations.hpp>
-
 #include <stdint.h>
 
 #include <chrono>
 #include <string>
 #include <thread>
 
+#include <tbai_core/Rotations.hpp>
 #include <tbai_core/control/Rate.hpp>
 
 static uint32_t crc32_core(uint32_t *ptr, uint32_t len) {
@@ -43,7 +42,7 @@ Go2RobotInterface::Go2RobotInterface(Go2RobotInterfaceArgs args) {
     TBAI_LOG_INFO(logger_, "Network interface: {}", args.networkInterface());
     TBAI_LOG_INFO(logger_, "Initializing Go2RobotInterface");
     TBAI_LOG_INFO(logger_, "Channel init: {}", args.channelInit());
-    if(args.channelInit()) {
+    if (args.channelInit()) {
         TBAI_LOG_INFO(logger_, "Initializing channel factory: {}", args.networkInterface());
         unitree::robot::ChannelFactory::Instance()->Init(0, args.networkInterface());
     } else {
@@ -91,7 +90,6 @@ Go2RobotInterface::Go2RobotInterface(Go2RobotInterfaceArgs args) {
     lowcmd_publisher.reset(new ChannelPublisher<unitree_go::msg::dds_::LowCmd_>(TOPIC_LOWCMD));
     lowcmd_publisher->InitChannel();
 
-
     std::cout << "Initializing motion switcher client" << std::endl;
     /*init MotionSwitcherClient*/
     msc->SetTimeout(10.0f);
@@ -116,8 +114,7 @@ Go2RobotInterface::Go2RobotInterface(Go2RobotInterfaceArgs args) {
 
     std::cout << "Initializing subscriber" << std::endl;
     lowstate_subscriber.reset(new ChannelSubscriber<unitree_go::msg::dds_::LowState_>(TOPIC_LOWSTATE));
-    lowstate_subscriber->InitChannel(std::bind(&Go2RobotInterface::lowStateCallback, this, std::placeholders::_1),
-    1);
+    lowstate_subscriber->InitChannel(std::bind(&Go2RobotInterface::lowStateCallback, this, std::placeholders::_1), 1);
 }
 
 Go2RobotInterface::~Go2RobotInterface() {
@@ -157,10 +154,8 @@ int Go2RobotInterface::queryMotionStatus() {
 }
 
 void Go2RobotInterface::lowStateCallback(const void *message) {
-
     auto t11 = std::chrono::high_resolution_clock::now();
     timestamp = tbai::SystemTime<std::chrono::high_resolution_clock>::rightNow();
-
 
     // static scalar_t last_time_limiter = timestamp;
     // constexpr scalar_t dt_limiter = 1/300.0;
@@ -168,7 +163,6 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     //     return;
     // }
     // last_time_limiter = timestamp;
-
 
     // Create a copy of the low level state
     unitree_go::msg::dds_::LowState_ &low_state = *(unitree_go::msg::dds_::LowState_ *)message;
@@ -193,7 +187,8 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     vector_t jointPositions(12);
     vector_t jointVelocities(12);
 
-    // Map joints in order: LF_HAA, LF_HFE, LF_KFE, LH_HAA, LH_HFE, LH_KFE, RF_HAA, RF_HFE, RF_KFE, RH_HAA, RH_HFE, RH_KFE
+    // Map joints in order: LF_HAA, LF_HFE, LF_KFE, LH_HAA, LH_HFE, LH_KFE, RF_HAA, RF_HFE, RF_KFE, RH_HAA, RH_HFE,
+    // RH_KFE
     jointPositions[0] = low_state.motor_state()[motor_id_map["LF_HAA"]].q();  // LF_HAA
     jointPositions[1] = low_state.motor_state()[motor_id_map["LF_HFE"]].q();  // LF_HFE
     jointPositions[2] = low_state.motor_state()[motor_id_map["LF_KFE"]].q();  // LF_KFE
@@ -209,7 +204,7 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     jointPositions[8] = low_state.motor_state()[motor_id_map["RF_KFE"]].q();  // RF_KFE
 
     // Right Hind leg
-    jointPositions[9] = low_state.motor_state()[motor_id_map["RH_HAA"]].q();    // RH_HAA
+    jointPositions[9] = low_state.motor_state()[motor_id_map["RH_HAA"]].q();   // RH_HAA
     jointPositions[10] = low_state.motor_state()[motor_id_map["RH_HFE"]].q();  // RH_HFE
     jointPositions[11] = low_state.motor_state()[motor_id_map["RH_KFE"]].q();  // RH_KFE
 
@@ -226,7 +221,7 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     jointVelocities[7] = low_state.motor_state()[motor_id_map["RF_HFE"]].dq();  // RF_HFE
     jointVelocities[8] = low_state.motor_state()[motor_id_map["RF_KFE"]].dq();  // RF_KFE
 
-    jointVelocities[9] = low_state.motor_state()[motor_id_map["RH_HAA"]].dq();    // RH_HAA
+    jointVelocities[9] = low_state.motor_state()[motor_id_map["RH_HAA"]].dq();   // RH_HAA
     jointVelocities[10] = low_state.motor_state()[motor_id_map["RH_HFE"]].dq();  // RH_HFE
     jointVelocities[11] = low_state.motor_state()[motor_id_map["RH_KFE"]].dq();  // RH_KFE
 
@@ -247,33 +242,31 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     angularVelBase[1] = low_state.imu_state().gyroscope()[1];
     angularVelBase[2] = low_state.imu_state().gyroscope()[2];
 
-
     // Contact states (assuming all feet are in contact for now)
     // Determine contact states based on ground reaction forces
     std::vector<bool> contacts(4, false);
     const double contact_threshold = 16.0;  // N, threshold for contact detection
-    
+
     // Extract ground reaction forces from foot sensors
     // Assuming the order is: LF, LH, RF, RH
     std::vector<double> grf = {
         static_cast<double>(low_state.foot_force()[foot_id_map["LF_FOOT"]]),  // LF
-        static_cast<double>(low_state.foot_force()[foot_id_map["LH_FOOT"]]),  // LH  
+        static_cast<double>(low_state.foot_force()[foot_id_map["LH_FOOT"]]),  // LH
         static_cast<double>(low_state.foot_force()[foot_id_map["RF_FOOT"]]),  // RF
         static_cast<double>(low_state.foot_force()[foot_id_map["RH_FOOT"]])   // RH
     };
-    
+
     // Set contact to true if ground reaction force exceeds threshold
     for (size_t i = 0; i < 4; ++i) {
         contacts[i] = static_cast<bool>(grf[i] >= contact_threshold);
     }
 
-    if(count % N == 0) {
+    if (count % N == 0) {
         std::cout << "LF contact: " << std::to_string(contacts[0]) << " grf: " << std::to_string(grf[0]) << std::endl;
         std::cout << "LH contact: " << std::to_string(contacts[1]) << " grf: " << std::to_string(grf[1]) << std::endl;
         std::cout << "RF contact: " << std::to_string(contacts[2]) << " grf: " << std::to_string(grf[2]) << std::endl;
         std::cout << "RH contact: " << std::to_string(contacts[3]) << " grf: " << std::to_string(grf[3]) << std::endl;
     }
-
 
     // Calculate dt (assuming this is called at regular intervals)
     static scalar_t last_time3 = timestamp;
@@ -282,7 +275,6 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
 
     static bool enable_state_estim = true;
     if (enable_state_estim) {
-
         // Update the state estimator
         auto t1 = std::chrono::high_resolution_clock::now();
         if (estimator_) {
@@ -290,10 +282,10 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
                                contacts, true, enablePositionEstimation_);
         }
         auto t2 = std::chrono::high_resolution_clock::now();
-        if(count % N == 0) {
-            std::cout << "State estimator update time: " << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " us" << std::endl;
+        if (count % N == 0) {
+            std::cout << "State estimator update time: "
+                      << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " us" << std::endl;
         }
-
     }
 
     // Get the latest state from the estimator
@@ -303,7 +295,7 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     // Base orientation - Euler zyx as {roll, pitch, yaw}
     tbai::vector_t rpy;
     tbai::matrix3_t R_base_world;
-    if(enable_state_estim) {
+    if (enable_state_estim) {
         auto orientation_rot = estimator_->getBaseOrientation();
         const quaternion_t baseQuaternion(orientation_rot);
         const tbai::matrix3_t R_world_base = baseQuaternion.toRotationMatrix();
@@ -318,11 +310,10 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
         lastYaw_ = rpy[2];
     }
 
-
     state.x.segment<3>(0) = rpy;
 
     // Base position
-    if(enable_state_estim) {
+    if (enable_state_estim) {
         state.x.segment<3>(3) = estimator_->getBasePosition();
     }
 
@@ -330,7 +321,7 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     state.x.segment<3>(6) = angularVelBase;
 
     // Base linear velocity
-    if(enable_state_estim) {
+    if (enable_state_estim) {
         state.x.segment<3>(9) = R_base_world * estimator_->getBaseVelocity();
     }
 
@@ -343,42 +334,51 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     state.timestamp = timestamp;
     state.contactFlags = contacts;
 
-    if(count % N == 0) {
-        std::cout << "Base orientation: " << std::to_string(rpy[0]) << " " << std::to_string(rpy[1]) << " " << std::to_string(rpy[2]) << std::endl;
-        std::cout << "Base position: " << std::to_string(state.x.segment<3>(3)[0]) << " " << std::to_string(state.x.segment<3>(3)[1]) << " " << std::to_string(state.x.segment<3>(3)[2]) << std::endl;
-        std::cout << "Base angular velocity: " << std::to_string(state.x.segment<3>(6)[0]) << " " << std::to_string(state.x.segment<3>(6)[1]) << " " << std::to_string(state.x.segment<3>(6)[2]) << std::endl;
-        std::cout << "Base linear velocity: " << std::to_string(state.x.segment<3>(9)[0]) << " " << std::to_string(state.x.segment<3>(9)[1]) << " " << std::to_string(state.x.segment<3>(9)[2]) << std::endl;
-        std::cout << "Base linear acceleration: " << linearAccBase[0] << " " << linearAccBase[1] << " " << linearAccBase[2] << std::endl;
+    if (count % N == 0) {
+        std::cout << "Base orientation: " << std::to_string(rpy[0]) << " " << std::to_string(rpy[1]) << " "
+                  << std::to_string(rpy[2]) << std::endl;
+        std::cout << "Base position: " << std::to_string(state.x.segment<3>(3)[0]) << " "
+                  << std::to_string(state.x.segment<3>(3)[1]) << " " << std::to_string(state.x.segment<3>(3)[2])
+                  << std::endl;
+        std::cout << "Base angular velocity: " << std::to_string(state.x.segment<3>(6)[0]) << " "
+                  << std::to_string(state.x.segment<3>(6)[1]) << " " << std::to_string(state.x.segment<3>(6)[2])
+                  << std::endl;
+        std::cout << "Base linear velocity: " << std::to_string(state.x.segment<3>(9)[0]) << " "
+                  << std::to_string(state.x.segment<3>(9)[1]) << " " << std::to_string(state.x.segment<3>(9)[2])
+                  << std::endl;
+        std::cout << "Base linear acceleration: " << linearAccBase[0] << " " << linearAccBase[1] << " "
+                  << linearAccBase[2] << std::endl;
     }
 
     // Update the latest state
     auto t12 = std::chrono::high_resolution_clock::now();
-    if(count % N == 0) {
-        std::cout << "State update time: " << std::chrono::duration_cast<std::chrono::microseconds>(t12 - t11).count() << " us" << std::endl;
+    if (count % N == 0) {
+        std::cout << "State update time: " << std::chrono::duration_cast<std::chrono::microseconds>(t12 - t11).count()
+                  << " us" << std::endl;
     }
     std::lock_guard<std::mutex> lock(latest_state_mutex_);
     state_ = std::move(state);
     auto t13 = std::chrono::high_resolution_clock::now();
-    if(count % N == 0) {
-        std::cout << "Total callback time: " << std::chrono::duration_cast<std::chrono::microseconds>(t13 - t11).count() << " us" << std::endl;
+    if (count % N == 0) {
+        std::cout << "Total callback time: " << std::chrono::duration_cast<std::chrono::microseconds>(t13 - t11).count()
+                  << " us" << std::endl;
     }
 }
 
 void Go2RobotInterface::publish(std::vector<MotorCommand> commands) {
-
     static auto last_publish_time = std::chrono::high_resolution_clock::now();
     static int publish_count = 0;
     publish_count++;
-    
-    constexpr int PUBLISH_N = 100; // Print every 100 publishes (roughly 100 ms at 1kHz)
+
+    constexpr int PUBLISH_N = 100;  // Print every 100 publishes (roughly 100 ms at 1kHz)
     if (publish_count % PUBLISH_N == 0) {
         auto current_time = std::chrono::high_resolution_clock::now();
-        auto time_diff = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_publish_time).count();
+        auto time_diff =
+            std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_publish_time).count();
         double rate = (PUBLISH_N * 1000.0) / time_diff;
         TBAI_LOG_INFO(logger_, "Publish frequency: {} Hz (count: {})", rate, publish_count);
         last_publish_time = current_time;
     }
-
 
     // for (const auto &command : commands) {
     //     int motor_id = motor_id_map[command.joint_name];

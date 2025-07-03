@@ -30,7 +30,6 @@ InEKFEstimator::InEKFEstimator(std::vector<std::string> footNames, const std::st
     P_init.block<3, 3>(9, 9).diagonal().setConstant(pow(0.001, 2));
     P_init.block<3, 3>(12, 12).diagonal().setConstant(pow(0.001, 2));
 
-
     // TODO: Store this for future re-use (state reset)
     ::inekf::RobotState init_state;
     init_state.setRotation(Eigen::Matrix3d::Identity());
@@ -65,8 +64,8 @@ InEKFEstimator::InEKFEstimator(std::vector<std::string> footNames, const std::st
 
 void InEKFEstimator::update(scalar_t currentTime, scalar_t dt, const vector4_t &quatBase,
                             const vector_t &jointPositions, const vector_t &jointVelocities,
-                            const vector3_t &linearAccBase, const vector3_t &angularVelBase,
-                            std::vector<bool> contacts, bool rectifyOrientation, bool enablePositionEstimation) {
+                            const vector3_t &linearAccBase, const vector3_t &angularVelBase, std::vector<bool> contacts,
+                            bool rectifyOrientation, bool enablePositionEstimation) {
     // Just store the message on the first call
     if (!firstMessageReceived_) {
         firstMessageReceived_ = true;
@@ -76,9 +75,9 @@ void InEKFEstimator::update(scalar_t currentTime, scalar_t dt, const vector4_t &
     }
 
     if (rectifyOrientation || !enablePositionEstimation) {
-        inekf_.getState().setRotation(Eigen::Quaterniond(quatBase[3], quatBase[0], quatBase[1], quatBase[2]).toRotationMatrix());
+        inekf_.getState().setRotation(
+            Eigen::Quaterniond(quatBase[3], quatBase[0], quatBase[1], quatBase[2]).toRotationMatrix());
     }
-
 
     if (enablePositionEstimation) {
         // Propagate IMU measurements
@@ -109,11 +108,10 @@ void InEKFEstimator::update(scalar_t currentTime, scalar_t dt, const vector4_t &
         for (size_t i = 0; i < legIndices_.size(); i++) {
             constexpr double foot_noise = 0.01;
             kinematics.emplace_back(i, Eigen::Affine3d(Eigen::Translation3d(footPositions[i])).matrix(),
-                                                Eigen::Matrix<double, 6, 6>::Identity() * pow(foot_noise, 2));
+                                    Eigen::Matrix<double, 6, 6>::Identity() * pow(foot_noise, 2));
         }
         inekf_.CorrectKinematics(kinematics);
     }
-
 
     lastAngularVelocity_ = angularVelBase;
     lastLinearAcceleration_ = linearAccBase;

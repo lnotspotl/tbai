@@ -1,8 +1,8 @@
 #pragma once
 
 #include <filesystem>
-#include <vector>
 #include <functional>
+#include <vector>
 
 #include <tbai_core/Types.hpp>
 
@@ -31,6 +31,6 @@ std::string downloadFromHuggingFace(const std::string &repo_id, const std::strin
  * @param vectors The vectors to stack
  * @return The stacked vector
  */
-tbai::vector_t vvstack(const std::vector<std::reference_wrapper<const tbai::vector_t>>& vectors);
+tbai::vector_t vvstack(const std::vector<std::reference_wrapper<const tbai::vector_t>> &vectors);
 
 }  // namespace tbai

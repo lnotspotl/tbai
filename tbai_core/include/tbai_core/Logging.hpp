@@ -61,7 +61,7 @@
             std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); \
         if (__TBAI_LOG_THROTTLE_CHECK(__log_throttle_now__, __log_throttle_last_hit__, period)) {       \
             __log_throttle_last_hit__ = __log_throttle_now__;                                           \
-            TBAI_GLOBAL_LOG_DEBUG(__VA_ARGS__);                                                                \
+            TBAI_GLOBAL_LOG_DEBUG(__VA_ARGS__);                                                         \
         }                                                                                               \
     } while (false)
 
@@ -72,7 +72,7 @@
             std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); \
         if (__TBAI_LOG_THROTTLE_CHECK(__log_throttle_now__, __log_throttle_last_hit__, period)) {       \
             __log_throttle_last_hit__ = __log_throttle_now__;                                           \
-            TBAI_GLOBAL_LOG_INFO(__VA_ARGS__);                                                                 \
+            TBAI_GLOBAL_LOG_INFO(__VA_ARGS__);                                                          \
         }                                                                                               \
     } while (false)
 
@@ -83,7 +83,7 @@
             std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); \
         if (__TBAI_LOG_THROTTLE_CHECK(__log_throttle_now__, __log_throttle_last_hit__, period)) {       \
             __log_throttle_last_hit__ = __log_throttle_now__;                                           \
-            TBAI_GLOBAL_LOG_WARN(__VA_ARGS__);                                                                 \
+            TBAI_GLOBAL_LOG_WARN(__VA_ARGS__);                                                          \
         }                                                                                               \
     } while (false)
 
@@ -94,7 +94,7 @@
             std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); \
         if (__TBAI_LOG_THROTTLE_CHECK(__log_throttle_now__, __log_throttle_last_hit__, period)) {       \
             __log_throttle_last_hit__ = __log_throttle_now__;                                           \
-            TBAI_GLOBAL_LOG_ERROR(__VA_ARGS__);                                                                \
+            TBAI_GLOBAL_LOG_ERROR(__VA_ARGS__);                                                         \
         }                                                                                               \
     } while (false)
 
@@ -105,7 +105,7 @@
             std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); \
         if (__TBAI_LOG_THROTTLE_CHECK(__log_throttle_now__, __log_throttle_last_hit__, period)) {       \
             __log_throttle_last_hit__ = __log_throttle_now__;                                           \
-            TBAI_GLOBAL_LOG_FATAL(__VA_ARGS__);                                                                \
+            TBAI_GLOBAL_LOG_FATAL(__VA_ARGS__);                                                         \
         }                                                                                               \
     } while (false)
 
@@ -116,7 +116,7 @@
             std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); \
         if (__TBAI_LOG_THROTTLE_CHECK(__log_throttle_now__, __log_throttle_last_hit__, period)) {       \
             __log_throttle_last_hit__ = __log_throttle_now__;                                           \
-            TBAI_LOG_TRACE(logger, __VA_ARGS__);                                                     \
+            TBAI_LOG_TRACE(logger, __VA_ARGS__);                                                        \
         }                                                                                               \
     } while (false)
 
@@ -127,7 +127,7 @@
             std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); \
         if (__TBAI_LOG_THROTTLE_CHECK(__log_throttle_now__, __log_throttle_last_hit__, period)) {       \
             __log_throttle_last_hit__ = __log_throttle_now__;                                           \
-            TBAI_LOG_DEBUG(logger, __VA_ARGS__);                                                     \
+            TBAI_LOG_DEBUG(logger, __VA_ARGS__);                                                        \
         }                                                                                               \
     } while (false)
 
@@ -138,7 +138,7 @@
             std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); \
         if (__TBAI_LOG_THROTTLE_CHECK(__log_throttle_now__, __log_throttle_last_hit__, period)) {       \
             __log_throttle_last_hit__ = __log_throttle_now__;                                           \
-            TBAI_LOG_INFO(logger, __VA_ARGS__);                                                      \
+            TBAI_LOG_INFO(logger, __VA_ARGS__);                                                         \
         }                                                                                               \
     } while (false)
 
@@ -149,7 +149,7 @@
             std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); \
         if (__TBAI_LOG_THROTTLE_CHECK(__log_throttle_now__, __log_throttle_last_hit__, period)) {       \
             __log_throttle_last_hit__ = __log_throttle_now__;                                           \
-            TBAI_LOG_WARN(logger, __VA_ARGS__);                                                      \
+            TBAI_LOG_WARN(logger, __VA_ARGS__);                                                         \
         }                                                                                               \
     } while (false)
 
@@ -160,7 +160,7 @@
             std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); \
         if (__TBAI_LOG_THROTTLE_CHECK(__log_throttle_now__, __log_throttle_last_hit__, period)) {       \
             __log_throttle_last_hit__ = __log_throttle_now__;                                           \
-            TBAI_LOG_ERROR(logger, __VA_ARGS__);                                                     \
+            TBAI_LOG_ERROR(logger, __VA_ARGS__);                                                        \
         }                                                                                               \
     } while (false)
 
@@ -171,7 +171,7 @@
             std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); \
         if (__TBAI_LOG_THROTTLE_CHECK(__log_throttle_now__, __log_throttle_last_hit__, period)) {       \
             __log_throttle_last_hit__ = __log_throttle_now__;                                           \
-            TBAI_LOG_FATAL(logger, __VA_ARGS__);                                                     \
+            TBAI_LOG_FATAL(logger, __VA_ARGS__);                                                        \
         }                                                                                               \
     } while (false)
 namespace tbai {

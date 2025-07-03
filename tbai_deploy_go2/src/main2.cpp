@@ -1,7 +1,7 @@
-#include <iostream>
-
 #include <chrono>
+#include <iostream>
 #include <thread>
+
 #include <argparse/argparse.hpp>
 
 #define SCHED_DEADLINE 6
@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
 
     try {
         program.parse_args(argc, argv);
-    } catch (const std::runtime_error& err) {
+    } catch (const std::runtime_error &err) {
         std::cerr << err.what() << std::endl;
         std::cerr << program;
         exit(1);
@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
 
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
-    while(true) {
+    while (true) {
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
         go2.publish(std::vector<tbai::MotorCommand>());
     }

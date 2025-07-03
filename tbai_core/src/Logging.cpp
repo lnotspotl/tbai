@@ -3,7 +3,8 @@
 namespace tbai {
 
 std::shared_ptr<spdlog::logger> getLogger(const std::string &name) {
-    auto logLevel = tbai::getEnvAsChecked<std::string>("TBAI_LOG_LEVEL", {"trace", "debug", "info", "warn", "error", "fatal"}, true, "info");
+    auto logLevel = tbai::getEnvAsChecked<std::string>(
+        "TBAI_LOG_LEVEL", {"trace", "debug", "info", "warn", "error", "fatal"}, true, "info");
     auto logFolder = tbai::getEnvAs<std::string>("TBAI_LOG_FOLDER", true, "");
     auto logToConsole = tbai::getEnvAs<bool>("TBAI_LOG_TO_CONSOLE", true, true);
 
