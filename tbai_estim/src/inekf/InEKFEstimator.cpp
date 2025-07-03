@@ -8,7 +8,7 @@
 namespace tbai {
 namespace inekf {
 InEKFEstimator::InEKFEstimator(std::vector<std::string> footNames, const std::string &urdf) {
-    logger_ = tbai::getLogger("InEKFEstimator");
+    logger_ = tbai::getLogger("inekf_estimator");
 
     TBAI_LOG_INFO(logger_, "Initializing Pinocchio model");
     setupPinocchioModel(urdf);
