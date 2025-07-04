@@ -20,11 +20,11 @@ InEKFEstimator::InEKFEstimator(std::vector<std::string> footNames, const std::st
     // Set up InEKF parameters
     // TODO: load these from config
     ::inekf::NoiseParams noise_params;
-    noise_params.setGyroscopeNoise(Eigen::Vector3d(0.0001, 0.0001, 0.0001));
-    noise_params.setAccelerometerNoise(Eigen::Vector3d(0.1, 0.1, 0.1));
-    noise_params.setGyroscopeBiasNoise(0.0001);
-    noise_params.setAccelerometerBiasNoise(0.0001);
-    noise_params.setContactNoise(0.01);
+    noise_params.setGyroscopeNoise(Eigen::Vector3d(0.01, 0.01, 0.015));
+    noise_params.setAccelerometerNoise(Eigen::Vector3d(0.08, 0.1, 0.12));
+    noise_params.setGyroscopeBiasNoise(0.002);
+    noise_params.setAccelerometerBiasNoise(0.015);
+    noise_params.setContactNoise(0.0005);
     inekf_.setNoiseParams(noise_params);
 
     Eigen::Matrix<double, 15, 15> P_init = Eigen::Matrix<double, 15, 15>::Zero();
@@ -39,8 +39,8 @@ InEKFEstimator::InEKFEstimator(std::vector<std::string> footNames, const std::st
     init_state.setRotation(Eigen::Matrix3d::Identity());
     init_state.setVelocity(Eigen::Vector3d::Zero());
     init_state.setPosition(Eigen::Vector3d(0.0, 0.0, 0.35));
-    init_state.setGyroscopeBias(Eigen::Vector3d(0.01, 0.01, 0.01));
-    init_state.setAccelerometerBias(Eigen::Vector3d(0.01, 0.01, 0.01));
+    init_state.setGyroscopeBias(Eigen::Vector3d(0.003, 0.0, -0.007));
+    init_state.setAccelerometerBias(Eigen::Vector3d(-0.08, 0.05, 0.3));
     init_state.setP(P_init);
     inekf_.setState(init_state);
 

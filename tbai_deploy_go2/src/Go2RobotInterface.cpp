@@ -192,14 +192,14 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     static int count = 0;
     count++;
 
-    constexpr int N = 500;
-    if (count % N == 0) {  // Print every 100th callback to avoid spam
-        scalar_t time_diff = timestamp - last_time2;
-        double rate = N / time_diff;
-        std::cout << "Low state callback rate: " << rate << " Hz (count: " << count << ")" << std::endl;
-        last_time2 = timestamp;
-        std::cout << "time_diff: " << std::to_string(time_diff) << std::endl;
-    }
+    constexpr int N = 2;
+    // if (count % N == 0) {  // Print every 100th callback to avoid spam
+    //     scalar_t time_diff = timestamp - last_time2;
+    //     double rate = N / time_diff;
+    //     std::cout << "Low state callback rate: " << rate << " Hz (count: " << count << ")" << std::endl;
+    //     last_time2 = timestamp;
+    //     std::cout << "time_diff: " << std::to_string(time_diff) << std::endl;
+    // }
 
     // Extract joint positions and velocities from low_state
     vector_t jointPositions(12);
@@ -263,14 +263,14 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     // Contact states (assuming all feet are in contact for now)
     // Determine contact states based on ground reaction forces
     std::vector<bool> contacts(4, false);
-    const double contact_threshold = 16.0;  // N, threshold for contact detection
+    const double contact_threshold = 19.0;  // N, threshold for contact detection
 
     // Extract ground reaction forces from foot sensors
     // Assuming the order is: LF, LH, RF, RH
     std::vector<double> grf = {
         static_cast<double>(low_state.foot_force()[foot_id_map["LF_FOOT"]]),  // LF
-        static_cast<double>(low_state.foot_force()[foot_id_map["LH_FOOT"]]),  // LH
         static_cast<double>(low_state.foot_force()[foot_id_map["RF_FOOT"]]),  // RF
+        static_cast<double>(low_state.foot_force()[foot_id_map["LH_FOOT"]]),  // LH
         static_cast<double>(low_state.foot_force()[foot_id_map["RH_FOOT"]])   // RH
     };
 
@@ -279,12 +279,12 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
         contacts[i] = static_cast<bool>(grf[i] >= contact_threshold);
     }
 
-    if (count % N == 0) {
-        std::cout << "LF contact: " << std::to_string(contacts[0]) << " grf: " << std::to_string(grf[0]) << std::endl;
-        std::cout << "LH contact: " << std::to_string(contacts[1]) << " grf: " << std::to_string(grf[1]) << std::endl;
-        std::cout << "RF contact: " << std::to_string(contacts[2]) << " grf: " << std::to_string(grf[2]) << std::endl;
-        std::cout << "RH contact: " << std::to_string(contacts[3]) << " grf: " << std::to_string(grf[3]) << std::endl;
-    }
+    // if (count % N == 0) {
+    //     std::cout << "LF contact: " << std::to_string(contacts[0]) << " grf: " << std::to_string(grf[0]) << std::endl;
+    //     std::cout << "LH contact: " << std::to_string(contacts[1]) << " grf: " << std::to_string(grf[1]) << std::endl;
+    //     std::cout << "RF contact: " << std::to_string(contacts[2]) << " grf: " << std::to_string(grf[2]) << std::endl;
+    //     std::cout << "RH contact: " << std::to_string(contacts[3]) << " grf: " << std::to_string(grf[3]) << std::endl;
+    // }
 
     // Calculate dt (assuming this is called at regular intervals)
     static scalar_t last_time3 = timestamp;
@@ -297,7 +297,7 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
         auto t1 = std::chrono::high_resolution_clock::now();
         if (estimator_) {
             estimator_->update(timestamp, dt, quatBase, jointPositions, jointVelocities, linearAccBase, angularVelBase,
-                               contacts, true, enablePositionEstimation_);
+                               contacts, false, enablePositionEstimation_);
         }
         auto t2 = std::chrono::high_resolution_clock::now();
         if (count % N == 0) {
@@ -353,14 +353,14 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     state.contactFlags = contacts;
 
     if (count % N == 0) {
-        std::cout << "Base orientation: " << std::to_string(rpy[0]) << " " << std::to_string(rpy[1]) << " "
-                  << std::to_string(rpy[2]) << std::endl;
+        // std::cout << "Base orientation: " << std::to_string(rpy[0]) << " " << std::to_string(rpy[1]) << " "
+        //           << std::to_string(rpy[2]) << std::endl;
         std::cout << "Base position: " << std::to_string(state.x.segment<3>(3)[0]) << " "
                   << std::to_string(state.x.segment<3>(3)[1]) << " " << std::to_string(state.x.segment<3>(3)[2])
                   << std::endl;
-        std::cout << "Base angular velocity: " << std::to_string(state.x.segment<3>(6)[0]) << " "
-                  << std::to_string(state.x.segment<3>(6)[1]) << " " << std::to_string(state.x.segment<3>(6)[2])
-                  << std::endl;
+        // std::cout << "Base angular velocity: " << std::to_string(state.x.segment<3>(6)[0]) << " "
+        //           << std::to_string(state.x.segment<3>(6)[1]) << " " << std::to_string(state.x.segment<3>(6)[2])
+        //           << std::endl;
         std::cout << "Base linear velocity: " << std::to_string(state.x.segment<3>(9)[0]) << " "
                   << std::to_string(state.x.segment<3>(9)[1]) << " " << std::to_string(state.x.segment<3>(9)[2])
                   << std::endl;
@@ -370,17 +370,17 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
 
     // Update the latest state
     auto t12 = std::chrono::high_resolution_clock::now();
-    if (count % N == 0) {
-        std::cout << "State update time: " << std::chrono::duration_cast<std::chrono::microseconds>(t12 - t11).count()
-                  << " us" << std::endl;
-    }
+    // if (count % N == 0) {
+    //     std::cout << "State update time: " << std::chrono::duration_cast<std::chrono::microseconds>(t12 - t11).count()
+    //               << " us" << std::endl;
+    // }
     std::lock_guard<std::mutex> lock(latest_state_mutex_);
     state_ = std::move(state);
     auto t13 = std::chrono::high_resolution_clock::now();
-    if (count % N == 0) {
-        std::cout << "Total callback time: " << std::chrono::duration_cast<std::chrono::microseconds>(t13 - t11).count()
-                  << " us" << std::endl;
-    }
+    // if (count % N == 0) {
+    //     std::cout << "Total callback time: " << std::chrono::duration_cast<std::chrono::microseconds>(t13 - t11).count()
+    //               << " us" << std::endl;
+    // }
 }
 
 /*********************************************************************************************************************/
@@ -401,20 +401,20 @@ void Go2RobotInterface::publish(std::vector<MotorCommand> commands) {
         last_publish_time = current_time;
     }
 
-    // for (const auto &command : commands) {
-    //     int motor_id = motor_id_map[command.joint_name];
-    //     low_cmd.motor_cmd()[motor_id].mode() = (0x01);  // motor switch to servo (PMSM) mode
-    //     low_cmd.motor_cmd()[motor_id].q() = (command.desired_position);
-    //     low_cmd.motor_cmd()[motor_id].kp() = command.kp;
-    //     low_cmd.motor_cmd()[motor_id].dq() = (command.desired_velocity);
-    //     low_cmd.motor_cmd()[motor_id].kd() = command.kd;
-    //     low_cmd.motor_cmd()[motor_id].tau() = command.torque_ff;
-    // }
+    for (const auto &command : commands) {
+        int motor_id = motor_id_map[command.joint_name];
+        low_cmd.motor_cmd()[motor_id].mode() = (0x01);  // motor switch to servo (PMSM) mode
+        low_cmd.motor_cmd()[motor_id].q() = (command.desired_position);
+        low_cmd.motor_cmd()[motor_id].kp() = command.kp;
+        low_cmd.motor_cmd()[motor_id].dq() = (command.desired_velocity);
+        low_cmd.motor_cmd()[motor_id].kd() = command.kd;
+        low_cmd.motor_cmd()[motor_id].tau() = command.torque_ff;
+    }
 
-    // low_cmd.crc() = crc32_core((uint32_t *)&low_cmd, (sizeof(unitree_go::msg::dds_::LowCmd_) >> 2) - 1);
+    low_cmd.crc() = crc32_core((uint32_t *)&low_cmd, (sizeof(unitree_go::msg::dds_::LowCmd_) >> 2) - 1);
 
-    // // Publish the low level command
-    // lowcmd_publisher->Write(low_cmd);
+    // Publish the low level command
+    lowcmd_publisher->Write(low_cmd);
 }
 
 /*********************************************************************************************************************/
