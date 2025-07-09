@@ -280,10 +280,11 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     }
 
     // if (count % N == 0) {
-    //     std::cout << "LF contact: " << std::to_string(contacts[0]) << " grf: " << std::to_string(grf[0]) << std::endl;
-    //     std::cout << "LH contact: " << std::to_string(contacts[1]) << " grf: " << std::to_string(grf[1]) << std::endl;
-    //     std::cout << "RF contact: " << std::to_string(contacts[2]) << " grf: " << std::to_string(grf[2]) << std::endl;
-    //     std::cout << "RH contact: " << std::to_string(contacts[3]) << " grf: " << std::to_string(grf[3]) << std::endl;
+    //     std::cout << "LF contact: " << std::to_string(contacts[0]) << " grf: " << std::to_string(grf[0]) <<
+    //     std::endl; std::cout << "LH contact: " << std::to_string(contacts[1]) << " grf: " << std::to_string(grf[1])
+    //     << std::endl; std::cout << "RF contact: " << std::to_string(contacts[2]) << " grf: " <<
+    //     std::to_string(grf[2]) << std::endl; std::cout << "RH contact: " << std::to_string(contacts[3]) << " grf: "
+    //     << std::to_string(grf[3]) << std::endl;
     // }
 
     // Calculate dt (assuming this is called at regular intervals)
@@ -371,14 +372,16 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     // Update the latest state
     auto t12 = std::chrono::high_resolution_clock::now();
     // if (count % N == 0) {
-    //     std::cout << "State update time: " << std::chrono::duration_cast<std::chrono::microseconds>(t12 - t11).count()
+    //     std::cout << "State update time: " << std::chrono::duration_cast<std::chrono::microseconds>(t12 -
+    //     t11).count()
     //               << " us" << std::endl;
     // }
     std::lock_guard<std::mutex> lock(latest_state_mutex_);
     state_ = std::move(state);
     auto t13 = std::chrono::high_resolution_clock::now();
     // if (count % N == 0) {
-    //     std::cout << "Total callback time: " << std::chrono::duration_cast<std::chrono::microseconds>(t13 - t11).count()
+    //     std::cout << "Total callback time: " << std::chrono::duration_cast<std::chrono::microseconds>(t13 -
+    //     t11).count()
     //               << " us" << std::endl;
     // }
 }

@@ -16,22 +16,22 @@ TEST(HistoryBufferTest, TestHistoryBuffer) {
     historyBuffer.addObservation((tbai::vector_t(2) << 1, 2).finished());
     finalObservation = historyBuffer.getFinalObservation();
     std::cout << finalObservation.transpose() << std::endl;
-    testEq(finalObservation, ((tbai::vector_t(6) << 0,0,0,0,1,2).finished()));
+    testEq(finalObservation, ((tbai::vector_t(6) << 0, 0, 0, 0, 1, 2).finished()));
 
     historyBuffer.addObservation((tbai::vector_t(2) << 3, 4).finished());
     finalObservation = historyBuffer.getFinalObservation();
     std::cout << finalObservation.transpose() << std::endl;
-    testEq(finalObservation, ((tbai::vector_t(6) << 0,0,1,2,3,4).finished()));
+    testEq(finalObservation, ((tbai::vector_t(6) << 0, 0, 1, 2, 3, 4).finished()));
 
     historyBuffer.addObservation((tbai::vector_t(2) << 5, 6).finished());
     finalObservation = historyBuffer.getFinalObservation();
     std::cout << finalObservation.transpose() << std::endl;
-    testEq(finalObservation, ((tbai::vector_t(6) << 1,2,3,4,5,6).finished()));
+    testEq(finalObservation, ((tbai::vector_t(6) << 1, 2, 3, 4, 5, 6).finished()));
 
     historyBuffer.addObservation((tbai::vector_t(2) << 7, 8).finished());
     finalObservation = historyBuffer.getFinalObservation();
     std::cout << finalObservation.transpose() << std::endl;
-    testEq(finalObservation, ((tbai::vector_t(6) << 3,4,5,6,7,8).finished()));
+    testEq(finalObservation, ((tbai::vector_t(6) << 3, 4, 5, 6, 7, 8).finished()));
 }
 
 int main(int argc, char **argv) {

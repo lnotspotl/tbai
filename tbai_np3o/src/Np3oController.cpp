@@ -29,16 +29,16 @@ static inline scalar_t clip(scalar_t x, scalar_t min, scalar_t max) {
 }
 
 Np3oController::Np3oController(const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
-                             const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen)
+                               const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen)
     : Np3oController::Np3oController(tbai::getEnvAs<std::string>("TBAI_ROBOT_DESCRIPTION_PATH"), stateSubscriberPtr,
-                                   refVelGen) {}
+                                     refVelGen) {}
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 Np3oController::Np3oController(const std::string &urdfPathOrString,
-                             const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
-                             const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen)
+                               const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
+                               const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen)
     : stateSubscriberPtr_(stateSubscriberPtr), refVelGen_(refVelGen), historyBuffer_(70, 30) {
     logger_ = tbai::getLogger("wtw_controller");
 

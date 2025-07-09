@@ -13,9 +13,9 @@
 #include <tbai_core/Logging.hpp>
 #include <tbai_core/control/Controllers.hpp>
 #include <tbai_core/control/Subscribers.hpp>
-#include <tbai_reference/ReferenceVelocityGenerator.hpp>
 #include <tbai_np3o/HistoryBuffer.hpp>
 #include <tbai_np3o/State.hpp>
+#include <tbai_reference/ReferenceVelocityGenerator.hpp>
 #include <torch/script.h>
 
 namespace tbai {
@@ -25,11 +25,12 @@ using torch::jit::script::Module;
 
 class Np3oController : public tbai::Controller {
    public:
-    Np3oController(const std::string &urdfPathOrString, const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
-                  const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen);
+    Np3oController(const std::string &urdfPathOrString,
+                   const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
+                   const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen);
 
     Np3oController(const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
-                  const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen);
+                   const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen);
 
     std::vector<tbai::MotorCommand> getMotorCommands(scalar_t currentTime, scalar_t dt) override;
 
