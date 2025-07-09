@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 option(TBAI_BUILD_TESTS "Build the tests" OFF)
 option(TBAI_BUILD_BOB "Build the bob" ON)
 option(TBAI_BUILD_WTW "Build the wtw" ON)
+option(TBAI_BUILD_NP3O "Build the np3o" ON)
 option(TBAI_BUILD_MUSE "Build the muse" ON)
 option(TBAI_BUILD_PYTHON "Build the Python bindings" OFF)
 option(TBAI_BUILD_DEPLOY_GO2 "Build the deploy go2" ON)
@@ -49,6 +50,10 @@ endif()
 
 if(TBAI_BUILD_WTW)
   add_subdirectory(tbai_wtw)
+endif()
+
+if(TBAI_BUILD_NP3O)
+  add_subdirectory(tbai_np3o)
 endif()
 
 if(TBAI_BUILD_PYTHON)

@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <tbai_wtw/HistoryBuffer.hpp>
+#include <tbai_np3o/HistoryBuffer.hpp>
 
 static void testEq(const tbai::vector_t &a, const tbai::vector_t &b) {
     EXPECT_EQ(a.size(), b.size());
