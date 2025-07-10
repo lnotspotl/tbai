@@ -4,7 +4,7 @@
 #include <tbai_np3o/HistoryBuffer.hpp>
 
 namespace tbai {
-namespace wtw {
+namespace np3o {
 
 HistoryBuffer::HistoryBuffer(std::size_t numObs, std::size_t historyLength)
     : numObs_(numObs), historyLength_(historyLength), currentIndex_(0) {
@@ -28,5 +28,5 @@ tbai::vector_t HistoryBuffer::getFinalObservation() {
     return tbai::vvstack(historyRefs);
 }
 
-}  // namespace wtw
+}  // namespace np3o
 }  // namespace tbai

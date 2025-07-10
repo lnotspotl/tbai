@@ -44,7 +44,7 @@ class Np3oController : public tbai::Controller {
 
     void postStep(scalar_t currentTime, scalar_t dt) override {}
 
-    std::string getName() const override { return "WTW"; }
+    std::string getName() const override { return "NP3O"; }
 
     virtual void atPositions(matrix_t &positions) = 0;
 
@@ -56,15 +56,13 @@ class Np3oController : public tbai::Controller {
 
     std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> refVelGen_;
 
-    Module adaptationModule_;
-    Module bodyModule_;
+    Module model_;
 
-    at::Tensor forward(at::Tensor &input) {
+    at::Tensor forward(at::Tensor &obsProprioceptive, at::Tensor &obsHistory) {
         torch::NoGradGuard no_grad;
-        input = input.reshape({1, -1});
-        auto latent = adaptationModule_.forward({input}).toTensor();
-        at::Tensor concatenated = torch::cat({input, latent}, -1);
-        at::Tensor action = bodyModule_.forward({concatenated}).toTensor();
+        obsProprioceptive = obsProprioceptive.reshape({1, -1});
+        obsHistory = obsHistory.reshape({1, 10, -1});  // TODO: history size is hardcoded here
+        at::Tensor action = model_.forward({obsProprioceptive, obsHistory}).toTensor().reshape({-1});
         return action;
     }
 
@@ -72,41 +70,39 @@ class Np3oController : public tbai::Controller {
     std::vector<tbai::MotorCommand> getMotorCommands(const vector_t &jointAngles);
     pinocchio::Model pinocchioModel_;
     pinocchio::Data pinocchioData_;
-    wtw::State getWtwState();
+    np3o::State getNp3oState();
 
-    at::Tensor getNNInput(const wtw::State &state, scalar_t currentTime, scalar_t dt);
+    tbai::vector_t getObsProprioceptive(const np3o::State &state, scalar_t currentTime, scalar_t dt);
+    tbai::vector_t getObsHistory();
+    void updateObsHistory(const tbai::vector_t &observation);
 
-    constexpr static int GRAVITY_START_INDEX = 0;
-    constexpr static int COMMAND_START_INDEX = 3;
-    constexpr static int JOINT_RESIDUALS_START_INDEX = 18;
-    constexpr static int JOINT_VELOCITIES_START_INDEX = 30;
-    constexpr static int LAST_ACTION_START_INDEX = 42;
-    constexpr static int LAST_LAST_ACTION_START_INDEX = 54;
-    constexpr static int CLOCK_INPUTS_START_INDEX = 66;
 
-    // Observations:
-    // gravity - 3
-    // commands - 15
+    // base angular velocity - 3
+    // projected gravity - 3
+    // command - 3
     // dof residuals - 12
     // dof velocities - 12
     // last action - 12
-    // last last action - 12
-    // clock inputs - 4
+    constexpr static int BASE_ANGULAR_VELOCITY_START_INDEX = 0;
+    constexpr static int PROJECTED_GRAVITY_START_INDEX = 3;
+    constexpr static int COMMAND_START_INDEX = 6;
+    constexpr static int DOF_RESIDUALS_START_INDEX = 9;
+    constexpr static int DOF_VELOCITIES_START_INDEX = 21;
+    constexpr static int LAST_ACTION_START_INDEX = 33;
 
-    void fillGravity(vector_t &input, const wtw::State &state);
-    void fillCommand(vector_t &input, const wtw::State &state, scalar_t currentTime, scalar_t dt);
-    void fillJointResiduals(vector_t &input, const wtw::State &state);
-    void fillJointVelocities(vector_t &input, const wtw::State &state);
-    void fillLastAction(vector_t &input, const wtw::State &state);
-    void fillLastLastAction(vector_t &input, const wtw::State &state);
-    void fillClockInputs(vector_t &input, scalar_t currentTime, scalar_t dt);
+    void fillBaseAngularVelocity(vector_t &input, const np3o::State &state);
+    void fillProjectedGravity(vector_t &input, const np3o::State &state);
+    void fillCommand(vector_t &input, const np3o::State &state, scalar_t currentTime, scalar_t dt);
+    void fillJointResiduals(vector_t &input, const np3o::State &state);
+    void fillJointVelocities(vector_t &input, const np3o::State &state);
+    void fillLastAction(vector_t &input, const np3o::State &state);
 
     std::vector<std::string> jointNames_;
 
     vector_t lastAction_;
     vector_t lastLastAction_;
 
-    wtw::HistoryBuffer historyBuffer_;
+    np3o::HistoryBuffer historyBuffer_;
 
     std::shared_ptr<spdlog::logger> logger_;
 

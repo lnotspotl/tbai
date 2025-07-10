@@ -9,7 +9,7 @@ static void testEq(const tbai::vector_t &a, const tbai::vector_t &b) {
 }
 
 TEST(HistoryBufferTest, TestHistoryBuffer) {
-    tbai::wtw::HistoryBuffer historyBuffer(2, 3);
+    tbai::np3o::HistoryBuffer historyBuffer(2, 3);
     tbai::vector_t finalObservation = historyBuffer.getFinalObservation();
     testEq(finalObservation, ((tbai::vector_t(6) << 0, 0, 0, 0, 0, 0).finished()));
 

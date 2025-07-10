@@ -6,7 +6,7 @@
 #include <tbai_core/Utils.hpp>
 
 namespace tbai {
-namespace wtw {
+namespace np3o {
 
 class HistoryBuffer {
    public:
@@ -21,5 +21,5 @@ class HistoryBuffer {
     std::vector<tbai::vector_t> history_;
 };
 
-}  // namespace wtw
+}  // namespace np3o
 }  // namespace tbai
