@@ -92,33 +92,33 @@ Go2RobotInterface::Go2RobotInterface(Go2RobotInterfaceArgs args) {
         low_cmd.motor_cmd()[i].tau() = (0);
     }
 
-    std::cout << "Initializing publisher" << std::endl;
+    TBAI_LOG_INFO(logger_, "Initializing publisher: Topic: {}", TOPIC_LOWCMD);
     lowcmd_publisher.reset(new ChannelPublisher<unitree_go::msg::dds_::LowCmd_>(TOPIC_LOWCMD));
     lowcmd_publisher->InitChannel();
 
-    std::cout << "Initializing motion switcher client" << std::endl;
+    TBAI_LOG_INFO(logger_, "Initializing motion switcher client");
     /*init MotionSwitcherClient*/
     msc->SetTimeout(10.0f);
     msc->Init();
     /*Shut down motion control-related service*/
     while (queryMotionStatus()) {
-        std::cout << "Try to deactivate the motion control-related service." << std::endl;
+        TBAI_LOG_INFO(logger_, "Try to deactivate the motion control-related service.");
         int32_t ret = msc->ReleaseMode();
         if (ret == 0) {
-            std::cout << "ReleaseMode succeeded." << std::endl;
+            TBAI_LOG_INFO(logger_, "ReleaseMode succeeded.");
         } else {
-            std::cout << "ReleaseMode failed. Error code: " << ret << std::endl;
+            TBAI_LOG_ERROR(logger_, "ReleaseMode failed. Error code: {}", ret);
         }
         sleep(5);
     }
 
     // Initialize estimator
-    std::cout << "Initializing estimator" << std::endl;
-    std::vector<std::string> footNames = {"LF_FOOT", "RF_FOOT", "RH_FOOT", "LH_FOOT"};
+    std::vector<std::string> footNames = {"LF_FOOT", "RF_FOOT", "LH_FOOT", "RH_FOOT"};
+    TBAI_LOG_INFO(logger_, "Initializing estimator: Foot names: {}", footNames);
     estimator_ = std::make_unique<tbai::inekf::InEKFEstimator>(footNames, "");
-    std::cout << "Estimator initialized" << std::endl;
+    TBAI_LOG_INFO(logger_, "Estimator initialized");
 
-    std::cout << "Initializing subscriber" << std::endl;
+    TBAI_LOG_INFO(logger_, "Initializing subscriber - Topic: {}", TOPIC_LOWSTATE);
     lowstate_subscriber.reset(new ChannelSubscriber<unitree_go::msg::dds_::LowState_>(TOPIC_LOWSTATE));
     lowstate_subscriber->InitChannel(std::bind(&Go2RobotInterface::lowStateCallback, this, std::placeholders::_1), 1);
 }
@@ -127,7 +127,7 @@ Go2RobotInterface::Go2RobotInterface(Go2RobotInterfaceArgs args) {
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 Go2RobotInterface::~Go2RobotInterface() {
-    std::cout << "Destroying Go2RobotInterface" << std::endl;
+    TBAI_LOG_INFO(logger_, "Destroying Go2RobotInterface");
 }
 
 /*********************************************************************************************************************/
@@ -153,16 +153,16 @@ int Go2RobotInterface::queryMotionStatus() {
     int motionStatus;
     int32_t ret = msc->CheckMode(robotForm, motionName);
     if (ret == 0) {
-        std::cout << "CheckMode succeeded." << std::endl;
+        TBAI_LOG_INFO(logger_, "CheckMode succeeded.");
     } else {
-        std::cout << "CheckMode failed. Error code: " << ret << std::endl;
+        TBAI_LOG_ERROR(logger_, "CheckMode failed. Error code: {}", ret);
     }
     if (motionName.empty()) {
-        std::cout << "The motion control-related service is deactivated." << std::endl;
+        TBAI_LOG_INFO(logger_, "The motion control-related service is deactivated.");
         motionStatus = 0;
     } else {
         std::string serviceName = queryServiceName(robotForm, motionName);
-        std::cout << "Service: " << serviceName << " is activate" << std::endl;
+        TBAI_LOG_INFO(logger_, "Service: {} is activate", serviceName);
         motionStatus = 1;
     }
     return motionStatus;
@@ -301,10 +301,8 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
                                contacts, false, enablePositionEstimation_);
         }
         auto t2 = std::chrono::high_resolution_clock::now();
-        if (count % N == 0) {
-            std::cout << "State estimator update time: "
-                      << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " us" << std::endl;
-        }
+        TBAI_LOG_INFO_THROTTLE(logger_, 5.0, "State estimator update time: {} us",
+                                std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count());
     }
 
     // Get the latest state from the estimator
@@ -334,6 +332,9 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     // Base position
     if (enable_state_estim) {
         state.x.segment<3>(3) = estimator_->getBasePosition();
+
+        TBAI_LOG_DEBUG(logger_, "Base position: {}",
+                       (std::stringstream() << estimator_->getBasePosition().transpose()).str());
     }
 
     // Base angular velocity
@@ -356,17 +357,17 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     if (count % N == 0) {
         // std::cout << "Base orientation: " << std::to_string(rpy[0]) << " " << std::to_string(rpy[1]) << " "
         //           << std::to_string(rpy[2]) << std::endl;
-        std::cout << "Base position: " << std::to_string(state.x.segment<3>(3)[0]) << " "
-                  << std::to_string(state.x.segment<3>(3)[1]) << " " << std::to_string(state.x.segment<3>(3)[2])
-                  << std::endl;
-        // std::cout << "Base angular velocity: " << std::to_string(state.x.segment<3>(6)[0]) << " "
-        //           << std::to_string(state.x.segment<3>(6)[1]) << " " << std::to_string(state.x.segment<3>(6)[2])
+        // std::cout << "Base position: " << std::to_string(state.x.segment<3>(3)[0]) << " "
+        //           << std::to_string(state.x.segment<3>(3)[1]) << " " << std::to_string(state.x.segment<3>(3)[2])
         //           << std::endl;
-        std::cout << "Base linear velocity: " << std::to_string(state.x.segment<3>(9)[0]) << " "
-                  << std::to_string(state.x.segment<3>(9)[1]) << " " << std::to_string(state.x.segment<3>(9)[2])
-                  << std::endl;
-        std::cout << "Base linear acceleration: " << linearAccBase[0] << " " << linearAccBase[1] << " "
-                  << linearAccBase[2] << std::endl;
+        // // std::cout << "Base angular velocity: " << std::to_string(state.x.segment<3>(6)[0]) << " "
+        // //           << std::to_string(state.x.segment<3>(6)[1]) << " " << std::to_string(state.x.segment<3>(6)[2])
+        // //           << std::endl;
+        // std::cout << "Base linear velocity: " << std::to_string(state.x.segment<3>(9)[0]) << " "
+        //           << std::to_string(state.x.segment<3>(9)[1]) << " " << std::to_string(state.x.segment<3>(9)[2])
+        //           << std::endl;
+        // std::cout << "Base linear acceleration: " << linearAccBase[0] << " " << linearAccBase[1] << " "
+        //           << linearAccBase[2] << std::endl;
     }
 
     // Update the latest state
@@ -424,11 +425,12 @@ void Go2RobotInterface::publish(std::vector<MotorCommand> commands) {
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 void Go2RobotInterface::waitTillInitialized() {
-    std::cout << "Waiting for the robot to initialize..." << std::endl;
+    TBAI_LOG_INFO(logger_, "Waiting for the robot to initialize...");
     while (!initialized) {
+        TBAI_LOG_INFO_THROTTLE(logger_, 1.0, "Waiting for the robot to initialize...");
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
-    std::cout << "Robot initialized" << std::endl;
+    TBAI_LOG_INFO(logger_, "Robot initialized");
 }
 
 /*********************************************************************************************************************/

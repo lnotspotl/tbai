@@ -306,6 +306,7 @@ class DummyChangeControllerSubscriber(ChangeControllerSubscriber):
 
     def bob_callback(self):
         self.new_controller = "NP3O"
+        #self.new_controller = "BOB"
 
 
 class DummyReferenceVelocityGenerator(ReferenceVelocityGenerator):

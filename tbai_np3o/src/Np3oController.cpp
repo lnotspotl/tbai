@@ -234,8 +234,11 @@ void Np3oController::fillCommand(vector_t &input, const np3o::State &state, scal
     const scalar_t velocity_y = command.velocity_y;
     const scalar_t yaw_rate = command.yaw_rate;
 
-    input[COMMAND_START_INDEX + 0] = velocity_x * LIN_VEL_SCALE;
-    input[COMMAND_START_INDEX + 1] = velocity_y * LIN_VEL_SCALE;
+
+    auto norm = std::sqrt(velocity_x * velocity_x + velocity_y * velocity_y);
+
+    input[COMMAND_START_INDEX + 0] = norm > 0.2 ? velocity_x * LIN_VEL_SCALE : 0.0;
+    input[COMMAND_START_INDEX + 1] = norm > 0.2 ? velocity_y * LIN_VEL_SCALE : 0.0;
     input[COMMAND_START_INDEX + 2] = yaw_rate * ANG_VEL_SCALE;
 }
 
