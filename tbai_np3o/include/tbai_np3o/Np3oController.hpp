@@ -34,6 +34,8 @@ class Np3oController : public tbai::Controller {
 
     std::vector<tbai::MotorCommand> getMotorCommands(scalar_t currentTime, scalar_t dt) override;
 
+    void waitTillInitialized() override { stateSubscriberPtr_->waitTillInitialized(); }
+
     bool isSupported(const std::string &controllerType) override;
 
     void stopController() override {}
@@ -45,8 +47,6 @@ class Np3oController : public tbai::Controller {
     void postStep(scalar_t currentTime, scalar_t dt) override {}
 
     std::string getName() const override { return "NP3O"; }
-
-    virtual void atPositions(matrix_t &positions) = 0;
 
    protected:
     std::shared_ptr<tbai::StateSubscriber> stateSubscriberPtr_;
@@ -62,7 +62,7 @@ class Np3oController : public tbai::Controller {
         torch::NoGradGuard no_grad;
         obsProprioceptive = obsProprioceptive.reshape({1, -1});
         obsHistory = obsHistory.reshape({1, 10, -1});  // TODO: history size is hardcoded here
-        at::Tensor action = model_.forward({obsProprioceptive, obsHistory}).toTensor().reshape({-1});
+        at::Tensor action = model_.forward({obsProprioceptive.to(torch::kHalf), obsHistory.to(torch::kHalf)}).toTensor().reshape({-1}).to(torch::kFloat);
         return action;
     }
 
@@ -100,7 +100,7 @@ class Np3oController : public tbai::Controller {
     std::vector<std::string> jointNames_;
 
     vector_t lastAction_;
-    vector_t lastLastAction_;
+    vector_t filterLastAction_;
 
     np3o::HistoryBuffer historyBuffer_;
 
@@ -109,6 +109,8 @@ class Np3oController : public tbai::Controller {
     vector_t defaultJointAngles_;
 
     scalar_t gaitIndex_;
+
+    bool useActionFilter_ = false;
 
     State state_;
 };

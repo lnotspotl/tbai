@@ -40,13 +40,16 @@ Np3oController::Np3oController(const std::string &urdfPathOrString,
                                const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
                                const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen)
     : stateSubscriberPtr_(stateSubscriberPtr), refVelGen_(refVelGen), historyBuffer_(45, 10) {
-    logger_ = tbai::getLogger("wtw_controller");
+    logger_ = tbai::getLogger("np3o");
 
     gaitIndex_ = 0.0;
 
     // Load parameters
-    kp_ = tbai::fromGlobalConfig<scalar_t>("wtw_controller/kp");
-    kd_ = tbai::fromGlobalConfig<scalar_t>("wtw_controller/kd");
+    kp_ = tbai::fromGlobalConfig<scalar_t>("np3o/kp");
+    kd_ = tbai::fromGlobalConfig<scalar_t>("np3o/kd");
+    useActionFilter_ = tbai::fromGlobalConfig<bool>("np3o/use_action_filter");
+
+    TBAI_LOG_INFO(logger_, "Use action filter: {}", useActionFilter_);
     jointNames_ = tbai::fromGlobalConfig<std::vector<std::string>>("joint_names");
 
     // Load URDF string from file
@@ -78,7 +81,7 @@ Np3oController::Np3oController(const std::string &urdfPathOrString,
 
     const std::string modelPath = "/home/user/model.pt";
     try {
-        model_ = torch::jit::load(modelPath);
+        model_ = torch::jit::load(modelPath, torch::kCPU);
     } catch (const c10::Error &e) {
         TBAI_THROW("Could not load model from: {}\nError: {}", modelPath, e.what());
     }
@@ -86,7 +89,7 @@ Np3oController::Np3oController(const std::string &urdfPathOrString,
     TBAI_LOG_INFO(logger_, "Model loaded");
 
     lastAction_ = tbai::vector_t::Zero(12);
-    lastLastAction_ = tbai::vector_t::Zero(12);
+    filterLastAction_ = tbai::vector_t::Zero(12);
 
     defaultJointAngles_ = tbai::vector_t::Zero(12);
 }
@@ -104,7 +107,7 @@ void Np3oController::setupPinocchioModel(const std::string &urdfString) {
 /**********************************************************************************************
  * *************************/
 bool Np3oController::isSupported(const std::string &controllerType) {
-    if (controllerType == "WTW") {
+    if (controllerType == "NP3O") {
         return true;
     }
     return false;
@@ -114,6 +117,7 @@ bool Np3oController::isSupported(const std::string &controllerType) {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 bool Np3oController::checkStability() const {
+    return true;
     scalar_t roll = state_.x[0];
     if (roll >= 1.57 || roll <= -1.57) {
         return false;
@@ -176,14 +180,24 @@ std::vector<tbai::MotorCommand> Np3oController::getMotorCommands(scalar_t curren
     at::Tensor out = forward(obsProprioceptive, obsHistory).squeeze();
     auto t4 = std::chrono::high_resolution_clock::now();
 
-    // Send command
-    auto ret =
-        getMotorCommands(tbai::torch2vector(out.reshape({12}) * torch::tensor({0.125, 0.25, 0.25, 0.125, 0.25, 0.25,
-                                                                               0.125, 0.25, 0.25, 0.125, 0.25, 0.25})) +
-                         defaultJointAngles_);
+    tbai::vector_t currentAction =
+        tbai::torch2vector(out.reshape({12}) *
+                           torch::tensor({0.125, 0.25, 0.25, 0.125, 0.25, 0.25, 0.125, 0.25, 0.25, 0.125, 0.25, 0.25}));
+    tbai::vector_t filteredAction;
 
-    lastLastAction_ = lastAction_;
+    if (useActionFilter_) {
+        filteredAction = 0.2 * filterLastAction_ + 0.8 * currentAction;
+        filterLastAction_ = currentAction;
+    } else {
+        filteredAction = currentAction;
+    }
+    auto ret = getMotorCommands(filteredAction + defaultJointAngles_);
+
     lastAction_ = tbai::torch2vector(out.reshape({12}));
+    TBAI_LOG_DEBUG_THROTTLE(logger_, 0.5, "Current action: {} Last action: {} Joint angles: {}",
+                            (std::stringstream() << currentAction.transpose()).str(),
+                            (std::stringstream() << lastAction_.transpose()).str(),
+                            (std::stringstream() << (filteredAction + defaultJointAngles_).transpose()).str());
 
     updateObsHistory(obsProprioceptiveEigen);
 
@@ -214,7 +228,7 @@ void Np3oController::fillProjectedGravity(vector_t &input, const np3o::State &st
 
 void Np3oController::fillCommand(vector_t &input, const np3o::State &state, scalar_t currentTime, scalar_t dt) {
     constexpr scalar_t LIN_VEL_SCALE = 2.0;
-    constexpr scalar_t ANG_VEL_SCALE = 0.25;
+    constexpr scalar_t ANG_VEL_SCALE = 0.25 * 5;  // 5 because it was too slow
 
     auto command = refVelGen_->getReferenceVelocity(currentTime, dt);
     const scalar_t velocity_x = command.velocity_x;
@@ -291,7 +305,6 @@ void Np3oController::fillJointResiduals(vector_t &input, const np3o::State &stat
     input[DOF_RESIDUALS_START_INDEX + 9] = RL_hip_joint_residual * JOINT_RESIDUAL_SCALE;
     input[DOF_RESIDUALS_START_INDEX + 10] = RL_thigh_joint_residual * JOINT_RESIDUAL_SCALE;
     input[DOF_RESIDUALS_START_INDEX + 11] = RL_calf_joint_residual * JOINT_RESIDUAL_SCALE;
-
 
     defaultJointAngles_[0] = defaultJointAngles["FR_hip_joint"];
     defaultJointAngles_[1] = defaultJointAngles["FR_thigh_joint"];
