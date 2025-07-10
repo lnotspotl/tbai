@@ -149,7 +149,7 @@ at::Tensor WtwController::getNNInput(const wtw::State &state, scalar_t currentTi
     fillClockInputs(input, currentTime, dt);
 
     historyBuffer_.addObservation(input);
-    return vector2torch(historyBuffer_.getFinalObservation());
+    return wtw::vector2torch(historyBuffer_.getFinalObservation());
 }
 
 /***********************************************************************************************************************/
@@ -172,12 +172,12 @@ std::vector<tbai::MotorCommand> WtwController::getMotorCommands(scalar_t current
 
     // Send command
     auto ret =
-        getMotorCommands(tbai::torch2vector(out.reshape({12}) * torch::tensor({0.125, 0.25, 0.25, 0.125, 0.25, 0.25,
+        getMotorCommands(tbai::wtw::torch2vector(out.reshape({12}) * torch::tensor({0.125, 0.25, 0.25, 0.125, 0.25, 0.25,
                                                                                0.125, 0.25, 0.25, 0.125, 0.25, 0.25})) +
                          defaultJointAngles_);
 
     lastLastAction_ = lastAction_;
-    lastAction_ = tbai::torch2vector(out.reshape({12}));
+    lastAction_ = tbai::wtw::torch2vector(out.reshape({12}));
 
     auto t5 = std::chrono::high_resolution_clock::now();
     TBAI_LOG_INFO_THROTTLE(

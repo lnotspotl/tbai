@@ -2,6 +2,7 @@
 #include <tbai_wtw/EigenTorch.hpp>
 
 using namespace tbai;
+using namespace tbai::wtw;
 
 TEST(EigTorch, VectorConversion) {
     // Test vector Torch -> Eigen

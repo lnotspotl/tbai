@@ -36,6 +36,8 @@ class Np3oController : public tbai::Controller {
 
     void waitTillInitialized() override { stateSubscriberPtr_->waitTillInitialized(); }
 
+    void preStep(scalar_t currentTime, scalar_t dt) override { state_ = stateSubscriberPtr_->getLatestState(); }
+
     bool isSupported(const std::string &controllerType) override;
 
     void stopController() override {}

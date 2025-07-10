@@ -2,6 +2,7 @@
 #include <tbai_np3o/EigenTorch.hpp>
 
 using namespace tbai;
+using namespace tbai::np3o;
 
 TEST(EigTorch, VectorConversion) {
     // Test vector Torch -> Eigen

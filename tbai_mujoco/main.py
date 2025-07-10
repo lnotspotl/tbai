@@ -1,7 +1,7 @@
 import sys
 import copy
 
-sys.path.insert(0, "/home/kuba/Documents/tbai2/build/tbai_python")
+sys.path.insert(0, "/home/user/Documents/tbai2/build/tbai_python")
 
 import tbai_python
 
@@ -34,8 +34,8 @@ from tbai_python import (
 
 from tbai_python.rotations import rpy2quat, quat2mat, mat2rpy, mat2ocs2rpy, ocs2rpy2quat, rpy2mat, mat2aa
 
-kp = 30
-kd = 0.5
+kp = 40
+kd = 1.0
 desired_joint_angles = np.zeros(12)
 running = True
 
@@ -70,9 +70,9 @@ def physics_fn(model, data, lock, physics_dt, subscriber):
     global desired_joint_angles
     while running:
         with lock:
-            current_q = data.qpos[7 : 7 + 12]
+            current_q = data.qpos[7 : 7 + 12].copy()
             desired_q = desired_joint_angles.copy()
-            current_v = data.qvel[6 : 6 + 12]
+            current_v = data.qvel[6 : 6 + 12].copy()
             desired_v = np.zeros_like(current_v)
             data.ctrl[:12] = pd_controller(current_q, desired_q, desired_v, current_v, kp, kd)
             mujoco.mj_step(model, data)
@@ -142,7 +142,7 @@ class DummyStateSubscriber(StateSubscriber):
         self.last_yaw = 0.0
         self.first_update = True
         self.needs_update = True
-        self.ekf = tbai_python.MuseEstimator(["FL_foot", "FR_foot", "RL_foot", "RR_foot"])
+        self.ekf = tbai_python.MuseEstimator(["LF_FOOT", "RF_FOOT", "LH_FOOT", "RH_FOOT"])
         self.last_velocity_base = None
 
     def waitTillInitialized(self):
@@ -150,11 +150,11 @@ class DummyStateSubscriber(StateSubscriber):
         self.initialized = True
 
     def getLatestState(self):
-        current_time = time.time()
+        current_time = self.data.time
         dt = current_time - self.last_time
 
         # Get base orientation (quat) and convert to rotation matrix
-        base_quat = np.roll(self.data.qpos[3:7], -1)  # roll to make it xyzw
+        base_quat = np.roll(self.data.qpos[3:7].copy(), -1)  # roll to make it xyzw
         R_world_base = quat2mat(base_quat)
         R_base_world = R_world_base.T
 
@@ -163,7 +163,7 @@ class DummyStateSubscriber(StateSubscriber):
         self.last_yaw = rpy[2]
 
         # Base position in world frame
-        base_position = self.data.qpos[0:3]
+        base_position = self.data.qpos[0:3].copy()
 
         if self.first_update:
             self.last_orientation = R_base_world
@@ -171,18 +171,24 @@ class DummyStateSubscriber(StateSubscriber):
             self.first_update = False
 
         # Base angular velocity in base frame
-        angular_velocity_world = mat2aa(R_world_base @ self.last_orientation) / dt if dt > 0 else np.zeros(3)
+        angular_velocity_world = mat2aa(R_world_base @ self.last_orientation.copy()) / dt if dt > 0 else np.zeros(3)
         angular_velocity_base = R_base_world @ angular_velocity_world
 
         # Base linear velocity in base frame
-        linear_velocity_world = (base_position - self.last_position) / dt if dt > 0 else np.zeros(3)
+        linear_velocity_world = (base_position.copy() - self.last_position.copy()) / dt if dt > 0 else np.zeros(3)
         linear_velocity_base = R_base_world @ linear_velocity_world
 
         # Joint angles and velocities
         joint_angles = self.data.qpos[7:19].copy()  # Assuming 12 joints starting at index 7
-        joint_angles[3:6], joint_angles[6:9] = joint_angles[3:6], joint_angles[6:9]
+        joint_angles = joint_angles.copy()
+        joint_angles[3], joint_angles[6] = joint_angles[6], joint_angles[3] 
+        joint_angles[4], joint_angles[7] = joint_angles[7], joint_angles[4]
+        joint_angles[5], joint_angles[8] = joint_angles[8], joint_angles[5]
         joint_velocities = self.data.qvel[6:18].copy()  # Assuming 12 joint velocities starting at index 6
-        joint_velocities[3:6], joint_velocities[6:9] = joint_velocities[3:6], joint_velocities[6:9]
+        joint_velocities = joint_velocities.copy()
+        joint_velocities[3], joint_velocities[6] = joint_velocities[6], joint_velocities[3]
+        joint_velocities[4], joint_velocities[7] = joint_velocities[7], joint_velocities[4]
+        joint_velocities[5], joint_velocities[8] = joint_velocities[8], joint_velocities[5]
 
         # Update state vector
         self.current_state[0:3] = rpy.copy()  # Base orientation (RPY)
@@ -273,8 +279,9 @@ class DummyCommandPublisher(CommandPublisher):
         global desired_joint_angles
         kp = commands[0].kp
         kd = commands[0].kd
-        for command in commands:
-            desired_joint_angles[joint2idx[command.joint_name]] = command.desired_position
+        with lock:
+            for command in commands:
+                desired_joint_angles[joint2idx[command.joint_name]] = command.desired_position
 
 
 class DummyChangeControllerSubscriber(ChangeControllerSubscriber):
@@ -298,7 +305,7 @@ class DummyChangeControllerSubscriber(ChangeControllerSubscriber):
         self.new_controller = "SIT"
 
     def bob_callback(self):
-        self.new_controller = "BOB"
+        self.new_controller = "NP3O"
 
 
 class DummyReferenceVelocityGenerator(ReferenceVelocityGenerator):
@@ -314,10 +321,10 @@ class DummyReferenceVelocityGenerator(ReferenceVelocityGenerator):
         return ref
 
 
-scene_path = "/home/kuba/Documents/mujoco_menagerie/unitree_go2/scene.xml"
-# scene_path = "/home/kuba/Documents/mujoco_menagerie/anybotics_anymal_c/scene.xml"
+scene_path = "/home/user/Documents/mujoco_menagerie/unitree_go2/scene.xml"
+# scene_path = "/home/user/Documents/mujoco_menagerie/anybotics_anymal_c/scene.xml"
 model = mujoco.MjModel.from_xml_path(scene_path)
-model.opt.timestep = 0.0025
+model.opt.timestep = 0.005
 data = mujoco.MjData(model)
 
 print("Joint names:")
@@ -364,6 +371,7 @@ def callback(currentTime, dt):
 
 # central_controller.add_wtw_controller(subscriber, ref_vel_gen, rerun_logger.visualize_callback)
 central_controller.add_static_controller(subscriber, rerun_logger.visualize_callback)
+central_controller.add_np3o_controller(subscriber, ref_vel_gen, rerun_logger.visualize_callback)
 central_controller.add_bob_controller(subscriber, ref_vel_gen, rerun_logger.visualize_callback)
 
 viewer_thread = threading.Thread(target=viewer_fn, args=(window, lock, 1 / 30))

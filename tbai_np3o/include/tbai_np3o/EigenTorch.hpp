@@ -4,6 +4,7 @@
 #include <torch/torch.h>
 
 namespace tbai {
+namespace np3o {
 
 /** Torch -> Eigen*/
 vector_t torch2vector(const torch::Tensor &t) {
@@ -51,4 +52,5 @@ torch::Tensor matrix2torch(const matrix_t &m) {
     return out;
 }
 
+}  // namespace np3o
 }  // namespace tbai

@@ -117,7 +117,6 @@ bool Np3oController::isSupported(const std::string &controllerType) {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 bool Np3oController::checkStability() const {
-    return true;
     scalar_t roll = state_.x[0];
     if (roll >= 1.57 || roll <= -1.57) {
         return false;
@@ -170,8 +169,8 @@ std::vector<tbai::MotorCommand> Np3oController::getMotorCommands(scalar_t curren
     tbai::vector_t obsProprioceptiveEigen = getObsProprioceptive(state, currentTime, dt);
     tbai::vector_t obsHistoryEigen = getObsHistory();
 
-    at::Tensor obsProprioceptive = tbai::vector2torch(obsProprioceptiveEigen);
-    at::Tensor obsHistory = tbai::vector2torch(obsHistoryEigen);
+    at::Tensor obsProprioceptive = tbai::np3o::vector2torch(obsProprioceptiveEigen);
+    at::Tensor obsHistory = tbai::np3o::vector2torch(obsHistoryEigen);
 
     auto t2 = std::chrono::high_resolution_clock::now();
 
@@ -181,7 +180,7 @@ std::vector<tbai::MotorCommand> Np3oController::getMotorCommands(scalar_t curren
     auto t4 = std::chrono::high_resolution_clock::now();
 
     tbai::vector_t currentAction =
-        tbai::torch2vector(out.reshape({12}) *
+        tbai::np3o::torch2vector(out.reshape({12}) *
                            torch::tensor({0.125, 0.25, 0.25, 0.125, 0.25, 0.25, 0.125, 0.25, 0.25, 0.125, 0.25, 0.25}));
     tbai::vector_t filteredAction;
 
@@ -193,7 +192,7 @@ std::vector<tbai::MotorCommand> Np3oController::getMotorCommands(scalar_t curren
     }
     auto ret = getMotorCommands(filteredAction + defaultJointAngles_);
 
-    lastAction_ = tbai::torch2vector(out.reshape({12}));
+    lastAction_ = tbai::np3o::torch2vector(out.reshape({12}));
     TBAI_LOG_DEBUG_THROTTLE(logger_, 0.5, "Current action: {} Last action: {} Joint angles: {}",
                             (std::stringstream() << currentAction.transpose()).str(),
                             (std::stringstream() << lastAction_.transpose()).str(),

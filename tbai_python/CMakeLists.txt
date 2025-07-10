@@ -15,6 +15,7 @@ target_link_libraries(tbai_python
     PUBLIC
         tbai_core
         tbai_bob
+        tbai_np3o
         tbai_wtw
         tbai_reference
         tbai_static
