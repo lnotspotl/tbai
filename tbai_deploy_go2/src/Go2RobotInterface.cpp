@@ -175,31 +175,21 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     auto t11 = std::chrono::high_resolution_clock::now();
     timestamp = tbai::SystemTime<std::chrono::high_resolution_clock>::rightNow();
 
-    // static scalar_t last_time_limiter = timestamp;
-    // constexpr scalar_t dt_limiter = 1/300.0;
-    // if((timestamp - last_time_limiter) < dt_limiter) {
-    //     return;
-    // }
-    // last_time_limiter = timestamp;
-
     // Create a copy of the low level state
     unitree_go::msg::dds_::LowState_ &low_state = *(unitree_go::msg::dds_::LowState_ *)message;
-
-    initialized = true;
 
     // Calculate callback rate
     static auto last_time2 = timestamp;
     static int count = 0;
     count++;
 
-    constexpr int N = 2;
-    // if (count % N == 0) {  // Print every 100th callback to avoid spam
-    //     scalar_t time_diff = timestamp - last_time2;
-    //     double rate = N / time_diff;
-    //     std::cout << "Low state callback rate: " << rate << " Hz (count: " << count << ")" << std::endl;
-    //     last_time2 = timestamp;
-    //     std::cout << "time_diff: " << std::to_string(time_diff) << std::endl;
-    // }
+    constexpr int N = 200;  // Print every 100th callback to avoid spam
+    if (count % N == 0) {
+        scalar_t time_diff = timestamp - last_time2;
+        double rate = N / time_diff;
+        TBAI_LOG_INFO_THROTTLE(logger_, 8.0, "Low state callback rate: {} Hz (count: {})", rate, count);
+        last_time2 = timestamp;
+    }
 
     // Extract joint positions and velocities from low_state
     vector_t jointPositions(12);
@@ -279,14 +269,6 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
         contacts[i] = static_cast<bool>(grf[i] >= contact_threshold);
     }
 
-    // if (count % N == 0) {
-    //     std::cout << "LF contact: " << std::to_string(contacts[0]) << " grf: " << std::to_string(grf[0]) <<
-    //     std::endl; std::cout << "LH contact: " << std::to_string(contacts[1]) << " grf: " << std::to_string(grf[1])
-    //     << std::endl; std::cout << "RF contact: " << std::to_string(contacts[2]) << " grf: " <<
-    //     std::to_string(grf[2]) << std::endl; std::cout << "RH contact: " << std::to_string(contacts[3]) << " grf: "
-    //     << std::to_string(grf[3]) << std::endl;
-    // }
-
     // Calculate dt (assuming this is called at regular intervals)
     static scalar_t last_time3 = timestamp;
     scalar_t dt = timestamp - last_time3;
@@ -301,8 +283,8 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
                                contacts, false, enablePositionEstimation_);
         }
         auto t2 = std::chrono::high_resolution_clock::now();
-        TBAI_LOG_INFO_THROTTLE(logger_, 5.0, "State estimator update time: {} us",
-                                std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count());
+        TBAI_LOG_INFO_THROTTLE(logger_, 8.0, "State estimator update time: {} us",
+                               std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count());
     }
 
     // Get the latest state from the estimator
@@ -354,37 +336,19 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     state.timestamp = timestamp;
     state.contactFlags = contacts;
 
-    if (count % N == 0) {
-        // std::cout << "Base orientation: " << std::to_string(rpy[0]) << " " << std::to_string(rpy[1]) << " "
-        //           << std::to_string(rpy[2]) << std::endl;
-        // std::cout << "Base position: " << std::to_string(state.x.segment<3>(3)[0]) << " "
-        //           << std::to_string(state.x.segment<3>(3)[1]) << " " << std::to_string(state.x.segment<3>(3)[2])
-        //           << std::endl;
-        // // std::cout << "Base angular velocity: " << std::to_string(state.x.segment<3>(6)[0]) << " "
-        // //           << std::to_string(state.x.segment<3>(6)[1]) << " " << std::to_string(state.x.segment<3>(6)[2])
-        // //           << std::endl;
-        // std::cout << "Base linear velocity: " << std::to_string(state.x.segment<3>(9)[0]) << " "
-        //           << std::to_string(state.x.segment<3>(9)[1]) << " " << std::to_string(state.x.segment<3>(9)[2])
-        //           << std::endl;
-        // std::cout << "Base linear acceleration: " << linearAccBase[0] << " " << linearAccBase[1] << " "
-        //           << linearAccBase[2] << std::endl;
-    }
+    auto t12 = std::chrono::high_resolution_clock::now();
+    TBAI_LOG_INFO_THROTTLE(logger_, 8.0, "State update time: {} us",
+                           std::chrono::duration_cast<std::chrono::microseconds>(t12 - t11).count());
 
     // Update the latest state
-    auto t12 = std::chrono::high_resolution_clock::now();
-    // if (count % N == 0) {
-    //     std::cout << "State update time: " << std::chrono::duration_cast<std::chrono::microseconds>(t12 -
-    //     t11).count()
-    //               << " us" << std::endl;
-    // }
     std::lock_guard<std::mutex> lock(latest_state_mutex_);
     state_ = std::move(state);
     auto t13 = std::chrono::high_resolution_clock::now();
-    // if (count % N == 0) {
-    //     std::cout << "Total callback time: " << std::chrono::duration_cast<std::chrono::microseconds>(t13 -
-    //     t11).count()
-    //               << " us" << std::endl;
-    // }
+
+    TBAI_LOG_INFO_THROTTLE(logger_, 8.0, "Total callback time: {} us",
+                           std::chrono::duration_cast<std::chrono::microseconds>(t13 - t11).count());
+
+    initialized = true;
 }
 
 /*********************************************************************************************************************/
