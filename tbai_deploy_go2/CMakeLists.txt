@@ -7,6 +7,7 @@ project(tbai_deploy_go2)
 
 add_library(tbai_deploy_go2
     src/Go2RobotInterface.cpp
+    src/Go2JoystickInterface.cpp
 )
 
 target_include_directories(tbai_deploy_go2
@@ -31,6 +32,12 @@ target_link_libraries(main
 
 add_executable(main2 src/main2.cpp)
 target_link_libraries(main2
+    PUBLIC
+        tbai_deploy_go2
+)
+
+add_executable(joystick_main src/joystick_main.cpp)
+target_link_libraries(joystick_main
     PUBLIC
         tbai_deploy_go2
 )
