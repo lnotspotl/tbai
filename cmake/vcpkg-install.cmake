@@ -54,18 +54,18 @@ else()
     endif()
 endif()
 
-message(STATUS "[vcpkg-install] Installing vcpkg libraries from: ${VCPKG_INSTALLED_DIRECTORY}/${VCPKG_TRIPLET}")
+message(STATUS "[TBAI] Installing vcpkg libraries from: ${VCPKG_INSTALLED_DIRECTORY}/${VCPKG_TRIPLET}")
 
 # Check if the installed directory exists
 if(NOT EXISTS "${VCPKG_INSTALLED_DIRECTORY}")
-    message(WARNING "[vcpkg-install] Vcpkg installed directory does not exist yet: ${VCPKG_INSTALLED_DIRECTORY}")
-    message(WARNING "[vcpkg-install] This is normal during first build. Libraries will be installed after vcpkg packages are built.")
+    message(WARNING "[TBAI] Vcpkg installed directory does not exist yet: ${VCPKG_INSTALLED_DIRECTORY}")
+    message(WARNING "[TBAI] This is normal during first build. Libraries will be installed after vcpkg packages are built.")
     return()
 endif()
 
 if(NOT EXISTS "${VCPKG_INSTALLED_DIRECTORY}/${VCPKG_TRIPLET}")
-    message(WARNING "[vcpkg-install] Vcpkg triplet directory does not exist yet: ${VCPKG_INSTALLED_DIRECTORY}/${VCPKG_TRIPLET}")
-    message(WARNING "[vcpkg-install] This is normal during first build. Libraries will be installed after vcpkg packages are built.")
+    message(WARNING "[TBAI] Vcpkg triplet directory does not exist yet: ${VCPKG_INSTALLED_DIRECTORY}/${VCPKG_TRIPLET}")
+    message(WARNING "[TBAI] This is normal during first build. Libraries will be installed after vcpkg packages are built.")
     return()
 endif()
 
@@ -73,15 +73,15 @@ endif()
 if(EXISTS "${VCPKG_INSTALLED_DIRECTORY}/${VCPKG_TRIPLET}/lib")
     install(DIRECTORY ${VCPKG_INSTALLED_DIRECTORY}/${VCPKG_TRIPLET}/lib/
         DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        FILES_MATCHING PATTERN "*.so*" PATTERN "*.dll" PATTERN "*.dylib" PATTERN "*.a" PATTERN "*.lib"
+        FILES_MATCHING PATTERN "*.so*" PATTERN "*.dll" PATTERN "*.dylib" PATTERN "*.lib"
     )
 endif()
 
 # Install debug libraries if they exist
-if(EXISTS "${VCPKG_INSTALLED_DIRECTORY}/${VCPKG_TRIPLET}/debug/lib")
+if(EXISTS "${VCPKG_INSTALLED_DIRECTORY}/${VCPKG_TRIPLET}/debug/lib" AND NOT EXISTS "${VCPKG_INSTALLED_DIRECTORY}/${VCPKG_TRIPLET}/lib/")
     install(DIRECTORY ${VCPKG_INSTALLED_DIRECTORY}/${VCPKG_TRIPLET}/debug/lib/
         DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        FILES_MATCHING PATTERN "*.so*" PATTERN "*.dll" PATTERN "*.dylib" PATTERN "*.a" PATTERN "*.lib"
+        FILES_MATCHING PATTERN "*.so*" PATTERN "*.dll" PATTERN "*.dylib"  PATTERN "*.lib"
     )
 endif()
 
@@ -93,13 +93,13 @@ if(EXISTS "${VCPKG_INSTALLED_DIRECTORY}/${VCPKG_TRIPLET}/include")
 endif()
 
 # Install debug include files if they exist
-if(EXISTS "${VCPKG_INSTALLED_DIRECTORY}/${VCPKG_TRIPLET}/debug/include")
+if(EXISTS "${VCPKG_INSTALLED_DIRECTORY}/${VCPKG_TRIPLET}/debug/include" AND NOT EXISTS "${VCPKG_INSTALLED_DIRECTORY}/${VCPKG_TRIPLET}/include/")
     install(DIRECTORY ${VCPKG_INSTALLED_DIRECTORY}/${VCPKG_TRIPLET}/debug/include/
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
 endif()
 
 
-message(STATUS "[vcpkg-install] Vcpkg libraries installation configured successfully")
-message(STATUS "[vcpkg-install] Libraries will be installed to: ${CMAKE_INSTALL_LIBDIR}")
-message(STATUS "[vcpkg-install] Headers will be installed to: ${CMAKE_INSTALL_INCLUDEDIR}")
+message(STATUS "[TBAI] Vcpkg libraries installation configured successfully")
+message(STATUS "[TBAI] Libraries will be installed to: ${CMAKE_INSTALL_LIBDIR}")
+message(STATUS "[TBAI] Headers will be installed to: ${CMAKE_INSTALL_INCLUDEDIR}")

@@ -10,11 +10,8 @@ FetchContent_Declare(
     CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF
 )
 FetchContent_MakeAvailable(unitree_sdk2)
-message(STATUS "[tbai_bob] Unitree SDK2 built: ${unitree_sdk2_SOURCE_DIR}")
+message(STATUS "[TBAI] Unitree SDK2 source dir: ${unitree_sdk2_SOURCE_DIR}")
 
-## == Unitree Legged SDK2 ==
-message(STATUS "[tbai_bob] Unitree SDK2 found: ${unitree_sdk2_DIR}")
-    
 ## == Install unitree_sdk2 ==
 install(DIRECTORY ${unitree_sdk2_SOURCE_DIR}/lib/
     DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -29,4 +26,4 @@ install(DIRECTORY ${unitree_sdk2_SOURCE_DIR}/thirdparty/include/ddscxx/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-
+message(STATUS "[TBAI] Unitree SDK2 installation configured successfully")

@@ -4,6 +4,7 @@ include(CMakeFindDependencyMacro)
 
 # Set up vcpkg toolchain if available
 if(EXISTS "@PACKAGE_tbai_VCPKG_TOOLCHAIN_FILE@")
+    message(WARNING "[TBAI] Setting CMAKE_TOOLCHAIN_FILE to @PACKAGE_tbai_VCPKG_TOOLCHAIN_FILE@ from tbai-config.cmake. This may override your current toolchain file.")
     set(CMAKE_TOOLCHAIN_FILE "@PACKAGE_tbai_VCPKG_TOOLCHAIN_FILE@" CACHE STRING "Vcpkg toolchain file" FORCE)
 endif()
 

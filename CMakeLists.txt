@@ -25,6 +25,8 @@ if(TBAI_BUILD_DEPLOY_GO2)
 endif()
 
 set(VCPKG_VERSION)
+set(VCPKG_LIBRARY_LINKAGE dynamic)
+set(VCPKG_CRT_LINKAGE dynamic)
 include(cmake/vcpkg.cmake)
 
 project(tbai VERSION 2.0.0)
@@ -33,12 +35,12 @@ add_subdirectory(tbai_core)
 add_subdirectory(tbai_reference)
 add_subdirectory(tbai_static)
 
-if(TBAI_BUILD_BOB OR TBAI_BUILD_WTW)
+if(TBAI_BUILD_BOB OR TBAI_BUILD_WTW OR TBAI_BUILD_DEPLOY_GO2 OR TBAI_BUILD_NP3O)
   include(cmake/torch.cmake)
 endif()
 
-# # Install vcpkg libraries
-# include(cmake/vcpkg-install.cmake)
+# Install vcpkg libraries
+include(cmake/vcpkg-install.cmake)
 
 if(TBAI_BUILD_MUSE)
   add_subdirectory(tbai_estim)
