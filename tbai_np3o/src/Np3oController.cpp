@@ -72,14 +72,13 @@ Np3oController::Np3oController(const std::string &urdfPathOrString,
     }
     setupPinocchioModel(urdfString);
 
-    // auto hfRepo = tbai::fromGlobalConfig<std::string>("wtw_controller/hf_repo");
-    // auto hfModel = tbai::fromGlobalConfig<std::string>("wtw_controller/hf_model");
+    auto hfRepo = tbai::fromGlobalConfig<std::string>("np3o/hf_repo");
+    auto hfModel = tbai::fromGlobalConfig<std::string>("np3o/hf_model");
 
-    // TBAI_LOG_INFO(logger_, "Loading HF model: {}/{}", hfRepo, hfModel);
-    // auto modelPath = tbai::downloadFromHuggingFace(hfRepo, hfModel);
-    // TBAI_LOG_INFO(logger_, "Model downloaded to: {}", modelPath);
+    TBAI_LOG_INFO(logger_, "Loading HF model: {}/{}", hfRepo, hfModel);
+    auto modelPath = tbai::downloadFromHuggingFace(hfRepo, hfModel);
+    TBAI_LOG_INFO(logger_, "Model downloaded to: {}", modelPath);
 
-    const std::string modelPath = "/home/user/model.pt";
     try {
         model_ = torch::jit::load(modelPath, torch::kCPU);
     } catch (const c10::Error &e) {
