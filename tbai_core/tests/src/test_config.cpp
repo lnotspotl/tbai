@@ -70,6 +70,22 @@ TEST_F(YamlConfigTest, test_global_config) {
     ASSERT_EQ(tbai::fromGlobalConfig<int>("a/e/f"), 28);
 }
 
+TEST_F(YamlConfigTest, test_global_config_with_default) {
+    tbai::setEnv("TBAI_GLOBAL_CONFIG_PATH", DUMMY_CONFIG_PATH);
+
+    // Test present values
+    ASSERT_EQ(tbai::fromGlobalConfig<std::string>("a/b", "default"), "hello");
+    ASSERT_EQ(tbai::fromGlobalConfig<int>("a/c", 0), 1);
+    ASSERT_EQ(tbai::fromGlobalConfig<double>("a/d", 0.0), 3.14);
+    ASSERT_EQ(tbai::fromGlobalConfig<int>("a/e/f", 0), 28);
+
+    // Test absent values
+    ASSERT_EQ(tbai::fromGlobalConfig<std::string>("a/b/c", "default"), "default");
+    ASSERT_EQ(tbai::fromGlobalConfig<int>("a/c/d", 0), 0);
+    ASSERT_EQ(tbai::fromGlobalConfig<double>("a/d/e", 0.0), 0.0);
+    ASSERT_EQ(tbai::fromGlobalConfig<int>("a/e/f/g", 0), 0);
+}
+
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

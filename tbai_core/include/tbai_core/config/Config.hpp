@@ -95,9 +95,32 @@ T fromConfig(const std::string &path, const std::string &configPath) {
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 template <typename T>
+T fromConfig(const std::string &path, const std::string &configPath, T defaultValue) {
+    // Make sure the config file exists
+    TBAI_THROW_UNLESS(std::filesystem::exists(configPath), "Config file does not exist: " + configPath);
+
+    try {
+        return fromConfig<T>(path, configPath);
+    } catch (const std::exception &e) {
+        return defaultValue;
+    }
+}
+
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+template <typename T>
 T fromGlobalConfig(const std::string &path) {
     const std::string configPath = getEnvAs<std::string>("TBAI_GLOBAL_CONFIG_PATH");
     return fromConfig<T>(path, configPath);
 }
 
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+template <typename T>
+T fromGlobalConfig(const std::string &path, T defaultValue) {
+    const std::string configPath = getEnvAs<std::string>("TBAI_GLOBAL_CONFIG_PATH");
+    return fromConfig<T>(path, configPath, defaultValue);
+}
 }  // namespace tbai
