@@ -1,6 +1,6 @@
 include(FetchContent)
 
-option(TBAI_FORCE_TORCH_FETCH "Force fetching libtorch from PyTorch website" OFF)
+option(TBAI_FORCE_TORCH_FETCH "Force fetching libtorch from PyTorch website" ON)
 
 
 if(TBAI_FORCE_TORCH_FETCH)

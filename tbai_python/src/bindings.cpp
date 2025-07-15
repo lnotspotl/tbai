@@ -13,10 +13,10 @@
 #include <tbai_core/control/Rate.hpp>
 #include <tbai_core/control/Subscribers.hpp>
 #include <tbai_estim/muse/MuseEstimator.hpp>
+#include <tbai_np3o/Np3oController.hpp>
 #include <tbai_reference/ReferenceVelocityGenerator.hpp>
 #include <tbai_static/StaticController.hpp>
 #include <tbai_wtw/WtwController.hpp>
-#include <tbai_np3o/Np3oController.hpp>
 
 // Python wrappers around virtual classes
 namespace tbai {
@@ -98,8 +98,8 @@ class PyBobController : public tbai::BobController {
 class PyNp3oController : public tbai::Np3oController {
    public:
     PyNp3oController(const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
-                    const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen,
-                    std::function<void(scalar_t, scalar_t)> visualizeCallback = nullptr)
+                     const std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> &refVelGen,
+                     std::function<void(scalar_t, scalar_t)> visualizeCallback = nullptr)
         : tbai::Np3oController(stateSubscriberPtr, refVelGen), visualizeCallback_(visualizeCallback) {}
 
     void postStep(scalar_t currentTime, scalar_t dt) override {

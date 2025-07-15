@@ -171,10 +171,10 @@ std::vector<tbai::MotorCommand> WtwController::getMotorCommands(scalar_t current
     auto t4 = std::chrono::high_resolution_clock::now();
 
     // Send command
-    auto ret =
-        getMotorCommands(tbai::wtw::torch2vector(out.reshape({12}) * torch::tensor({0.125, 0.25, 0.25, 0.125, 0.25, 0.25,
-                                                                               0.125, 0.25, 0.25, 0.125, 0.25, 0.25})) +
-                         defaultJointAngles_);
+    auto ret = getMotorCommands(
+        tbai::wtw::torch2vector(out.reshape({12}) * torch::tensor({0.125, 0.25, 0.25, 0.125, 0.25, 0.25, 0.125, 0.25,
+                                                                   0.25, 0.125, 0.25, 0.25})) +
+        defaultJointAngles_);
 
     lastLastAction_ = lastAction_;
     lastAction_ = tbai::wtw::torch2vector(out.reshape({12}));

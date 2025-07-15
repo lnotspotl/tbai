@@ -4,7 +4,10 @@
 #include <pinocchio/fwd.hpp>
 // clang-format on
 
+#include <functional>
+#include <memory>
 #include <string>
+#include <vector>
 
 #include <Eigen/Dense>
 #include <pinocchio/algorithm/kinematics.hpp>
@@ -64,7 +67,10 @@ class Np3oController : public tbai::Controller {
         torch::NoGradGuard no_grad;
         obsProprioceptive = obsProprioceptive.reshape({1, -1});
         obsHistory = obsHistory.reshape({1, 10, -1});  // TODO: history size is hardcoded here
-        at::Tensor action = model_.forward({obsProprioceptive.to(torch::kHalf), obsHistory.to(torch::kHalf)}).toTensor().reshape({-1}).to(torch::kFloat);
+        at::Tensor action = model_.forward({obsProprioceptive.to(torch::kHalf), obsHistory.to(torch::kHalf)})
+                                .toTensor()
+                                .reshape({-1})
+                                .to(torch::kFloat);
         return action;
     }
 
@@ -77,7 +83,6 @@ class Np3oController : public tbai::Controller {
     tbai::vector_t getObsProprioceptive(const np3o::State &state, scalar_t currentTime, scalar_t dt);
     tbai::vector_t getObsHistory();
     void updateObsHistory(const tbai::vector_t &observation);
-
 
     // base angular velocity - 3
     // projected gravity - 3
@@ -115,6 +120,7 @@ class Np3oController : public tbai::Controller {
     bool useActionFilter_ = false;
 
     State state_;
+    np3o::State np3oState_;
 };
 
 }  // namespace tbai

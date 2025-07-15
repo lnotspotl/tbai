@@ -14,8 +14,6 @@
 #include "unitree/idl/go2/WirelessController_.hpp"
 #include "unitree/robot/channel/channel_subscriber.hpp"
 
-
-
 using namespace unitree;
 using namespace unitree::common;
 

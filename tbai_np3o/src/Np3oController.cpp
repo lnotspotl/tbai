@@ -159,7 +159,8 @@ void Np3oController::updateObsHistory(const tbai::vector_t &observation) {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 std::vector<tbai::MotorCommand> Np3oController::getMotorCommands(scalar_t currentTime, scalar_t dt) {
-    auto state = getNp3oState();
+    np3oState_ = getNp3oState();
+    np3o::State &state = np3oState_;
 
     // Do not keep track of gradients
     torch::NoGradGuard no_grad;
@@ -179,8 +180,8 @@ std::vector<tbai::MotorCommand> Np3oController::getMotorCommands(scalar_t curren
     auto t4 = std::chrono::high_resolution_clock::now();
 
     tbai::vector_t currentAction =
-        tbai::np3o::torch2vector(out.reshape({12}) *
-                           torch::tensor({0.125, 0.25, 0.25, 0.125, 0.25, 0.25, 0.125, 0.25, 0.25, 0.125, 0.25, 0.25}));
+        tbai::np3o::torch2vector(out.reshape({12}) * torch::tensor({0.125, 0.25, 0.25, 0.125, 0.25, 0.25, 0.125, 0.25,
+                                                                    0.25, 0.125, 0.25, 0.25}));
     tbai::vector_t filteredAction;
 
     if (useActionFilter_) {
@@ -232,7 +233,6 @@ void Np3oController::fillCommand(vector_t &input, const np3o::State &state, scal
     const scalar_t velocity_x = command.velocity_x;
     const scalar_t velocity_y = command.velocity_y;
     const scalar_t yaw_rate = command.yaw_rate;
-
 
     auto norm = std::sqrt(velocity_x * velocity_x + velocity_y * velocity_y);
 
