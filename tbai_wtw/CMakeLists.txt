@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(tbai_wtw)
 
+find_package(Torch REQUIRED)
+
 add_library(tbai_wtw
     src/WtwController.cpp
     src/HistoryBuffer.cpp

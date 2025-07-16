@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(tbai_np3o)
 
+find_package(Torch REQUIRED)
+
 add_library(tbai_np3o
     src/Np3oController.cpp
     src/HistoryBuffer.cpp

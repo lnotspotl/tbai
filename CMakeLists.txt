@@ -11,36 +11,11 @@ option(TBAI_BUILD_MUSE "Build the muse" ON)
 option(TBAI_BUILD_PYTHON "Build the Python bindings" OFF)
 option(TBAI_BUILD_DEPLOY_GO2 "Build the deploy go2" ON)
 
-if(TBAI_BUILD_TESTS)
-  enable_testing()
-  list(APPEND VCPKG_MANIFEST_FEATURES "tests")
-endif()
-
-if(TBAI_BUILD_PYTHON)
-  list(APPEND VCPKG_MANIFEST_FEATURES "python")
-endif()
-
-if(TBAI_BUILD_DEPLOY_GO2)
-  list(APPEND VCPKG_MANIFEST_FEATURES "deploy-go2")
-endif()
-
-set(VCPKG_VERSION)
-set(VCPKG_LIBRARY_LINKAGE dynamic)
-set(VCPKG_CRT_LINKAGE dynamic)
-include(cmake/vcpkg.cmake)
-
 project(tbai VERSION 2.0.0)
 
 add_subdirectory(tbai_core)
 add_subdirectory(tbai_reference)
 add_subdirectory(tbai_static)
-
-if(TBAI_BUILD_BOB OR TBAI_BUILD_WTW OR TBAI_BUILD_DEPLOY_GO2 OR TBAI_BUILD_NP3O)
-  include(cmake/torch.cmake)
-endif()
-
-# Install vcpkg libraries
-include(cmake/vcpkg-install.cmake)
 
 if(TBAI_BUILD_MUSE)
   add_subdirectory(tbai_estim)
@@ -75,12 +50,10 @@ write_basic_package_version_file(
     COMPATIBILITY SameMajorVersion
 )
 
-set(tbai_VCPKG_TOOLCHAIN_FILE "${CMAKE_TOOLCHAIN_FILE}")
 configure_package_config_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/tbai-config.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/tbai-config.cmake"
     INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/tbai
-    PATH_VARS tbai_VCPKG_TOOLCHAIN_FILE
 )
 
 install(FILES
