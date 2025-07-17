@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(tbai_bob)
 
 find_package(pinocchio REQUIRED)
+find_package(Torch REQUIRED)
 
 add_library(tbai_bob
     src/BobController.cpp

@@ -2,17 +2,6 @@
 
 include(CMakeFindDependencyMacro)
 
-# Set up vcpkg toolchain if available
-if(EXISTS "@PACKAGE_tbai_VCPKG_TOOLCHAIN_FILE@")
-    message(WARNING "[TBAI] Setting CMAKE_TOOLCHAIN_FILE to @PACKAGE_tbai_VCPKG_TOOLCHAIN_FILE@ from tbai-config.cmake. This may override your current toolchain file.")
-    set(CMAKE_TOOLCHAIN_FILE "@PACKAGE_tbai_VCPKG_TOOLCHAIN_FILE@" CACHE STRING "Vcpkg toolchain file" FORCE)
-endif()
-
-find_package(Eigen3 REQUIRED)
-find_package(yaml-cpp REQUIRED) 
-find_package(fmt REQUIRED)
-find_package(spdlog REQUIRED)
-
 # Get list of target files
 file(GLOB target_files "${CMAKE_CURRENT_LIST_DIR}/*-targets.cmake")
 
