@@ -81,6 +81,7 @@ Np3oController::Np3oController(const std::string &urdfPathOrString,
 
     try {
         model_ = torch::jit::load(modelPath, torch::kCPU);
+        model_.to(torch::kFloat32); 
     } catch (const c10::Error &e) {
         TBAI_THROW("Could not load model from: {}\nError: {}", modelPath, e.what());
     }
