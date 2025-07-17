@@ -24,9 +24,10 @@ class InEKFEstimator {
 
     void setupPinocchioModel(const std::string &urdf = "");
 
-    vector3_t getBasePosition() { return inekf_.getState().getPosition(); }
-    vector3_t getBaseVelocity() { return inekf_.getState().getVelocity(); }
-    vector4_t getBaseOrientation() { return quaternion_t(inekf_.getState().getRotation()).coeffs(); }
+    inline vector3_t getBasePosition() { return inekf_.getState().getPosition(); }
+    inline vector3_t getBaseVelocity() { return inekf_.getState().getVelocity(); }
+    inline vector4_t getBaseOrientation() { return quaternion_t(inekf_.getState().getRotation()).coeffs(); }
+    inline vector3_t getGyroscopeBias() { return inekf_.getState().getGyroscopeBias(); }
     inline ::inekf::RobotState &getState() { return inekf_.getState(); }
 
     pinocchio::Model model_;
