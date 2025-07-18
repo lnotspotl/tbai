@@ -13,6 +13,10 @@ option(TBAI_BUILD_DEPLOY_GO2 "Build the deploy go2" ON)
 
 project(tbai VERSION 2.0.0)
 
+if(TBAI_BUILD_TESTS)
+  enable_testing()
+endif()
+
 add_subdirectory(tbai_core)
 add_subdirectory(tbai_reference)
 add_subdirectory(tbai_static)

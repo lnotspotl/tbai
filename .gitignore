@@ -3,3 +3,4 @@ build/
 .cache/
 ocs2_robotic_assets/
 *.rrd
+pixi.lock
