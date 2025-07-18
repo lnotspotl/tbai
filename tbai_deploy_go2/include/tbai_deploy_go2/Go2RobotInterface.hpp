@@ -70,7 +70,6 @@ class Go2RobotInterface : public RobotInterface {
 
     std::unordered_map<std::string, int> motor_id_map;
     std::unordered_map<std::string, int> foot_id_map;
-    scalar_t timestamp = 0.0;
     bool initialized = false;
 
     std::unique_ptr<tbai::inekf::InEKFEstimator> estimator_;

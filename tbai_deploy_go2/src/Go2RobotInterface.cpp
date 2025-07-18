@@ -8,6 +8,7 @@
 
 #include <tbai_core/Rotations.hpp>
 #include <tbai_core/control/Rate.hpp>
+#include <tbai_core/config/Config.hpp>
 
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
@@ -179,7 +180,7 @@ int Go2RobotInterface::queryMotionStatus() {
 /*********************************************************************************************************************/
 void Go2RobotInterface::lowStateCallback(const void *message) {
     auto t11 = std::chrono::high_resolution_clock::now();
-    currentTime = tbai::SystemTime<std::chrono::high_resolution_clock>::rightNow();
+    scalar_t currentTime = tbai::SystemTime<std::chrono::high_resolution_clock>::rightNow();
 
     // Create a copy of the low level state
     unitree_go::msg::dds_::LowState_ &low_state = *(unitree_go::msg::dds_::LowState_ *)message;
@@ -325,6 +326,7 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     state.timestamp = currentTime;
     state.contactFlags = contactFlags;
 
+    auto t12 = std::chrono::high_resolution_clock::now();
     TBAI_LOG_INFO_THROTTLE(logger_, 8.0, "State update time: {} us",
                            std::chrono::duration_cast<std::chrono::microseconds>(t12 - t11).count());
 
