@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 function print_help() {
-	echo "Usage: ./tbai [--format]"
+	echo "Usage: ./tbai2.bash [--format]"
 }
 
 function format() {
