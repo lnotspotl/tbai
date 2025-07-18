@@ -10,37 +10,22 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
-    - name: Setup CMake
-      uses: jwlawson/actions-setup-cmake@v1.13
-      with:
-        cmake-version: '3.16.0'
 
-    - name: Install pinocchio
+    - name: Install pixi
       run: |
-        wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-        bash miniconda.sh -b -p $HOME/miniconda
-        source $HOME/miniconda/bin/activate
-        conda init
-        conda create -n tbai_env && conda activate tbai_env && conda install -c conda-forge pinocchio  
+        curl -fsSL https://pixi.sh/install.sh | bash
+        echo "$HOME/.pixi/bin" >> $GITHUB_PATH
 
-    - name: Configure CMake
+    - name: Install environment with pixi
       run: |
-        export CMAKE_PREFIX_PATH=$HOME/miniconda/envs/tbai_env/lib/cmake:$CMAKE_PREFIX_PATH
-        cmake -B build \
-          -S . \
-          -DTBAI_BUILD_TESTS=ON \
-          -DTBAI_BUILD_BOB=OFF \
-          -DTBAI_BUILD_PYTHON=OFF
-          
-    - name: Build
-      run: cmake --build build --config Release --parallel
-      
+        export PATH="$HOME/.pixi/bin:$PATH"
+        pixi install
+
     - name: Run tests
       run: |
-        cd build
-        ctest --output-on-failure --verbose 
+        export PATH="$HOME/.pixi/bin:$PATH"
+        pixi run test
