@@ -21,11 +21,7 @@ T getEnvAs(const std::string &var, bool allowDefault = false, T defaultValue = T
 }
 
 template <>
-bool getEnvAs(const std::string &var, bool allowDefault, bool defaultValue) {
-    std::string value = getEnvAs<std::string>(var, allowDefault, defaultValue);
-    std::transform(value.begin(), value.end(), value.begin(), ::tolower);
-    return (value == "true" || value == "1" || value == "yes" || value == "on");
-}
+bool getEnvAs(const std::string &var, bool allowDefault, bool defaultValue);
 
 template <typename T>
 T getEnvAsChecked(const std::string &var, const std::vector<T> &allowedValues, bool allowDefault = false,
