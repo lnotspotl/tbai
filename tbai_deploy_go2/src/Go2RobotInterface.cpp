@@ -7,8 +7,8 @@
 #include <thread>
 
 #include <tbai_core/Rotations.hpp>
-#include <tbai_core/control/Rate.hpp>
 #include <tbai_core/config/Config.hpp>
+#include <tbai_core/control/Rate.hpp>
 
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/

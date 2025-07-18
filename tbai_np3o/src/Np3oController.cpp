@@ -81,7 +81,7 @@ Np3oController::Np3oController(const std::string &urdfPathOrString,
 
     try {
         model_ = torch::jit::load(modelPath, torch::kCPU);
-        model_.to(torch::kFloat32); 
+        model_.to(torch::kFloat32);
     } catch (const c10::Error &e) {
         TBAI_THROW("Could not load model from: {}\nError: {}", modelPath, e.what());
     }
@@ -194,7 +194,7 @@ std::vector<tbai::MotorCommand> Np3oController::getMotorCommands(scalar_t curren
     auto ret = getMotorCommands(filteredAction + defaultJointAngles_);
 
     lastAction_ = tbai::np3o::torch2vector(out.reshape({12}));
-    TBAI_LOG_DEBUG_THROTTLE(logger_, 0.5, "Current action: {} Last action: {} Joint angles: {}",
+    TBAI_LOG_DEBUG_THROTTLE(logger_, 1.0 / 30.0, "Current action: {} Last action: {} Joint angles: {}",
                             (std::stringstream() << currentAction.transpose()).str(),
                             (std::stringstream() << lastAction_.transpose()).str(),
                             (std::stringstream() << (filteredAction + defaultJointAngles_).transpose()).str());

@@ -21,11 +21,14 @@ std::shared_ptr<spdlog::logger> getLogger(const std::string &name) {
     auto logFolder = tbai::getEnvAs<std::string>("TBAI_LOG_FOLDER", true, "");
     auto logToConsole = tbai::getEnvAs<bool>("TBAI_LOG_TO_CONSOLE", true, true);
     auto useAsyncLogging = tbai::getEnvAs<bool>("TBAI_LOG_USE_ASYNC", true, false);
+    auto fileLogLevel = tbai::getEnvAsChecked<std::string>(
+        "TBAI_LOG_FILE_LEVEL", {"trace", "debug", "info", "warn", "error", "fatal"}, true, "debug");
 
     std::vector<spdlog::sink_ptr> sinks;
     if (logToConsole) {
         auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
         consoleSink->set_pattern("[%H:%M:%S.%e] [%^%l%$] [%n] %v");
+        consoleSink->set_level(spdlog::level::from_str(logLevel));
         sinks.push_back(consoleSink);
     }
 
@@ -44,6 +47,7 @@ std::shared_ptr<spdlog::logger> getLogger(const std::string &name) {
         if (logFolderScript) {
             auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFile, true);
             fileSink->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [%n] %v");
+            fileSink->set_level(spdlog::level::from_str(fileLogLevel));
             sinks.push_back(fileSink);
         }
     }
@@ -60,7 +64,8 @@ std::shared_ptr<spdlog::logger> getLogger(const std::string &name) {
     } else {
         logger = std::make_shared<spdlog::logger>(name, sinks.begin(), sinks.end());
     }
-    logger->set_level(spdlog::level::from_str(logLevel));
+    logger->set_level(std::min(spdlog::level::from_str(logLevel),
+                               logFolder.empty() ? spdlog::level::off : spdlog::level::from_str(fileLogLevel)));
     return logger;
 }
 
