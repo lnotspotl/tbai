@@ -121,6 +121,12 @@ Go2RobotInterface::Go2RobotInterface(Go2RobotInterfaceArgs args) {
     TBAI_LOG_INFO(logger_, "Initializing subscriber - Topic: {}", TOPIC_LOWSTATE);
     lowstate_subscriber.reset(new ChannelSubscriber<unitree_go::msg::dds_::LowState_>(TOPIC_LOWSTATE));
     lowstate_subscriber->InitChannel(std::bind(&Go2RobotInterface::lowStateCallback, this, std::placeholders::_1), 1);
+
+    // Initialize estimator parameters
+    rectifyOrientation_ = tbai::fromGlobalConfig<bool>("inekf_estimator/rectify_orientation", true);
+    removeGyroscopeBias_ = tbai::fromGlobalConfig<bool>("inekf_estimator/remove_gyroscope_bias", true);
+    TBAI_LOG_INFO(logger_, "Rectify orientation: {}", rectifyOrientation_);
+    TBAI_LOG_INFO(logger_, "Remove gyroscope bias: {}", removeGyroscopeBias_);
 }
 
 /*********************************************************************************************************************/
@@ -173,48 +179,48 @@ int Go2RobotInterface::queryMotionStatus() {
 /*********************************************************************************************************************/
 void Go2RobotInterface::lowStateCallback(const void *message) {
     auto t11 = std::chrono::high_resolution_clock::now();
-    timestamp = tbai::SystemTime<std::chrono::high_resolution_clock>::rightNow();
+    currentTime = tbai::SystemTime<std::chrono::high_resolution_clock>::rightNow();
 
     // Create a copy of the low level state
     unitree_go::msg::dds_::LowState_ &low_state = *(unitree_go::msg::dds_::LowState_ *)message;
 
     // Calculate callback rate
-    static auto last_time2 = timestamp;
+    static auto last_time2 = currentTime;
     static int count = 0;
     count++;
 
     constexpr int N = 200;  // Print every 100th callback to avoid spam
     if (count % N == 0) {
-        scalar_t time_diff = timestamp - last_time2;
+        scalar_t time_diff = currentTime - last_time2;
         double rate = N / time_diff;
         TBAI_LOG_INFO_THROTTLE(logger_, 8.0, "Low state callback rate: {} Hz (count: {})", rate, count);
-        last_time2 = timestamp;
+        last_time2 = currentTime;
     }
 
     // Extract joint positions and velocities from low_state
-    vector_t jointPositions(12);
+    vector_t jointAngles(12);
     vector_t jointVelocities(12);
 
     // Map joints in order: LF_HAA, LF_HFE, LF_KFE, LH_HAA, LH_HFE, LH_KFE, RF_HAA, RF_HFE, RF_KFE, RH_HAA, RH_HFE,
     // RH_KFE
-    jointPositions[0] = low_state.motor_state()[motor_id_map["LF_HAA"]].q();  // LF_HAA
-    jointPositions[1] = low_state.motor_state()[motor_id_map["LF_HFE"]].q();  // LF_HFE
-    jointPositions[2] = low_state.motor_state()[motor_id_map["LF_KFE"]].q();  // LF_KFE
+    jointAngles[0] = low_state.motor_state()[motor_id_map["LF_HAA"]].q();  // LF_HAA
+    jointAngles[1] = low_state.motor_state()[motor_id_map["LF_HFE"]].q();  // LF_HFE
+    jointAngles[2] = low_state.motor_state()[motor_id_map["LF_KFE"]].q();  // LF_KFE
 
     // Left Hind leg
-    jointPositions[3] = low_state.motor_state()[motor_id_map["LH_HAA"]].q();  // LH_HAA
-    jointPositions[4] = low_state.motor_state()[motor_id_map["LH_HFE"]].q();  // LH_HFE
-    jointPositions[5] = low_state.motor_state()[motor_id_map["LH_KFE"]].q();  // LH_KFE
+    jointAngles[3] = low_state.motor_state()[motor_id_map["LH_HAA"]].q();  // LH_HAA
+    jointAngles[4] = low_state.motor_state()[motor_id_map["LH_HFE"]].q();  // LH_HFE
+    jointAngles[5] = low_state.motor_state()[motor_id_map["LH_KFE"]].q();  // LH_KFE
 
     // Right Front leg
-    jointPositions[6] = low_state.motor_state()[motor_id_map["RF_HAA"]].q();  // RF_HAA
-    jointPositions[7] = low_state.motor_state()[motor_id_map["RF_HFE"]].q();  // RF_HFE
-    jointPositions[8] = low_state.motor_state()[motor_id_map["RF_KFE"]].q();  // RF_KFE
+    jointAngles[6] = low_state.motor_state()[motor_id_map["RF_HAA"]].q();  // RF_HAA
+    jointAngles[7] = low_state.motor_state()[motor_id_map["RF_HFE"]].q();  // RF_HFE
+    jointAngles[8] = low_state.motor_state()[motor_id_map["RF_KFE"]].q();  // RF_KFE
 
     // Right Hind leg
-    jointPositions[9] = low_state.motor_state()[motor_id_map["RH_HAA"]].q();   // RH_HAA
-    jointPositions[10] = low_state.motor_state()[motor_id_map["RH_HFE"]].q();  // RH_HFE
-    jointPositions[11] = low_state.motor_state()[motor_id_map["RH_KFE"]].q();  // RH_KFE
+    jointAngles[9] = low_state.motor_state()[motor_id_map["RH_HAA"]].q();   // RH_HAA
+    jointAngles[10] = low_state.motor_state()[motor_id_map["RH_HFE"]].q();  // RH_HFE
+    jointAngles[11] = low_state.motor_state()[motor_id_map["RH_KFE"]].q();  // RH_KFE
 
     // Extract joint velocities in the same order
     jointVelocities[0] = low_state.motor_state()[motor_id_map["LF_HAA"]].dq();  // LF_HAA
@@ -234,25 +240,25 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
     jointVelocities[11] = low_state.motor_state()[motor_id_map["RH_KFE"]].dq();  // RH_KFE
 
     // Extract IMU data
-    vector4_t quatBase;
-    quatBase[0] = low_state.imu_state().quaternion()[1];  // x
-    quatBase[1] = low_state.imu_state().quaternion()[2];  // y
-    quatBase[2] = low_state.imu_state().quaternion()[3];  // z
-    quatBase[3] = low_state.imu_state().quaternion()[0];  // w
+    vector4_t baseOrientation;
+    baseOrientation[0] = low_state.imu_state().quaternion()[1];  // x
+    baseOrientation[1] = low_state.imu_state().quaternion()[2];  // y
+    baseOrientation[2] = low_state.imu_state().quaternion()[3];  // z
+    baseOrientation[3] = low_state.imu_state().quaternion()[0];  // w
 
-    vector3_t linearAccBase;
-    linearAccBase[0] = low_state.imu_state().accelerometer()[0];
-    linearAccBase[1] = low_state.imu_state().accelerometer()[1];
-    linearAccBase[2] = low_state.imu_state().accelerometer()[2];
+    vector3_t baseAcc;
+    baseAcc[0] = low_state.imu_state().accelerometer()[0];
+    baseAcc[1] = low_state.imu_state().accelerometer()[1];
+    baseAcc[2] = low_state.imu_state().accelerometer()[2];
 
-    vector3_t angularVelBase;
-    angularVelBase[0] = low_state.imu_state().gyroscope()[0];
-    angularVelBase[1] = low_state.imu_state().gyroscope()[1];
-    angularVelBase[2] = low_state.imu_state().gyroscope()[2];
+    vector3_t baseAngVel;
+    baseAngVel[0] = low_state.imu_state().gyroscope()[0];
+    baseAngVel[1] = low_state.imu_state().gyroscope()[1];
+    baseAngVel[2] = low_state.imu_state().gyroscope()[2];
 
     // Contact states (assuming all feet are in contact for now)
     // Determine contact states based on ground reaction forces
-    std::vector<bool> contacts(4, false);
+    std::vector<bool> contactFlags(4, false);
     const double contact_threshold = 19.0;  // N, threshold for contact detection
 
     // Extract ground reaction forces from foot sensors
@@ -266,77 +272,59 @@ void Go2RobotInterface::lowStateCallback(const void *message) {
 
     // Set contact to true if ground reaction force exceeds threshold
     for (size_t i = 0; i < 4; ++i) {
-        contacts[i] = static_cast<bool>(grf[i] >= contact_threshold);
+        contactFlags[i] = static_cast<bool>(grf[i] >= contact_threshold);
     }
 
     // Calculate dt (assuming this is called at regular intervals)
-    static scalar_t last_time3 = timestamp;
-    scalar_t dt = timestamp - last_time3;
-    last_time3 = timestamp;
+    static scalar_t last_time3 = currentTime;
+    scalar_t dt = currentTime - last_time3;
+    last_time3 = currentTime;
 
-    static bool enable_state_estim = true;
-    if (enable_state_estim) {
-        // Update the state estimator
-        auto t1 = std::chrono::high_resolution_clock::now();
-        if (estimator_) {
-            estimator_->update(timestamp, dt, quatBase, jointPositions, jointVelocities, linearAccBase, angularVelBase,
-                               contacts, false, enablePositionEstimation_);
-        }
-        auto t2 = std::chrono::high_resolution_clock::now();
-        TBAI_LOG_INFO_THROTTLE(logger_, 8.0, "State estimator update time: {} us",
-                               std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count());
-    }
+    auto t1 = std::chrono::high_resolution_clock::now();
+    estimator_->update(currentTime, dt, baseOrientation, jointAngles, jointVelocities, baseAcc, baseAngVel,
+                       contactFlags, rectifyOrientation_, enable_);
+
+    auto t2 = std::chrono::high_resolution_clock::now();
+    TBAI_LOG_INFO_THROTTLE(logger_, 8.0, "State estimator update: {} us",
+                           std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count());
 
     // Get the latest state from the estimator
     State state;
     state.x = vector_t::Zero(36);
 
     // Base orientation - Euler zyx as {roll, pitch, yaw}
-    tbai::vector_t rpy;
-    tbai::matrix3_t R_base_world;
-    if (enable_state_estim) {
-        auto orientation_rot = estimator_->getBaseOrientation();
-        const quaternion_t baseQuaternion(orientation_rot);
-        const tbai::matrix3_t R_world_base = baseQuaternion.toRotationMatrix();
-        R_base_world = R_world_base.transpose();
-        rpy = tbai::mat2oc2rpy(R_world_base, lastYaw_);
-        lastYaw_ = rpy[2];
-    } else {
-        const quaternion_t baseQuaternion(quatBase);
-        const tbai::matrix3_t R_world_base = baseQuaternion.toRotationMatrix();
-        R_base_world = R_world_base.transpose();
-        rpy = tbai::mat2oc2rpy(R_world_base, lastYaw_);
-        lastYaw_ = rpy[2];
-    }
+    const quaternion_t baseQuaternion =
+        rectifyOrientation_ ? quaternion_t(baseOrientation) : quaternion_t(estimator_->getBaseOrientation());
+    const tbai::matrix3_t R_world_base = baseQuaternion.toRotationMatrix();
+    const tbai::matrix3_t R_base_world = R_world_base.transpose();
+    const tbai::vector_t rpy = tbai::mat2oc2rpy(R_world_base, lastYaw_);
+    lastYaw_ = rpy[2];
 
+    // Base orientation - Euler zyx as {roll, pitch, yaw}
     state.x.segment<3>(0) = rpy;
 
     // Base position
-    if (enable_state_estim) {
-        state.x.segment<3>(3) = estimator_->getBasePosition();
-
-        TBAI_LOG_DEBUG(logger_, "Base position: {}",
-                       (std::stringstream() << estimator_->getBasePosition().transpose()).str());
-    }
+    state.x.segment<3>(3) = estimator_->getBasePosition();
 
     // Base angular velocity
-    state.x.segment<3>(6) = angularVelBase;
-
-    // Base linear velocity
-    if (enable_state_estim) {
-        state.x.segment<3>(9) = R_base_world * estimator_->getBaseVelocity();
+    if (removeGyroscopeBias_) {
+        state.x.segment<3>(6) = baseAngVel - estimator_->getGyroscopeBias();
+    } else {
+        state.x.segment<3>(6) = baseAngVel;
     }
 
+    // Base linear velocity
+    state.x.segment<3>(9) = R_base_world * estimator_->getBaseVelocity();
+
     // Joint positions
-    state.x.segment<12>(12) = jointPositions;
+    state.x.segment<12>(12) = jointAngles;
 
     // Joint velocities
     state.x.segment<12>(12 + 12) = jointVelocities;
 
-    state.timestamp = timestamp;
-    state.contactFlags = contacts;
+    state.timestamp = currentTime;
+    state.contactFlags = contactFlags;
 
-    auto t12 = std::chrono::high_resolution_clock::now();
     TBAI_LOG_INFO_THROTTLE(logger_, 8.0, "State update time: {} us",
                            std::chrono::duration_cast<std::chrono::microseconds>(t12 - t11).count());
 

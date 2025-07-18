@@ -81,11 +81,12 @@ class Go2RobotInterface : public RobotInterface {
 
     std::shared_ptr<spdlog::logger> logger_;
 
-    bool enablePositionEstimation_ = false;
+    bool rectifyOrientation_ = true;
+    bool removeGyroscopeBias_ = true;
 
-    virtual void enable() override { enablePositionEstimation_ = true; }
-
-    virtual void disable() override { enablePositionEstimation_ = false; }
+    bool enable_ = false;  // Enable state estimation
+    void enable() override { enable_ = true; }
+    void disable() override { enable_ = false; }
 };
 
 }  // namespace tbai
