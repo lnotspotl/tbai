@@ -1,8 +1,6 @@
 import sys
 import copy
 
-sys.path.insert(0, "/home/user/Documents/tbai2/build/tbai_python")
-
 import tbai_python
 
 import mpac_logging
