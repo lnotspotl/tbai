@@ -1,6 +1,10 @@
 # Towards Better Athletic Intelligence
+This repository contains implementations of core algorithms used in the `tbai` ecosystems. For deployment and use with specific robotics frameworks, including ROS and ROS2, thin wrapper repositories are available: [tbai_ros](https://github.com/lnotspotl/tbai_ros)
 
-## Environment Variables used throughout `tbai`
+- [**tbai_ros**](https://github.com/lnotspotl/tbai_ros) - a ROS-noetic wrapper around tbai, uses [pixi](pixi.sh) for dependency management, so no worries that ROS is past its end of life :)
+- [**tbai_ros2**]() - coming soon ...
+
+#### Environment Variables used throughout `tbai`
 
 | Environment Variable | Type | Default | Description | Usage |
 |---------------------|------|---------|-------------|-------|
@@ -10,8 +14,3 @@
 | **`TBAI_GLOBAL_CONFIG_PATH`** | `string` | **Required** | Global config file path | Main YAML config file |
 | **`TBAI_ROBOT_DESCRIPTION_PATH`** | `string` | **Required** | Robot URDF path | Robot model file |
 | **`TBAI_CACHE_DIR`** | `string` | `"/tmp/tbai_hf_cache"` | Model cache directory | For downloaded models |
-
-## Combining logs
-```bash
-sort -t']' -k1 *.logs > combined.txt
-```
