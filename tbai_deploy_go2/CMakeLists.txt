@@ -24,20 +24,14 @@ target_link_libraries(tbai_deploy_go2
 )
 
 
-add_executable(main src/main.cpp)
-target_link_libraries(main
+add_executable(test_stand_sit src/test_stand_sit.cpp)
+target_link_libraries(test_stand_sit
     PUBLIC
     unitree_sdk2
 )
 
-add_executable(main2 src/main2.cpp)
-target_link_libraries(main2
-    PUBLIC
-        tbai_deploy_go2
-)
-
-add_executable(joystick_main src/joystick_main.cpp)
-target_link_libraries(joystick_main
+add_executable(test_lidar src/test_lidar.cpp)
+target_link_libraries(test_lidar
     PUBLIC
         tbai_deploy_go2
 )

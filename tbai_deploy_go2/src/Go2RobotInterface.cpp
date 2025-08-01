@@ -49,11 +49,19 @@ Go2RobotInterface::Go2RobotInterface(Go2RobotInterfaceArgs args) {
     TBAI_LOG_INFO(logger_, "Network interface: {}", args.networkInterface());
     TBAI_LOG_INFO(logger_, "Initializing Go2RobotInterface");
     TBAI_LOG_INFO(logger_, "Channel init: {}", args.channelInit());
+    TBAI_LOG_INFO(logger_, "Subscribe lidar: {}", args.subscribeLidar());
     if (args.channelInit()) {
         TBAI_LOG_INFO(logger_, "Initializing channel factory: {}", args.networkInterface());
         unitree::robot::ChannelFactory::Instance()->Init(0, args.networkInterface());
     } else {
         throw std::runtime_error("Channel init is disabled");
+    }
+
+    // Subscribe lidar
+    if (args.subscribeLidar()) {
+        TBAI_LOG_INFO(logger_, "Initializing lidar subscriber: {}", TOPIC_LIDAR);
+        lidar_subscriber.reset(new ChannelSubscriber<sensor_msgs::msg::dds_::PointCloud2_>(TOPIC_LIDAR));
+        lidar_subscriber->InitChannel(std::bind(&Go2RobotInterface::lidarCallback, this, std::placeholders::_1), 1);
     }
 
     msc = std::make_unique<MotionSwitcherClient>();

@@ -18,6 +18,7 @@
 #include <unitree/common/time/time_tool.hpp>
 #include <unitree/idl/go2/LowCmd_.hpp>
 #include <unitree/idl/go2/LowState_.hpp>
+#include <unitree/idl/ros2/PointCloud2_.hpp>
 #include <unitree/robot/b2/motion_switcher/motion_switcher_client.hpp>
 #include <unitree/robot/channel/channel_publisher.hpp>
 #include <unitree/robot/channel/channel_subscriber.hpp>
@@ -28,6 +29,7 @@ using namespace unitree::robot::b2;
 
 #define TOPIC_LOWCMD "rt/lowcmd"
 #define TOPIC_LOWSTATE "rt/lowstate"
+#define TOPIC_LIDAR "rt/utlidar/cloud"
 
 constexpr double PosStopF = (2.146E+9f);
 constexpr double VelStopF = (16000.0f);
@@ -38,6 +40,7 @@ struct Go2RobotInterfaceArgs {
     TBAI_ARG_DEFAULT(std::string, networkInterface, "192.168.123.10");
     TBAI_ARG_DEFAULT(bool, channelInit, true);
     TBAI_ARG_DEFAULT(bool, enableStateEstim, true);
+    TBAI_ARG_DEFAULT(bool, subscribeLidar, true);
 };
 
 class Go2RobotInterface : public RobotInterface {
@@ -49,6 +52,10 @@ class Go2RobotInterface : public RobotInterface {
     void publish(std::vector<MotorCommand> commands) override;
     void waitTillInitialized() override;
     State getLatestState() override;
+
+    virtual void lidarCallback(const void *message) {
+        // Do nothing by default, a user is expected to override this method, but does not have to
+    };
 
    private:
     int queryMotionStatus();
@@ -64,6 +71,7 @@ class Go2RobotInterface : public RobotInterface {
     ChannelPublisherPtr<unitree_go::msg::dds_::LowCmd_> lowcmd_publisher;
     /*subscriber*/
     ChannelSubscriberPtr<unitree_go::msg::dds_::LowState_> lowstate_subscriber;
+    ChannelSubscriberPtr<sensor_msgs::msg::dds_::PointCloud2_> lidar_subscriber;
 
     /*LowCmd write thread*/
     ThreadPtr lowCmdWriteThreadPtr;
