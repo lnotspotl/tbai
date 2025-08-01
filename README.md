@@ -4,6 +4,13 @@ This repository contains implementations of core algorithms used in the `tbai` e
 - [**tbai_ros**](https://github.com/lnotspotl/tbai_ros) - a ROS-noetic wrapper around tbai, uses [pixi](pixi.sh) for dependency management, so no worries that ROS is past its end of life :)
 - [**tbai_ros2**]() - coming soon ...
 
+#### Install `tbai`
+```bash
+pixi install && pixi shell
+mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release
+make -j10
+```
+
 #### Environment Variables used throughout `tbai`
 
 | Environment Variable | Type | Default | Description | Usage |
