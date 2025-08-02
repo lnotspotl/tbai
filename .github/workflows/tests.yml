@@ -23,9 +23,9 @@ jobs:
     - name: Install environment with pixi
       run: |
         export PATH="$HOME/.pixi/bin:$PATH"
-        pixi install
+        pixi run just install
 
     - name: Run tests
       run: |
         export PATH="$HOME/.pixi/bin:$PATH"
-        pixi run test
+        pixi run just test

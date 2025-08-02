@@ -17,8 +17,4 @@ pybind11="2.13.6.*"
 yaml-cpp="*"
 pinocchio="3.7.*"
 cmake="3.30.*"
-
-[tasks]
-
-just_install = { cmd = "cmake -B/tmp/cpmbuild -S. -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX && cmake --build /tmp/cpmbuild --parallel 8 && cmake --build /tmp/cpmbuild --target install" }
-test = { cmd = "cmake -Bbuild -S. -DTBAI_BUILD_TESTS=ON -DTBAI_BUILD_PYTHON=OFF -DTBAI_BUILD_DEPLOY_GO2=OFF && cd build && make -j8 && ctest --output-on-failure" }
+just = ">=1.42.4,<2"

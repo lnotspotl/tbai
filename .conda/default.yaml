@@ -1,0 +1,17 @@
+name: default
+channels:
+- conda-forge
+- nodefaults
+dependencies:
+- gxx 13.3.*
+- fmt 10.1.*
+- spdlog 1.12.0.*
+- libtorch ==2.7.0 *cpu_generic*
+- cpp-argparse *
+- eigen 3.3.7.*
+- gtest *
+- pybind11 2.13.6.*
+- yaml-cpp *
+- pinocchio 3.7.*
+- cmake 3.30.*
+
