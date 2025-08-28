@@ -10,6 +10,7 @@ option(TBAI_BUILD_NP3O "Build the np3o" ON)
 option(TBAI_BUILD_MUSE "Build the muse" ON)
 option(TBAI_BUILD_PYTHON "Build the Python bindings" OFF)
 option(TBAI_BUILD_DEPLOY_GO2 "Build the deploy go2" ON)
+option(TBAI_BUILD_G1_RL "Build the g1_rl" ON)
 
 project(tbai VERSION 2.0.0)
 
@@ -35,6 +36,10 @@ endif()
 
 if(TBAI_BUILD_NP3O)
   add_subdirectory(tbai_np3o)
+endif()
+
+if(TBAI_BUILD_G1_RL)
+  add_subdirectory(tbai_g1_rl)
 endif()
 
 if(TBAI_BUILD_PYTHON)
