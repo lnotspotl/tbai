@@ -77,7 +77,7 @@ std::string downloadFromHuggingFace(const std::string &repo_id, const std::strin
         std::filesystem::create_directories(cache_dir);
     }
 
-    std::string command = fmt::format("huggingface-cli download {0} {1} --local-dir {2}", repo_id, filename, cache_dir);
+    std::string command = fmt::format("hf download {0} {1} --local-dir {2}", repo_id, filename, cache_dir);
 
     // Execute the command
     int result = system(command.c_str());
