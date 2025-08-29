@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tbai_safe"
+version = "0.0.6"
+dependencies = [
+    "numpy==2.2.6",
+    "matplotlib==3.10.0",
+    "scipy==1.15.2",
+    "casadi==3.6.7",
+    "sympy==1.13.3",
+    "pytest==8.3.4",
+    "ruff==0.9.7",
+    "pre-commit",
+    "evdev",
+    "seaborn",
+    "numba",
+    "colored",
+    "imageio",
+]
+
+[project.optional-dependencies]
+vision=[
+    "depthai==3.0.0rc4",
+    "rerun-sdk==0.23.1",
+    "opencv-python==4.12.0.88",
+]
+all = [
+    "tbai_safe[vision]",
+]
+
+[tool.ruff]
+line-length = 120
+indent-width = 2
+
+[tool.ruff.lint]
+ignore = ["E731"]
+
+[tool.pytest]
+norecursedirs = "3rdparty/*"
+testpaths = ["tests"]
+
