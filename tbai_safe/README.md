@@ -1,5 +1,5 @@
 # tbai_safe 
-[![Tests](https://github.com/Hier-Lab/tbai_safe/actions/workflows/python_test.yaml/badge.svg)](https://github.com/Hier-Lab/tbai_safe/actions/workflows/python_test.yaml)
+[![Tests](https://github.com/lnotspotl/tbai/actions/workflows/tests.yml/badge.svg)](https://github.com/lnotspotl/tbai/actions/workflows/tests.yml)
 
 ## Installation
 
