@@ -4,6 +4,7 @@
 #include <tbai_core/control/Subscribers.hpp>
 #include <tbai_g1_rl/State.hpp>
 #include <tbai_reference/ReferenceVelocityGenerator.hpp>
+#include <tbai_g1_rl/HistoryBuffer.hpp>
 
 namespace tbai {
 
@@ -38,7 +39,6 @@ class G1RlController : public tbai::Controller {
 
     std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> refVelGen_;
 
-    void setupPinocchioModel(const std::string &urdfString);
     std::vector<tbai::MotorCommand> getMotorCommands(const vector_t &jointAngles);
     g1_rl::State getG1RlState();
 
@@ -81,6 +81,15 @@ class G1RlController : public tbai::Controller {
 
     State state_;
     g1_rl::State g1RlState_;
+
+    tbai::g1_rl::HistoryBuffer historyBuffer_;
+
+    std::vector<int> joint_ids_map_;
+    std::vector<scalar_t> stiffness_;
+    std::vector<scalar_t> damping_;
+    std::vector<scalar_t> default_joint_pos_;
+    std::vector<scalar_t> action_scale_;
+    std::vector<scalar_t> action_offset_;
 };
 
 }  // namespace tbai

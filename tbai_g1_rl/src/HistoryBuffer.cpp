@@ -1,11 +1,10 @@
 #include <functional>
 #include <iostream>
 
-#include <tbai_np3o/HistoryBuffer.hpp>
+#include <tbai_g1_rl/HistoryBuffer.hpp>
 
 namespace tbai {
-namespace np3o {
-
+namespace g1_rl {
 HistoryBuffer::HistoryBuffer(std::size_t numObs, std::size_t historyLength)
     : numObs_(numObs), historyLength_(historyLength) {
     for (std::size_t i = 0; i < historyLength; i++) {
@@ -29,5 +28,5 @@ tbai::vector_t HistoryBuffer::getFinalObservation() {
     return tbai::vvstack(historyRefs);
 }
 
-}  // namespace np3o
+}  // namespace g1_rl
 }  // namespace tbai
