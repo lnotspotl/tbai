@@ -24,3 +24,22 @@ jobs:
       run: |
         export PATH="$HOME/.pixi/bin:$PATH"
         pixi run just test
+
+  tbai_safe_tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11.9'
+        
+    - name: Install dependencies
+      run: |
+        cd tbai_safe && pip install -e . --use-pep517
+        
+    - name: Run tests
+      run: |
+        cd tbai_safe && pytest --verbose
