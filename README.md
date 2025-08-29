@@ -1,7 +1,7 @@
 # Towards Better Athletic Intelligence
 This repository contains implementations of core algorithms used in the `tbai` ecosystems. For deployment and use with specific robotics frameworks, including ROS and ROS2, thin wrapper repositories are available: [tbai_ros](https://github.com/lnotspotl/tbai_ros)
 
-- [**tbai_ros**](https://github.com/lnotspotl/tbai_ros) - a ROS-noetic wrapper around tbai, uses [pixi](pixi.sh) for dependency management, so no worries that ROS is past its end of life :)
+- [**tbai_ros**](https://github.com/lnotspotl/tbai_ros) - a ROS-noetic wrapper around tbai, uses [pixi](pixi.sh) for dependency management, so no worries that ROS is past its end of life :) - works on many Ubuntu releases, including Ubuntu 24.04
 - [**tbai_ros2**]() - coming soon ...
 
 #### Install `tbai`
