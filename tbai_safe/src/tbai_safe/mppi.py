@@ -493,6 +493,9 @@ class AcceleratedSafetyMPPI:
     self.u_prev[:-1] = u[1:]
     self.u_prev[-1] = u[-1]
 
+    if self.backend == np:
+      return u[0], u, optimal_traj, sampled_traj_list
+
     if self.backend == cp:
       return (
         u[0].get(),
@@ -501,8 +504,7 @@ class AcceleratedSafetyMPPI:
         sampled_traj_list.get() if sampled_traj_list is not None else None,
       )
 
-    if self.backend == np:
-      return u[0], u, optimal_traj, sampled_traj_list
+    raise RuntimeError(f"Backend {self.backend} is invalid!") 
 
   def calculate_epsilon(self, sigma: np.ndarray, size_sample: int, size_time_step: int, size_dim_u: int):
     mu = self.backend.zeros((size_dim_u))
