@@ -9,13 +9,14 @@ import numba
 
 from tbai_safe.utils import remove_kwargs
 import tbai_safe.ulogging
+from scipy.ndimage import convolve1d as np_convolve1d
 
 
 import os
 
 try:
   import cupy as cp
-
+  from cupyx.scipy.ndimage import convolve1d as cp_convolve1d
   has_cuda = True
 except ImportError:
   has_cuda = False
@@ -419,9 +420,11 @@ class AcceleratedSafetyMPPI:
 
     if backend == "numpy":
       self.backend = np
+      self.convolve = lambda xx, b, axis, mode, cval: np_convolve1d(xx, b, axis=axis, mode=mode, cval=cval)
     if backend == "cuda":
       assert has_cuda, "Numba CUDA is not installed"
       self.backend = cp
+      self.convolve = lambda xx, b, axis, mode, cval: cp_convolve1d(xx, b, axis=axis, mode=mode, cval=cval)
 
     if stype == "float64":
       self.stype = self.backend.float64
@@ -582,21 +585,20 @@ class AcceleratedSafetyMPPI:
     w = (1.0 / eta) * exp_terms
     return w
 
-  def moving_average_filter(self, xx: np.ndarray, window_size: int):
+
+  def moving_average_filter(self, xx, window_size: int):
     b = self.backend.ones(window_size) / window_size
     xx_mean = self.backend.zeros_like(xx)
+    xx_mean = self.convolve(xx, b, axis=0, mode="constant", cval=0.0)
 
-    xx_mean = self.backend.apply_along_axis(lambda x: self.backend.convolve(x, b, mode="same"), axis=0, arr=xx)
-
-    n_conv = math.ceil(window_size / 2)
-
+    n_conv = int(np.ceil(window_size / 2))
     xx_mean[0, :] *= window_size / n_conv
 
-    for i in range(1, n_conv):
-      scale_start = window_size / (i + n_conv)
-      scale_end = window_size / (i + n_conv - (window_size % 2))
+    idx = self.backend.arange(1, n_conv)
+    scale_start = window_size / (idx + n_conv)
+    scale_end = window_size / (idx + n_conv - (window_size % 2))
 
-      xx_mean[i, :] *= scale_start
-      xx_mean[-i, :] *= scale_end
+    xx_mean[idx, :] *= scale_start[:, self.backend.newaxis]
+    xx_mean[-idx, :] *= scale_end[:, self.backend.newaxis]
 
     return xx_mean
