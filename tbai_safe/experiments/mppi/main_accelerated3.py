@@ -19,6 +19,7 @@ from tbai_safe.mppi import (
   cost_fn,
 )
 from tbai_safe.mppi import set_default_dtype, set_default_backend
+from tbai_safe.anim import save_animation
 
 
 def main():
@@ -135,6 +136,7 @@ def main():
 
   fig.canvas.mpl_connect("key_press_event", on_key_press)
 
+  @save_animation(fig, ax, filename="animation.gif", fps=20, repeat=True)
   def update(_):
     nonlocal weights, flip, pcm, colors
 
