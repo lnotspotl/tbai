@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import functools
 import time
 
 import numpy as np
@@ -67,18 +68,22 @@ def main():
   cbf12_jit = jit_expr(cbf12.get_expr(substitute=True))
   cbf13_jit = jit_expr(cbf13.get_expr(substitute=True))
 
+  @functools.partial(cost_fn, locals=locals(), globals=globals())
   def stage_cost1(x, y, u1, u2, weight1, weight2, weight3, weight4):
     cbf10_val = cbf10_jit(x=x, y=y)
     return (-weight1 * cbf10_val) if cbf10_val < 0 else 0
 
+  @functools.partial(cost_fn, locals=locals(), globals=globals())
   def stage_cost2(x, y, u1, u2, weight1, weight2, weight3, weight4):
     cbf11_val = cbf11_jit(x=x, y=y)
     return (-weight2 * cbf11_val) if cbf11_val < 0 else 0
 
+  @functools.partial(cost_fn, locals=locals(), globals=globals())
   def stage_cost3(x, y, u1, u2, weight1, weight2, weight3, weight4):
     cbf12_val = cbf12_jit(x=x, y=y)
     return (-weight3 * cbf12_val) if cbf12_val < 0 else 0
 
+  @functools.partial(cost_fn, locals=locals(), globals=globals())
   def stage_cost4(x, y, u1, u2, weight1, weight2, weight3, weight4):
     cbf13_val = cbf13_jit(x=x, y=y)
     return (-weight4 * cbf13_val) if cbf13_val < 0 else 0
@@ -86,36 +91,45 @@ def main():
   lqr_final_cost_expr = system.get_lqr_cost_expr(Q, R, x1, x2, u1, u2, x_desired[0], x_desired[1], 0.0, 0.0)
   lqr_final_jit = jit_expr(lqr_final_cost_expr)
 
+  @functools.partial(cost_fn, locals=locals(), globals=globals())
   def terminal_cost(x, y, alpha=1.0):
     return lqr_final_jit(x=x, y=y, u1=0.0, u2=0.0)
 
+  @functools.partial(cost_fn, locals=locals(), globals=globals())
+  def dummy_zero_cost(x, y, weight1, weight2, weight3, weight4):
+    return 0.0
+
+  @functools.partial(cost_fn, locals=locals(), globals=globals())
+  def lqr_cost_fn(x, y, u1, u2, alpha):
+    return alpha * lqr_stage_jit(x=x, y=y, u1=0.0, u2=0.0)
+
   mppi_cost_fn1 = get_cost_function_parameterized(
-    cost_fn(stage_cost1),
-    cost_fn(lambda x, y, weight1, weight2, weight3, weight4: 0.0),
+    stage_cost1,
+    dummy_zero_cost,
     scalar_args=["weight1", "weight2", "weight3", "weight4"],
     vector_args_ew=[],
     vector_args_vw=[],
   )
 
   mppi_cost_fn3 = get_cost_function_parameterized(
-    cost_fn(stage_cost3),
-    cost_fn(lambda x, y, weight1, weight2, weight3, weight4: 0.0),
+    stage_cost3,
+    dummy_zero_cost,
     scalar_args=["weight1", "weight2", "weight3", "weight4"],
     vector_args_ew=[],
     vector_args_vw=[],
   )
 
   mppi_cost_fn4 = get_cost_function_parameterized(
-    cost_fn(stage_cost4),
-    cost_fn(lambda x, y, weight1, weight2, weight3, weight4: 0.0),
+    stage_cost4,
+    dummy_zero_cost,
     scalar_args=["weight1", "weight2", "weight3", "weight4"],
     vector_args_ew=[],
     vector_args_vw=[],
   )
 
-  lqr_cost_fn = get_cost_function_parameterized(
-    cost_fn(lambda x, y, u1, u2, alpha: alpha * lqr_stage_jit(x=x, y=y, u1=0.0, u2=0.0)),
-    cost_fn(terminal_cost),
+  mppi_lqr_cost_fn = get_cost_function_parameterized(
+    lqr_cost_fn,
+    terminal_cost,
     scalar_args=[],
     vector_args_ew=["alpha"],
     vector_args_vw=[],
@@ -125,7 +139,7 @@ def main():
   cost2 = cost1
   cost3 = MppiCbfCost(mppi_cost_fn3)
   cost4 = MppiCbfCost(mppi_cost_fn4)
-  cost5 = MppiCost(lqr_cost_fn)
+  cost5 = MppiCost(mppi_lqr_cost_fn)
 
   print("Jitted!")
 
@@ -161,8 +175,6 @@ def main():
 
   fig.canvas.mpl_connect("key_press_event", on_key_press)
 
-  frames = []
-
   @save_animation(fig, ax, filename="animation.gif", fps=20, repeat=True)
   def update(_):
     nonlocal weights, flip, pcm, colors
@@ -195,9 +207,6 @@ def main():
     system.step(control, dt=dt)
     system.visualize()
     time.sleep(0.05)
-
-    fig.canvas.draw()
-    frames.append(fig.canvas.copy_from_bbox(ax.bbox))
 
     if mppi.return_sampled_trajectories:
       for i, sampled_trajectory in enumerate(sampled_trajectories):

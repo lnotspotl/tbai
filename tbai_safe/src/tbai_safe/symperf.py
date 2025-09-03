@@ -4,6 +4,7 @@ import sympy as sp
 import numpy as np
 import numba
 
+from tbai_safe.ulogging import get_logger
 from tbai_safe.mppi import get_default_backend, get_default_dtype
 
 try:
@@ -13,19 +14,19 @@ try:
 except ImportError:
   has_cuda = False
 
+logger = get_logger(__name__)
 
-def jit_expr(
-  expr: sp.Expr, nbtype=numba.float32, cse=True, parallel=False, symbols=None, device=True, backend=None, stype=None
-):
+
+def jit_expr(expr: sp.Expr, cse=True, parallel=False, symbols=None, device=True, backend=None, stype=None):
   """Take an expression, convert it into a callable function and jit it. Works for both numpy and cuda backends."""
-  backend = get_default_backend() if backend is None else backend
-  stype = get_default_dtype() if stype is None else stype
-
+  backend = get_default_backend()
+  stype = get_default_dtype()
   expr_symbols = [s.name for s in sorted(expr.free_symbols, key=lambda x: x.name)]
   symbols = symbols if symbols is not None else expr_symbols
   assert sorted(symbols) == expr_symbols, (
     f"Used symbols must be a permutation of the expression symbols: {symbols} != {expr_symbols}"
   )
+  logger.debug(f"Jitting expression: {expr} with symbols: {symbols}")
   if isinstance(expr, sp.MatrixBase):  # For matrices, we let numba infer types
     fn = sp.lambdify(symbols, expr, modules="numpy", cse=cse)
     if backend == "numpy":
@@ -37,7 +38,8 @@ def jit_expr(
       raise ValueError(f"Invalid backend: {backend}, supported backends are: numpy, cuda")
   else:
     fn = sp.lambdify(symbols, expr, modules="math", cse=cse)
-    annotation = nbtype(*[nbtype for _ in symbols])
+    annotation = f"({stype}({', '.join([stype for _ in symbols])}))"
+    logger.debug(f"Annotation: {annotation}")
     if backend == "numpy":
       return numba.jit([annotation], nopython=True, parallel=parallel)(fn)
     elif backend == "cuda":

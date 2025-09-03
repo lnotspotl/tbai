@@ -2,13 +2,14 @@
 
 import math
 import textwrap
-import inspect
 import numpy as np
 from tbai_safe.systems import SimpleSingleIntegrator2D
 from dataclasses import dataclass
 import numba
 
-import tbai_safe.logging
+from tbai_safe.utils import remove_kwargs
+import tbai_safe.ulogging
+
 
 import os
 
@@ -22,7 +23,7 @@ except ImportError:
 from typing import Callable
 import sympy as sp
 
-logger = tbai_safe.logging.get_logger(__name__)
+logger = tbai_safe.ulogging.get_logger(__name__)
 
 
 @dataclass
@@ -74,32 +75,60 @@ def get_default_threads_per_block():
   return _mppi_config.threads_per_block
 
 
-def cost_fn(fn: Callable, backend: str = None, dtype: str = None):
+def cost_fn(fn: Callable, backend: str = None, dtype: str = None, locals: dict = None, globals: dict = None):
   if hasattr(fn, "_tbai_safe_backend"):
     return fn
+
+  assert locals is not None, "locals must be provided. Use functools.partial to provide locals"
+  assert globals is not None, "globals must be provided. Use functools.partial to provide globals"
 
   backend = get_default_backend() if backend is None else backend
   dtype = get_default_dtype() if dtype is None else dtype
 
+  # Remove kwargs from the function
+  fn, source, new_source = remove_kwargs(fn, locals=locals, globals=globals)
+
+  jitted_fn = None
   if backend == "numpy":
     jitted_fn = numba.njit(fn, fastmath=False)
     jitted_fn._tbai_safe_backend = backend
-    return jitted_fn
   elif backend == "cuda":
     jitted_fn = numba.cuda.jit(fn, fastmath=False, device=True)
     jitted_fn._tbai_safe_backend = backend
-    return jitted_fn
   else:
     raise ValueError(f"Invalid backend: {backend}")
 
+  # Set original and jitted source code
+  jitted_fn._tbai_safe_source = source
+  jitted_fn._tbai_safe_new_source = new_source
+
+  return jitted_fn
+
 
 class MppiCost:
-  def __init__(self, fn: Callable):
+  def __init__(self, fn: Callable, backend: str = None, dtype: str = None):
     self.fn = fn
+    self.backend = get_default_backend() if backend is None else backend
+    self.dtype = get_default_dtype() if dtype is None else dtype
+    self.eval_fn = self.evaluate_numpy if self.backend == "numpy" else self.evaluate_cuda
+
+  def evaluate_numpy(self, *args, **kwargs):
+    args = [arg if isinstance(arg, np.ndarray) else np.array(arg, dtype=self.dtype) for arg in args]
+    kwargs = {
+      k: kwargs[k] if isinstance(kwargs[k], np.ndarray) else np.array(kwargs[k], dtype=self.dtype) for k in kwargs
+    }
+    return self.fn(*args, **kwargs)
+
+  def evaluate_cuda(self, *args, **kwargs):
+    args = [arg if isinstance(arg, cp.ndarray) else cp.array(arg, dtype=self.dtype) for arg in args]
+    kwargs = {
+      k: kwargs[k] if isinstance(kwargs[k], cp.ndarray) else cp.array(kwargs[k], dtype=self.dtype) for k in kwargs
+    }
+    return self.fn(*args, **kwargs)
 
   def evaluate(self, X, U, S, other_inputs):
     """X is of shape (B, T, 2), U is of shape (B, T, 2) - it is states and actions respectively, S is of shape (B,) and is the buffer where the cost should be accumulated"""
-    return self.fn(X, U, *other_inputs, S)
+    return self.eval_fn(X, U, *other_inputs, S)
 
 
 @dataclass
@@ -111,9 +140,7 @@ class MppiCbfCostInputs:
 
 class MppiCbfCost(MppiCost):
   def __init__(self, fn: Callable, backend: str = None, dtype: str = None):
-    super().__init__(fn)
-    self.backend = get_default_backend() if backend is None else backend
-    self.dtype = get_default_dtype() if dtype is None else dtype
+    super().__init__(fn, backend, dtype)
     self.eval_fn = self.evaluate_numpy if self.backend == "numpy" else self.evaluate_cuda
 
   def evaluate_numpy(self, X, U, S, other_inputs: MppiCbfCostInputs):
@@ -206,6 +233,10 @@ def get_cost_function_parameterized(
   # vector_args_vw = vector-wise for each time step (per-rollout, constant for each time step)
   assert hasattr(stage_cost, "_tbai_safe_backend"), "Stage cost must be jitted with cost_fn"
   assert hasattr(terminal_cost, "_tbai_safe_backend"), "Terminal cost must be jitted with cost_fn"
+  assert hasattr(stage_cost, "_tbai_safe_source"), "Stage cost must be jitted with cost_fn"
+  assert hasattr(terminal_cost, "_tbai_safe_source"), "Terminal cost must be jitted with cost_fn"
+  assert hasattr(stage_cost, "_tbai_safe_new_source"), "Stage cost must be jitted with cost_fn"
+  assert hasattr(terminal_cost, "_tbai_safe_new_source"), "Terminal cost must be jitted with cost_fn"
 
   stype = get_default_dtype() if stype is None else stype
   backend = get_default_backend() if backend is None else backend
@@ -271,10 +302,12 @@ def get_cost_function_parameterized(
     def total_cost_vec(x, u, {args_str} out):
       B, T, _ = x.shape
       for i in range(B):
+        total = 0.0
         for t in range(T):
+          total += stage_cost(x[i, t, 0], x[i, t, 1], u[i, t, 0], u[i, t, 1], {use_str})
           if t == T - 1:
-            out[i] += terminal_cost(x[i, t, 0], x[i, t, 1], {use_str})
-          out[i] += stage_cost(x[i, t, 0], x[i, t, 1], u[i, t, 0], u[i, t, 1], {use_str})
+            total += terminal_cost(x[i, t, 0], x[i, t, 1], {use_str})
+        out[i] += total
     """
 
   ### CUDA backend
@@ -294,19 +327,24 @@ def get_cost_function_parameterized(
         if idx < B:
             total = 0.0
             for t in range(T):
-              out[idx] = 0.0
               if t == T - 1:
                 total += terminal_cost(x[idx, t, 0], x[idx, t, 1], {use_str})
               total += stage_cost(x[idx, t, 0], x[idx, t, 1], u[idx, t, 0], u[idx, t, 1], {use_str})
-            out[idx] = total
+            out[idx] += total
     """
 
   assert cc is not None, f"Invalid backend: {backend}"
   cc = textwrap.dedent(cc)
 
-  logger.debug(
-    f"Stage cost source:\n{textwrap.dedent(inspect.getsource(stage_cost))}\nTerminal cost source:\n{textwrap.dedent(inspect.getsource(terminal_cost))}\n{cc}"
-  )
+  old_code = False
+  if old_code:
+    logger.debug(
+      f"Stage cost source:\n{textwrap.dedent(stage_cost._tbai_safe_source)}\nTerminal cost source:\n{textwrap.dedent(terminal_cost._tbai_safe_source)}\n{cc}"
+    )
+  else:
+    logger.debug(
+      f"Stage cost source:\n{textwrap.dedent(stage_cost._tbai_safe_new_source)}\nTerminal cost source:\n{textwrap.dedent(terminal_cost._tbai_safe_new_source)}\n{cc}"
+    )
 
   exec(cc, locals())
 
@@ -326,12 +364,13 @@ def get_cost_function_parameterized(
   raise ValueError(f"Invalid backend: {backend}")
 
 
-def jit_expr_v2t(expr: sp.Expr, nbtype=numba.float32, cse=True, parallel=False, symbols=None, backend=None):
+def jit_expr_v2t(expr: sp.Expr, cse=True, parallel=False, symbols=None, backend=None, stype=None):
   """Jit an expression that takes in x, y and val[i] and returns the expression evaluated at x, y and val[i]
 
   This function essentially unpacks the val arguments as numba currently does not support passing in a list of arguments.
   """
   backend = get_default_backend() if backend is None else backend
+  stype = get_default_dtype() if stype is None else stype
 
   header = f"@numba.jit(nopython=True, parallel={parallel})" if backend == "numpy" else "@numba.cuda.jit(device=True)"
 
@@ -345,7 +384,7 @@ def jit_expr_v2t(expr: sp.Expr, nbtype=numba.float32, cse=True, parallel=False, 
   import numba
   {"import numba.cuda" if backend == "cuda" else ""}
   from tbai_safe.symperf import jit_expr
-  jitted = jit_expr(expr, nbtype, cse, parallel, symbols=["x", "y"] + symbols, backend="{backend}", device=True)
+  jitted = jit_expr(expr, cse, parallel, symbols=["x", "y"] + symbols, backend="{backend}", device=True, stype="{stype}")
   {header}
   def jitted_wrapper(x, y, val):
     return jitted({args})
@@ -480,7 +519,9 @@ class AcceleratedSafetyMPPI:
     ).reshape(self.K, self.T, 2)
 
     for fn, args in cost_fn_args:
+      print("Evaluating cost function")
       fn.evaluate(out, v, self.S, args)
+      print(self.S[:3])
 
     w = self.compute_weights(self.S)
     w_epsilon = self.backend.sum(w[:, self.backend.newaxis, self.backend.newaxis] * epsilon, axis=0)

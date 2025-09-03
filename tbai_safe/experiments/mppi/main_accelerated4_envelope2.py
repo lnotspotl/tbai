@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import time
+import functools
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -96,22 +97,24 @@ def main():
   print(cbf10_memory.all_symbols_envelope)
   print(cbf10_memory.get_args(x=float(system.state[0]), y=float(system.state[1])))
 
+  @functools.partial(cost_fn, locals=locals(), globals=globals())
   def stage_cost(x, y, u1, u2, weight1, alpha, val1):
-    cost = alpha * lqr_stage_jit(x, y, 0, 0)
+    cost = alpha * lqr_stage_jit(x=x, y=y, u1=0.0, u2=0.0)
 
-    cbf10_val = cbf10_jit(x, y, val1)
+    cbf10_val = cbf10_jit(x=x, y=y, val=val1)
     cost += (-weight1 * cbf10_val) if cbf10_val < 0 else 0
     return cost
 
   lqr_final_cost_expr = system.get_lqr_cost_expr(Q, R, x1, x2, u1, u2, x_desired[0], x_desired[1], 0.0, 0.0)
   lqr_final_jit = jit_expr(lqr_final_cost_expr)
 
+  @functools.partial(cost_fn, locals=locals(), globals=globals())
   def terminal_cost(x, y, weight1, alpha, val1):
-    return lqr_final_jit(x, y, 0.0, 0.0)
+    return lqr_final_jit(x=x, y=y, u1=0.0, u2=0.0)
 
   mppi_cost_fn = get_cost_function_parameterized(
-    cost_fn(stage_cost),
-    cost_fn(terminal_cost),
+    stage_cost,
+    terminal_cost,
     scalar_args=["weight1"],
     vector_args_ew=["alpha"],
     vector_args_vw=["val1"],

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import time
+import functools
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -97,14 +98,14 @@ def main(args):
   print(cbf10_memory.all_symbols)
   print(cbf10_memory.get_args(x=float(system.state[0]), y=float(system.state[1])))
 
-  @cost_fn
+  @functools.partial(cost_fn, locals=locals(), globals=globals())
   def stage_cost(x, y, u1, u2, weight1, weight2, weight3, weight4, alpha, val1, val2, val3, val4):
-    cost = alpha * lqr_stage_jit(x, y, 0, 0)
+    cost = alpha * lqr_stage_jit(x=x, y=y, u1=0.0, u2=0.0)
 
-    cbf10_val = cbf10_jit(x, y, val1)
-    cbf11_val = cbf11_jit(x, y, val2)
-    cbf12_val = cbf12_jit(x, y, val3)
-    cbf13_val = cbf13_jit(x, y, val4)
+    cbf10_val = cbf10_jit(x=x, y=y, val=val1)
+    cbf11_val = cbf11_jit(x=x, y=y, val=val2)
+    cbf12_val = cbf12_jit(x=x, y=y, val=val3)
+    cbf13_val = cbf13_jit(x=x, y=y, val=val4)
     cost += (-weight1 * cbf10_val) if cbf10_val < 0 else 0
     cost += (-weight2 * cbf11_val) if cbf11_val < 0 else 0
     cost += (-weight3 * cbf12_val) if cbf12_val < 0 else 0
@@ -114,9 +115,9 @@ def main(args):
   lqr_final_cost_expr = system.get_lqr_cost_expr(Q, R, x1, x2, u1, u2, x_desired[0], x_desired[1], 0.0, 0.0)
   lqr_final_jit = jit_expr(lqr_final_cost_expr)
 
-  @cost_fn
+  @functools.partial(cost_fn, locals=locals(), globals=globals())
   def terminal_cost(x, y, weight1, weight2, weight3, weight4, alpha, val1, val2, val3, val4):
-    return lqr_final_jit(x, y, 0.0, 0.0)
+    return lqr_final_jit(x=x, y=y, u1=0.0, u2=0.0)
 
   mppi_cost_fn = get_cost_function_parameterized(
     stage_cost,
@@ -237,6 +238,7 @@ def main(args):
 
 if __name__ == "__main__":
   import argparse
+
   parser = argparse.ArgumentParser()
   parser.add_argument("--rectangle", action="store_true")
   parser.add_argument("--noise-scale", type=float, default=0.02)

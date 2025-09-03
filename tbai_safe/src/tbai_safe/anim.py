@@ -7,7 +7,7 @@ import imageio
 import matplotlib.pyplot as plt
 from typing import Callable
 
-from tbai_safe.logging import get_logger
+from tbai_safe.ulogging import get_logger
 
 logger = get_logger("anim")
 

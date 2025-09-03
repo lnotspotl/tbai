@@ -2,6 +2,8 @@
 
 import time
 
+import functools
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -10,7 +12,13 @@ from tbai_safe.systems import SimpleSingleIntegrator2D
 from tbai_safe.cbf import ControlBarrierFunctionFactory, visualize_cbfs
 from tbai_safe.control import VanillaSafetyFilterNew
 from tbai_safe.symperf import jit_expr
-from tbai_safe.mppi import AcceleratedSafetyMPPI, get_cost_function_parameterized, MppiCbfCost, MppiCbfCostInputs, cost_fn
+from tbai_safe.mppi import (
+  AcceleratedSafetyMPPI,
+  get_cost_function_parameterized,
+  MppiCbfCost,
+  MppiCbfCostInputs,
+  cost_fn,
+)
 from tbai_safe.anim import save_animation
 
 
@@ -61,12 +69,12 @@ def main():
   cbf4_jit = jit_expr(cbf4.get_expr(substitute=True))
   cbf5_jit = jit_expr(cbf5.get_expr(substitute=True))
 
-  @cost_fn
+  @functools.partial(cost_fn, locals=locals(), globals=globals())
   def stage_cost(x, y, u1, u2, weight1, weight2, alpha):
-    cost = alpha * lqr_stage_jit(x, y, u1, u2)
+    cost = alpha * lqr_stage_jit(y=y, x=x, u1=u1, u2=u2)
 
-    cbf4_val = cbf4_jit(x, y)
-    cbf5_val = cbf5_jit(x, y)
+    cbf4_val = cbf4_jit(x=x, y=y)
+    cbf5_val = cbf5_jit(x=x, y=y)
     cost += (-weight1 * cbf4_val) if cbf4_val < 0 else 0
     cost += (-weight2 * cbf5_val) if cbf5_val < 0 else 0
     return cost
@@ -74,9 +82,9 @@ def main():
   lqr_final_cost_expr = system.get_lqr_cost_expr(Q, R, x1, x2, u1, u2, x_desired[0], x_desired[1], 0.0, 0.0)
   lqr_final_jit = jit_expr(lqr_final_cost_expr)
 
-  @cost_fn
+  @functools.partial(cost_fn, locals=locals(), globals=globals())
   def terminal_cost(x, y, weight1=1.0, weight2=1.0, alpha=1.0):
-    return lqr_final_jit(x, y, 0.0, 0.0)
+    return lqr_final_jit(x=x, y=y, u1=0.0, u2=0.0)
 
   mppi_cost_fn = get_cost_function_parameterized(
     stage_cost,

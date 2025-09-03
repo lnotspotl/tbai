@@ -1,10 +1,79 @@
 #!/usr/bin/env python3
 
+import ast
+import inspect
 import time
 import numpy as np
 import matplotlib.pyplot as plt
 from collections import deque
 import seaborn as sns
+import textwrap
+
+from tbai_safe.ulogging import get_logger
+
+logger = get_logger(__name__)
+
+
+class _KwargsToPositionalTransformer(ast.NodeTransformer):
+  def __init__(self, func_name: str, globals: dict = None, locals: dict = None):
+    self.func_name = func_name
+    self.globals = globals if globals else {}
+    self.locals = locals if locals else {}
+    super().__init__()
+
+  def visit_Call(self, node):
+    self.generic_visit(node)
+    func_name = None
+    if isinstance(node.func, ast.Name):
+      func_name = node.func.id
+    elif isinstance(node.func, ast.Attribute):
+      func_name = node.func.attr
+
+    func_obj = None
+    if func_obj is None and func_name in self.globals:
+      func_obj = self.globals[func_name]
+
+    if func_obj is None and func_name in self.locals:
+      func_obj = self.locals[func_name]
+
+    if func_obj is None:
+      logger.warning(f"Function {func_name} not found in globals or locals")
+      return node
+
+    sig = inspect.signature(func_obj)
+    param_names = list(sig.parameters.keys())
+    kwargs_dict = {kw.arg: kw.value for kw in node.keywords if kw.arg is not None}
+    new_args = list(node.args)
+    current_pos = len(new_args)
+    for param_name in param_names[current_pos:]:
+      if param_name in kwargs_dict:
+        new_args.append(kwargs_dict.pop(param_name))
+    node.args = new_args
+    node.keywords = [ast.keyword(arg=k, value=v) for k, v in kwargs_dict.items()]
+    return node
+
+
+def remove_kwargs(func, locals: dict = None, globals: dict = None) -> str:
+  """
+  Remove kwargs from a function call. Returns the source code of the function with the kwargs removed.
+  """
+  source = textwrap.dedent(inspect.getsource(func))
+  # Remove decorators
+  source = "\n".join([line for line in source.split("\n") if not line.lstrip().startswith("@")])
+  tree = ast.parse(source)
+  transformer = _KwargsToPositionalTransformer(func_name=func.__name__, locals=locals, globals=globals)
+  new_tree = transformer.visit(tree)
+  ast.fix_missing_locations(new_tree)
+  new_source = ast.unparse(new_tree)
+  logger.debug(f"Original source: {repr(source)} | New source: {repr(new_source)}")
+  func_name = func.__name__
+  namespace = {}
+  if globals is not None:
+    namespace.update(globals)
+  if locals is not None:
+    namespace.update(locals)
+  exec(new_source, namespace, namespace)
+  return eval(func_name, namespace, namespace), source, new_source
 
 
 def remove_outliers(data: list, lower_percentile: float = 5, upper_percentile: float = 95):
@@ -193,10 +262,15 @@ class MultiPlotter:
 
 
 if __name__ == "__main__":
-  plotter = MultiPlotter(rows=1, cols=2, names=["Plot 1", "Plot 2"], figsize=(20, 5))
-  for i in range(50):
-    plotter.update("Plot 1", i, i + np.random.randn())
-    plotter.update("Plot 2", i, i + np.random.randn())
-    plt.pause(0.01)
-  plotter.save("plot.png")
-  plotter.show()
+
+  def example_func(a, b, d=4, c=3):
+    return a * b / c**d
+
+  def example_func_2(a, b, c=3, d=4):
+    return example_func(a, d=d, c=c, b=b)
+
+  source = remove_kwargs(example_func_2, locals=locals(), globals=globals(), return_source=True)
+
+  fn = remove_kwargs(example_func_2, locals=locals(), globals=globals(), return_source=False)
+  assert fn(1, 2, 3, 4) == example_func(1, 2, 4, 3)
+  assert fn(1, 2, d=4, c=3) == example_func(1, 2, 4, 3)

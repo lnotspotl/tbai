@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import time
+import functools
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -70,13 +71,13 @@ def main():
   cbf12_jit = jit_expr(cbf12.get_expr(substitute=True))
   cbf13_jit = jit_expr(cbf13.get_expr(substitute=True))
 
-  @cost_fn
+  @functools.partial(cost_fn, locals=locals(), globals=globals())
   def stage_cost(x, y, u1, u2, weight1, weight2, weight3, weight4, alpha):
-    cbf10_val = cbf10_jit(x, y)
-    cbf11_val = cbf11_jit(x, y)
-    cbf12_val = cbf12_jit(x, y)
-    cbf13_val = cbf13_jit(x, y)
-    cost = alpha * lqr_stage_jit(x, y, 0.0, 0.0)
+    cbf10_val = cbf10_jit(x=x, y=y)
+    cbf11_val = cbf11_jit(x=x, y=y)
+    cbf12_val = cbf12_jit(x=x, y=y)
+    cbf13_val = cbf13_jit(x=x, y=y)
+    cost = alpha * lqr_stage_jit(x=x, y=y, u1=0.0, u2=0.0)
     cost += (-weight1 * cbf10_val) if cbf10_val < 0 else 0
     cost += (-weight2 * cbf11_val) if cbf11_val < 0 else 0
     cost += (-weight3 * cbf12_val) if cbf12_val < 0 else 0
@@ -86,9 +87,9 @@ def main():
   lqr_final_cost_expr = system.get_lqr_cost_expr(Q, R, x1, x2, u1, u2, x_desired[0], x_desired[1], 0.0, 0.0)
   lqr_final_jit = jit_expr(lqr_final_cost_expr)
 
-  @cost_fn
+  @functools.partial(cost_fn, locals=locals(), globals=globals())
   def terminal_cost(x, y, weight1, weight2, weight3, weight4, alpha):
-    return lqr_final_jit(x, y, 0.0, 0.0)
+    return lqr_final_jit(x=x, y=y, u1=0.0, u2=0.0)
 
   mppi_cost_fn = get_cost_function_parameterized(
     stage_cost,
@@ -134,8 +135,6 @@ def main():
 
   fig.canvas.mpl_connect("key_press_event", on_key_press)
 
-  frames = []
-
   def update(_):
     nonlocal weights, flip, pcm, colors
 
@@ -164,9 +163,6 @@ def main():
     system.visualize()
     time.sleep(0.05)
 
-    fig.canvas.draw()
-    frames.append(fig.canvas.copy_from_bbox(ax.bbox))
-
     if mppi.return_sampled_trajectories:
       for i, sampled_trajectory in enumerate(sampled_trajectories):
         sampled_trajectory.set_data(st[i][:, 0], st[i][:, 1])
@@ -176,11 +172,6 @@ def main():
 
   _ = FuncAnimation(fig, update, interval=33, frames=100)
   plt.show()
-
-  if frames:
-    import imageio
-
-    imageio.mimsave("animation2.gif", frames, duration=len(frames) // 20, loop=True)
 
 
 if __name__ == "__main__":
