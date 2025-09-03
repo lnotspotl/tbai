@@ -29,12 +29,17 @@ logger = tbai_safe.logging.get_logger(__name__)
 class MppiConfig:
   backend: str = os.environ.get("MPPI_BACKEND", "numpy")
   dtype: str = os.environ.get("MPPI_DTYPE", "float64")
+  threads_per_block: int = os.environ.get("MPPI_THREADS_PER_BLOCK", 256)
 
   def __post_init__(self):
     assert self.backend in ["numpy", "cuda"], f"Invalid backend: {self.backend}"
     assert self.dtype in ["float64", "float32"], f"Invalid dtype: {self.dtype}"
     logger.info(f"Setting default backend to {self.backend}")
     logger.info(f"Setting default dtype to {self.dtype}")
+    if self.backend == "cuda":
+      assert has_cuda, "Numba CUDA is not installed"
+      logger.info(f"Setting default threads per block to {self.threads_per_block}")
+    self.threads_per_block = int(self.threads_per_block)
 
 
 _mppi_config = MppiConfig()
@@ -46,9 +51,15 @@ def set_default_backend(backend: str):
   if backend == "cuda":
     assert has_cuda, "Numba CUDA is not installed"
 
+
 def set_default_dtype(dtype: str):
   assert dtype in ["float64", "float32"], f"Invalid dtype: {dtype}"
   _mppi_config.dtype = dtype
+
+
+def set_default_threads_per_block(threads_per_block: int):
+  assert threads_per_block > 0, f"Invalid threads per block: {threads_per_block}"
+  _mppi_config.threads_per_block = threads_per_block
 
 
 def get_default_backend():
@@ -57,6 +68,10 @@ def get_default_backend():
 
 def get_default_dtype():
   return _mppi_config.dtype
+
+
+def get_default_threads_per_block():
+  return _mppi_config.threads_per_block
 
 
 def cost_fn(fn: Callable, backend: str = None, dtype: str = None):
@@ -184,7 +199,7 @@ def get_cost_function_parameterized(
   vector_args_ew=[],
   stype=None,
   backend=None,
-  threads_per_block=256,
+  threads_per_block=None,
 ):
   # scalar_args = constant for each rollout for every time step
   # vector_args_ew = element-wise for each time step (per-rollout per-time-step)
@@ -194,6 +209,7 @@ def get_cost_function_parameterized(
 
   stype = get_default_dtype() if stype is None else stype
   backend = get_default_backend() if backend is None else backend
+  threads_per_block = get_default_threads_per_block() if threads_per_block is None else threads_per_block
 
   scalar_args_str = ", ".join([f"{stype}" for _ in scalar_args])
   scalar_args_str = scalar_args_str + ", " if scalar_args_str else ""
@@ -505,7 +521,7 @@ class AcceleratedSafetyMPPI:
         sampled_traj_list.get() if sampled_traj_list is not None else None,
       )
 
-    raise RuntimeError(f"Backend {self.backend} is invalid!") 
+    raise RuntimeError(f"Backend {self.backend} is invalid!")
 
   def calculate_epsilon(self, sigma: np.ndarray, size_sample: int, size_time_step: int, size_dim_u: int):
     mu = self.backend.zeros((size_dim_u))
