@@ -31,7 +31,7 @@ def jit_expr(expr: sp.Expr, cse=True, parallel=False, symbols=None, device=True,
     fn = sp.lambdify(symbols, expr, modules="numpy", cse=cse)
     if backend == "numpy":
       return numba.jit(nopython=True, parallel=parallel)(fn)
-    elif backend == "cuda":
+    elif backend == "cupy":
       assert has_cuda, "Numba CUDA is not installed"
       return nbcuda.jit(nopython=True, device=device)(fn)
     else:
@@ -42,7 +42,7 @@ def jit_expr(expr: sp.Expr, cse=True, parallel=False, symbols=None, device=True,
     logger.debug(f"Annotation: {annotation}")
     if backend == "numpy":
       return numba.jit([annotation], nopython=True, parallel=parallel)(fn)
-    elif backend == "cuda":
+    elif backend == "cupy":
       assert has_cuda, "Numba CUDA is not installed"
       return nbcuda.jit([annotation], nopython=True, device=device)(fn)
     else:

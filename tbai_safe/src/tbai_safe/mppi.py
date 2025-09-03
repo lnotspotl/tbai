@@ -34,11 +34,11 @@ class MppiConfig:
   threads_per_block: int = os.environ.get("MPPI_THREADS_PER_BLOCK", 256)
 
   def __post_init__(self):
-    assert self.backend in ["numpy", "cuda"], f"Invalid backend: {self.backend}"
+    assert self.backend in ["numpy", "cupy"], f"Invalid backend: {self.backend}"
     assert self.dtype in ["float64", "float32"], f"Invalid dtype: {self.dtype}"
     logger.info(f"Setting default backend to {self.backend}")
     logger.info(f"Setting default dtype to {self.dtype}")
-    if self.backend == "cuda":
+    if self.backend == "cupy":
       assert has_cuda, "Numba CUDA is not installed"
     logger.info(f"Setting default threads per block to {self.threads_per_block}")
     self.threads_per_block = int(self.threads_per_block)
@@ -48,9 +48,9 @@ _mppi_config = MppiConfig()
 
 
 def set_default_backend(backend: str):
-  assert backend in ["numpy", "cuda"], f"Invalid backend: {backend}"
+  assert backend in ["numpy", "cupy"], f"Invalid backend: {backend}"
   _mppi_config.backend = backend
-  if backend == "cuda":
+  if backend == "cupy":
     assert has_cuda, "Numba CUDA is not installed"
   logger.info(f"Setting default backend to {backend}")
 
@@ -96,7 +96,7 @@ def cost_fn(fn: Callable, backend: str = None, dtype: str = None, locals: dict =
   if backend == "numpy":
     jitted_fn = numba.njit(fn, fastmath=False)
     jitted_fn._tbai_safe_backend = backend
-  elif backend == "cuda":
+  elif backend == "cupy":
     jitted_fn = numba.cuda.jit(fn, fastmath=False, device=True)
     jitted_fn._tbai_safe_backend = backend
   else:
@@ -279,7 +279,7 @@ def get_cost_function_parameterized(
       + [f"{vector_args_vw[i]}={vector_args_vw[i]}" for i in range(len(vector_args_vw))]
     )
 
-  if backend == "cuda":
+  if backend == "cupy":
     ## Cuda backend does not support keyword arguments
     use_str = ", ".join(
       [f"{scalar_args[i]}" for i in range(len(scalar_args))]
@@ -315,7 +315,7 @@ def get_cost_function_parameterized(
     """
 
   ### CUDA backend
-  if backend == "cuda":
+  if backend == "cupy":
     cc = f"""
     import numba
     import numba.cuda
@@ -357,7 +357,7 @@ def get_cost_function_parameterized(
     return fn
 
   ## Create a small wrapper function to call the cuda function
-  if backend == "cuda":
+  if backend == "cupy":
 
     def wrapper(x, u, *args, **kwargs):
       blocks_per_grid = (x.shape[0] + threads_per_block - 1) // threads_per_block
@@ -378,7 +378,7 @@ def jit_expr_v2t(expr: sp.Expr, cse=True, parallel=False, symbols=None, backend=
 
   header = f"@numba.jit(nopython=True, parallel={parallel})" if backend == "numpy" else "@numba.cuda.jit(device=True)"
 
-  if backend == "cuda":
+  if backend == "cupy":
     # Cuda backend does not support keyword arguments
     args = ", ".join(["x", "y"] + [f"val[{i}]" for i in range(len(symbols))])
   if backend == "numpy":
@@ -386,7 +386,7 @@ def jit_expr_v2t(expr: sp.Expr, cse=True, parallel=False, symbols=None, backend=
 
   cc = f"""
   import numba
-  {"import numba.cuda" if backend == "cuda" else ""}
+  {"import numba.cuda" if backend == "cupy" else ""}
   from tbai_safe.symperf import jit_expr
   jitted = jit_expr(expr, cse, parallel, symbols=["x", "y"] + symbols, backend="{backend}", device=True, stype="{stype}")
   {header}
@@ -424,7 +424,7 @@ class AcceleratedSafetyMPPI:
     if backend == "numpy":
       self.backend = np
       self.convolve = lambda xx, b, axis, mode, cval: np_convolve1d(xx, b, axis=axis, mode=mode, cval=cval)
-    if backend == "cuda":
+    if backend == "cupy":
       assert has_cuda, "Numba CUDA is not installed"
       self.backend = cp
       self.convolve = lambda xx, b, axis, mode, cval: cp_convolve1d(xx, b, axis=axis, mode=mode, cval=cval)
