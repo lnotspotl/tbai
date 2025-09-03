@@ -2,6 +2,7 @@
 
 import time
 import functools
+import argparse
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,7 +10,7 @@ from matplotlib.animation import FuncAnimation
 
 
 from tbai_safe.systems import SimpleSingleIntegrator2D
-from tbai_safe.cbf import ControlBarrierFunctionFactory, visualize_cbfs
+from tbai_safe.cbf import ControlBarrierFunctionFactory
 from tbai_safe.symperf import jit_expr
 from tbai_safe.mppi import (
   AcceleratedSafetyMPPI,
@@ -22,7 +23,7 @@ from tbai_safe.mppi import set_default_dtype, set_default_backend
 from tbai_safe.anim import save_animation
 
 
-def main():
+def main(show_animation=True):
   # Initial and final states
   x_initial = np.array([-2.0, -3.4])
   x_desired = np.array([0.0, 0.0])
@@ -46,7 +47,7 @@ def main():
 
   # Visualize initial and desired states
   ax.plot(x_initial[0], x_initial[1], "rx", label="Initial state", markersize=10)
-  desired_plot, = ax.plot(x_desired[0], x_desired[1], "bx", label="Desired state", markersize=10)
+  (desired_plot,) = ax.plot(x_desired[0], x_desired[1], "bx", label="Desired state", markersize=10)
   ax.legend()
 
   # Initialize system
@@ -60,6 +61,7 @@ def main():
   # Prepare stage cost
   x1, x2, u1, u2 = factory2.x, factory2.y, factory2.u1, factory2.u2
   import sympy as sp
+
   x_desireds, y_desireds = sp.symbols("x_desired, y_desired")
   lqr_stage_cost_expr = system.get_lqr_cost_expr(Q, R, x1, x2, u1, u2, x_desireds, y_desireds, 0.0, 0.0)
   lqr_stage_jit = jit_expr(lqr_stage_cost_expr)
@@ -134,7 +136,18 @@ def main():
     control, _, optimal_trajectory, st = mppi.calc_control_input(
       system.state,
       [
-        (cost, MppiCbfCostInputs(scalars=[*weights], vectors_ew=[mppi.relaxation_alphas, [x_desired[0] + r * np.sin(current_time) for _ in range(mppi.T)], [x_desired[1] + r * np.cos(current_time) for _ in range(mppi.T)]], vectors_vw=[])),
+        (
+          cost,
+          MppiCbfCostInputs(
+            scalars=[*weights],
+            vectors_ew=[
+              mppi.relaxation_alphas,
+              [x_desired[0] + r * np.sin(current_time) for _ in range(mppi.T)],
+              [x_desired[1] + r * np.cos(current_time) for _ in range(mppi.T)],
+            ],
+            vectors_vw=[],
+          ),
+        ),
       ],
       x_desired=np.array([x_desired[0] + r * np.sin(current_time), x_desired[1] + r * np.cos(current_time)]),
     )
@@ -154,8 +167,17 @@ def main():
       optimal_trajectory_plot.set_data(optimal_trajectory[:, 0], optimal_trajectory[:, 1])
 
   _ = FuncAnimation(fig, update, interval=33, frames=100)
-  plt.show()
+  if show_animation:
+    plt.show()
+  else:
+    plt.ioff()
+    for frame in range(100):
+      update(frame)
+    plt.ion()
 
 
 if __name__ == "__main__":
-  main()
+  parser = argparse.ArgumentParser()
+  parser.add_argument("--no_gui", action="store_true")
+  args = parser.parse_args()
+  main(show_animation=not args.no_gui)

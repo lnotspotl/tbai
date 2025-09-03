@@ -3,6 +3,7 @@
 import time
 
 import functools
+import argparse
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -22,7 +23,7 @@ from tbai_safe.mppi import (
 from tbai_safe.anim import save_animation
 
 
-def main():
+def main(show_animation=True):
   # Initial and final states
   x_initial = np.array([-3.0, -3.4])
   x_desired = np.array([3.0, 3.0])
@@ -180,9 +181,18 @@ def main():
     if mppi.return_optimal_trajectory:
       optimal_trajectory_plot.set_data(optimal_trajectory[:, 0], optimal_trajectory[:, 1])
 
-  _ = FuncAnimation(fig, update, interval=33, frames=100)
-  plt.show()
+  anim = FuncAnimation(fig, update, interval=33, frames=100)
+  if show_animation:
+    plt.show()
+  else:
+    plt.ioff()
+    for frame in range(100):
+      update(frame)
+    plt.ion()
 
 
 if __name__ == "__main__":
-  main()
+  parser = argparse.ArgumentParser()
+  parser.add_argument("--no_gui", action="store_true")
+  args = parser.parse_args()
+  main(show_animation=not args.no_gui)

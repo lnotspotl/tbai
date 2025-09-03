@@ -18,9 +18,10 @@ from tbai_safe.mppi import (
   MppiCbfCost,
   MppiCbfCostInputs,
 )
+import argparse
 
 
-def main(args):
+def main(show_animation=True):
   # Initial and final states
   x_initial = np.array([-2.0, -3.4])
   x_desired = np.array([3.0, 3.0])
@@ -233,7 +234,13 @@ def main(args):
       optimal_trajectory_plot.set_data(optimal_trajectory[:, 0], optimal_trajectory[:, 1])
 
   _ = FuncAnimation(fig, update, interval=33, frames=100)
-  plt.show()
+  if show_animation:
+    plt.show()
+  else:
+    plt.ioff()
+    for frame in range(100):
+      update(frame)
+    plt.ion()
 
 
 if __name__ == "__main__":
@@ -242,10 +249,11 @@ if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   parser.add_argument("--rectangle", action="store_true")
   parser.add_argument("--noise-scale", type=float, default=0.02)
+  parser.add_argument("--no_gui", action="store_true")
   args = parser.parse_args()
 
   print("Press 'c' to flip the weights")
   print("Press 'x' to reset the system")
   print("Press 'z' to toggle the memory visualization")
 
-  main(args)
+  main(show_animation=not args.no_gui)
