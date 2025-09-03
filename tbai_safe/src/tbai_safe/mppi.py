@@ -40,7 +40,7 @@ class MppiConfig:
     logger.info(f"Setting default dtype to {self.dtype}")
     if self.backend == "cuda":
       assert has_cuda, "Numba CUDA is not installed"
-      logger.info(f"Setting default threads per block to {self.threads_per_block}")
+    logger.info(f"Setting default threads per block to {self.threads_per_block}")
     self.threads_per_block = int(self.threads_per_block)
 
 
