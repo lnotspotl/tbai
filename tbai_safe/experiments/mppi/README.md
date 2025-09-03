@@ -40,3 +40,7 @@
 #### Optimized `float32`, single core
 
 ~ `1.41 ms` per iteration -> 177x speedup
+
+### Iteration 03
+
+![animation](https://github.com/user-attachments/assets/19db24b1-3f25-4feb-81d3-9f2126f6b2b3)
