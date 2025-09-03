@@ -43,7 +43,8 @@ _mppi_config = MppiConfig()
 def set_default_backend(backend: str):
   assert backend in ["numpy", "cuda"], f"Invalid backend: {backend}"
   _mppi_config.backend = backend
-
+  if backend == "cuda":
+    assert has_cuda, "Numba CUDA is not installed"
 
 def set_default_dtype(dtype: str):
   assert dtype in ["float64", "float32"], f"Invalid dtype: {dtype}"
