@@ -52,17 +52,18 @@ def set_default_backend(backend: str):
   _mppi_config.backend = backend
   if backend == "cuda":
     assert has_cuda, "Numba CUDA is not installed"
+  logger.info(f"Setting default backend to {backend}")
 
 
 def set_default_dtype(dtype: str):
   assert dtype in ["float64", "float32"], f"Invalid dtype: {dtype}"
   _mppi_config.dtype = dtype
-
+  logger.info(f"Setting default dtype to {dtype}")
 
 def set_default_threads_per_block(threads_per_block: int):
   assert threads_per_block > 0, f"Invalid threads per block: {threads_per_block}"
   _mppi_config.threads_per_block = threads_per_block
-
+  logger.info(f"Setting default threads per block to {threads_per_block}")
 
 def get_default_backend():
   return _mppi_config.backend
