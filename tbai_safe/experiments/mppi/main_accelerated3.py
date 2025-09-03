@@ -137,7 +137,6 @@ def main(show_animation=True):
   def update(_):
     nonlocal weights, flip, pcm, colors
 
-    # control = lqr_controller(system.state)
     if flip:
       mppi.reset_relaxation()
       c = colors.pop()

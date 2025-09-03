@@ -5,6 +5,7 @@ import functools
 import argparse
 
 import numpy as np
+import sympy as sp
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
@@ -64,7 +65,6 @@ def main(show_animation=True):
 
   # Prepare stage cost
   x1, x2, u1, u2 = factory2.x, factory2.y, factory2.u1, factory2.u2
-  import sympy as sp
 
   x_desireds, y_desireds = sp.symbols("x_desired, y_desired")
   lqr_stage_cost_expr = system.get_lqr_cost_expr(Q, R, x1, x2, u1, u2, x_desireds, y_desireds, 0.0, 0.0)

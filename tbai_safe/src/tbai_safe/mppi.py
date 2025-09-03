@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import math
 import textwrap
 import numpy as np
 from tbai_safe.systems import SimpleSingleIntegrator2D
@@ -17,6 +16,7 @@ import os
 try:
   import cupy as cp
   from cupyx.scipy.ndimage import convolve1d as cp_convolve1d
+
   has_cuda = True
 except ImportError:
   has_cuda = False
@@ -60,10 +60,12 @@ def set_default_dtype(dtype: str):
   _mppi_config.dtype = dtype
   logger.info(f"Setting default dtype to {dtype}")
 
+
 def set_default_threads_per_block(threads_per_block: int):
   assert threads_per_block > 0, f"Invalid threads per block: {threads_per_block}"
   _mppi_config.threads_per_block = threads_per_block
   logger.info(f"Setting default threads per block to {threads_per_block}")
+
 
 def get_default_backend():
   return _mppi_config.backend
@@ -585,7 +587,6 @@ class AcceleratedSafetyMPPI:
     eta = self.backend.sum(exp_terms)
     w = (1.0 / eta) * exp_terms
     return w
-
 
   def moving_average_filter(self, xx, window_size: int):
     b = self.backend.ones(window_size) / window_size
