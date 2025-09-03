@@ -19,7 +19,6 @@ from tbai_safe.mppi import (
   MppiCbfCostInputs,
   cost_fn,
 )
-from tbai_safe.mppi import set_default_dtype, set_default_backend
 from tbai_safe.anim import save_animation
 
 
@@ -29,9 +28,6 @@ def main(show_animation=True):
   x_desired = np.array([0.0, 0.0])
   r = 3.04
   current_time = 0
-
-  set_default_backend("cuda")
-  set_default_dtype("float64")
 
   # Soft CBFs
   factory2 = ControlBarrierFunctionFactory()
