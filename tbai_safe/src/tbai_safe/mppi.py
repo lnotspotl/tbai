@@ -519,9 +519,7 @@ class AcceleratedSafetyMPPI:
     ).reshape(self.K, self.T, 2)
 
     for fn, args in cost_fn_args:
-      print("Evaluating cost function")
       fn.evaluate(out, v, self.S, args)
-      print(self.S[:3])
 
     w = self.compute_weights(self.S)
     w_epsilon = self.backend.sum(w[:, self.backend.newaxis, self.backend.newaxis] * epsilon, axis=0)
