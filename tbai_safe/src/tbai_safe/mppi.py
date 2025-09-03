@@ -487,13 +487,14 @@ class AcceleratedSafetyMPPI:
       while len(self.relaxation_alphas) < self.T:
         self.relaxation_alphas.append(1)
 
-  def calc_control_input(self, observed_x: np.ndarray, cost_fn_args):
+  def calc_control_input(self, observed_x: np.ndarray, cost_fn_args, x_desired: np.ndarray = None):
     # Set u to be the LQR controller response
     observed_x = self.backend.asarray(observed_x, dtype=self.stype)
+    x_desired = self.backend.asarray(x_desired, dtype=self.stype) if x_desired is not None else self.x_desired
     current_state = observed_x
     a = 0.3 * self.relaxation_alphas[0]
     for i in range(self.T):
-      u = self.lqr_controller(current_state - self.x_desired)
+      u = self.lqr_controller(current_state - x_desired)
       current_state = self.integrate(current_state, u)
       self.u_prev[i] = u * a + (1 - a) * self.u_prev[i]
 
