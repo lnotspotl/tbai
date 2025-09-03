@@ -37,7 +37,7 @@ constexpr double VelStopF = (16000.0f);
 namespace tbai {
 
 struct Go2RobotInterfaceArgs {
-    TBAI_ARG_DEFAULT(std::string, networkInterface, "192.168.123.10");
+    TBAI_ARG_DEFAULT(std::string, networkInterface, "eth0");
     TBAI_ARG_DEFAULT(bool, channelInit, true);
     TBAI_ARG_DEFAULT(bool, enableStateEstim, true);
     TBAI_ARG_DEFAULT(bool, subscribeLidar, true);
