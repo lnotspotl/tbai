@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
-import functools
 import time
+import functools
 
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+
 
 from tbai_safe.systems import SimpleSingleIntegrator2D
 from tbai_safe.cbf import ControlBarrierFunctionFactory, visualize_cbfs
@@ -15,16 +16,20 @@ from tbai_safe.mppi import (
   get_cost_function_parameterized,
   MppiCbfCost,
   MppiCbfCostInputs,
-  MppiCost,
   cost_fn,
 )
-from tbai_safe.anim import save_animation
+from tbai_safe.mppi import set_default_dtype, set_default_backend
 
 
 def main():
   # Initial and final states
   x_initial = np.array([-2.0, -3.4])
-  x_desired = np.array([0.0, 0.0])
+  x_desired = np.array([3.0, 3.0])
+  r = 3.84
+  current_time = 0
+
+  set_default_backend("cuda")
+  set_default_dtype("float64")
 
   # Soft CBFs
   factory2 = ControlBarrierFunctionFactory()
@@ -48,7 +53,7 @@ def main():
 
   # Visualize initial and desired states
   ax.plot(x_initial[0], x_initial[1], "rx", label="Initial state", markersize=10)
-  final_desired_plot, = ax.plot(x_desired[0], x_desired[1], "bx", label="Desired state", markersize=10)
+  desired_plot, = ax.plot(x_desired[0], x_desired[1], "bx", label="Desired state", markersize=10)
   ax.legend()
 
   # Initialize system
@@ -71,77 +76,39 @@ def main():
   cbf13_jit = jit_expr(cbf13.get_expr(substitute=True))
 
   @functools.partial(cost_fn, locals=locals(), globals=globals())
-  def stage_cost1(x, y, u1, u2, weight1, weight2, weight3, weight4):
+  def stage_cost(x, y, u1, u2, weight1, weight2, weight3, weight4, alpha, x_desired, y_desired):
     cbf10_val = cbf10_jit(x=x, y=y)
-    return (-weight1 * cbf10_val) if cbf10_val < 0 else 0
-
-  @functools.partial(cost_fn, locals=locals(), globals=globals())
-  def stage_cost2(x, y, u1, u2, weight1, weight2, weight3, weight4):
     cbf11_val = cbf11_jit(x=x, y=y)
-    return (-weight2 * cbf11_val) if cbf11_val < 0 else 0
-
-  @functools.partial(cost_fn, locals=locals(), globals=globals())
-  def stage_cost3(x, y, u1, u2, weight1, weight2, weight3, weight4):
     cbf12_val = cbf12_jit(x=x, y=y)
-    return (-weight3 * cbf12_val) if cbf12_val < 0 else 0
-
-  @functools.partial(cost_fn, locals=locals(), globals=globals())
-  def stage_cost4(x, y, u1, u2, weight1, weight2, weight3, weight4):
     cbf13_val = cbf13_jit(x=x, y=y)
-    return (-weight4 * cbf13_val) if cbf13_val < 0 else 0
+    cost = 0.0
+    cost += (-weight1 * cbf10_val) if cbf10_val < 0 else 0
+    cost += (-weight2 * cbf11_val) if cbf11_val < 0 else 0
+    cost += (-weight3 * cbf12_val) if cbf12_val < 0 else 0
+    cost += (-weight4 * cbf13_val) if cbf13_val < 0 else 0
+    abs_cost = -cost if cost < 0 else cost
+    if abs_cost == 0:
+      abs_cost = 1.0
+    abs_cost = max(abs_cost, 1.0)
+    cost += (alpha * lqr_stage_jit(x=x, y=y, u1=0.0, u2=0.0, x_desired=x_desired, y_desired=y_desired)) / abs_cost
+    return cost
 
   lqr_final_cost_expr = system.get_lqr_cost_expr(Q, R, x1, x2, u1, u2, x_desireds, y_desireds, 0.0, 0.0)
   lqr_final_jit = jit_expr(lqr_final_cost_expr)
 
   @functools.partial(cost_fn, locals=locals(), globals=globals())
-  def terminal_cost(x, y, x_desired, y_desired, alpha=1.0):
+  def terminal_cost(x, y, weight1, weight2, weight3, weight4, alpha, x_desired, y_desired):
     return lqr_final_jit(x=x, y=y, u1=0.0, u2=0.0, x_desired=x_desired, y_desired=y_desired)
 
-  @functools.partial(cost_fn, locals=locals(), globals=globals())
-  def dummy_zero_cost(x, y, weight1, weight2, weight3, weight4):
-    return 0.0
-
-  @functools.partial(cost_fn, locals=locals(), globals=globals())
-  def lqr_cost_fn(x, y, u1, u2, alpha, x_desired, y_desired):
-    return alpha * lqr_stage_jit(x=x, y=y, u1=0.0, u2=0.0, x_desired=x_desired, y_desired=y_desired)
-
-  mppi_cost_fn1 = get_cost_function_parameterized(
-    stage_cost1,
-    dummy_zero_cost,
-    scalar_args=["weight1", "weight2", "weight3", "weight4"],
-    vector_args_ew=[],
-    vector_args_vw=[],
-  )
-
-  mppi_cost_fn3 = get_cost_function_parameterized(
-    stage_cost3,
-    dummy_zero_cost,
-    scalar_args=["weight1", "weight2", "weight3", "weight4"],
-    vector_args_ew=[],
-    vector_args_vw=[],
-  )
-
-  mppi_cost_fn4 = get_cost_function_parameterized(
-    stage_cost4,
-    dummy_zero_cost,
-    scalar_args=["weight1", "weight2", "weight3", "weight4"],
-    vector_args_ew=[],
-    vector_args_vw=[],
-  )
-
-  mppi_lqr_cost_fn = get_cost_function_parameterized(
-    lqr_cost_fn,
+  mppi_cost_fn = get_cost_function_parameterized(
+    stage_cost,
     terminal_cost,
-    scalar_args=[],
+    scalar_args=["weight1", "weight2", "weight3", "weight4"],
     vector_args_ew=["alpha", "x_desired", "y_desired"],
     vector_args_vw=[],
   )
 
-  cost1 = MppiCbfCost(mppi_cost_fn1)
-  cost2 = cost1
-  cost3 = MppiCbfCost(mppi_cost_fn3)
-  cost4 = MppiCbfCost(mppi_cost_fn4)
-  cost5 = MppiCost(mppi_lqr_cost_fn)
+  cost = MppiCbfCost(mppi_cost_fn)
 
   print("Jitted!")
 
@@ -151,7 +118,7 @@ def main():
     lqr_R=np.eye(2),
     dt=0.02,
     horizon=20,
-    mc_rollouts=1000,
+    mc_rollouts=50000,
     lmbda=50.0,
     sigma=np.eye(2) * 4.0,
     transition_time=20,
@@ -177,12 +144,9 @@ def main():
 
   fig.canvas.mpl_connect("key_press_event", on_key_press)
 
-  current_time = 0
-
-  @save_animation(fig, ax, filename="animation.gif", fps=20, repeat=True)
   def update(_):
-    nonlocal weights, flip, pcm, colors, current_time, final_desired_plot
-    current_time += 0.05
+    nonlocal current_time, desired_plot
+    nonlocal weights, flip, pcm, colors
 
     # control = lqr_controller(system.state)
     if flip:
@@ -196,20 +160,16 @@ def main():
       print("Flipped")
       flip = False
 
-    r = 3.0
     t1 = time.time()
     control, _, optimal_trajectory, st = mppi.calc_control_input(
       system.state,
       [
-        (cost1, MppiCbfCostInputs(scalars=[*weights], vectors_ew=[], vectors_vw=[])),
-        (cost2, MppiCbfCostInputs(scalars=[*weights], vectors_ew=[], vectors_vw=[])),
-        (cost3, MppiCbfCostInputs(scalars=[*weights], vectors_ew=[], vectors_vw=[])),
-        (cost4, MppiCbfCostInputs(scalars=[*weights], vectors_ew=[], vectors_vw=[])),
-        (cost5, (mppi.relaxation_alphas, [x_desired[0] + r * np.sin(current_time) for _ in range(mppi.T)], [x_desired[1] + r * np.cos(current_time) for _ in range(mppi.T)])),
+        (cost, MppiCbfCostInputs(scalars=[*weights], vectors_ew=[mppi.relaxation_alphas, [x_desired[0] + r * np.sin(current_time) for _ in range(mppi.T)], [x_desired[1] + r * np.cos(current_time) for _ in range(mppi.T)]], vectors_vw=[])),
       ],
       x_desired=np.array([x_desired[0] + r * np.sin(current_time), x_desired[1] + r * np.cos(current_time)]),
     )
-    final_desired_plot.set_data([x_desired[0] + r * np.sin(current_time)], [x_desired[1] + r * np.cos(current_time)])
+    desired_plot.set_data([x_desired[0] + r * np.sin(current_time)], [x_desired[1] + r * np.cos(current_time)])
+    current_time += 0.05
     t2 = time.time()
     print(f"Time taken: {t2 - t1} seconds")
     system.step(control, dt=dt)
