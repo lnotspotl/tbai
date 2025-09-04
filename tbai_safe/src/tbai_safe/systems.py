@@ -16,10 +16,8 @@ class SimpleSingleIntegrator2D:
     self.reset(initial_state, visualizer)
 
   def reset(self, initial_state, visualizer=None, visualize_history=False):
-    assert len(initial_state) == 2, "Initial state must be a list of length 2"
-
     # Reset state
-    self.state = initial_state
+    self.set_state(initial_state)
     self.visualizer = visualizer
     self.visualize_history = visualize_history
 
@@ -37,6 +35,10 @@ class SimpleSingleIntegrator2D:
       if self.visualize_history:
         (self.com_history_plot,) = self.ax.plot([], [], "k--", alpha=0.5)
     return self
+
+  def set_state(self, state):
+    assert len(state) == 2, "State must be a list of length 2"
+    self.state = state
 
   @staticmethod
   def integrate(state, control, dt):

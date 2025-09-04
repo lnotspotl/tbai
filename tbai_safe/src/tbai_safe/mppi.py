@@ -149,10 +149,12 @@ class MppiCbfCost(MppiCost):
 
   def evaluate_numpy(self, X, U, S, other_inputs: MppiCbfCostInputs):
     other_inputs.vectors_ew = [
-      v if isinstance(v, np.ndarray) else np.array(v, dtype=self.dtype) for v in other_inputs.vectors_ew
+      v if isinstance(v, np.ndarray) and v.dtype == self.dtype else np.array(v, dtype=self.dtype)
+      for v in other_inputs.vectors_ew
     ]
     other_inputs.vectors_vw = [
-      v if isinstance(v, np.ndarray) else np.array(v, dtype=self.dtype) for v in other_inputs.vectors_vw
+      v if isinstance(v, np.ndarray) and v.dtype == self.dtype else np.array(v, dtype=self.dtype)
+      for v in other_inputs.vectors_vw
     ]
     return self.fn(X, U, *other_inputs.scalars, *other_inputs.vectors_ew, *other_inputs.vectors_vw, S)
 
@@ -456,7 +458,7 @@ class AcceleratedSafetyMPPI:
     self.max_abs_velocity = 2.3
 
     # Desired state (one that LQR tries to reach)
-    self.x_desired = self.backend.asarray(x_desired)
+    self.x_desired = self.backend.asarray(x_desired, dtype=self.stype)
 
     # Whether to return the optimal trajectory
     self.return_optimal_trajectory = return_optimal_trajectory
@@ -468,7 +470,7 @@ class AcceleratedSafetyMPPI:
     self.transition_time = transition_time
     self.reset_relaxation(init=True)
     assert hasattr(self, "relaxation_alphas")
-    self.u_prev = self.backend.zeros((self.T, self.system.dim_u))
+    self.u_prev = self.backend.zeros((self.T, self.system.dim_u), dtype=self.stype)
 
     A, B = self.system.get_A(), self.system.get_B()
     Ad, Bd = discretize_system(A, B, self.dt)
@@ -489,7 +491,7 @@ class AcceleratedSafetyMPPI:
       while len(self.relaxation_alphas) < self.T:
         self.relaxation_alphas.append(1)
     else:
-      self.relaxation_alphas = np.linspace(0, 1, self.transition_time).tolist()
+      self.relaxation_alphas = np.linspace(0, 1, self.transition_time, dtype=self.stype).tolist()
       while len(self.relaxation_alphas) < self.T:
         self.relaxation_alphas.append(1)
 
