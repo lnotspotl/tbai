@@ -52,10 +52,16 @@ void Go2JoystickInterface::Step() {
     if (gamepad.B.on_press) onPressB();
     if (gamepad.X.on_press) onPressX();
     if (gamepad.Y.on_press) onPressY();
-    if (gamepad.A.on_release) inReleaseA();
-    if (gamepad.B.on_release) inReleaseB();
-    if (gamepad.X.on_release) inReleaseX();
-    if (gamepad.Y.on_release) inReleaseY();
+    if (gamepad.A.on_release) onReleaseA();
+    if (gamepad.B.on_release) onReleaseB();
+    if (gamepad.X.on_release) onReleaseX();
+    if (gamepad.Y.on_release) onReleaseY();
+    if (gamepad.up.on_press) onPressUp();
+    if (gamepad.right.on_press) onPressRight();
+    if (gamepad.down.on_press) onPressDown();
+    if (gamepad.left.on_press) onPressLeft();
+    if (gamepad.up.on_release) onReleaseUp();
+    if (gamepad.right.on_release) onReleaseRight();
 }
 
 // start the work thread

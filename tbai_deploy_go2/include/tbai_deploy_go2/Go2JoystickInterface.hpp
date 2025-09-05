@@ -37,10 +37,10 @@ class Go2JoystickInterface {
     virtual void onPressB() { TBAI_LOG_WARN(logger_, "B pressed"); }
     virtual void onPressX() { TBAI_LOG_WARN(logger_, "X pressed"); }
     virtual void onPressY() { TBAI_LOG_WARN(logger_, "Y pressed"); }
-    virtual void inReleaseA() { TBAI_LOG_WARN(logger_, "A released"); }
-    virtual void inReleaseB() { TBAI_LOG_WARN(logger_, "B released"); }
-    virtual void inReleaseX() { TBAI_LOG_WARN(logger_, "X released"); }
-    virtual void inReleaseY() { TBAI_LOG_WARN(logger_, "Y released"); }
+    virtual void onReleaseA() { TBAI_LOG_WARN(logger_, "A released"); }
+    virtual void onReleaseB() { TBAI_LOG_WARN(logger_, "B released"); }
+    virtual void onReleaseX() { TBAI_LOG_WARN(logger_, "X released"); }
+    virtual void onReleaseY() { TBAI_LOG_WARN(logger_, "Y released"); }
     virtual void onPressStart() { TBAI_LOG_WARN(logger_, "Start pressed"); }
     virtual void onPressSelect() { TBAI_LOG_WARN(logger_, "Select pressed"); }
     virtual void onPressL1() { TBAI_LOG_WARN(logger_, "L1 pressed"); }
@@ -48,6 +48,14 @@ class Go2JoystickInterface {
     virtual void onPressL2() { TBAI_LOG_WARN(logger_, "L2 pressed"); }
     virtual void onPressR2() { TBAI_LOG_WARN(logger_, "R2 pressed"); }
     virtual void onPressF1() { TBAI_LOG_WARN(logger_, "F1 pressed"); }
+    virtual void onPressUp() { TBAI_LOG_WARN(logger_, "Up pressed"); }
+    virtual void onPressRight() { TBAI_LOG_WARN(logger_, "Right pressed"); }
+    virtual void onPressDown() { TBAI_LOG_WARN(logger_, "Down pressed"); }
+    virtual void onPressLeft() { TBAI_LOG_WARN(logger_, "Left pressed"); }
+    virtual void onReleaseUp() { TBAI_LOG_WARN(logger_, "Up released"); }
+    virtual void onReleaseRight() { TBAI_LOG_WARN(logger_, "Right released"); }
+    virtual void onReleaseDown() { TBAI_LOG_WARN(logger_, "Down released"); }
+    virtual void onReleaseLeft() { TBAI_LOG_WARN(logger_, "Left released"); }
     void Step();
     void Start();
 
