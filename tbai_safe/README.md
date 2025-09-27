@@ -16,3 +16,6 @@ conda env create -f ./conda/tbai_safe-gpu-free.yaml
 conda activate tbai_safe
 pip3 install -e ".[all]"
 ```
+
+## Examples
+Navigate to the `experiments` folder and run the examples.
