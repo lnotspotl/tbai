@@ -9,9 +9,6 @@
 
 #include <math.h>
 #include <stdint.h>
-#include <stdio.h>
-
-#include <iostream>
 
 #include <tbai_estim/inekf/InEKFEstimator.hpp>
 #include <unitree/common/thread/thread.hpp>
@@ -38,6 +35,7 @@ namespace tbai {
 
 struct Go2RobotInterfaceArgs {
     TBAI_ARG_DEFAULT(std::string, networkInterface, "eth0");
+    TBAI_ARG_DEFAULT(int, unitreeChannel, 0);
     TBAI_ARG_DEFAULT(bool, channelInit, true);
     TBAI_ARG_DEFAULT(bool, enableStateEstim, true);
     TBAI_ARG_DEFAULT(bool, subscribeLidar, true);
@@ -58,14 +56,10 @@ class Go2RobotInterface : public RobotInterface {
     };
 
    private:
-    int queryMotionStatus();
-    std::string queryServiceName(std::string form, std::string name);
     void lowStateCallback(const void *message);
 
     unitree_go::msg::dds_::LowCmd_ low_cmd{};  // default init
     // unitree_go::msg::dds_::LowState_ low_state{};  // default init
-
-    std::unique_ptr<MotionSwitcherClient> msc;
 
     /*publisher*/
     ChannelPublisherPtr<unitree_go::msg::dds_::LowCmd_> lowcmd_publisher;

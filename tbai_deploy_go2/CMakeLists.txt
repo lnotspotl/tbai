@@ -24,8 +24,15 @@ target_link_libraries(tbai_deploy_go2
 )
 
 
-add_executable(test_stand_sit src/test_stand_sit.cpp)
-target_link_libraries(test_stand_sit
+add_executable(test_stand_sit_tbai src/test_stand_sit_tbai.cpp)
+target_link_libraries(test_stand_sit_tbai
+    PUBLIC
+    unitree_sdk2
+    tbai_deploy_go2
+)
+
+add_executable(test_stand_sit_unitree src/test_stand_sit_unitree.cpp)
+target_link_libraries(test_stand_sit_unitree
     PUBLIC
     unitree_sdk2
 )

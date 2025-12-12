@@ -48,11 +48,12 @@ Go2RobotInterface::Go2RobotInterface(Go2RobotInterfaceArgs args) {
     TBAI_LOG_INFO(logger_, "Go2RobotInterface constructor");
     TBAI_LOG_INFO(logger_, "Network interface: {}", args.networkInterface());
     TBAI_LOG_INFO(logger_, "Initializing Go2RobotInterface");
+    TBAI_LOG_INFO(logger_, "Unitree channel: {}", args.unitreeChannel());
     TBAI_LOG_INFO(logger_, "Channel init: {}", args.channelInit());
     TBAI_LOG_INFO(logger_, "Subscribe lidar: {}", args.subscribeLidar());
     if (args.channelInit()) {
         TBAI_LOG_INFO(logger_, "Initializing channel factory: {}", args.networkInterface());
-        unitree::robot::ChannelFactory::Instance()->Init(0, args.networkInterface());
+        unitree::robot::ChannelFactory::Instance()->Init(args.unitreeChannel(), args.networkInterface());
     } else {
         throw std::runtime_error("Channel init is disabled");
     }
@@ -63,8 +64,6 @@ Go2RobotInterface::Go2RobotInterface(Go2RobotInterfaceArgs args) {
         lidar_subscriber.reset(new ChannelSubscriber<sensor_msgs::msg::dds_::PointCloud2_>(TOPIC_LIDAR));
         lidar_subscriber->InitChannel(std::bind(&Go2RobotInterface::lidarCallback, this, std::placeholders::_1), 1);
     }
-
-    msc = std::make_unique<MotionSwitcherClient>();
 
     // Initialize motor 2 id map
     motor_id_map["RF_HAA"] = 0;
@@ -85,41 +84,9 @@ Go2RobotInterface::Go2RobotInterface(Go2RobotInterfaceArgs args) {
     foot_id_map["RH_FOOT"] = 2;
     foot_id_map["LH_FOOT"] = 3;
 
-    // Initialize low level command
-    low_cmd.head()[0] = 0xFE;
-    low_cmd.head()[1] = 0xEF;
-    low_cmd.level_flag() = 0xFF;
-    low_cmd.gpio() = 0;
-
-    TBAI_LOG_INFO(logger_, "Initializing low level command");
-    for (int i = 0; i < 20; i++) {
-        low_cmd.motor_cmd()[i].mode() = (0x01);  // motor switch to servo (PMSM) mode
-        low_cmd.motor_cmd()[i].q() = (PosStopF);
-        low_cmd.motor_cmd()[i].kp() = (0);
-        low_cmd.motor_cmd()[i].dq() = (VelStopF);
-        low_cmd.motor_cmd()[i].kd() = (0);
-        low_cmd.motor_cmd()[i].tau() = (0);
-    }
-
     TBAI_LOG_INFO(logger_, "Initializing publisher: Topic: {}", TOPIC_LOWCMD);
     lowcmd_publisher.reset(new ChannelPublisher<unitree_go::msg::dds_::LowCmd_>(TOPIC_LOWCMD));
     lowcmd_publisher->InitChannel();
-
-    TBAI_LOG_INFO(logger_, "Initializing motion switcher client");
-    /*init MotionSwitcherClient*/
-    msc->SetTimeout(10.0f);
-    msc->Init();
-    /*Shut down motion control-related service*/
-    while (queryMotionStatus()) {
-        TBAI_LOG_INFO(logger_, "Try to deactivate the motion control-related service.");
-        int32_t ret = msc->ReleaseMode();
-        if (ret == 0) {
-            TBAI_LOG_INFO(logger_, "ReleaseMode succeeded.");
-        } else {
-            TBAI_LOG_ERROR(logger_, "ReleaseMode failed. Error code: {}", ret);
-        }
-        sleep(5);
-    }
 
     // Initialize estimator
     std::vector<std::string> footNames = {"LF_FOOT", "RF_FOOT", "LH_FOOT", "RH_FOOT"};
@@ -143,44 +110,6 @@ Go2RobotInterface::Go2RobotInterface(Go2RobotInterfaceArgs args) {
 /*********************************************************************************************************************/
 Go2RobotInterface::~Go2RobotInterface() {
     TBAI_LOG_INFO(logger_, "Destroying Go2RobotInterface");
-}
-
-/*********************************************************************************************************************/
-/*********************************************************************************************************************/
-/*********************************************************************************************************************/
-std::string Go2RobotInterface::queryServiceName(std::string form, std::string name) {
-    if (form == "0") {
-        if (name == "normal") return "sport_mode";
-        if (name == "ai") return "ai_sport";
-        if (name == "advanced") return "advanced_sport";
-    } else {
-        if (name == "ai-w") return "wheeled_sport(go2W)";
-        if (name == "normal-w") return "wheeled_sport(b2W)";
-    }
-    return "";
-}
-
-/*********************************************************************************************************************/
-/*********************************************************************************************************************/
-/*********************************************************************************************************************/
-int Go2RobotInterface::queryMotionStatus() {
-    std::string robotForm, motionName;
-    int motionStatus;
-    int32_t ret = msc->CheckMode(robotForm, motionName);
-    if (ret == 0) {
-        TBAI_LOG_INFO(logger_, "CheckMode succeeded.");
-    } else {
-        TBAI_LOG_ERROR(logger_, "CheckMode failed. Error code: {}", ret);
-    }
-    if (motionName.empty()) {
-        TBAI_LOG_INFO(logger_, "The motion control-related service is deactivated.");
-        motionStatus = 0;
-    } else {
-        std::string serviceName = queryServiceName(robotForm, motionName);
-        TBAI_LOG_INFO(logger_, "Service: {} is activate", serviceName);
-        motionStatus = 1;
-    }
-    return motionStatus;
 }
 
 /*********************************************************************************************************************/
