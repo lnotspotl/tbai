@@ -1,21 +1,17 @@
-#include <tbai_deploy_go2/Go2RobotInterface.hpp>
-
 #include <chrono>
 #include <iostream>
 #include <thread>
 #include <vector>
 
+#include <tbai_deploy_go2/Go2RobotInterface.hpp>
+
 // Joint names in order: RF, LF, RH, LH (each: HAA, HFE, KFE)
-static const std::vector<std::string> JOINT_NAMES = {
-    "RF_HAA", "RF_HFE", "RF_KFE",
-    "LF_HAA", "LF_HFE", "LF_KFE",
-    "RH_HAA", "RH_HFE", "RH_KFE",
-    "LH_HAA", "LH_HFE", "LH_KFE"
-};
+static const std::vector<std::string> JOINT_NAMES = {"RF_HAA", "RF_HFE", "RF_KFE", "LF_HAA", "LF_HFE", "LF_KFE",
+                                                     "RH_HAA", "RH_HFE", "RH_KFE", "LH_HAA", "LH_HFE", "LH_KFE"};
 
 class StandSitController {
-public:
-    StandSitController(tbai::Go2RobotInterface& robot) : robot_(robot) {}
+   public:
+    StandSitController(tbai::Go2RobotInterface &robot) : robot_(robot) {}
 
     void run() {
         // Wait for robot to initialize (receive first state)
@@ -49,7 +45,7 @@ public:
         }
     }
 
-private:
+   private:
     void update() {
         motionTime_++;
 
@@ -59,8 +55,8 @@ private:
                 tbai::State state = robot_.getLatestState();
                 std::cout << "Read sensor data example: " << std::endl;
                 std::cout << "Joint 0 (RF_HAA) pos: " << state.x[12] << std::endl;
-                std::cout << "Base orientation (roll, pitch, yaw): "
-                          << state.x[0] << ", " << state.x[1] << ", " << state.x[2] << std::endl;
+                std::cout << "Base orientation (roll, pitch, yaw): " << state.x[0] << ", " << state.x[1] << ", "
+                          << state.x[2] << std::endl;
                 std::cout << std::endl;
             }
         }
@@ -124,7 +120,7 @@ private:
         }
     }
 
-    void publishCommands(const float* positions) {
+    void publishCommands(const float *positions) {
         std::vector<tbai::MotorCommand> commands;
         commands.reserve(12);
 
@@ -142,7 +138,7 @@ private:
         robot_.publish(commands);
     }
 
-    tbai::Go2RobotInterface& robot_;
+    tbai::Go2RobotInterface &robot_;
 
     float kp_ = 60.0f;
     float kd_ = 5.0f;
@@ -169,9 +165,11 @@ private:
     float percent4_ = 0.0f;
 };
 
-int main(int argc, const char** argv) {
+int main(int argc, const char **argv) {
     if (argc < 3) {
-        std::cout << "Usage: " << argv[0] << " networkInterface unitreeChannel (unitreeChannel is 0 for hardware and 1 for simulation)" << std::endl;
+        std::cout << "Usage: " << argv[0]
+                  << " networkInterface unitreeChannel (unitreeChannel is 0 for hardware and 1 for simulation)"
+                  << std::endl;
         exit(-1);
     }
 

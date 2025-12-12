@@ -1,15 +1,17 @@
+#include <unistd.h>
+
 #include <iostream>
 #include <string>
-#include <unistd.h>
-#include <unitree/robot/channel/channel_subscriber.hpp>
+
 #include <unitree/idl/ros2/PointCloud2_.hpp>
+#include <unitree/robot/channel/channel_subscriber.hpp>
 
 using namespace unitree::common;
 using namespace unitree::robot;
 
 #define TOPIC_RAW "rt/utlidar/cloud"
 
-void dds_msg_callback(const void* msg2) {
+void dds_msg_callback(const void *msg2) {
     std::cout << "hello, point cloud published" << std::endl;
     auto *msg = reinterpret_cast<const sensor_msgs::msg::dds_::PointCloud2_ *>(msg2);
     // Print Header information
@@ -24,11 +26,9 @@ void dds_msg_callback(const void* msg2) {
     // Print fields info
     std::cout << "fields (" << msg->fields().size() << "):" << std::endl;
     for (size_t i = 0; i < msg->fields().size(); ++i) {
-        const auto& field = msg->fields()[i];
-        std::cout << "  [" << i << "] name: " << field.name()
-                  << ", offset: " << field.offset()
-                  << ", datatype: " << static_cast<int>(field.datatype())
-                  << ", count: " << field.count() << std::endl;
+        const auto &field = msg->fields()[i];
+        std::cout << "  [" << i << "] name: " << field.name() << ", offset: " << field.offset()
+                  << ", datatype: " << static_cast<int>(field.datatype()) << ", count: " << field.count() << std::endl;
     }
 
     // Print endianness, point_step, row_step, data size
@@ -41,7 +41,7 @@ void dds_msg_callback(const void* msg2) {
     std::cout << "is_dense: " << (msg->is_dense() ? "true" : "false") << std::endl;
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     if (argc < 2) {
         std::cout << "Usage: " << argv[0] << " <network_interface> [<domain_id>]" << std::endl;
         std::cout << "Please specify the network interface" << std::endl;
