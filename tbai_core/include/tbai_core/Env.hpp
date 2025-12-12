@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -17,7 +18,9 @@ T getEnvAs(const std::string &var, bool allowDefault = false, T defaultValue = T
         }
         TBAI_THROW("Environment variable {} is not set. Defaults are not allowed.", var);
     }
-    return value;
+    T returnValue;
+    std::stringstream(value) >> returnValue;
+    return returnValue;
 }
 
 template <>
