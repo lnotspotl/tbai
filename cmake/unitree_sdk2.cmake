@@ -6,7 +6,7 @@ set(BUILD_EXAMPLES OFF CACHE BOOL "Build examples" FORCE)
 FetchContent_Declare(
     unitree_sdk2
     GIT_REPOSITORY https://github.com/unitreerobotics/unitree_sdk2.git
-    GIT_TAG eed0898b8d63d83406f7f460a827fa378dd3e631
+    GIT_TAG 4f8aca7bbc269d275d45a7917d23b0386f74fb1c
     CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=OFF
 )
 FetchContent_MakeAvailable(unitree_sdk2)
