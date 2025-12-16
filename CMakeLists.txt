@@ -10,6 +10,8 @@ option(TBAI_BUILD_NP3O "Build the np3o" ON)
 option(TBAI_BUILD_MUSE "Build the muse" ON)
 option(TBAI_BUILD_PYTHON "Build the Python bindings" OFF)
 option(TBAI_BUILD_DEPLOY_GO2 "Build the deploy go2" ON)
+option(TBAI_BUILD_DEPLOY_GO2W "Build the deploy go2w (wheeled)" ON)
+option(TBAI_BUILD_DEPLOY_G1 "Build the deploy g1" ON)
 
 project(tbai VERSION 2.0.0)
 
@@ -41,9 +43,26 @@ if(TBAI_BUILD_PYTHON)
   add_subdirectory(tbai_python)
 endif()
 
-if(TBAI_BUILD_DEPLOY_GO2)
+set(GET_USE_UNITREE_SDK2 
+    ${TBAI_BUILD_DEPLOY_GO2} 
+    OR ${TBAI_BUILD_DEPLOY_GO2W} 
+    OR ${TBAI_BUILD_DEPLOY_G1}
+)
+
+if(GET_USE_UNITREE_SDK2)
   include(cmake/unitree_sdk2.cmake)
+endif()
+
+if(TBAI_BUILD_DEPLOY_GO2)
   add_subdirectory(tbai_deploy_go2)
+endif()
+
+#if(TBAI_BUILD_DEPLOY_GO2W)
+#  add_subdirectory(tbai_deploy_go2w)
+#endif()
+
+if(TBAI_BUILD_DEPLOY_G1)
+  add_subdirectory(tbai_deploy_g1)
 endif()
 
 include(CMakePackageConfigHelpers)
