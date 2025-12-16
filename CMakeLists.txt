@@ -57,9 +57,9 @@ if(TBAI_BUILD_DEPLOY_GO2)
   add_subdirectory(tbai_deploy_go2)
 endif()
 
-#if(TBAI_BUILD_DEPLOY_GO2W)
-#  add_subdirectory(tbai_deploy_go2w)
-#endif()
+if(TBAI_BUILD_DEPLOY_GO2W)
+  add_subdirectory(tbai_deploy_go2w)
+endif()
 
 if(TBAI_BUILD_DEPLOY_G1)
   add_subdirectory(tbai_deploy_g1)
