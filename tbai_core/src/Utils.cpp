@@ -69,6 +69,10 @@ scalar_t readInitTime() {
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 std::string downloadFromHuggingFace(const std::string &repo_id, const std::string &filename) {
+    // basic checks
+    TBAI_THROW_IF(repo_id.empty(), "Repository ID is empty");
+    TBAI_THROW_IF(filename.empty(), "Filename is empty");
+
     // Get the cache directory
     std::string cache_dir = getEnvAs<std::string>("TBAI_CACHE_DIR", true, TBAI_HF_CACHE_DIR);
 
@@ -77,7 +81,13 @@ std::string downloadFromHuggingFace(const std::string &repo_id, const std::strin
         std::filesystem::create_directories(cache_dir);
     }
 
-    std::string command = fmt::format("hf download {0} {1} --local-dir {2}", repo_id, filename, cache_dir);
+    bool is_folder = filename.back() == '/';
+    std::string command;
+    if (is_folder) {
+        command = fmt::format("hf download {0} --include {1}* --local-dir {2}", repo_id, filename, cache_dir);
+    } else {
+        command = fmt::format("hf download {0} {1} --local-dir {2}", repo_id, filename, cache_dir);
+    }
 
     // Execute the command
     int result = system(command.c_str());
