@@ -12,6 +12,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Generate compile_commands.json for clang tools
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Enable Position Independent Code for all targets (needed for linking static libs into shared libs)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 # Build options
 option(OCS2_BUILD_TESTS "Build unit tests" OFF)
 
@@ -69,6 +72,7 @@ add_subdirectory(ocs2_qp_solver)
 add_subdirectory(ocs2_mpc)
 add_subdirectory(ocs2_thirdparty/blasfeo)
 add_subdirectory(ocs2_thirdparty/hpipm)
+add_subdirectory(ocs2_thirdparty/qpoases)
 add_subdirectory(ocs2_sqp)
 add_subdirectory(ocs2_ddp)
 add_subdirectory(ocs2_slp)
