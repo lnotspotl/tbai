@@ -9,6 +9,7 @@
 #include <tbai_core/Throws.hpp>
 #include <tbai_mpc/quadruped_mpc/anymal_interface/Interface.h>
 #include <tbai_mpc/wbc/Factory.hpp>
+#include <tbai_core/Utils.hpp>
 
 
 #include <ocs2_ddp/DDP_Settings.h>
@@ -28,6 +29,7 @@ MpcController::MpcController(const std::shared_ptr<tbai::StateSubscriber>& state
                              std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> velocityGeneratorPtr)
     : stateSubscriberPtr_(stateSubscriberPtr), velocityGeneratorPtr_(std::move(velocityGeneratorPtr)) {
     logger_ = tbai::getLogger("mpc_controller");
+    initTime_ = tbai::readInitTime();
 }
 
 /*********************************************************************************************************************/
@@ -177,8 +179,7 @@ void MpcController::changeController(const std::string& controllerType, scalar_t
         resetMpc();
         mrt_initialized_ = true;
     }
-    tNow_ = currentTime;
-    initTime_ = currentTime;
+    tNow_ = currentTime - initTime_;
 
     // Start reference thread
     startReferenceThread();
