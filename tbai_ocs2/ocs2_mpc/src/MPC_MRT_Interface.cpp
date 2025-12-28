@@ -37,8 +37,18 @@ namespace ocs2 {
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-MPC_MRT_Interface::MPC_MRT_Interface(MPC_BASE& mpc) : mpc_(mpc) {
+MPC_MRT_Interface::MPC_MRT_Interface(MPC_BASE& mpc, bool threaded) : mpc_(mpc), threaded_(threaded) {
   mpcTimer_.reset();
+  if (threaded_) {
+    startMpcThread();
+  }
+}
+
+/******************************************************************************************************/
+/******************************************************************************************************/
+/******************************************************************************************************/
+MPC_MRT_Interface::~MPC_MRT_Interface() {
+  stopMpcThread();
 }
 
 /******************************************************************************************************/
@@ -54,8 +64,35 @@ void MPC_MRT_Interface::resetMpcNode(const TargetTrajectories& initTargetTraject
 /******************************************************************************************************/
 /******************************************************************************************************/
 void MPC_MRT_Interface::setCurrentObservation(const SystemObservation& currentObservation) {
-  std::lock_guard<std::mutex> lock(observationMutex_);
-  currentObservation_ = currentObservation;
+  {
+    std::lock_guard<std::mutex> lock(observationMutex_);
+    currentObservation_ = currentObservation;
+  }
+
+  if (threaded_) {
+    // Notify the MPC thread that a new observation is available
+    {
+      std::lock_guard<std::mutex> lock(mpcMutex_);
+      newObservationAvailable_ = true;
+    }
+    mpcCondition_.notify_one();
+  } else {
+    advanceMpc(); // synchronous mode
+  }
+}
+
+/******************************************************************************************************/
+/******************************************************************************************************/
+/******************************************************************************************************/
+void MPC_MRT_Interface::setTargetTrajectories(const TargetTrajectories& targetTrajectories) {
+  mpc_.getSolverPtr()->getReferenceManager().setTargetTrajectories(targetTrajectories);
+}
+
+/******************************************************************************************************/
+/******************************************************************************************************/
+/******************************************************************************************************/
+void MPC_MRT_Interface::setModeSchedule(const ModeSchedule& modeSchedule) {
+  mpc_.getSolverPtr()->getReferenceManager().setModeSchedule(modeSchedule);
 }
 
 /******************************************************************************************************/
@@ -167,6 +204,48 @@ vector_t MPC_MRT_Interface::getStateInputEqualityConstraintLagrangian(scalar_t t
 /******************************************************************************************************/
 MultiplierCollection MPC_MRT_Interface::getIntermediateDualSolution(scalar_t time) const {
   return mpc_.getSolverPtr()->getIntermediateDualSolution(time);
+}
+
+/******************************************************************************************************/
+/******************************************************************************************************/
+/******************************************************************************************************/
+void MPC_MRT_Interface::mpcWorkerThread() {
+  while (!stopMpcThread_) {
+    std::unique_lock<std::mutex> lock(mpcMutex_);
+    mpcCondition_.wait(lock, [this] { return newObservationAvailable_ || stopMpcThread_.load(); });
+
+    if (stopMpcThread_) {
+      break;
+    }
+
+    newObservationAvailable_ = false;
+    lock.unlock();
+
+    // Run MPC iteration
+    advanceMpc();
+  }
+}
+
+/******************************************************************************************************/
+/******************************************************************************************************/
+/******************************************************************************************************/
+void MPC_MRT_Interface::startMpcThread() {
+  stopMpcThread_ = false;
+  mpcThread_ = std::thread(&MPC_MRT_Interface::mpcWorkerThread, this);
+}
+
+/******************************************************************************************************/
+/******************************************************************************************************/
+/******************************************************************************************************/
+void MPC_MRT_Interface::stopMpcThread() {
+  if (mpcThread_.joinable()) {
+    {
+      std::lock_guard<std::mutex> lock(mpcMutex_);
+      stopMpcThread_ = true;
+    }
+    mpcCondition_.notify_one();
+    mpcThread_.join();
+  }
 }
 
 }  // namespace ocs2

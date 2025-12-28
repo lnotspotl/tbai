@@ -29,6 +29,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include <atomic>
 #include <condition_variable>
 #include <csignal>
 #include <ctime>
@@ -52,14 +53,19 @@ class MPC_MRT_Interface final : public MRT_BASE {
   /**
    * Constructor
    * @param [in] mpc: The underlying MPC class to be used.
+   * @param [in] threaded: If true, advanceMpc() is called in a separate thread on each setCurrentObservation().
    */
-  explicit MPC_MRT_Interface(MPC_BASE& mpc);
+  explicit MPC_MRT_Interface(MPC_BASE& mpc, bool threaded = false);
 
-  ~MPC_MRT_Interface() override = default;
+  ~MPC_MRT_Interface() override;
 
   void resetMpcNode(const TargetTrajectories& initTargetTrajectories) override;
 
   void setCurrentObservation(const SystemObservation& currentObservation) override;
+
+  void setTargetTrajectories(const TargetTrajectories& targetTrajectories) override;
+
+  void setModeSchedule(const ModeSchedule& modeSchedule) override;
 
   /*
    * Gets the ReferenceManager which manages both ModeSchedule and TargetTrajectories.
@@ -123,12 +129,35 @@ class MPC_MRT_Interface final : public MRT_BASE {
    */
   void copyToBuffer(const SystemObservation& mpcInitObservation);
 
+  /**
+   * Worker thread function for threaded MPC execution.
+   */
+  void mpcWorkerThread();
+
+  /**
+   * Starts the MPC worker thread if threaded mode is enabled.
+   */
+  void startMpcThread();
+
+  /**
+   * Stops the MPC worker thread.
+   */
+  void stopMpcThread();
+
   MPC_BASE& mpc_;
   benchmark::RepeatedTimer mpcTimer_;
 
   // MPC inputs
   SystemObservation currentObservation_;
   std::mutex observationMutex_;
+
+  // Threading support
+  bool threaded_;
+  std::thread mpcThread_;
+  std::atomic<bool> stopMpcThread_{false};
+  std::condition_variable mpcCondition_;
+  std::mutex mpcMutex_;
+  bool newObservationAvailable_{false};
 };
 
 }  // namespace ocs2

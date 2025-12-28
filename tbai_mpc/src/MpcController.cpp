@@ -1,0 +1,275 @@
+// clang-format off
+#include <pinocchio/fwd.hpp>
+// clang-format on
+
+#include "tbai_mpc/MpcController.hpp"
+
+#include <tbai_mpc/quadruped_mpc/core/MotionPhaseDefinition.h>
+#include <tbai_core/Rotations.hpp>
+#include <tbai_core/Throws.hpp>
+#include <tbai_mpc/quadruped_mpc/anymal_interface/Interface.h>
+#include <tbai_mpc/wbc/Factory.hpp>
+
+
+#include <ocs2_ddp/DDP_Settings.h>
+#include <ocs2_mpc/MPC_BASE.h>
+#include <ocs2_mpc/MPC_Settings.h>
+#include <ocs2_sqp/SqpSettings.h>
+
+#include <tbai_mpc/quadruped_mpc/QuadrupedMpc.h>
+
+namespace tbai {
+namespace mpc {
+
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+MpcController::MpcController(const std::shared_ptr<tbai::StateSubscriber>& stateSubscriberPtr,
+                             std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> velocityGeneratorPtr)
+    : stateSubscriberPtr_(stateSubscriberPtr), velocityGeneratorPtr_(std::move(velocityGeneratorPtr)) {
+    logger_ = tbai::getLogger("mpc_controller");
+}
+
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+void MpcController::initialize(const std::string& urdfString, const std::string& taskSettingsFile,
+                               const std::string& frameDeclarationFile, const std::string& controllerConfigFile,
+                               const std::string& targetCommandFile, scalar_t trajdt, size_t trajKnots) {
+    // Create quadruped interface
+    quadrupedInterfacePtr_ =
+        anymal::getAnymalInterface(urdfString, switched_model::loadQuadrupedSettings(taskSettingsFile),
+                                   anymal::frameDeclarationFromFile(frameDeclarationFile));
+
+    // Create WBC
+    wbcPtr_ = tbai::mpc::getWbcUnique(controllerConfigFile, urdfString, quadrupedInterfacePtr_->getComModel(),
+                                           quadrupedInterfacePtr_->getKinematicModel(),
+                                           quadrupedInterfacePtr_->getJointNames());
+
+    // Create reference trajectory generator
+    auto kinematicsPtr = std::shared_ptr<switched_model::KinematicsModelBase<scalar_t>>(
+        quadrupedInterfacePtr_->getKinematicModel().clone());
+    referenceTrajectoryGeneratorPtr_ = std::make_unique<reference::ReferenceTrajectoryGenerator>(
+        targetCommandFile, velocityGeneratorPtr_, std::move(kinematicsPtr), trajdt, trajKnots);
+
+    // Create MRT interface
+    mpcPtr_ = createMpcInterface();
+    mrtPtr_ = createMrtInterface();
+
+    tNow_ = 0.0;
+}
+
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+std::unique_ptr<ocs2::MPC_BASE> MpcController::createMpcInterface() {
+    auto sqpSettings = ocs2::sqp::Settings();
+    auto mpcSettings = ocs2::mpc::Settings();
+    return getSqpMpc(*quadrupedInterfacePtr_, mpcSettings, sqpSettings);
+}
+
+
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+std::unique_ptr<ocs2::MRT_BASE> MpcController::createMrtInterface() {
+    // Default implementation: create MPC_MRT_Interface with threaded execution
+    return std::make_unique<ocs2::MPC_MRT_Interface>(*mpcPtr_, true);  // threaded = true
+}
+
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+std::vector<MotorCommand> MpcController::getMotorCommands(scalar_t currentTime, scalar_t dt) {
+    // For MPC_MRT_Interface, we need to call updatePolicy to get latest solution
+    mrtPtr_->spinMRT();
+    mrtPtr_->updatePolicy();
+
+    tNow_ = currentTime - initTime_;
+
+    auto observation = generateSystemObservation();
+
+    ocs2::vector_t desiredState;
+    ocs2::vector_t desiredInput;
+    size_t desiredMode;
+    mrtPtr_->evaluatePolicy(tNow_, observation.state, desiredState, desiredInput, desiredMode);
+
+    constexpr ocs2::scalar_t time_eps = 1e-4;
+    ocs2::vector_t dummyState;
+    ocs2::vector_t dummyInput;
+    size_t dummyMode;
+    mrtPtr_->evaluatePolicy(tNow_ + time_eps, observation.state, dummyState, dummyInput, dummyMode);
+
+    ocs2::vector_t joint_accelerations = (dummyInput.tail<12>() - desiredInput.tail<12>()) / time_eps;
+
+    auto commands = wbcPtr_->getMotorCommands(tNow_, observation.state, observation.input, observation.mode,
+                                              desiredState, desiredInput, desiredMode, joint_accelerations, isStable_);
+
+    timeSinceLastMpcUpdate_ += dt;
+    if (timeSinceLastMpcUpdate_ >= 1.0 / mpcRate_) {
+        setObservation();
+    }
+
+    return commands;
+}
+
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+void MpcController::referenceThreadLoop() {
+    referenceTrajectoryGeneratorPtr_->reset();
+
+    // Wait for initial observation
+    while (!stopReferenceThread_) {
+        if (referenceTrajectoryGeneratorPtr_->isInitialized()) break;
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    }
+
+    // Reference loop
+    auto sleepDuration = std::chrono::milliseconds(static_cast<int>(1000.0 / referenceThreadRate_));
+    while (!stopReferenceThread_) {
+        // Generate and publish reference trajectory
+        auto observation = generateSystemObservation();
+        auto targetTrajectories =
+            referenceTrajectoryGeneratorPtr_->generateReferenceTrajectory(tNow_, observation);
+        mrtPtr_->setTargetTrajectories(targetTrajectories);
+
+        TBAI_LOG_INFO_THROTTLE(logger_, 5.0, "Publishing reference");
+        std::this_thread::sleep_for(sleepDuration);
+    }
+}
+
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+bool MpcController::checkStability() const {
+    if (!isStable_) {
+        TBAI_LOG_ERROR(logger_, "Mpc is unstable");
+        return false;
+    }
+
+    scalar_t roll = state_.x[0];
+    if (roll >= 1.57 || roll <= -1.57) {
+        return false;
+    }
+    scalar_t pitch = state_.x[1];
+    if (pitch >= 1.57 || pitch <= -1.57) {
+        return false;
+    }
+    return true;
+}
+
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+void MpcController::changeController(const std::string& controllerType, scalar_t currentTime) {
+    preStep(currentTime, 0.0);
+
+    if (!mrt_initialized_ || currentTime + 0.1 > mrtPtr_->getPolicy().timeTrajectory_.back()) {
+        resetMpc();
+        mrt_initialized_ = true;
+    }
+    tNow_ = currentTime;
+    initTime_ = currentTime;
+
+    // Start reference thread
+    startReferenceThread();
+}
+
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+void MpcController::startReferenceThread() {
+    // Stop existing thread if running
+    stopReferenceThread();
+
+    stopReferenceThread_ = false;
+    referenceThread_ = std::thread(&MpcController::referenceThreadLoop, this);
+}
+
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+void MpcController::stopReferenceThread() {
+    stopReferenceThread_ = true;
+    if (referenceThread_.joinable()) {
+        referenceThread_.join();
+    }
+}
+
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+bool MpcController::isSupported(const std::string& controllerType) {
+    return controllerType == "WBC";
+}
+
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+void MpcController::resetMpc() {
+    // Generate initial observation
+    stateSubscriberPtr_->waitTillInitialized();
+    auto initialObservation = generateSystemObservation();
+    const ocs2::TargetTrajectories initTargetTrajectories({0.0}, {initialObservation.state},
+                                                          {initialObservation.input});
+    mrtPtr_->resetMpcNode(initTargetTrajectories);
+
+    while (!mrtPtr_->initialPolicyReceived()) {
+        TBAI_LOG_INFO(logger_, "Waiting for initial policy...");
+        initialObservation = generateSystemObservation();
+        mrtPtr_->setCurrentObservation(initialObservation);
+        mrtPtr_->spinMRT();
+        mrtPtr_->updatePolicy();
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
+    TBAI_LOG_INFO(logger_, "Initial policy received.");
+}
+
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+void MpcController::setObservation() {
+    mrtPtr_->setCurrentObservation(generateSystemObservation());
+    timeSinceLastMpcUpdate_ = 0.0;
+}
+
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+ocs2::SystemObservation MpcController::generateSystemObservation() const {
+    auto state = stateSubscriberPtr_->getLatestState();
+    const tbai::vector_t& rbdState = state.x;
+
+    // Set observation time
+    ocs2::SystemObservation observation;
+    observation.time = state.timestamp - initTime_;
+
+    // Set mode
+    const std::vector<bool>& contactFlags = state.contactFlags;
+    std::array<bool, 4> contactFlagsArray = {contactFlags[0], contactFlags[1], contactFlags[2], contactFlags[3]};
+    observation.mode = switched_model::stanceLeg2ModeNumber(contactFlagsArray);
+
+    // Set state
+    observation.state = rbdState.head<3 + 3 + 3 + 3 + 12>();
+
+    // Swap LH and RF
+    std::swap(observation.state(3 + 3 + 3 + 3 + 3 + 0), observation.state(3 + 3 + 3 + 3 + 3 + 3));
+    std::swap(observation.state(3 + 3 + 3 + 3 + 3 + 1), observation.state(3 + 3 + 3 + 3 + 3 + 4));
+    std::swap(observation.state(3 + 3 + 3 + 3 + 3 + 2), observation.state(3 + 3 + 3 + 3 + 3 + 5));
+
+    // Set input
+    observation.input.setZero(24);
+    observation.input.tail<12>() = rbdState.tail<12>();
+
+    // Swap LH and RF
+    std::swap(observation.input(12 + 3), observation.input(12 + 6));
+    std::swap(observation.input(12 + 4), observation.input(12 + 7));
+    std::swap(observation.input(12 + 5), observation.input(12 + 8));
+
+    return observation;
+}
+
+}  // namespace mpc
+}  // namespace tbai
