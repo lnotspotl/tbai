@@ -39,10 +39,13 @@ void MpcController::initialize(const std::string& urdfString, const std::string&
                                const std::string& frameDeclarationFile, const std::string& controllerConfigFile,
                                const std::string& targetCommandFile, scalar_t trajdt, size_t trajKnots) {
     // Create quadruped interface
-    quadrupedInterfacePtr_ =
-        anymal::getAnymalInterface(urdfString, switched_model::loadQuadrupedSettings(taskSettingsFile),
-                                   anymal::frameDeclarationFromFile(frameDeclarationFile));
+    // quadrupedInterfacePtr_ =
+    //     anymal::getAnymalInterface(urdfString, switched_model::loadQuadrupedSettings(taskSettingsFile),
+    //                                anymal::frameDeclarationFromFile(frameDeclarationFile));
 
+    quadrupedInterfacePtr_ =
+        anymal::getGo2Interface(urdfString, switched_model::loadQuadrupedSettings(taskSettingsFile),
+                                    anymal::frameDeclarationFromFile(frameDeclarationFile));
     // Create WBC
     wbcPtr_ = tbai::mpc::getWbcUnique(controllerConfigFile, urdfString, quadrupedInterfacePtr_->getComModel(),
                                            quadrupedInterfacePtr_->getKinematicModel(),
