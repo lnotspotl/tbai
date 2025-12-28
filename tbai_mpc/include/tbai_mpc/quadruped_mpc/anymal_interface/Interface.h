@@ -21,4 +21,10 @@ std::string getConfigFolder(const std::string& configName);
 
 std::string getTaskFilePath(const std::string& configName);
 
+std::unique_ptr<switched_model::QuadrupedInterface> getGo2Interface(const std::string& urdf, const std::string& taskFolder);
+
+std::unique_ptr<switched_model::QuadrupedInterface> getGo2Interface(const std::string& urdf,
+                                                                       switched_model::QuadrupedInterface::Settings settings,
+                                                                       const FrameDeclaration& frameDeclaration);
+
 }  // end of namespace anymal

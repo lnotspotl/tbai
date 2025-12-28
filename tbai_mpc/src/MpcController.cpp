@@ -117,17 +117,23 @@ std::vector<MotorCommand> MpcController::getMotorCommands(scalar_t currentTime, 
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 void MpcController::referenceThreadLoop() {
+    std::cerr << "Reference trajectory generator reset" << std::endl;
+    TBAI_LOG_WARN(logger_, "Reference trajectory generator reset");
     referenceTrajectoryGeneratorPtr_->reset();
+    std::cerr << "Reference trajectory generator reset2" << std::endl;
+    TBAI_LOG_WARN(logger_, "Reference trajectory generator reset2");
 
     // Wait for initial observation
-    while (!stopReferenceThread_) {
-        if (referenceTrajectoryGeneratorPtr_->isInitialized()) break;
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
-    }
+    stateSubscriberPtr_->waitTillInitialized();
+    ocs2::SystemObservation observation = generateSystemObservation();
+    referenceTrajectoryGeneratorPtr_->updateObservation(observation);
+    TBAI_LOG_WARN(logger_, "Reference trajectory generator initialized");
 
     // Reference loop
     auto sleepDuration = std::chrono::milliseconds(static_cast<int>(1000.0 / referenceThreadRate_));
     while (!stopReferenceThread_) {
+        std::cerr << "Reference thread loop" << std::endl;
+        TBAI_LOG_WARN_THROTTLE(logger_, 0.005, "Reference thread loop");
         // Generate and publish reference trajectory
         auto observation = generateSystemObservation();
         auto targetTrajectories =
@@ -136,6 +142,8 @@ void MpcController::referenceThreadLoop() {
 
         TBAI_LOG_INFO_THROTTLE(logger_, 5.0, "Publishing reference");
         std::this_thread::sleep_for(sleepDuration);
+        observation = generateSystemObservation();
+        referenceTrajectoryGeneratorPtr_->updateObservation(observation);
     }
 }
 
@@ -183,8 +191,11 @@ void MpcController::startReferenceThread() {
     // Stop existing thread if running
     stopReferenceThread();
 
+
+    TBAI_LOG_WARN(logger_, "Starting reference thread");
     stopReferenceThread_ = false;
     referenceThread_ = std::thread(&MpcController::referenceThreadLoop, this);
+    TBAI_LOG_WARN(logger_, "Reference thread started");
 }
 
 /*********************************************************************************************************************/
