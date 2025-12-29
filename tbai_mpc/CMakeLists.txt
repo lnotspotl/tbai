@@ -103,6 +103,8 @@ target_link_libraries(tbai_mpc
         tbai_core
         tbai_reference
         ocs2_core
+        ocs2_ddp
+        ocs2_sqp
         ocs2_mpc
         ocs2_pinocchio_interface
         ocs2::qpoases

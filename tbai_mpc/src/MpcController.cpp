@@ -7,7 +7,7 @@
 #include <tbai_mpc/quadruped_mpc/core/MotionPhaseDefinition.h>
 #include <tbai_core/Rotations.hpp>
 #include <tbai_core/Throws.hpp>
-#include <tbai_mpc/quadruped_mpc/anymal_interface/Interface.h>
+#include <tbai_mpc/quadruped_mpc/quadruped_interfaces/Interfaces.h>
 #include <tbai_mpc/wbc/Factory.hpp>
 #include <tbai_core/Utils.hpp>
 
