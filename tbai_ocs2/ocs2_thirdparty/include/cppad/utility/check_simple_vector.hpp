@@ -1,5 +1,5 @@
-#ifndef CPPAD_UTILITY_CHECK_SIMPLE_VECTOR_HPP
-#define CPPAD_UTILITY_CHECK_SIMPLE_VECTOR_HPP
+# ifndef CPPAD_UTILITY_CHECK_SIMPLE_VECTOR_HPP
+# define CPPAD_UTILITY_CHECK_SIMPLE_VECTOR_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -95,89 +95,104 @@ $end
 ---------------------------------------------------------------------------
 */
 
-#include <cstddef>
-
-#include <cppad/core/cppad_assert.hpp>
-#include <cppad/local/define.hpp>
-#include <cppad/utility/thread_alloc.hpp>
+# include <cstddef>
+# include <cppad/core/cppad_assert.hpp>
+# include <cppad/local/define.hpp>
+# include <cppad/utility/thread_alloc.hpp>
 
 namespace CppAD {
 
-#ifdef NDEBUG
-template <class Scalar, class Vector>
-inline void CheckSimpleVector(const Scalar &x, const Scalar &y) {}
-template <class Scalar, class Vector>
-inline void CheckSimpleVector(void) {}
-#else
-template <class S, class T>
-struct ok_if_S_same_as_T {};
+# ifdef NDEBUG
+    template <class Scalar, class Vector>
+    inline void CheckSimpleVector(const Scalar& x, const Scalar& y)
+    { }
+    template <class Scalar, class Vector>
+    inline void CheckSimpleVector(void)
+    { }
+# else
+    template <class S, class T>
+    struct ok_if_S_same_as_T { };
 
-template <class T>
-struct ok_if_S_same_as_T<T, T> {
-    T value;
-};
+    template <class T>
+    struct ok_if_S_same_as_T<T,T> { T value; };
 
-template <class Scalar, class Vector>
-void CheckSimpleVector(const Scalar &x, const Scalar &y) {
-    CPPAD_ASSERT_FIRST_CALL_NOT_PARALLEL
-    static size_t count;
-    if (count > 0) return;
-    count++;
+    template <class Scalar, class Vector>
+    void CheckSimpleVector(const Scalar& x, const Scalar& y)
+    {   CPPAD_ASSERT_FIRST_CALL_NOT_PARALLEL
+        static size_t count;
+        if( count > 0  )
+            return;
+        count++;
 
-    // value_type must be type of elements of Vector
-    typedef typename Vector::value_type value_type;
+        // value_type must be type of elements of Vector
+        typedef typename Vector::value_type value_type;
 
-    // check that elements of Vector have type Scalar
-    struct ok_if_S_same_as_T<Scalar, value_type> x_copy;
-    x_copy.value = x;
+        // check that elements of Vector have type Scalar
+        struct ok_if_S_same_as_T<Scalar, value_type> x_copy;
+        x_copy.value = x;
 
-    // check default constructor
-    Vector d;
+        // check default constructor
+        Vector d;
 
-    // size member function
-    CPPAD_ASSERT_KNOWN(d.size() == 0, "default construtor result does not have size zero");
+        // size member function
+        CPPAD_ASSERT_KNOWN(
+            d.size() == 0,
+            "default construtor result does not have size zero"
+        );
 
-    // resize to same size as other vectors in test
-    d.resize(1);
+        // resize to same size as other vectors in test
+        d.resize(1);
 
-    // check sizing constructor
-    Vector s(1);
+        // check sizing constructor
+        Vector s(1);
 
-    // check element assignment
-    s[0] = y;
-    CPPAD_ASSERT_KNOWN(s[0] == y, "element assignment failed");
+        // check element assignment
+        s[0] = y;
+        CPPAD_ASSERT_KNOWN(
+            s[0] == y,
+            "element assignment failed"
+        );
 
-    // check copy constructor
-    s[0] = x_copy.value;
-    const Vector c(s);
-    s[0] = y;
-    CPPAD_ASSERT_KNOWN(c[0] == x, "copy constructor is shallow");
+        // check copy constructor
+        s[0] = x_copy.value;
+        const Vector c(s);
+        s[0] = y;
+        CPPAD_ASSERT_KNOWN(
+            c[0] == x,
+            "copy constructor is shallow"
+        );
 
-    // vector assignment operator
-    d[0] = x;
-    s = d;
-    s[0] = y;
-    CPPAD_ASSERT_KNOWN(d[0] == x, "assignment operator is shallow");
+        // vector assignment operator
+        d[0] = x;
+        s    = d;
+        s[0] = y;
+        CPPAD_ASSERT_KNOWN(
+            d[0] == x,
+            "assignment operator is shallow"
+        );
 
-    // element access, right side const
-    // element assignment, left side not const
-    d[0] = c[0];
-    CPPAD_ASSERT_KNOWN(d[0] == x, "element assignment from const failed");
-}
-template <class Scalar, class Vector>
-void CheckSimpleVector(void) {
-    Scalar x;
-    Scalar y;
+        // element access, right side const
+        // element assignment, left side not const
+        d[0] = c[0];
+        CPPAD_ASSERT_KNOWN(
+            d[0] == x,
+            "element assignment from const failed"
+        );
+    }
+    template <class Scalar, class Vector>
+    void CheckSimpleVector(void)
+    {   Scalar x;
+        Scalar y;
 
-    // use assignment and not constructor
-    x = 0;
-    y = 1;
+        // use assignment and not constructor
+        x = 0;
+        y = 1;
 
-    CheckSimpleVector<Scalar, Vector>(x, y);
-}
+        CheckSimpleVector<Scalar, Vector>(x, y);
+    }
 
-#endif
+# endif
 
-}  // end namespace CppAD
+} // end namespace CppAD
 
-#endif
+# endif

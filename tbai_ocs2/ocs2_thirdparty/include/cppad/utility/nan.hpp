@@ -1,5 +1,5 @@
-#ifndef CPPAD_UTILITY_NAN_HPP
-#define CPPAD_UTILITY_NAN_HPP
+# ifndef CPPAD_UTILITY_NAN_HPP
+# define CPPAD_UTILITY_NAN_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -142,50 +142,51 @@ contains an example and test of this routine.
 $end
 */
 
-#include <cstddef>
-
-#include <cppad/core/cppad_assert.hpp>
+# include <cstddef>
+# include <cppad/core/cppad_assert.hpp>
 
 // needed before one can use CPPAD_ASSERT_FIRST_CALL_NOT_PARALLEL
-#include <cppad/utility/thread_alloc.hpp>
+# include <cppad/utility/thread_alloc.hpp>
 
 /*
 # define nan There must be a define for every CppAD undef
 */
-#ifdef nan
-#undef nan
-#endif
+# ifdef nan
+# undef nan
+# endif
 
 /*
 # define isnan There must be a define for every CppAD undef
 */
-#ifdef isnan
-#undef isnan
-#endif
+# ifdef isnan
+# undef isnan
+# endif
 
-namespace CppAD {  // BEGIN CppAD namespace
+namespace CppAD { // BEGIN CppAD namespace
 
 template <class Scalar>
-bool isnan(const Scalar &s) {
-    return (s != s);
+bool isnan(const Scalar &s)
+{   return (s != s);
 }
 
 template <class Vector>
-bool hasnan(const Vector &v) {
+bool hasnan(const Vector &v)
+{
     bool found_nan;
     size_t i;
-    i = v.size();
+    i   = v.size();
     found_nan = false;
     // on MS Visual Studio 2012, CppAD required in front of isnan ?
-    while (i--) found_nan |= CppAD::isnan(v[i]);
+    while(i--)
+        found_nan |= CppAD::isnan(v[i]);
     return found_nan;
 }
 
 template <class Scalar>
-Scalar nan(const Scalar &zero) {
-    return zero / zero;
+Scalar nan(const Scalar &zero)
+{   return zero / zero;
 }
 
-}  // namespace CppAD
+} // End CppAD namespace
 
-#endif
+# endif

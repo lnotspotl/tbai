@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_FOR_TWO_HPP
-#define CPPAD_CORE_FOR_TWO_HPP
+# ifndef CPPAD_CORE_FOR_TWO_HPP
+# define CPPAD_CORE_FOR_TWO_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -141,8 +141,11 @@ namespace CppAD {
 
 template <class Base, class RecBase>
 template <class BaseVector, class SizeVector_t>
-BaseVector ADFun<Base, RecBase>::ForTwo(const BaseVector &x, const SizeVector_t &j, const SizeVector_t &k) {
-    size_t i;
+BaseVector ADFun<Base,RecBase>::ForTwo(
+    const BaseVector   &x,
+    const SizeVector_t &j,
+    const SizeVector_t &k)
+{   size_t i;
     size_t j1;
     size_t k1;
     size_t l;
@@ -157,10 +160,17 @@ BaseVector ADFun<Base, RecBase>::ForTwo(const BaseVector &x, const SizeVector_t 
     // check SizeVector_t is Simple Vector class with size_t elements
     CheckSimpleVector<size_t, SizeVector_t>();
 
-    CPPAD_ASSERT_KNOWN(x.size() == n, "ForTwo: Length of x not equal domain dimension for f.");
-    CPPAD_ASSERT_KNOWN(j.size() == k.size(), "ForTwo: Lenght of the j and k vectors are not equal.");
+    CPPAD_ASSERT_KNOWN(
+        x.size() == n,
+        "ForTwo: Length of x not equal domain dimension for f."
+    );
+    CPPAD_ASSERT_KNOWN(
+        j.size() == k.size(),
+        "ForTwo: Lenght of the j and k vectors are not equal."
+    );
     // point at which we are evaluating the second partials
     Forward(0, x);
+
 
     // dimension the return value
     BaseVector ddy(m * p);
@@ -171,43 +181,56 @@ BaseVector ADFun<Base, RecBase>::ForTwo(const BaseVector &x, const SizeVector_t 
 
     // boolean flag for which diagonal coefficients are computed
     CppAD::vector<bool> c(n);
-    for (j1 = 0; j1 < n; j1++) c[j1] = false;
+    for(j1 = 0; j1 < n; j1++)
+        c[j1] = false;
 
     // direction vector in argument space
     BaseVector dx(n);
-    for (j1 = 0; j1 < n; j1++) dx[j1] = Base(0.0);
+    for(j1 = 0; j1 < n; j1++)
+        dx[j1] = Base(0.0);
 
     // result vector in range space
     BaseVector dy(m);
 
     // compute the diagonal coefficients that are needed
-    for (l = 0; l < p; l++) {
-        j1 = j[l];
+    for(l = 0; l < p; l++)
+    {   j1 = j[l];
         k1 = k[l];
-        CPPAD_ASSERT_KNOWN(j1 < n, "ForTwo: an element of j not less than domain dimension for f.");
-        CPPAD_ASSERT_KNOWN(k1 < n, "ForTwo: an element of k not less than domain dimension for f.");
+        CPPAD_ASSERT_KNOWN(
+        j1 < n,
+        "ForTwo: an element of j not less than domain dimension for f."
+        );
+        CPPAD_ASSERT_KNOWN(
+        k1 < n,
+        "ForTwo: an element of k not less than domain dimension for f."
+        );
         size_t count = 2;
-        while (count) {
-            count--;
-            if (!c[j1]) {  // diagonal term in j1 direction
-                c[j1] = true;
+        while(count)
+        {   count--;
+            if( ! c[j1] )
+            {   // diagonal term in j1 direction
+                c[j1]  = true;
                 dx[j1] = Base(1.0);
                 Forward(1, dx);
 
                 dx[j1] = Base(0.0);
-                dy = Forward(2, dx);
-                for (i = 0; i < m; i++) D[i * n + j1] = dy[i];
+                dy     = Forward(2, dx);
+                for(i = 0; i < m; i++)
+                    D[i * n + j1 ] = dy[i];
             }
             j1 = k1;
         }
     }
     // compute all the requested cross partials
-    for (l = 0; l < p; l++) {
-        j1 = j[l];
+    for(l = 0; l < p; l++)
+    {   j1 = j[l];
         k1 = k[l];
-        if (j1 == k1) {
-            for (i = 0; i < m; i++) ddy[i * p + l] = Base(2.0) * D[i * n + j1];
-        } else {
+        if( j1 == k1 )
+        {   for(i = 0; i < m; i++)
+                ddy[i * p + l] = Base(2.0) * D[i * n + j1];
+        }
+        else
+        {
             // cross term in j1 and k1 directions
             dx[j1] = Base(1.0);
             dx[k1] = Base(1.0);
@@ -218,12 +241,14 @@ BaseVector ADFun<Base, RecBase>::ForTwo(const BaseVector &x, const SizeVector_t 
             dy = Forward(2, dx);
 
             // place result in return value
-            for (i = 0; i < m; i++) ddy[i * p + l] = dy[i] - D[i * n + j1] - D[i * n + k1];
+            for(i = 0; i < m; i++)
+                ddy[i * p + l] = dy[i] - D[i*n+j1] - D[i*n+k1];
+
         }
     }
     return ddy;
 }
 
-}  // namespace CppAD
+} // END CppAD namespace
 
-#endif
+# endif

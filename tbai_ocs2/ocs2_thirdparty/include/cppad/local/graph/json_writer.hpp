@@ -1,5 +1,5 @@
-#ifndef CPPAD_LOCAL_GRAPH_JSON_WRITER_HPP
-#define CPPAD_LOCAL_GRAPH_JSON_WRITER_HPP
+# ifndef CPPAD_LOCAL_GRAPH_JSON_WRITER_HPP
+# define CPPAD_LOCAL_GRAPH_JSON_WRITER_HPP
 
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-19 Bradley M. Bell
@@ -13,11 +13,10 @@ CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-19 Bradley M. Bell
         GNU General Public License, Version 2.0 or later.
 -------------------------------------------------------------------------- */
 
-#include <string>
-
-#include <cppad/local/graph/cpp_graph_op.hpp>
-#include <cppad/utility/to_string.hpp>
-#include <cppad/utility/vector.hpp>
+# include <string>
+# include <cppad/utility/vector.hpp>
+# include <cppad/local/graph/cpp_graph_op.hpp>
+# include <cppad/utility/to_string.hpp>
 
 /*
 $begin json_writer$$
@@ -41,15 +40,15 @@ This is a $code cpp_graph$$ object.
 
 $head Prototype$$
 $srccode%hpp% */
-namespace CppAD {
-namespace local {
-namespace graph {
-void json_writer(std::string &json, const cpp_graph &graph_obj);
-}
-}  // namespace local
-}  // namespace CppAD
+namespace CppAD { namespace local { namespace graph {
+    void json_writer(
+        std::string&       json        ,
+        const cpp_graph&   graph_obj
+    );
+} } }
 /* %$$
 $end
 */
 
-#endif
+
+# endif

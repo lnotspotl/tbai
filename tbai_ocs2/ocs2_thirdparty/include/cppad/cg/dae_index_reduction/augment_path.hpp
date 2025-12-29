@@ -26,35 +26,40 @@ namespace cg {
  * Algorithm interface for assigning equations to variables in sorting
  * procedures.
  */
-template <class Base>
+template<class Base>
 class AugmentPath {
-   protected:
+protected:
     using CGBase = CppAD::cg::CG<Base>;
     using ADCG = CppAD::AD<CGBase>;
-
-   protected:
+protected:
     SimpleLogger defaultLogger_;
     // logger
-    SimpleLogger *logger_;
+    SimpleLogger* logger_;
+public:
+    inline AugmentPath() :
+            logger_(&defaultLogger_) {
+    }
 
-   public:
-    inline AugmentPath() : logger_(&defaultLogger_) {}
-
-    inline virtual ~AugmentPath() {}
+    inline virtual ~AugmentPath() {
+    }
 
     /**
      *
      * @param i The equation node
      * @return true if an augmented path was found
      */
-    virtual bool augmentPath(Enode<Base> &i) = 0;
+    virtual bool augmentPath(Enode<Base>& i) = 0;
 
-    inline void setLogger(SimpleLogger &logger) { logger_ = &logger; }
+    inline void setLogger(SimpleLogger& logger) {
+        logger_ = &logger;
+    }
 
-    inline SimpleLogger &getLogger() const { return *logger_; }
+    inline SimpleLogger& getLogger() const {
+        return *logger_;
+    }
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

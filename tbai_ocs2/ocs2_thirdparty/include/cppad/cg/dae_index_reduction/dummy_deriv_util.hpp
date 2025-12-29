@@ -27,8 +27,9 @@ namespace cg {
  * @param j
  * @return true if i should come before j
  */
-template <class Base>
-bool sortVnodesByOrder(Vnode<Base> *i, Vnode<Base> *j) {
+template<class Base>
+bool sortVnodesByOrder(Vnode<Base>* i,
+                       Vnode<Base>* j) {
     return (i->order() > j->order());
 }
 
@@ -36,40 +37,56 @@ bool sortVnodesByOrder(Vnode<Base> *i, Vnode<Base> *j) {
  * Utility class used to sort variables in the DAE
  */
 class DaeVarOrderInfo {
-   public:
+public:
     size_t originalIndex;
     size_t originalIndex0;
     bool hasDerivatives;
     int order;
+public:
+    inline DaeVarOrderInfo() :
+            originalIndex(0),
+            originalIndex0(0),
+            hasDerivatives(false),
+            order(-1) {
+    }
 
-   public:
-    inline DaeVarOrderInfo() : originalIndex(0), originalIndex0(0), hasDerivatives(false), order(-1) {}
-
-    inline DaeVarOrderInfo(size_t moriginalIndex, size_t moriginalIndex0, bool mhasDerivatives, int morder)
-        : originalIndex(moriginalIndex),
-          originalIndex0(moriginalIndex0),
-          hasDerivatives(mhasDerivatives),
-          order(morder) {}
+    inline DaeVarOrderInfo(size_t moriginalIndex,
+                           size_t moriginalIndex0,
+                           bool mhasDerivatives,
+                           int morder) :
+            originalIndex(moriginalIndex),
+            originalIndex0(moriginalIndex0),
+            hasDerivatives(mhasDerivatives),
+            order(morder) {
+    }
 };
 
 /**
  * Utility class used to sort equations in the DAE system
  */
 class DaeEqOrderInfo {
-   public:
+public:
     size_t originalIndex;
     size_t originalIndex0;
     bool differential;
     int assignedVar;
+public:
+    inline DaeEqOrderInfo() :
+            originalIndex(0),
+            originalIndex0(0),
+            differential(false),
+            assignedVar(-1) {
+    }
 
-   public:
-    inline DaeEqOrderInfo() : originalIndex(0), originalIndex0(0), differential(false), assignedVar(-1) {}
-
-    inline DaeEqOrderInfo(size_t moriginalIndex, size_t moriginalIndex0, bool mdifferential, int massignedVar)
-        : originalIndex(moriginalIndex),
-          originalIndex0(moriginalIndex0),
-          differential(mdifferential),
-          assignedVar(massignedVar) {}
+    inline DaeEqOrderInfo(size_t moriginalIndex,
+                          size_t moriginalIndex0,
+                          bool mdifferential,
+                          int massignedVar) :
+            originalIndex(moriginalIndex),
+            originalIndex0(moriginalIndex0),
+            differential(mdifferential),
+            assignedVar(massignedVar) {
+    }
 };
 
 /**
@@ -80,7 +97,8 @@ class DaeEqOrderInfo {
  * @param j
  * @return true if i should come before j
  */
-inline bool sortVariablesByOrder(const DaeVarOrderInfo &i, const DaeVarOrderInfo &j) {
+inline bool sortVariablesByOrder(const DaeVarOrderInfo& i,
+                                 const DaeVarOrderInfo& j) {
     if (j.order < i.order) {
         return true;
     } else if (j.order > i.order) {
@@ -100,7 +118,8 @@ inline bool sortVariablesByOrder(const DaeVarOrderInfo &i, const DaeVarOrderInfo
  * @param j
  * @return true if i should come before j
  */
-inline bool sortEquationByAssignedOrder2(const DaeEqOrderInfo &i, const DaeEqOrderInfo &j) {
+inline bool sortEquationByAssignedOrder2(const DaeEqOrderInfo& i,
+                                         const DaeEqOrderInfo& j) {
     if (i.differential) {
         if (j.differential)
             return i.assignedVar < j.assignedVar;
@@ -119,7 +138,7 @@ inline bool sortEquationByAssignedOrder2(const DaeEqOrderInfo &i, const DaeEqOrd
     }
 }
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

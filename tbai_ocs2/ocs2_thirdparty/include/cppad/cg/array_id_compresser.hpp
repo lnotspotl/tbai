@@ -23,9 +23,9 @@ namespace cg {
  * Positions for each array can be determined using this class.
  * Array locations are stored in node IDs as: id = location + 1.
  */
-template <class Base>
+template<class Base>
 class ArrayIdCompresser {
-   private:
+private:
     /**
      * [start] = end
      */
@@ -37,47 +37,54 @@ class ArrayIdCompresser {
     /**
      * values in temporary array
      */
-    std::vector<const Argument<Base> *> _tmpArrayValues;
+    std::vector<const Argument<Base>*> _tmpArrayValues;
     /**
      * Variable IDs
      */
-    CodeHandlerVector<Base, size_t> &_varId;
+    CodeHandlerVector<Base, size_t>& _varId;
     /**
      * Maximum array id
      */
     size_t _idArrayCount;
+public:
 
-   public:
     /**
      * Creates an ArrayIdCompresser
      * @param maxArraySize The likely number of elements in the temporary array
      */
-    inline ArrayIdCompresser(CodeHandlerVector<Base, size_t> &varId, size_t maxArraySize)
-        : _tmpArrayValues(maxArraySize, nullptr), _varId(varId), _idArrayCount(1) {}
+    inline ArrayIdCompresser(CodeHandlerVector<Base, size_t>& varId,
+                             size_t maxArraySize) :
+        _tmpArrayValues(maxArraySize, nullptr),
+        _varId(varId),
+        _idArrayCount(1) {
+    }
 
-    inline size_t getIdCount() const { return _idArrayCount; }
+    inline size_t getIdCount() const {
+        return _idArrayCount;
+    }
 
-    inline void addFreeArraySpace(const OperationNode<Base> &released) {
+    inline void addFreeArraySpace(const OperationNode<Base>& released) {
         size_t arrayStart = _varId[released] - 1;
         const size_t arraySize = released.getArguments().size();
-        if (arraySize == 0) return;  // nothing to do (no free space)
+        if (arraySize == 0)
+            return; // nothing to do (no free space)
         size_t arrayEnd = arrayStart + arraySize - 1;
 
         std::map<size_t, size_t>::iterator it;
         if (arrayStart > 0) {
             // try to merge with previous free space
-            it = _freeArrayEndSpace.find(arrayStart - 1);  // previous
+            it = _freeArrayEndSpace.find(arrayStart - 1); // previous
             if (it != _freeArrayEndSpace.end()) {
-                arrayStart = it->second;  // merge space
+                arrayStart = it->second; // merge space
                 _freeArrayEndSpace.erase(it);
                 _freeArrayStartSpace.erase(arrayStart);
             }
         }
 
         // try to merge with the next free space
-        it = _freeArrayStartSpace.find(arrayEnd + 1);  // next
+        it = _freeArrayStartSpace.find(arrayEnd + 1); // next
         if (it != _freeArrayStartSpace.end()) {
-            arrayEnd = it->second;  // merge space
+            arrayEnd = it->second; // merge space 
             _freeArrayStartSpace.erase(it);
             _freeArrayEndSpace.erase(arrayEnd);
         }
@@ -88,18 +95,19 @@ class ArrayIdCompresser {
         CPPADCG_ASSERT_UNKNOWN(_freeArrayStartSpace.size() == _freeArrayEndSpace.size());
     }
 
-    inline size_t reserveArraySpace(const OperationNode<Base> &newArray) {
+    inline size_t reserveArraySpace(const OperationNode<Base>& newArray) {
         size_t arraySize = newArray.getArguments().size();
 
-        if (arraySize == 0) return 0;  // nothing to do (no space required)
+        if (arraySize == 0)
+            return 0; // nothing to do (no space required)
 
         std::set<size_t> blackList;
-        const std::vector<Argument<Base> > &args = newArray.getArguments();
+        const std::vector<Argument<Base> >& args = newArray.getArguments();
         for (size_t i = 0; i < args.size(); i++) {
-            const OperationNode<Base> *argOp = args[i].getOperation();
+            const OperationNode<Base>* argOp = args[i].getOperation();
             if (argOp != nullptr && argOp->getOperationType() == CGOpCode::ArrayElement) {
-                const OperationNode<Base> &otherArray = *argOp->getArguments()[0].getOperation();
-                CPPADCG_ASSERT_UNKNOWN(_varId[otherArray] > 0);  // make sure it had already been assigned space
+                const OperationNode<Base>& otherArray = *argOp->getArguments()[0].getOperation();
+                CPPADCG_ASSERT_UNKNOWN(_varId[otherArray] > 0); // make sure it had already been assigned space
                 size_t otherArrayStart = _varId[otherArray] - 1;
                 size_t index = argOp->getInfo()[0];
                 blackList.insert(otherArrayStart + index);
@@ -111,7 +119,7 @@ class ArrayIdCompresser {
          */
         std::map<size_t, size_t>::reverse_iterator it;
         std::map<size_t, size_t>::reverse_iterator itBestFit = _freeArrayStartSpace.rend();
-        size_t bestCommonValues = 0;  // the number of values likely to be the same
+        size_t bestCommonValues = 0; // the number of values likely to be the same
         for (it = _freeArrayStartSpace.rbegin(); it != _freeArrayStartSpace.rend(); ++it) {
             size_t start = it->first;
             size_t end = it->second;
@@ -122,10 +130,10 @@ class ArrayIdCompresser {
 
             std::set<size_t>::const_iterator itBlack = blackList.lower_bound(start);
             if (itBlack != blackList.end() && *itBlack <= end) {
-                continue;  // cannot use this space
+                continue; // cannot use this space
             }
 
-            // possible candidate
+            //possible candidate
             if (itBestFit == _freeArrayStartSpace.rend()) {
                 itBestFit = it;
             } else {
@@ -143,7 +151,7 @@ class ArrayIdCompresser {
                     itBestFit = it;
                     bestCommonValues = commonVals;
                     if (bestCommonValues == arraySize) {
-                        break;  // jackpot
+                        break; // jackpot
                     }
                 }
             }
@@ -159,7 +167,7 @@ class ArrayIdCompresser {
             size_t bestSpace = bestEnd - bestStart + 1;
             _freeArrayStartSpace.erase(bestStart);
             if (bestSpace == arraySize) {
-                // entire space
+                // entire space 
                 _freeArrayEndSpace.erase(bestEnd);
             } else {
                 // some space left
@@ -174,7 +182,7 @@ class ArrayIdCompresser {
              */
             // check if there is some free space at the end
             std::map<size_t, size_t>::iterator itEnd;
-            itEnd = _freeArrayEndSpace.find(_idArrayCount - 1 - 1);  // IDcount - initialID - 1
+            itEnd = _freeArrayEndSpace.find(_idArrayCount - 1 - 1); // IDcount - initialID - 1
             if (itEnd != _freeArrayEndSpace.end()) {
                 // check if it can be used
                 size_t lastSpotStart = itEnd->second;
@@ -208,7 +216,8 @@ class ArrayIdCompresser {
         return bestStart;
     }
 
-    inline static bool isSameArrayElement(const Argument<Base> *oldArg, const Argument<Base> &arg) {
+    inline static bool isSameArrayElement(const Argument<Base>* oldArg,
+                                          const Argument<Base>& arg) {
         if (oldArg != nullptr) {
             if (oldArg->getParameter() != nullptr) {
                 if (arg.getParameter() != nullptr) {
@@ -221,10 +230,11 @@ class ArrayIdCompresser {
         return false;
     }
 
-    virtual ~ArrayIdCompresser() {}
+    virtual ~ArrayIdCompresser() {
+    }
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_SIGN_HPP
-#define CPPAD_CORE_SIGN_HPP
+# ifndef CPPAD_CORE_SIGN_HPP
+# define CPPAD_CORE_SIGN_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -67,25 +67,33 @@ $end
 namespace CppAD {
 
 template <class Base>
-AD<Base> AD<Base>::sign_me(void) const {
+AD<Base> AD<Base>::sign_me (void) const
+{
     AD<Base> result;
     result.value_ = sign(value_);
-    CPPAD_ASSERT_UNKNOWN(Parameter(result));
+    CPPAD_ASSERT_UNKNOWN( Parameter(result) );
 
     // check if there is a recording in progress
-    local::ADTape<Base> *tape = AD<Base>::tape_ptr();
-    if (tape == CPPAD_NULL) return result;
+    local::ADTape<Base>* tape = AD<Base>::tape_ptr();
+    if( tape == CPPAD_NULL )
+        return result;
 
     // check if operand is a constant parameter
-    if (tape_id_ != tape->id_) return result;
+    if( tape_id_ != tape->id_ )
+        return result;
 
-    if (ad_type_ == dynamic_enum) {  // dynamic paramter argument
-        result.taddr_ = tape->Rec_.put_dyn_par(result.value_, local::sign_dyn, taddr_);
-        result.tape_id_ = tape_id_;
-        result.ad_type_ = dynamic_enum;
-    } else {  // variable argument
-        CPPAD_ASSERT_UNKNOWN(local::NumRes(local::SignOp) == 1);
-        CPPAD_ASSERT_UNKNOWN(local::NumArg(local::SignOp) == 1);
+    if(ad_type_ == dynamic_enum)
+    {   // dynamic paramter argument
+        result.taddr_   = tape->Rec_.put_dyn_par(
+            result.value_, local::sign_dyn, taddr_
+        );
+        result.tape_id_  = tape_id_;
+        result.ad_type_  = dynamic_enum;
+    }
+    else
+    {   // variable argument
+        CPPAD_ASSERT_UNKNOWN( local::NumRes(local::SignOp) == 1 );
+        CPPAD_ASSERT_UNKNOWN( local::NumArg(local::SignOp) == 1 );
 
         // corresponding operand address
         tape->Rec_.PutArg(taddr_);
@@ -101,14 +109,13 @@ AD<Base> AD<Base>::sign_me(void) const {
 }
 
 template <class Base>
-AD<Base> sign(const AD<Base> &x) {
-    return x.sign_me();
+AD<Base> sign(const AD<Base> &x)
+{   return x.sign_me();
 }
 template <class Base>
-AD<Base> sign(const VecAD_reference<Base> &x) {
-    return x.ADBase().sign_me();
-}
+AD<Base> sign(const VecAD_reference<Base> &x)
+{   return x.ADBase().sign_me(); }
 
-}  // namespace CppAD
+} // END CppAD namespace
 
-#endif
+# endif

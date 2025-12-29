@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_CONVERT_HPP
-#define CPPAD_CORE_CONVERT_HPP
+# ifndef CPPAD_CORE_CONVERT_HPP
+# define CPPAD_CORE_CONVERT_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-16 Bradley M. Bell
 
@@ -40,11 +40,11 @@ $tend
 $end
 */
 
-#include <cppad/core/ad_io.hpp>
-#include <cppad/core/ad_to_string.hpp>
-#include <cppad/core/integer.hpp>
-#include <cppad/core/print_for.hpp>
-#include <cppad/core/value.hpp>
-#include <cppad/core/var2par.hpp>
+# include <cppad/core/value.hpp>
+# include <cppad/core/integer.hpp>
+# include <cppad/core/ad_to_string.hpp>
+# include <cppad/core/ad_io.hpp>
+# include <cppad/core/print_for.hpp>
+# include <cppad/core/var2par.hpp>
 
-#endif
+# endif

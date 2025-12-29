@@ -22,38 +22,49 @@ namespace cg {
  * Variable position which does not change from iteration to iteration
  */
 class LoopPosition {
-   public:
+public:
     size_t tape;
     size_t original;
 
-    inline LoopPosition()
-        : tape((std::numeric_limits<size_t>::max)()), original((std::numeric_limits<size_t>::max)()) {}
+    inline LoopPosition() :
+        tape((std::numeric_limits<size_t>::max)()),
+        original((std::numeric_limits<size_t>::max)()) {
+    }
 
     /**
      * @param t Index in the loop tape
      * @param o Index in the original tape
      */
-    inline LoopPosition(size_t t, size_t o) : tape(t), original(o) {}
+    inline LoopPosition(size_t t, size_t o) :
+        tape(t),
+        original(o) {
+    }
 };
 
 /**
  * Variable position which changes from iteration to iteration
  */
 class LoopIndexedPosition : public LoopPosition {
-   public:
+public:
     size_t iteration;
 
-    inline LoopIndexedPosition() : LoopPosition(), iteration(-1) {}
+    inline LoopIndexedPosition() :
+        LoopPosition(),
+        iteration(-1) {
+    }
 
     /**
      * @param t Index in the loop tape
      * @param o Index in the original tape
      * @param it Iteration index
      */
-    inline LoopIndexedPosition(size_t t, size_t o, size_t it) : LoopPosition(t, o), iteration(it) {}
+    inline LoopIndexedPosition(size_t t, size_t o, size_t it) :
+        LoopPosition(t, o),
+        iteration(it) {
+    }
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

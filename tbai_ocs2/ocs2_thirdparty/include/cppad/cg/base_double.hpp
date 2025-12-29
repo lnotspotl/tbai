@@ -22,16 +22,26 @@ namespace CppAD {
  */
 template <>
 class numeric_limits<cg::CG<double> > {
-   public:
-    static cg::CG<double> epsilon() { return std::numeric_limits<double>::epsilon(); }
+public:
 
-    static cg::CG<double> min() { return (std::numeric_limits<double>::min)(); }
+    static cg::CG<double> epsilon() {
+        return std::numeric_limits<double>::epsilon();
+    }
 
-    static cg::CG<double> max() { return (std::numeric_limits<double>::max)(); }
+    static cg::CG<double> min() {
+        return (std::numeric_limits<double>::min)();
+    }
 
-    static cg::CG<double> quiet_NaN() { return std::numeric_limits<double>::quiet_NaN(); }
+    static cg::CG<double> max() {
+        return (std::numeric_limits<double>::max)();
+    }
 
-    static const int digits10 = std::numeric_limits<double>::digits10;
+    static cg::CG<double> quiet_NaN() {
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+
+    static const int digits10 
+        = std::numeric_limits<double>::digits10;
 };
 
 /**
@@ -45,13 +55,15 @@ inline cg::CG<double> epsilon<cg::CG<double> >() {
 /**
  * Absolute Zero multiplication
  */
-inline cg::CG<double> azmul(const cg::CG<double> &x, const cg::CG<double> &y) {
+inline cg::CG<double> azmul(const cg::CG<double>& x, const cg::CG<double>& y) {
     cg::CG<double> zero(0.0);
-    if (x == zero) return zero;
+    if (x == zero)
+        return zero;
     return x * y;
 }
-// CPPAD_AZMUL( cg::CG<double> )
+//CPPAD_AZMUL( cg::CG<double> )
 
-}  // namespace CppAD
+} // END CppAD namespace
 
 #endif
+

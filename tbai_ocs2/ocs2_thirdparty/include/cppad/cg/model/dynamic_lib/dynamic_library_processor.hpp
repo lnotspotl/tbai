@@ -21,12 +21,12 @@ namespace cg {
 /**
  * Useful class for generating source code for the creation of a dynamic
  * library.
- *
+ * 
  * @author Joao Leal
  */
-template <class Base>
+template<class Base>
 class DynamicModelLibraryProcessor : public ModelLibraryProcessor<Base> {
-   protected:
+protected:
     /**
      * the path of the dynamic library to be created
      */
@@ -34,28 +34,33 @@ class DynamicModelLibraryProcessor : public ModelLibraryProcessor<Base> {
     /**
      * a custom extension for the dynamic library (e.g. ".so.1")
      */
-    const std::string *_customLibExtension;
+    const std::string* _customLibExtension;
     /**
      * System dependent custom options
      */
     std::map<std::string, std::string> _options;
+public:
 
-   public:
     /**
      * Creates a new helper class for the generation of dynamic libraries
      * using the C language.
      *
      * @param modelLibGen
-     * @param libraryName The path of the dynamic library to be created
+     * @param libraryName The path of the dynamic library to be created 
      *                    (without the extension)
      */
-    inline DynamicModelLibraryProcessor(ModelLibraryCSourceGen<Base> &modelLibGen,
-                                        const std::string &libraryName = "cppad_cg_model")
-        : ModelLibraryProcessor<Base>(modelLibGen), _libraryName(libraryName), _customLibExtension(nullptr) {}
+    inline DynamicModelLibraryProcessor(ModelLibraryCSourceGen<Base>& modelLibGen,
+                                        const std::string& libraryName = "cppad_cg_model") :
+        ModelLibraryProcessor<Base>(modelLibGen),
+        _libraryName(libraryName),
+        _customLibExtension(nullptr) {
+    }
 
-    inline const std::string &getLibraryName() const { return _libraryName; }
+    inline const std::string& getLibraryName() const {
+        return _libraryName;
+    }
 
-    inline void setLibraryName(const std::string &libraryName) {
+    inline void setLibraryName(const std::string& libraryName) {
         CPPADCG_ASSERT_KNOWN(!libraryName.empty(), "Library name cannot be empty");
 
         _libraryName = libraryName;
@@ -63,17 +68,19 @@ class DynamicModelLibraryProcessor : public ModelLibraryProcessor<Base> {
 
     /**
      * Provides a custom library extension defined by the user
-     *
+     * 
      * @return a custom library extension
      */
-    inline const std::string *getCustomLibraryExtension() const { return _customLibExtension; }
+    inline const std::string* getCustomLibraryExtension() const {
+        return _customLibExtension;
+    }
 
     /**
      * Defines a custom extension for the library that will be created
-     *
+     * 
      * @param libraryExtension the custom extension name
      */
-    inline void setCustomLibraryExtension(const std::string &libraryExtension) {
+    inline void setCustomLibraryExtension(const std::string& libraryExtension) {
         delete _customLibExtension;
         _customLibExtension = new std::string(libraryExtension);
     }
@@ -89,41 +96,46 @@ class DynamicModelLibraryProcessor : public ModelLibraryProcessor<Base> {
     /**
      * System dependent custom options
      */
-    inline std::map<std::string, std::string> &getOptions() { return _options; }
+    inline std::map<std::string, std::string>& getOptions() {
+        return _options;
+    }
 
     /**
      * System dependent custom options
      */
-    inline const std::map<std::string, std::string> &getOptions() const { return _options; }
+    inline const std::map<std::string, std::string>& getOptions() const {
+        return _options;
+    }
 
     /**
      * Compiles all models and generates a dynamic library.
-     *
+     * 
      * @param compiler The compiler used to compile the sources and create
      *                 the dynamic library
      * @param loadLib Whether or not to load the dynamic library
      * @return The dynamic library if loadLib is true, nullptr otherwise
      */
-    std::unique_ptr<DynamicLib<Base>> createDynamicLibrary(CCompiler<Base> &compiler, bool loadLib = true) {
+    std::unique_ptr<DynamicLib<Base>> createDynamicLibrary(CCompiler<Base>& compiler,
+                                                           bool loadLib = true) {
         // backup output format so that it can be restored
         OStreamConfigRestore coutb(std::cout);
 
         this->modelLibraryHelper_->startingJob("", JobTimer::DYNAMIC_MODEL_LIBRARY);
 
-        const std::map<std::string, ModelCSourceGen<Base> *> &models = this->modelLibraryHelper_->getModels();
+        const std::map<std::string, ModelCSourceGen<Base>*>& models = this->modelLibraryHelper_->getModels();
         try {
-            for (const auto &p : models) {
-                const std::map<std::string, std::string> &modelSources = this->getSources(*p.second);
+            for (const auto& p : models) {
+                const std::map<std::string, std::string>& modelSources = this->getSources(*p.second);
 
                 this->modelLibraryHelper_->startingJob("", JobTimer::COMPILING_FOR_MODEL);
                 compiler.compileSources(modelSources, true, this->modelLibraryHelper_);
                 this->modelLibraryHelper_->finishedJob();
             }
 
-            const std::map<std::string, std::string> &sources = this->getLibrarySources();
+            const std::map<std::string, std::string>& sources = this->getLibrarySources();
             compiler.compileSources(sources, true, this->modelLibraryHelper_);
 
-            const std::map<std::string, std::string> &customSource = this->modelLibraryHelper_->getCustomSources();
+            const std::map<std::string, std::string>& customSource = this->modelLibraryHelper_->getCustomSources();
             compiler.compileSources(customSource, true, this->modelLibraryHelper_);
 
             std::string libname = _libraryName;
@@ -150,35 +162,37 @@ class DynamicModelLibraryProcessor : public ModelLibraryProcessor<Base> {
 
     /**
      * Compiles all models and generates a static library.
-     *
+     * 
      * @param compiler The compiler used to compile the sources
      * @param ar The archiver used to assemble the compiled source into a
      *           static library
-     * @param posIndepCode Whether or not to compile the source
-     *                     with position independent code (static libraries
+     * @param posIndepCode Whether or not to compile the source 
+     *                     with position independent code (static libraries 
      *                     typically do not use this feature)
      */
 
-    void createStaticLibrary(CCompiler<Base> &compiler, Archiver &ar, bool posIndepCode) {
+    void createStaticLibrary(CCompiler<Base>& compiler,
+                             Archiver& ar,
+                             bool posIndepCode) {
         // backup output format so that it can be restored
         OStreamConfigRestore coutb(std::cout);
 
         this->modelLibraryHelper_->startingJob("", JobTimer::STATIC_MODEL_LIBRARY);
 
-        const std::map<std::string, ModelCSourceGen<Base> *> &models = this->modelLibraryHelper_->getModels();
+        const std::map<std::string, ModelCSourceGen<Base>*>& models = this->modelLibraryHelper_->getModels();
         try {
-            for (const auto &p : models) {
-                const std::map<std::string, std::string> &modelSources = this->getSources(*p.second);
+            for (const auto& p : models) {
+                const std::map<std::string, std::string>& modelSources = this->getSources(*p.second);
 
                 this->modelLibraryHelper_->startingJob("", JobTimer::COMPILING_FOR_MODEL);
                 compiler.compileSources(modelSources, posIndepCode, this->modelLibraryHelper_);
                 this->modelLibraryHelper_->finishedJob();
             }
 
-            const std::map<std::string, std::string> &sources = this->getLibrarySources();
+            const std::map<std::string, std::string>& sources = this->getLibrarySources();
             compiler.compileSources(sources, posIndepCode, this->modelLibraryHelper_);
 
-            const std::map<std::string, std::string> &customSource = this->modelLibraryHelper_->getCustomSources();
+            const std::map<std::string, std::string>& customSource = this->modelLibraryHelper_->getCustomSources();
             compiler.compileSources(customSource, posIndepCode, this->modelLibraryHelper_);
 
             std::string libname = _libraryName;
@@ -197,13 +211,17 @@ class DynamicModelLibraryProcessor : public ModelLibraryProcessor<Base> {
         this->modelLibraryHelper_->finishedJob();
     }
 
-    virtual ~DynamicModelLibraryProcessor() { delete _customLibExtension; }
+    virtual ~DynamicModelLibraryProcessor() {
+        delete _customLibExtension;
+    }
 
-   protected:
+protected:
+
     virtual std::unique_ptr<DynamicLib<Base>> loadDynamicLibrary();
+
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

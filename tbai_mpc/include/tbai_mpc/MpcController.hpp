@@ -30,10 +30,11 @@ class MpcController : public tbai::Controller {
    public:
     /**
      * Constructor
+     * @param robotName: Robot name
      * @param stateSubscriberPtr: State subscriber for getting robot state
      * @param velocityGeneratorPtr: Reference velocity generator
      */
-    MpcController(const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
+    MpcController(const std::string &robotName, const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
                   std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> velocityGeneratorPtr);
 
     virtual ~MpcController() = default;
@@ -117,6 +118,8 @@ class MpcController : public tbai::Controller {
     bool isStable_ = true;
 
     State state_;
+
+    std::string robotName_;
 
     std::shared_ptr<spdlog::logger> logger_;
 

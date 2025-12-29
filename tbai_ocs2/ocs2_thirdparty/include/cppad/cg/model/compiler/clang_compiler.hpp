@@ -24,32 +24,34 @@ namespace cg {
  *
  * @author Joao Leal
  */
-template <class Base>
+template<class Base>
 class ClangCompiler : public AbstractCCompiler<Base> {
-   protected:
-    std::set<std::string> _bcfiles;  // bitcode files
+protected:
+    std::set<std::string> _bcfiles; // bitcode files
     std::string _version;
+public:
 
-   public:
-    ClangCompiler(const std::string &clangPath = "/usr/bin/clang") : AbstractCCompiler<Base>(clangPath) {
-        this->_compileFlags.push_back("-O2");           // Optimization level
-        this->_compileLibFlags.push_back("-O2");        // Optimization level
-        this->_compileLibFlags.push_back("-shared");    // Make shared object
-        this->_compileLibFlags.push_back("-rdynamic");  // add all symbols to the dynamic symbol table
+    ClangCompiler(const std::string& clangPath = "/usr/bin/clang") :
+        AbstractCCompiler<Base>(clangPath) {
+
+        this->_compileFlags.push_back("-O2"); // Optimization level
+        this->_compileLibFlags.push_back("-O2"); // Optimization level
+        this->_compileLibFlags.push_back("-shared"); // Make shared object
+        this->_compileLibFlags.push_back("-rdynamic"); // add all symbols to the dynamic symbol table
     }
 
-    ClangCompiler(const ClangCompiler &orig) = delete;
-    ClangCompiler &operator=(const ClangCompiler &rhs) = delete;
+    ClangCompiler(const ClangCompiler& orig) = delete;
+    ClangCompiler& operator=(const ClangCompiler& rhs) = delete;
 
-    const std::string &getVersion() {
-        if (_version.empty()) {
-            std::vector<std::string> args{"--version"};
+    const std::string& getVersion() {
+        if(_version.empty()) {
+            std::vector<std::string> args {"--version"};
             std::string output;
             system::callExecutable(this->_path, args, &output);
 
             std::string vv = "version ";
             size_t is = output.find(vv);
-            if (is == std::string::npos) {
+            if(is == std::string::npos) {
                 throw CGException("Failed to determine Clang version");
             }
             is += vv.size();
@@ -63,9 +65,12 @@ class ClangCompiler : public AbstractCCompiler<Base> {
         return _version;
     }
 
-    virtual const std::set<std::string> &getBitCodeFiles() const { return _bcfiles; }
+    virtual const std::set<std::string>& getBitCodeFiles() const {
+        return _bcfiles;
+    }
 
-    virtual void generateLLVMBitCode(const std::map<std::string, std::string> &sources, JobTimer *timer = nullptr) {
+    virtual void generateLLVMBitCode(const std::map<std::string, std::string>& sources,
+                                     JobTimer* timer = nullptr) {
         bool posIndepCode = false;
         this->_compileFlags.push_back("-emit-llvm");
         try {
@@ -81,22 +86,25 @@ class ClangCompiler : public AbstractCCompiler<Base> {
      *
      * @param library the path to the dynamic library to be created
      */
-    void buildDynamic(const std::string &library, JobTimer *timer = nullptr) override {
+    void buildDynamic(const std::string& library,
+                      JobTimer* timer = nullptr) override {
+
 #if CPPAD_CG_SYSTEM_APPLE
         std::string linkerName = "-install_name";
 #elif CPPAD_CG_SYSTEM_LINUX
         std::string linkerName = "-soname";
 #endif
         std::string linkerFlags = "-Wl," + linkerName + "," + system::filenameFromPath(library);
-        for (size_t i = 0; i < this->_linkFlags.size(); i++) linkerFlags += "," + this->_linkFlags[i];
+        for (size_t i = 0; i < this->_linkFlags.size(); i++)
+            linkerFlags += "," + this->_linkFlags[i];
 
         std::vector<std::string> args;
         args.insert(args.end(), this->_compileLibFlags.begin(), this->_compileLibFlags.end());
-        args.push_back(linkerFlags);  // Pass suitable options to linker
-        args.push_back("-o");         // Output file name
-        args.push_back(library);      // Output file name
+        args.push_back(linkerFlags); // Pass suitable options to linker
+        args.push_back("-o"); // Output file name
+        args.push_back(library); // Output file name
 
-        for (const std::string &it : this->_ofiles) {
+        for (const std::string& it : this->_ofiles) {
             args.push_back(it);
         }
 
@@ -115,8 +123,9 @@ class ClangCompiler : public AbstractCCompiler<Base> {
 
     void cleanup() override {
         // clean up
-        for (const std::string &it : _bcfiles) {
-            if (remove(it.c_str()) != 0) std::cerr << "Failed to delete temporary file '" << it << "'" << std::endl;
+        for (const std::string& it : _bcfiles) {
+            if (remove(it.c_str()) != 0)
+                std::cerr << "Failed to delete temporary file '" << it << "'" << std::endl;
         }
         _bcfiles.clear();
 
@@ -124,9 +133,11 @@ class ClangCompiler : public AbstractCCompiler<Base> {
         AbstractCCompiler<Base>::cleanup();
     }
 
-    virtual ~ClangCompiler() { cleanup(); }
+    virtual ~ClangCompiler() {
+        cleanup();
+    }
 
-    static std::vector<std::string> parseVersion(const std::string &version) {
+    static std::vector<std::string> parseVersion(const std::string& version) {
         auto vv = explode(version, ".");
         if (vv.size() > 2) {
             auto vv2 = explode(vv[2], "-");
@@ -138,7 +149,8 @@ class ClangCompiler : public AbstractCCompiler<Base> {
         return vv;
     }
 
-   protected:
+protected:
+
     /**
      * Compiles a single source file into an output file
      * (e.g. object file or bit code file)
@@ -146,15 +158,17 @@ class ClangCompiler : public AbstractCCompiler<Base> {
      * @param source the content of the source file
      * @param output the compiled output file name (the object file path)
      */
-    void compileSource(const std::string &source, const std::string &output, bool posIndepCode) override {
+    void compileSource(const std::string& source,
+                       const std::string& output,
+                       bool posIndepCode) override {
         std::vector<std::string> args;
         args.push_back("-x");
-        args.push_back("c");  // C source files
+        args.push_back("c"); // C source files
         args.insert(args.end(), this->_compileFlags.begin(), this->_compileFlags.end());
         args.push_back("-c");
         args.push_back("-");
         if (posIndepCode) {
-            args.push_back("-fPIC");  // position-independent code for dynamic linking
+            args.push_back("-fPIC"); // position-independent code for dynamic linking
         }
         args.push_back("-o");
         args.push_back(output);
@@ -162,13 +176,15 @@ class ClangCompiler : public AbstractCCompiler<Base> {
         system::callExecutable(this->_path, args, nullptr, &source);
     }
 
-    void compileFile(const std::string &path, const std::string &output, bool posIndepCode) override {
+    void compileFile(const std::string& path,
+                     const std::string& output,
+                     bool posIndepCode) override {
         std::vector<std::string> args;
         args.push_back("-x");
-        args.push_back("c");  // C source files
+        args.push_back("c"); // C source files
         args.insert(args.end(), this->_compileFlags.begin(), this->_compileFlags.end());
         if (posIndepCode) {
-            args.push_back("-fPIC");  // position-independent code for dynamic linking
+            args.push_back("-fPIC"); // position-independent code for dynamic linking
         }
         args.push_back("-c");
         args.push_back(path);
@@ -177,9 +193,10 @@ class ClangCompiler : public AbstractCCompiler<Base> {
 
         system::callExecutable(this->_path, args);
     }
+
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

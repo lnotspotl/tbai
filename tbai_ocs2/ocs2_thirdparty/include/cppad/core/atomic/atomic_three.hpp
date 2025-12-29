@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_ATOMIC_ATOMIC_THREE_HPP
-#define CPPAD_CORE_ATOMIC_ATOMIC_THREE_HPP
+# ifndef CPPAD_CORE_ATOMIC_ATOMIC_THREE_HPP
+# define CPPAD_CORE_ATOMIC_ATOMIC_THREE_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -193,15 +193,14 @@ $end
 -------------------------------------------------------------------------------
 */
 
-#include <set>
-
-#include <cppad/core/cppad_assert.hpp>
-#include <cppad/local/atomic_index.hpp>
+# include <set>
+# include <cppad/core/cppad_assert.hpp>
+# include <cppad/local/atomic_index.hpp>
 
 // needed before one can use in_parallel
-#include <cppad/utility/thread_alloc.hpp>
+# include <cppad/utility/thread_alloc.hpp>
 
-namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
+namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 /*!
 \file atomic_three.hpp
 Base class for atomic function operations.
@@ -209,8 +208,8 @@ Base class for atomic function operations.
 
 template <class Base>
 class atomic_three {
-    // ===================================================================
-   private:
+// ===================================================================
+private:
     // ------------------------------------------------------
     // constants
     //
@@ -223,23 +222,23 @@ class atomic_three {
     /// temporary work space used by member functions, declared here to avoid
     // memory allocation/deallocation for each usage
     struct work_struct {
-        vector<ad_type_enum> type_x;
-        vector<ad_type_enum> type_y;
+        vector<ad_type_enum>        type_x;
+        vector<ad_type_enum>        type_y;
         //
-        vector<Base> taylor_x;
-        vector<Base> taylor_y;
+        vector<Base>                taylor_x;
+        vector<Base>                taylor_y;
         //
-        vector<AD<Base> > ataylor_x;
-        vector<AD<Base> > ataylor_y;
+        vector< AD<Base> >          ataylor_x;
+        vector< AD<Base> >          ataylor_y;
         //
-        sparse_rc<vector<size_t> > pattern;
+        sparse_rc< vector<size_t> > pattern;
     };
     // Use pointers, to avoid false sharing between threads.
     // Not using: vector<work_struct*> work_;
     // so that deprecated atomic examples do not result in a memory leak.
-    work_struct *work_[CPPAD_MAX_NUM_THREADS];
+    work_struct* work_[CPPAD_MAX_NUM_THREADS];
     // -----------------------------------------------------
-   public:
+public:
     // =====================================================================
     // In User API
     // =====================================================================
@@ -247,132 +246,203 @@ class atomic_three {
     // ---------------------------------------------------------------------
     // ctor: doxygen in atomic/three_ctor.hpp
     atomic_three(void);
-    atomic_three(const std::string &name);
+    atomic_three(const std::string& name);
 
     // ------------------------------------------------------------------------
     // operator(): see doxygen in atomic_three/afun.hpp
     template <class ADVector>
-    void operator()(const ADVector &ax, ADVector &ay);
+    void operator()(
+        const ADVector&  ax     ,
+              ADVector&  ay
+    );
     // ------------------------------------------------------------------------
     // type: doxygen in atomic/three_for_type.hpp
-    virtual bool for_type(const vector<Base> &parameter_x, const vector<ad_type_enum> &type_x,
-                          vector<ad_type_enum> &type_y);
+    virtual bool for_type(
+        const vector<Base>&          parameter_x ,
+        const vector<ad_type_enum>&  type_x      ,
+        vector<ad_type_enum>&        type_y
+    );
     // ------------------------------------------------------------------------
     // type: doxygen in atomic/three_rev_depend.hpp
-    virtual bool rev_depend(const vector<Base> &parameter_x, const vector<ad_type_enum> &type_x, vector<bool> &depend_x,
-                            const vector<bool> &depend_y);
+    virtual bool rev_depend(
+        const vector<Base>&          parameter_x ,
+        const vector<ad_type_enum>&  type_x      ,
+        vector<bool>&                depend_x    ,
+        const vector<bool>&          depend_y
+    );
     // ------------------------------------------------------------------------
     // forward: see docygen in atomic/three_forward.hpp
-    virtual bool forward(const vector<Base> &parameter_x, const vector<ad_type_enum> &type_x, size_t need_y,
-                         size_t order_low, size_t order_up, const vector<Base> &taylor_x, vector<Base> &taylor_y);
-    virtual bool forward(const vector<AD<Base> > &aparameter_x, const vector<ad_type_enum> &type_x, size_t need_y,
-                         size_t order_low, size_t order_up, const vector<AD<Base> > &ataylor_x,
-                         vector<AD<Base> > &ataylor_y);
+    virtual bool forward(
+        const vector<Base>&          parameter_x ,
+        const vector<ad_type_enum>&  type_x      ,
+        size_t                       need_y      ,
+        size_t                       order_low   ,
+        size_t                       order_up    ,
+        const vector<Base>&          taylor_x    ,
+        vector<Base>&                taylor_y
+    );
+    virtual bool forward(
+        const vector< AD<Base> >&    aparameter_x ,
+        const vector<ad_type_enum>&  type_x       ,
+        size_t                       need_y       ,
+        size_t                       order_low    ,
+        size_t                       order_up     ,
+        const vector< AD<Base> >&    ataylor_x    ,
+        vector< AD<Base> >&          ataylor_y
+    );
     // ------------------------------------------------------------------------
     // reverse: see docygen in atomic/three_reverse.hpp
-    virtual bool reverse(const vector<Base> &parameter_x, const vector<ad_type_enum> &type_x, size_t order_up,
-                         const vector<Base> &taylor_x, const vector<Base> &taylor_y, vector<Base> &partial_x,
-                         const vector<Base> &partial_y);
-    virtual bool reverse(const vector<AD<Base> > &aparameter_x, const vector<ad_type_enum> &type_x, size_t order_up,
-                         const vector<AD<Base> > &ataylor_x, const vector<AD<Base> > &ataylor_y,
-                         vector<AD<Base> > &apartial_x, const vector<AD<Base> > &apartial_y);
+    virtual bool reverse(
+        const vector<Base>&          parameter_x ,
+        const vector<ad_type_enum>&  type_x      ,
+        size_t                       order_up    ,
+        const vector<Base>&          taylor_x    ,
+        const vector<Base>&          taylor_y    ,
+        vector<Base>&                partial_x   ,
+        const vector<Base>&          partial_y
+    );
+    virtual bool reverse(
+        const vector< AD<Base> >&    aparameter_x ,
+        const vector<ad_type_enum>&  type_x       ,
+        size_t                       order_up    ,
+        const vector< AD<Base> >&    ataylor_x   ,
+        const vector< AD<Base> >&    ataylor_y   ,
+        vector< AD<Base> >&          apartial_x  ,
+        const vector< AD<Base> >&    apartial_y
+    );
     // ------------------------------------------------------------
     // jac_sparsity: see doxygen in atomic/three_jac_sparsity.hpp
-    virtual bool jac_sparsity(const vector<Base> &parameter_x, const vector<ad_type_enum> &type_x, bool dependency,
-                              const vector<bool> &select_x, const vector<bool> &select_y,
-                              sparse_rc<vector<size_t> > &pattern_out);
+    virtual bool jac_sparsity(
+        const vector<Base>&          parameter_x ,
+        const vector<ad_type_enum>&  type_x      ,
+        bool                         dependency  ,
+        const vector<bool>&          select_x    ,
+        const vector<bool>&          select_y    ,
+        sparse_rc< vector<size_t> >& pattern_out
+    );
     template <class InternalSparsity>
-    bool for_jac_sparsity(bool dependency, const vector<Base> &parameter_x, const vector<ad_type_enum> &type_x,
-                          const local::pod_vector<size_t> &x_index, const local::pod_vector<size_t> &y_index,
-                          InternalSparsity &var_sparsity);
+    bool for_jac_sparsity(
+        bool                             dependency   ,
+        const vector<Base>&              parameter_x  ,
+        const vector<ad_type_enum>&      type_x       ,
+        const local::pod_vector<size_t>& x_index      ,
+        const local::pod_vector<size_t>& y_index      ,
+        InternalSparsity&                var_sparsity
+    );
     template <class InternalSparsity>
-    bool rev_jac_sparsity(bool dependency, const vector<Base> &parameter_x, const vector<ad_type_enum> &type_x,
-                          const local::pod_vector<size_t> &x_index, const local::pod_vector<size_t> &y_index,
-                          InternalSparsity &var_sparsity);
+    bool rev_jac_sparsity(
+        bool                             dependency   ,
+        const vector<Base>&              parameter_x  ,
+        const vector<ad_type_enum>&      type_x       ,
+        const local::pod_vector<size_t>& x_index      ,
+        const local::pod_vector<size_t>& y_index      ,
+        InternalSparsity&                var_sparsity
+    );
     // ------------------------------------------------------------
     // hes_sparsity: see doxygen in atomic/three_jac_sparsity.hpp
-    virtual bool hes_sparsity(const vector<Base> &parameter_x, const vector<ad_type_enum> &type_x,
-                              const vector<bool> &select_x, const vector<bool> &select_y,
-                              sparse_rc<vector<size_t> > &pattern_out);
+    virtual bool hes_sparsity(
+        const vector<Base>&                     parameter_x  ,
+        const vector<ad_type_enum>&             type_x       ,
+        const vector<bool>&                     select_x     ,
+        const vector<bool>&                     select_y     ,
+        sparse_rc< vector<size_t> >&            pattern_out
+    );
     template <class InternalSparsity>
-    bool for_hes_sparsity(const vector<Base> &parameter_x, const vector<ad_type_enum> &type_x,
-                          const local::pod_vector<size_t> &x_index, const local::pod_vector<size_t> &y_index,
-                          const InternalSparsity &for_jac_sparsity, const InternalSparsity &rev_jac_sparsity,
-                          InternalSparsity &hes_sparsity);
+    bool for_hes_sparsity(
+        const vector<Base>&              parameter_x      ,
+        const vector<ad_type_enum>&      type_x       ,
+        const local::pod_vector<size_t>& x_index          ,
+        const local::pod_vector<size_t>& y_index          ,
+        const InternalSparsity&          for_jac_sparsity ,
+        const InternalSparsity&          rev_jac_sparsity ,
+        InternalSparsity&                hes_sparsity
+    );
     template <class InternalSparsity>
-    bool rev_hes_sparsity(const vector<Base> &parameter_x, const vector<ad_type_enum> &type_x,
-                          const local::pod_vector<size_t> &x_index, const local::pod_vector<size_t> &y_index,
-                          const InternalSparsity &for_jac_sparsity, bool *rev_jac_flag, InternalSparsity &hes_sparsity);
+    bool rev_hes_sparsity(
+        const vector<Base>&              parameter_x      ,
+        const vector<ad_type_enum>&      type_x           ,
+        const local::pod_vector<size_t>& x_index          ,
+        const local::pod_vector<size_t>& y_index          ,
+        const InternalSparsity&          for_jac_sparsity ,
+        bool*                            rev_jac_flag     ,
+        InternalSparsity&                hes_sparsity
+    );
 
     // =====================================================================
     // Not in User API
     // =====================================================================
 
     /// Name corresponding to a atomic_three object
-    const std::string afun_name(void) const {
-        bool set_null = false;
-        size_t type = 0;  // set to avoid warning
+    const std::string afun_name(void) const
+    {   bool        set_null = false;
+        size_t      type  = 0;          // set to avoid warning
         std::string name;
-        void *v_ptr = CPPAD_NULL;  // set to avoid warning
+        void*       v_ptr = CPPAD_NULL; // set to avoid warning
         local::atomic_index<Base>(set_null, index_, type, &name, v_ptr);
-        CPPAD_ASSERT_UNKNOWN(type == 3);
+        CPPAD_ASSERT_UNKNOWN( type == 3 );
         return name;
     }
     /// destructor informs CppAD that this atomic function with this index
     /// has dropped out of scope by setting its pointer to null
-    virtual ~atomic_three(void) {  // change object pointer to null, but leave name for error reporting
-        bool set_null = true;
-        size_t type = 0;  // set to avoid warning
-        std::string *name = CPPAD_NULL;
-        void *v_ptr = CPPAD_NULL;  // set to avoid warning
+    virtual ~atomic_three(void)
+    {   // change object pointer to null, but leave name for error reporting
+        bool         set_null = true;
+        size_t       type  = 0;          // set to avoid warning
+        std::string* name  = CPPAD_NULL;
+        void*        v_ptr = CPPAD_NULL; // set to avoid warning
         local::atomic_index<Base>(set_null, index_, type, name, v_ptr);
-        CPPAD_ASSERT_UNKNOWN(type == 3);
+        CPPAD_ASSERT_UNKNOWN( type == 3 );
         //
         // free temporary work memory
-        for (size_t thread = 0; thread < CPPAD_MAX_NUM_THREADS; thread++) free_work(thread);
+        for(size_t thread = 0; thread < CPPAD_MAX_NUM_THREADS; thread++)
+            free_work(thread);
     }
     /// allocates work_ for a specified thread
-    void allocate_work(size_t thread) {
-        if (work_[thread] == CPPAD_NULL) {  // allocate the raw memory
+    void allocate_work(size_t thread)
+    {   if( work_[thread] == CPPAD_NULL )
+        {   // allocate the raw memory
             size_t min_bytes = sizeof(work_struct);
             size_t num_bytes;
-            void *v_ptr = thread_alloc::get_memory(min_bytes, num_bytes);
+            void*  v_ptr     = thread_alloc::get_memory(min_bytes, num_bytes);
             // save in work_
-            work_[thread] = reinterpret_cast<work_struct *>(v_ptr);
+            work_[thread]    = reinterpret_cast<work_struct*>( v_ptr );
             // call constructor
-            new (work_[thread]) work_struct;
+            new( work_[thread] ) work_struct;
         }
         return;
     }
     /// frees work_ for a specified thread
-    void free_work(size_t thread) {
-        if (work_[thread] != CPPAD_NULL) {  // call destructor
+    void free_work(size_t thread)
+    {   if( work_[thread] != CPPAD_NULL )
+        {   // call destructor
             work_[thread]->~work_struct();
             // return memory to avialable pool for this thread
-            thread_alloc::return_memory(reinterpret_cast<void *>(work_[thread]));
+            thread_alloc::return_memory(
+                reinterpret_cast<void*>(work_[thread])
+            );
             // mark this thread as not allocated
             work_[thread] = CPPAD_NULL;
         }
         return;
     }
     /// atomic_three function object corresponding to a certain index
-    static atomic_three *class_object(size_t index) {
-        bool set_null = false;
-        size_t type = 0;  // set to avoid warning
-        std::string *name = CPPAD_NULL;
-        void *v_ptr = CPPAD_NULL;  // set to avoid warning
+    static atomic_three* class_object(size_t index)
+    {   bool         set_null = false;
+        size_t       type  = 0;          // set to avoid warning
+        std::string* name  = CPPAD_NULL;
+        void*        v_ptr = CPPAD_NULL; // set to avoid warning
         local::atomic_index<Base>(set_null, index, type, name, v_ptr);
-        CPPAD_ASSERT_UNKNOWN(type == 3);
-        return reinterpret_cast<atomic_three *>(v_ptr);
+        CPPAD_ASSERT_UNKNOWN( type == 3 );
+        return reinterpret_cast<atomic_three*>( v_ptr );
     }
     /// atomic_three function name corresponding to a certain index
-    static const std::string class_name(size_t index) {
-        bool set_null = false;
-        size_t type = 0;  // set to avoid warning
+    static const std::string class_name(size_t index)
+    {   bool        set_null = false;
+        size_t      type  = 0;          // set to avoid warning
         std::string name;
-        void *v_ptr = CPPAD_NULL;  // set to avoid warning
+        void*       v_ptr = CPPAD_NULL; // set to avoid warning
         local::atomic_index<Base>(set_null, index, type, &name, v_ptr);
-        CPPAD_ASSERT_UNKNOWN(type == 3);
+        CPPAD_ASSERT_UNKNOWN( type == 3 );
         return name;
     }
 
@@ -382,19 +452,20 @@ class atomic_three {
     This function is called just before calling any of the virtual function
     and has the corresponding id of the corresponding virtual call.
     */
-    virtual void set_old(size_t id) {}
-    // ---------------------------------------------------------------------------
+    virtual void set_old(size_t id)
+    { }
+// ---------------------------------------------------------------------------
 };
-}  // namespace CppAD
+} // END_CPPAD_NAMESPACE
 
 // member functions
-#include <cppad/core/atomic/three_afun.hpp>
-#include <cppad/core/atomic/three_ctor.hpp>
-#include <cppad/core/atomic/three_for_type.hpp>
-#include <cppad/core/atomic/three_forward.hpp>
-#include <cppad/core/atomic/three_hes_sparsity.hpp>
-#include <cppad/core/atomic/three_jac_sparsity.hpp>
-#include <cppad/core/atomic/three_rev_depend.hpp>
-#include <cppad/core/atomic/three_reverse.hpp>
+# include <cppad/core/atomic/three_ctor.hpp>
+# include <cppad/core/atomic/three_afun.hpp>
+# include <cppad/core/atomic/three_for_type.hpp>
+# include <cppad/core/atomic/three_rev_depend.hpp>
+# include <cppad/core/atomic/three_forward.hpp>
+# include <cppad/core/atomic/three_reverse.hpp>
+# include <cppad/core/atomic/three_jac_sparsity.hpp>
+# include <cppad/core/atomic/three_hes_sparsity.hpp>
 
-#endif
+# endif

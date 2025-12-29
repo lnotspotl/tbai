@@ -1,5 +1,5 @@
-#ifndef CPPAD_UTILITY_INDEX_SORT_HPP
-#define CPPAD_UTILITY_INDEX_SORT_HPP
+# ifndef CPPAD_UTILITY_INDEX_SORT_HPP
+# define CPPAD_UTILITY_INDEX_SORT_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -74,13 +74,12 @@ It return true if it succeeds and false otherwise.
 
 $end
 */
-#include <algorithm>
+# include <algorithm>
+# include <cppad/utility/thread_alloc.hpp>
+# include <cppad/utility/check_simple_vector.hpp>
+# include <cppad/local/define.hpp>
 
-#include <cppad/local/define.hpp>
-#include <cppad/utility/check_simple_vector.hpp>
-#include <cppad/utility/thread_alloc.hpp>
-
-namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
+namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 /*!
 \file index_sort.hpp
 File used to implement the CppAD index sort utility
@@ -91,23 +90,27 @@ Helper class used by index_sort
 */
 template <class Compare>
 class index_sort_element {
-   private:
+private:
     /// key used to determine position of this element
     Compare key_;
     /// index vlaue corresponding to this key
-    size_t index_;
-
-   public:
+    size_t  index_;
+public:
     /// operator requried by std::sort
-    bool operator<(const index_sort_element &other) const { return key_ < other.key_; }
+    bool operator<(const index_sort_element& other) const
+    {   return key_ < other.key_; }
     /// set the key for this element
-    void set_key(const Compare &value) { key_ = value; }
+    void set_key(const Compare& value)
+    {   key_ = value; }
     /// set the index for this element
-    void set_index(const size_t &index) { index_ = index; }
+    void set_index(const size_t& index)
+    {   index_ = index; }
     /// get the key for this element
-    Compare get_key(void) const { return key_; }
+    Compare get_key(void) const
+    {   return key_; }
     /// get the index for this element
-    size_t get_index(void) const { return index_; }
+    size_t get_index(void) const
+    {   return index_; }
 };
 
 /*!
@@ -133,30 +136,35 @@ The output value of its elements satisfy
 \endcode
 */
 template <class KeyVector, class SizeVector>
-void index_sort(const KeyVector &keys, SizeVector &ind) {
-    typedef typename KeyVector::value_type Compare;
+void index_sort(const KeyVector& keys, SizeVector& ind)
+{   typedef typename KeyVector::value_type Compare;
     CheckSimpleVector<size_t, SizeVector>();
 
     typedef index_sort_element<Compare> element;
 
-    CPPAD_ASSERT_KNOWN(size_t(keys.size()) == size_t(ind.size()), "index_sort: vector sizes do not match");
+    CPPAD_ASSERT_KNOWN(
+        size_t(keys.size()) == size_t(ind.size()),
+        "index_sort: vector sizes do not match"
+    );
 
     size_t size_work = size_t(keys.size());
     size_t size_out;
-    element *work = thread_alloc::create_array<element>(size_work, size_out);
+    element* work =
+        thread_alloc::create_array<element>(size_work, size_out);
 
     // copy initial order into work
     size_t i;
-    for (i = 0; i < size_work; i++) {
-        work[i].set_key(keys[i]);
-        work[i].set_index(i);
+    for(i = 0; i < size_work; i++)
+    {   work[i].set_key( keys[i] );
+        work[i].set_index( i );
     }
 
     // sort the work array
-    std::sort(work, work + size_work);
+    std::sort(work, work+size_work);
 
     // copy the indices to the output vector
-    for (i = 0; i < size_work; i++) ind[i] = work[i].get_index();
+    for(i = 0; i < size_work; i++)
+        ind[i] = work[i].get_index();
 
     // we are done with this work array
     thread_alloc::delete_array(work);
@@ -164,6 +172,6 @@ void index_sort(const KeyVector &keys, SizeVector &ind) {
     return;
 }
 
-}  // namespace CppAD
+} // END_CPPAD_NAMESPACE
 
-#endif
+# endif

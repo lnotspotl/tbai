@@ -1,5 +1,4 @@
-const char CPPADCG_PTHREAD_POOL_C_FILE[] =
-    R"*=*(/* --------------------------------------------------------------------------
+const char CPPADCG_PTHREAD_POOL_C_FILE[] = R"*=*(/* --------------------------------------------------------------------------
  *  CppADCodeGen: C++ Algorithmic Differentiation with Source Code Generation:
  *    Copyright (C) 2016 Ciengis
  *
@@ -1420,3 +1419,4 @@ static void bsem_wait(BSem* bsem) {
 )*=*";
 
 const size_t CPPADCG_PTHREAD_POOL_C_FILE_SIZE = 43345;
+

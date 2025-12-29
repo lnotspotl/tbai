@@ -1,5 +1,5 @@
-#ifndef CPPAD_UTILITY_ODE_ERR_CONTROL_HPP
-#define CPPAD_UTILITY_ODE_ERR_CONTROL_HPP
+# ifndef CPPAD_UTILITY_ODE_ERR_CONTROL_HPP
+# define CPPAD_UTILITY_ODE_ERR_CONTROL_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -410,31 +410,55 @@ $end
 */
 
 // link exp and log for float and double
-#include <cppad/base_require.hpp>
-#include <cppad/core/cppad_assert.hpp>
-#include <cppad/utility/check_simple_vector.hpp>
-#include <cppad/utility/nan.hpp>
+# include <cppad/base_require.hpp>
 
-namespace CppAD {  // Begin CppAD namespace
+# include <cppad/core/cppad_assert.hpp>
+# include <cppad/utility/check_simple_vector.hpp>
+# include <cppad/utility/nan.hpp>
+
+namespace CppAD { // Begin CppAD namespace
 
 template <class Scalar, class Vector, class Method>
-Vector OdeErrControl(Method &method, const Scalar &ti, const Scalar &tf, const Vector &xi, const Scalar &smin,
-                     const Scalar &smax, Scalar &scur, const Vector &eabs, const Scalar &erel, Vector &ef,
-                     Vector &maxabs, size_t &nstep) {
+Vector OdeErrControl(
+    Method          &method,
+    const Scalar    &ti    ,
+    const Scalar    &tf    ,
+    const Vector    &xi    ,
+    const Scalar    &smin  ,
+    const Scalar    &smax  ,
+    Scalar          &scur  ,
+    const Vector    &eabs  ,
+    const Scalar    &erel  ,
+    Vector          &ef    ,
+    Vector          &maxabs,
+    size_t          &nstep )
+{
     // check simple vector class specifications
     CheckSimpleVector<Scalar, Vector>();
 
     size_t n = size_t(xi.size());
 
-    CPPAD_ASSERT_KNOWN(smin <= smax, "Error in OdeErrControl: smin > smax");
-    CPPAD_ASSERT_KNOWN(size_t(eabs.size()) == n, "Error in OdeErrControl: size of eabs is not equal to n");
-    CPPAD_ASSERT_KNOWN(size_t(maxabs.size()) == n, "Error in OdeErrControl: size of maxabs is not equal to n");
+    CPPAD_ASSERT_KNOWN(
+        smin <= smax,
+        "Error in OdeErrControl: smin > smax"
+    );
+    CPPAD_ASSERT_KNOWN(
+        size_t(eabs.size()) == n,
+        "Error in OdeErrControl: size of eabs is not equal to n"
+    );
+    CPPAD_ASSERT_KNOWN(
+        size_t(maxabs.size()) == n,
+        "Error in OdeErrControl: size of maxabs is not equal to n"
+    );
     size_t m = method.order();
-    CPPAD_ASSERT_KNOWN(m > 1, "Error in OdeErrControl: m is less than or equal one");
+    CPPAD_ASSERT_KNOWN(
+        m > 1,
+        "Error in OdeErrControl: m is less than or equal one"
+    );
 
-    bool ok;
-    bool minimum_step;
-    size_t i;
+    bool    ok;
+    bool    minimum_step;
+    size_t  i;
     Vector xa(n), xb(n), eb(n), nan_vec(n);
 
     // initialization
@@ -442,32 +466,36 @@ Vector OdeErrControl(Method &method, const Scalar &ti, const Scalar &tf, const V
     Scalar one(1.0);
     Scalar two(2.0);
     Scalar three(3.0);
-    Scalar m1(double(m - 1));
+    Scalar m1(double(m-1));
     Scalar ta = ti;
-    for (i = 0; i < n; i++) {
-        nan_vec[i] = nan(zero);
-        ef[i] = zero;
-        xa[i] = xi[i];
-        if (zero <= xi[i])
+    for(i = 0; i < n; i++)
+    {   nan_vec[i] = nan(zero);
+        ef[i]      = zero;
+        xa[i]      = xi[i];
+        if( zero <= xi[i] )
             maxabs[i] = xi[i];
         else
-            maxabs[i] = -xi[i];
+            maxabs[i] = - xi[i];
+
     }
     nstep = 0;
 
     Scalar tb, step, lambda, axbi, a, r, root;
-    while (!(ta == tf)) {  // start with value suggested by error criteria
+    while( ! (ta == tf) )
+    {   // start with value suggested by error criteria
         step = scur;
 
         // check maximum
-        if (smax <= step) step = smax;
+        if( smax <= step )
+            step = smax;
 
         // check minimum
         minimum_step = step <= smin;
-        if (minimum_step) step = smin;
+        if( minimum_step )
+            step = smin;
 
         // check if near the end
-        if (tf <= ta + step * three / two)
+        if( tf <= ta + step * three / two )
             tb = tf;
         else
             tb = ta + step;
@@ -478,42 +506,48 @@ Vector OdeErrControl(Method &method, const Scalar &ti, const Scalar &tf, const V
         step = tb - ta;
 
         // check if this steps error estimate is ok
-        ok = !(hasnan(xb) || hasnan(eb));
-        if ((!ok) && minimum_step) {
-            ef = nan_vec;
+        ok = ! (hasnan(xb) || hasnan(eb));
+        if( (! ok) && minimum_step )
+        {   ef = nan_vec;
             return nan_vec;
         }
 
         // compute value of lambda for this step
         lambda = Scalar(10) * scur / step;
-        for (i = 0; i < n; i++) {
-            if (zero <= xb[i])
+        for(i = 0; i < n; i++)
+        {   if( zero <= xb[i] )
                 axbi = xb[i];
             else
-                axbi = -xb[i];
-            a = eabs[i] + erel * axbi;
-            if (!(eb[i] == zero)) {
-                r = (a / eb[i]) * step / (tf - ti);
-                root = exp(log(r) / m1);
-                if (root <= lambda) lambda = root;
+                axbi = - xb[i];
+            a    = eabs[i] + erel * axbi;
+            if( ! (eb[i] == zero) )
+            {   r = ( a / eb[i] ) * step / (tf - ti);
+                root = exp( log(r) / m1 );
+                if( root <= lambda )
+                    lambda = root;
             }
         }
-        if (ok && (one <= lambda || step <= smin * three / two)) {  // this step is within error limits or
+        if( ok && ( one <= lambda || step <= smin * three / two) )
+        {   // this step is within error limits or
             // close to the minimum size
             ta = tb;
-            for (i = 0; i < n; i++) {
-                xa[i] = xb[i];
+            for(i = 0; i < n; i++)
+            {   xa[i] = xb[i];
                 ef[i] = ef[i] + eb[i];
-                if (zero <= xb[i])
+                if( zero <= xb[i] )
                     axbi = xb[i];
                 else
-                    axbi = -xb[i];
-                if (axbi > maxabs[i]) maxabs[i] = axbi;
+                    axbi = - xb[i];
+                if( axbi > maxabs[i] )
+                    maxabs[i] = axbi;
             }
         }
-        if (!ok) {  // decrease step an see if method will work this time
+        if( ! ok )
+        {   // decrease step an see if method will work this time
             scur = step / two;
-        } else if (!(ta == tf)) {  // step suggested by the error criteria is not used
+        }
+        else if( ! (ta == tf) )
+        {   // step suggested by the error criteria is not used
             // on the last step because it may be very small.
             scur = lambda * step / two;
         }
@@ -522,21 +556,43 @@ Vector OdeErrControl(Method &method, const Scalar &ti, const Scalar &tf, const V
 }
 
 template <class Scalar, class Vector, class Method>
-Vector OdeErrControl(Method &method, const Scalar &ti, const Scalar &tf, const Vector &xi, const Scalar &smin,
-                     const Scalar &smax, Scalar &scur, const Vector &eabs, const Scalar &erel, Vector &ef) {
-    Vector maxabs(xi.size());
+Vector OdeErrControl(
+    Method          &method,
+    const Scalar    &ti    ,
+    const Scalar    &tf    ,
+    const Vector    &xi    ,
+    const Scalar    &smin  ,
+    const Scalar    &smax  ,
+    Scalar          &scur  ,
+    const Vector    &eabs  ,
+    const Scalar    &erel  ,
+    Vector          &ef    )
+{   Vector maxabs(xi.size());
     size_t nstep;
-    return OdeErrControl(method, ti, tf, xi, smin, smax, scur, eabs, erel, ef, maxabs, nstep);
+    return OdeErrControl(
+    method, ti, tf, xi, smin, smax, scur, eabs, erel, ef, maxabs, nstep
+    );
 }
 
 template <class Scalar, class Vector, class Method>
-Vector OdeErrControl(Method &method, const Scalar &ti, const Scalar &tf, const Vector &xi, const Scalar &smin,
-                     const Scalar &smax, Scalar &scur, const Vector &eabs, const Scalar &erel, Vector &ef,
-                     Vector &maxabs) {
-    size_t nstep;
-    return OdeErrControl(method, ti, tf, xi, smin, smax, scur, eabs, erel, ef, maxabs, nstep);
+Vector OdeErrControl(
+    Method          &method,
+    const Scalar    &ti    ,
+    const Scalar    &tf    ,
+    const Vector    &xi    ,
+    const Scalar    &smin  ,
+    const Scalar    &smax  ,
+    Scalar          &scur  ,
+    const Vector    &eabs  ,
+    const Scalar    &erel  ,
+    Vector          &ef    ,
+    Vector          &maxabs)
+{   size_t nstep;
+    return OdeErrControl(
+    method, ti, tf, xi, smin, smax, scur, eabs, erel, ef, maxabs, nstep
+    );
 }
 
-}  // namespace CppAD
+} // End CppAD namespace
 
-#endif
+# endif

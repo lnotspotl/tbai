@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_OPT_VAL_HES_HPP
-#define CPPAD_CORE_OPT_VAL_HES_HPP
+# ifndef CPPAD_CORE_OPT_VAL_HES_HPP
+# define CPPAD_CORE_OPT_VAL_HES_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -231,7 +231,7 @@ $end
 -----------------------------------------------------------------------------
 */
 
-namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
+namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 /*!
 \file opt_val_hes.hpp
 \brief Computing Jabobians and Hessians of Optimal Values
@@ -357,9 +357,15 @@ If it is zero, then the matrix is singular and hes is not set
 to its specified value.
 */
 
+
 template <class BaseVector, class Fun>
-int opt_val_hes(const BaseVector &x, const BaseVector &y, Fun fun, BaseVector &jac,
-                BaseVector &hes) {  // determine the base type
+int opt_val_hes(
+    const BaseVector&   x     ,
+    const BaseVector&   y     ,
+    Fun                 fun   ,
+    BaseVector&         jac   ,
+    BaseVector&         hes   )
+{   // determine the base type
     typedef typename BaseVector::value_type Base;
 
     // check that BaseVector is a SimpleVector class with Base elements
@@ -369,7 +375,7 @@ int opt_val_hes(const BaseVector &x, const BaseVector &y, Fun fun, BaseVector &j
     typedef typename Fun::ad_vector ad_vector;
 
     // check that ad_vector is a SimpleVector class with AD<Base> elements
-    CheckSimpleVector<AD<Base>, ad_vector>();
+    CheckSimpleVector< AD<Base> , ad_vector >();
 
     // size of the x and y spaces
     size_t n = size_t(x.size());
@@ -379,10 +385,14 @@ int opt_val_hes(const BaseVector &x, const BaseVector &y, Fun fun, BaseVector &j
     size_t ell = fun.ell();
 
     // check size of return values
-    CPPAD_ASSERT_KNOWN(size_t(jac.size()) == n || jac.size() == 0,
-                       "opt_val_hes: size of the vector jac is not equal to n or zero");
-    CPPAD_ASSERT_KNOWN(size_t(hes.size()) == n * n || hes.size() == 0,
-                       "opt_val_hes: size of the vector hes is not equal to n * n or zero");
+    CPPAD_ASSERT_KNOWN(
+        size_t(jac.size()) == n || jac.size() == 0,
+        "opt_val_hes: size of the vector jac is not equal to n or zero"
+    );
+    CPPAD_ASSERT_KNOWN(
+        size_t(hes.size()) == n * n || hes.size() == 0,
+        "opt_val_hes: size of the vector hes is not equal to n * n or zero"
+    );
 
     // some temporary indices
     size_t i, j, k;
@@ -399,18 +409,23 @@ int opt_val_hes(const BaseVector &x, const BaseVector &y, Fun fun, BaseVector &j
     // AD version of y
     ad_vector a_y(n);
 
-    if (jac.size() > 0) {  // this is the easy part, computing the V^{(1)} (x) which is equal
+    if( jac.size() > 0  )
+    {   // this is the easy part, computing the V^{(1)} (x) which is equal
         // to \partial_x F (x, y) (see Thoerem 2 of the reference).
 
         // copy x and y to AD version
-        for (j = 0; j < n; j++) a_x[j] = x[j];
-        for (j = 0; j < m; j++) a_y[j] = y[j];
+        for(j = 0; j < n; j++)
+            a_x[j] = x[j];
+        for(j = 0; j < m; j++)
+            a_y[j] = y[j];
 
         // initialize summation
-        for (j = 0; j < n; j++) jac[j] = Base(0.);
+        for(j = 0; j < n; j++)
+            jac[j] = Base(0.);
 
         // add in \partial_x S_k (x, y)
-        for (k = 0; k < ell; k++) {  // start recording
+        for(k = 0; k < ell; k++)
+        {   // start recording
             Independent(a_x);
             // record
             s_k[0] = fun.s(k, a_x, a_y);
@@ -419,11 +434,13 @@ int opt_val_hes(const BaseVector &x, const BaseVector &y, Fun fun, BaseVector &j
             // compute partial of S_k with respect to x
             BaseVector jac_k = S_k.Jacobian(x);
             // add \partial_x S_k (x, y) to jac
-            for (j = 0; j < n; j++) jac[j] += jac_k[j];
+            for(j = 0; j < n; j++)
+                jac[j] += jac_k[j];
         }
     }
     // check if we are done
-    if (hes.size() == 0) return 0;
+    if( hes.size() == 0 )
+        return 0;
 
     /*
     In this case, we need to compute the Hessian. Using Theorem 1 of the
@@ -435,22 +452,28 @@ int opt_val_hes(const BaseVector &x, const BaseVector &y, Fun fun, BaseVector &j
     // Base and AD version of xy
     BaseVector xy(n + m);
     ad_vector a_xy(n + m);
-    for (j = 0; j < n; j++) a_xy[j] = xy[j] = x[j];
-    for (j = 0; j < m; j++) a_xy[n + j] = xy[n + j] = y[j];
+    for(j = 0; j < n; j++)
+        a_xy[j] = xy[j] = x[j];
+    for(j = 0; j < m; j++)
+        a_xy[n+j] = xy[n+j] = y[j];
 
     // Initialization summation for Hessian of F
     size_t nm_sq = (n + m) * (n + m);
     BaseVector F_hes(nm_sq);
-    for (j = 0; j < nm_sq; j++) F_hes[j] = Base(0.);
+    for(j = 0; j < nm_sq; j++)
+        F_hes[j] = Base(0.);
     BaseVector hes_k(nm_sq);
 
     // add in Hessian of S_k to hes
-    for (k = 0; k < ell; k++) {  // start recording
+    for(k = 0; k < ell; k++)
+    {   // start recording
         Independent(a_xy);
         // split out x
-        for (j = 0; j < n; j++) a_x[j] = a_xy[j];
+        for(j = 0; j < n; j++)
+            a_x[j] = a_xy[j];
         // split out y
-        for (j = 0; j < m; j++) a_y[j] = a_xy[n + j];
+        for(j = 0; j < m; j++)
+            a_y[j] = a_xy[n+j];
         // record
         s_k[0] = fun.s(k, a_x, a_y);
         // stop recording and store in S_k
@@ -460,35 +483,40 @@ int opt_val_hes(const BaseVector &x, const BaseVector &y, Fun fun, BaseVector &j
         // compute Hessian of S_k
         hes_k = S_k.Hessian(xy, 0);
         // add \partial_x S_k (x, y) to jac
-        for (j = 0; j < nm_sq; j++) F_hes[j] += hes_k[j];
+        for(j = 0; j < nm_sq; j++)
+            F_hes[j] += hes_k[j];
     }
     // Extract F_yx
     BaseVector F_yx(m * n);
-    for (i = 0; i < m; i++) {
-        for (j = 0; j < n; j++) F_yx[i * n + j] = F_hes[(i + n) * (n + m) + j];
+    for(i = 0; i < m; i++)
+    {   for(j = 0; j < n; j++)
+            F_yx[i * n + j] = F_hes[ (i+n)*(n+m) + j ];
     }
     // Extract F_yy
     BaseVector F_yy(n * m);
-    for (i = 0; i < m; i++) {
-        for (j = 0; j < m; j++) F_yy[i * m + j] = F_hes[(i + n) * (n + m) + j + n];
+    for(i = 0; i < m; i++)
+    {   for(j = 0; j < m; j++)
+            F_yy[i * m + j] = F_hes[ (i+n)*(n+m) + j + n ];
     }
 
     // compute - Y^{(1)}(x) = F_yy (x, y)^{-1} F_yx (x, y)
     BaseVector neg_Y_x(m * n);
     Base logdet;
     int signdet = CppAD::LuSolve(m, n, F_yy, F_yx, neg_Y_x, logdet);
-    if (signdet == 0) return signdet;
+    if( signdet == 0 )
+        return signdet;
 
     // compute hes = F_xx (x, y) + F_xy (x, y)  Y^{(1)}(x)
-    for (i = 0; i < n; i++) {
-        for (j = 0; j < n; j++) {
-            hes[i * n + j] = F_hes[i * (n + m) + j];
-            for (k = 0; k < m; k++) hes[i * n + j] -= F_hes[i * (n + m) + k + n] * neg_Y_x[k * n + j];
+    for(i = 0; i < n; i++)
+    {   for(j = 0; j < n; j++)
+        {   hes[i * n + j] = F_hes[ i*(n+m) + j ];
+            for(k = 0; k < m; k++)
+                hes[i*n+j] -= F_hes[i*(n+m) + k+n] * neg_Y_x[k*n+j];
         }
     }
     return signdet;
 }
 
-}  // namespace CppAD
+} // END_CPPAD_NAMESPACE
 
-#endif
+# endif

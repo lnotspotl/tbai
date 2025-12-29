@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_NUM_SKIP_HPP
-#define CPPAD_CORE_NUM_SKIP_HPP
+# ifndef CPPAD_CORE_NUM_SKIP_HPP
+# define CPPAD_CORE_NUM_SKIP_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -61,7 +61,7 @@ $end
 -----------------------------------------------------------------------------
 */
 
-#include <cppad/local/play/atom_op_info.hpp>
+# include <cppad/local/play/atom_op_info.hpp>
 
 // BEGIN CppAD namespace
 namespace CppAD {
@@ -69,10 +69,11 @@ namespace CppAD {
 // This routine is not const because it runs through the operations sequence
 // 2DO: compute this value during zero order forward operations.
 template <class Base, class RecBase>
-size_t ADFun<Base, RecBase>::number_skip(void) {  // must pass through operation sequence to map operations to variables
+size_t ADFun<Base,RecBase>::number_skip(void)
+{   // must pass through operation sequence to map operations to variables
 
     // information defined by atomic forward
-    size_t atom_index = 0, atom_old = 0, atom_m = 0, atom_n = 0;
+    size_t atom_index=0, atom_old=0, atom_m=0, atom_n=0;
 
     // number of variables skipped
     size_t num_var_skip = 0;
@@ -80,33 +81,44 @@ size_t ADFun<Base, RecBase>::number_skip(void) {  // must pass through operation
     // start playback
     local::play::const_sequential_iterator itr = play_.begin();
     local::OpCode op;
-    size_t i_var;
-    const addr_t *arg;
+    size_t        i_var;
+    const addr_t* arg;
     itr.op_info(op, arg, i_var);
     CPPAD_ASSERT_UNKNOWN(op == local::BeginOp)
-    while (op != local::EndOp) {  // next op
+    while(op != local::EndOp)
+    {   // next op
         (++itr).op_info(op, arg, i_var);
         //
-        if (op == local::AFunOp) {  // skip only appears at front or back AFunOp of atomic function call
-            bool skip_call = cskip_op_[itr.op_index()];
-            local::play::atom_op_info<Base>(op, arg, atom_index, atom_old, atom_m, atom_n);
-            CPPAD_ASSERT_UNKNOWN(NumRes(op) == 0);
+        if( op == local::AFunOp )
+        {   // skip only appears at front or back AFunOp of atomic function call
+            bool skip_call = cskip_op_[ itr.op_index() ];
+            local::play::atom_op_info<Base>(
+                op, arg, atom_index, atom_old, atom_m, atom_n
+            );
+            CPPAD_ASSERT_UNKNOWN( NumRes(op) == 0 );
             size_t num_op = atom_m + atom_n + 1;
-            for (size_t i = 0; i < num_op; i++) {
-                CPPAD_ASSERT_UNKNOWN(op != local::CSkipOp && op != local::CSumOp);
+            for(size_t i = 0; i < num_op; i++)
+            {   CPPAD_ASSERT_UNKNOWN(
+                    op != local::CSkipOp && op != local::CSumOp
+                );
                 (++itr).op_info(op, arg, i_var);
-                if (skip_call) num_var_skip += NumRes(op);
+                if( skip_call )
+                    num_var_skip += NumRes(op);
             }
-            CPPAD_ASSERT_UNKNOWN(op == local::AFunOp);
-        } else {
-            if (cskip_op_[itr.op_index()]) num_var_skip += NumRes(op);
+            CPPAD_ASSERT_UNKNOWN( op == local::AFunOp );
+        }
+        else
+        {   if( cskip_op_[ itr.op_index() ] )
+                num_var_skip += NumRes(op);
             //
-            if ((op == local::CSkipOp) | (op == local::CSumOp)) itr.correct_before_increment();
+            if( (op == local::CSkipOp) | (op == local::CSumOp) )
+                itr.correct_before_increment();
         }
     }
     return num_var_skip;
 }
 
-}  // namespace CppAD
+} // END CppAD namespace
 
-#endif
+
+# endif

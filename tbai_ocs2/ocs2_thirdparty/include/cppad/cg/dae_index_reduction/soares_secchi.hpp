@@ -16,9 +16,9 @@
  * Author: Joao Leal
  */
 
+#include <cppad/cg/dae_index_reduction/dae_structural_index_reduction.hpp>
 #include <cppad/cg/dae_index_reduction/augment_path_depth_lookahead.hpp>
 #include <cppad/cg/dae_index_reduction/augment_path_depth_lookahead_a.hpp>
-#include <cppad/cg/dae_index_reduction/dae_structural_index_reduction.hpp>
 
 namespace CppAD {
 namespace cg {
@@ -26,13 +26,12 @@ namespace cg {
 /**
  * Soares Secchi method for DAE structural index reduction
  */
-template <class Base>
+template<class Base>
 class SoaresSecchi : public DaeStructuralIndexReduction<Base> {
-   protected:
+protected:
     using CGBase = CppAD::cg::CG<Base>;
     using ADCG = CppAD::AD<CGBase>;
-
-   protected:
+protected:
     // avoids having to type this->graph_
     using DaeStructuralIndexReduction<Base>::graph_;
     // typical values used to avoid NaNs in the tape validation by CppAD
@@ -41,16 +40,16 @@ class SoaresSecchi : public DaeStructuralIndexReduction<Base> {
      * the last equations added to graph
      * (equations used to create the ODE or DAE with index 1)
      */
-    std::set<Enode<Base> *> lastAddEq_;
+    std::set<Enode<Base>*> lastAddEq_;
     // whether or not reduceIndex() has been called
     bool reduced_;
     //
     AugmentPathDepthLookahead<Base> defaultAugmentPath_;
     AugmentPathDepthLookaheadA<Base> defaultAugmentPathA_;
-    AugmentPath<Base> *augmentPath_;
-    AugmentPath<Base> *augmentPathA_;
+    AugmentPath<Base>* augmentPath_;
+    AugmentPath<Base>* augmentPathA_;
+public:
 
-   public:
     /**
      * Creates the DAE index reduction algorithm that implements the
      * Soares Secchi method.
@@ -61,37 +60,50 @@ class SoaresSecchi : public DaeStructuralIndexReduction<Base> {
      * @param eqName Equation names (it can be an empty vector)
      * @param x typical variable values (used to avoid NaNs in CppAD checks)
      */
-    SoaresSecchi(ADFun<CG<Base>> &fun, const std::vector<DaeVarInfo> &varInfo, const std::vector<std::string> &eqName,
-                 const std::vector<Base> &x)
-        : DaeStructuralIndexReduction<Base>(fun, varInfo, eqName),
-          x_(x),
-          reduced_(false),
-          augmentPath_(&defaultAugmentPath_),
-          augmentPathA_(&defaultAugmentPathA_) {}
+    SoaresSecchi(ADFun<CG<Base> >& fun,
+               const std::vector<DaeVarInfo>& varInfo,
+               const std::vector<std::string>& eqName,
+               const std::vector<Base>& x) :
+            DaeStructuralIndexReduction<Base>(fun, varInfo, eqName),
+            x_(x),
+            reduced_(false),
+            augmentPath_(&defaultAugmentPath_),
+            augmentPathA_(&defaultAugmentPathA_){
 
-    SoaresSecchi(const SoaresSecchi &p) = delete;
+    }
 
-    SoaresSecchi &operator=(const SoaresSecchi &p) = delete;
+    SoaresSecchi(const SoaresSecchi& p) = delete;
 
-    virtual ~SoaresSecchi() {}
+    SoaresSecchi& operator=(const SoaresSecchi& p) = delete;
 
-    AugmentPath<Base> &getAugmentPath() const { return *augmentPath_; }
+    virtual ~SoaresSecchi() {
+    }
 
-    void setAugmentPath(AugmentPath<Base> &a) const { augmentPath_ = &a; }
+    AugmentPath<Base>& getAugmentPath() const {
+        return *augmentPath_;
+    }
+
+    void setAugmentPath(AugmentPath<Base>& a) const {
+        augmentPath_ = &a;
+    }
 
     /**
      * Defines whether or not original names saved by using
      * CppAD::PrintFor(0, "", val, name)
      * should be kept by also adding PrintFor operations in the reduced model.
      */
-    inline void setPreserveNames(bool p) { graph_.setPreserveNames(p); }
+    inline void setPreserveNames(bool p) {
+        graph_.setPreserveNames(p);
+    }
 
     /**
      * Whether or not original names saved by using
      * CppAD::PrintFor(0, "", val, name)
      * should be kept by also adding PrintFor operations in the reduced model.
      */
-    inline bool isPreserveNames() const { return graph_.isPreserveNames(); }
+    inline bool isPreserveNames() const {
+        return graph_.isPreserveNames();
+    }
 
     /**
      * Performs the DAE differentiation index reductions
@@ -103,11 +115,13 @@ class SoaresSecchi : public DaeStructuralIndexReduction<Base> {
      * @return the reduced index model (must be deleted by user)
      * @throws CGException on failure
      */
-    inline std::unique_ptr<ADFun<CG<Base>>> reduceIndex(std::vector<DaeVarInfo> &newVarInfo,
-                                                        std::vector<DaeEquationInfo> &equationInfo) override {
-        if (reduced_) throw CGException("reduceIndex() can only be called once!");
+    inline std::unique_ptr<ADFun<CG<Base>>> reduceIndex(std::vector<DaeVarInfo>& newVarInfo,
+                                                        std::vector<DaeEquationInfo>& equationInfo) override {
+        if (reduced_)
+            throw CGException("reduceIndex() can only be called once!");
 
-        if (this->verbosity_ >= Verbosity::High) log() << "########  Soares Secchi method  ########\n";
+        if (this->verbosity_ >= Verbosity::High)
+            log() << "########  Soares Secchi method  ########\n";
 
         augmentPath_->setLogger(*this);
         augmentPathA_->setLogger(*this);
@@ -118,7 +132,7 @@ class SoaresSecchi : public DaeStructuralIndexReduction<Base> {
         detectSubset2Dif();
 
         // we want an index 1 DAE (ignore the last equations added to the graph)
-        for (const Enode<Base> *i : lastAddEq_) {
+        for(const Enode<Base>* i: lastAddEq_) {
             graph_.remove(*i);
         }
 
@@ -140,29 +154,33 @@ class SoaresSecchi : public DaeStructuralIndexReduction<Base> {
      * @return the DAE differentiation index.
      * @throws CGException
      */
-    inline size_t getStructuralIndex() const { return graph_.getStructuralIndex(); }
+    inline size_t getStructuralIndex() const {
+        return graph_.getStructuralIndex();
+    }
 
-   protected:
+protected:
     using DaeStructuralIndexReduction<Base>::log;
 
     /**
      *
      */
     inline void detectSubset2Dif() {
-        auto &vnodes = graph_.variables();
-        auto &enodes = graph_.equations();
+        auto& vnodes = graph_.variables();
+        auto& enodes = graph_.equations();
 
-        std::set<Enode<Base> *> marked;
-        std::set<Enode<Base> *> lastMarked;
+        std::set<Enode<Base>*> marked;
+        std::set<Enode<Base>*> lastMarked;
 
-        if (this->verbosity_ >= Verbosity::High) graph_.printDot(this->log());
+        if (this->verbosity_ >= Verbosity::High)
+            graph_.printDot(this->log());
 
         while (true) {
             // augment the matching one by one
             for (size_t k = 0; k < enodes.size(); k++) {
-                Enode<Base> *i = enodes[k];
+                Enode<Base>* i = enodes[k];
 
-                if (this->verbosity_ >= Verbosity::High) log() << "Outer loop: equation k = " << *i << "\n";
+                if (this->verbosity_ >= Verbosity::High)
+                    log() << "Outer loop: equation k = " << *i << "\n";
 
                 if (i->assignmentVariable() != nullptr) {
                     continue;
@@ -170,7 +188,8 @@ class SoaresSecchi : public DaeStructuralIndexReduction<Base> {
 
                 bool pathFound = augmentPathA_->augmentPath(*i);
                 if (!pathFound) {
-                    for (Enode<Base> *ii : enodes) {
+
+                    for (Enode<Base>* ii: enodes) {
                         // mark colored equations to be differentiated
                         if (ii->isColored() && ii->derivative() == nullptr) {
                             marked.insert(ii);
@@ -185,34 +204,40 @@ class SoaresSecchi : public DaeStructuralIndexReduction<Base> {
                         throw CGException("Singular system detected.");
                     }
 
-                    for (auto *jj : vnodes) jj->uncolor();
+                    for (auto* jj: vnodes)
+                        jj->uncolor();
 
                 } else {
-                    for (auto *ii : enodes) ii->uncolor();
+                    for (auto* ii: enodes)
+                        ii->uncolor();
                 }
             }
 
-            if (marked.empty()) break;
+            if (marked.empty())
+                break;
 
             // diff all MARKED equations
-            for (Enode<Base> *i : marked) {
+            for (Enode<Base>* i: marked) {
                 graph_.createDerivate(*i, false);
             }
 
-            if (this->verbosity_ >= Verbosity::High) graph_.printDot(this->log());
+            if (this->verbosity_ >= Verbosity::High)
+                graph_.printDot(this->log());
 
             lastMarked.swap(marked);
             marked.clear();
         }
 
         lastAddEq_.clear();
-        for (const Enode<Base> *i : lastMarked) {
+        for (const Enode<Base>* i: lastMarked) {
             lastAddEq_.insert(i->derivative());
         }
+
     }
+
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

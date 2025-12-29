@@ -1,5 +1,5 @@
-#ifndef CPPAD_UTILITY_ODE_GEAR_HPP
-#define CPPAD_UTILITY_ODE_GEAR_HPP
+# ifndef CPPAD_UTILITY_ODE_GEAR_HPP
+# define CPPAD_UTILITY_ODE_GEAR_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -351,19 +351,25 @@ $end
 --------------------------------------------------------------------------
 */
 
-#include <cstddef>
+# include <cstddef>
+# include <cppad/core/cppad_assert.hpp>
+# include <cppad/utility/check_simple_vector.hpp>
+# include <cppad/utility/check_numeric_type.hpp>
+# include <cppad/utility/vector.hpp>
+# include <cppad/utility/lu_factor.hpp>
+# include <cppad/utility/lu_invert.hpp>
 
-#include <cppad/core/cppad_assert.hpp>
-#include <cppad/utility/check_numeric_type.hpp>
-#include <cppad/utility/check_simple_vector.hpp>
-#include <cppad/utility/lu_factor.hpp>
-#include <cppad/utility/lu_invert.hpp>
-#include <cppad/utility/vector.hpp>
-
-namespace CppAD {  // BEGIN CppAD namespace
+namespace CppAD { // BEGIN CppAD namespace
 
 template <class Vector, class Fun>
-void OdeGear(Fun &F, size_t m, size_t n, const Vector &T, Vector &X, Vector &e) {
+void OdeGear(
+    Fun          &F  ,
+    size_t        m  ,
+    size_t        n  ,
+    const Vector &T  ,
+    Vector       &X  ,
+    Vector       &e  )
+{
     // temporary indices
     size_t i, j, k;
 
@@ -375,11 +381,26 @@ void OdeGear(Fun &F, size_t m, size_t n, const Vector &T, Vector &X, Vector &e) 
     // check simple vector class specifications
     CheckSimpleVector<Scalar, Vector>();
 
-    CPPAD_ASSERT_KNOWN(m >= 1, "OdeGear: m is less than one");
-    CPPAD_ASSERT_KNOWN(n > 0, "OdeGear: n is equal to zero");
-    CPPAD_ASSERT_KNOWN(size_t(T.size()) >= (m + 1), "OdeGear: size of T is not greater than or equal (m+1)");
-    CPPAD_ASSERT_KNOWN(size_t(X.size()) >= (m + 1) * n, "OdeGear: size of X is not greater than or equal (m+1) * n");
-    for (j = 0; j < m; j++) CPPAD_ASSERT_KNOWN(T[j] < T[j + 1], "OdeGear: the array T is not monotone increasing");
+    CPPAD_ASSERT_KNOWN(
+        m >= 1,
+        "OdeGear: m is less than one"
+    );
+    CPPAD_ASSERT_KNOWN(
+        n > 0,
+        "OdeGear: n is equal to zero"
+    );
+    CPPAD_ASSERT_KNOWN(
+        size_t(T.size()) >= (m+1),
+        "OdeGear: size of T is not greater than or equal (m+1)"
+    );
+    CPPAD_ASSERT_KNOWN(
+        size_t(X.size()) >= (m+1) * n,
+        "OdeGear: size of X is not greater than or equal (m+1) * n"
+    );
+    for(j = 0; j < m; j++) CPPAD_ASSERT_KNOWN(
+        T[j] < T[j+1],
+        "OdeGear: the array T is not monotone increasing"
+    );
 
     // some constants
     Scalar zero(0);
@@ -397,30 +418,35 @@ void OdeGear(Fun &F, size_t m, size_t n, const Vector &T, Vector &X, Vector &e) 
 
     // compute alpha[m]
     alpha[m] = zero;
-    for (k = 0; k < m; k++) alpha[m] += one / (T[m] - T[k]);
+    for(k = 0; k < m; k++)
+        alpha[m] += one / (T[m] - T[k]);
 
     // compute beta[m-1]
-    beta[m - 1] = one / (T[m - 1] - T[m]);
-    for (k = 0; k < m - 1; k++) beta[m - 1] += one / (T[m - 1] - T[k]);
+    beta[m-1] = one / (T[m-1] - T[m]);
+    for(k = 0; k < m-1; k++)
+        beta[m-1] += one / (T[m-1] - T[k]);
+
 
     // compute other components of alpha
-    for (j = 0; j < m; j++) {  // compute alpha[j]
+    for(j = 0; j < m; j++)
+    {   // compute alpha[j]
         alpha[j] = one / (T[j] - T[m]);
-        for (k = 0; k < m; k++) {
-            if (k != j) {
-                alpha[j] *= (T[m] - T[k]);
+        for(k = 0; k < m; k++)
+        {   if( k != j )
+            {   alpha[j] *= (T[m] - T[k]);
                 alpha[j] /= (T[j] - T[k]);
             }
         }
     }
 
     // compute other components of beta
-    for (j = 0; j <= m; j++) {
-        if (j != m - 1) {  // compute beta[j]
-            beta[j] = one / (T[j] - T[m - 1]);
-            for (k = 0; k <= m; k++) {
-                if (k != j && k != m - 1) {
-                    beta[j] *= (T[m - 1] - T[k]);
+    for(j = 0; j <= m; j++)
+    {   if( j != m-1 )
+        {   // compute beta[j]
+            beta[j] = one / (T[j] - T[m-1]);
+            for(k = 0; k <= m; k++)
+            {   if( k != j && k != m-1 )
+                {   beta[j] *= (T[m-1] - T[k]);
                     beta[j] /= (T[j] - T[k]);
                 }
             }
@@ -428,13 +454,15 @@ void OdeGear(Fun &F, size_t m, size_t n, const Vector &T, Vector &X, Vector &e) 
     }
 
     // evaluate f(T[m-1], x_{m-1} )
-    for (i = 0; i < n; i++) x_m[i] = X[(m - 1) * n + i];
-    F.Ode(T[m - 1], x_m, f);
+    for(i = 0; i < n; i++)
+        x_m[i] = X[(m-1) * n + i];
+    F.Ode(T[m-1], x_m, f);
 
     // solve for x_m^0
-    for (i = 0; i < n; i++) {
-        x_m[i] = f[i];
-        for (j = 0; j < m; j++) x_m[i] -= beta[j] * X[j * n + i];
+    for(i = 0; i < n; i++)
+    {   x_m[i] =  f[i];
+        for(j = 0; j < m; j++)
+            x_m[i] -= beta[j] * X[j * n + i];
         x_m[i] /= beta[m];
     }
     x_m0 = x_m;
@@ -443,42 +471,50 @@ void OdeGear(Fun &F, size_t m, size_t n, const Vector &T, Vector &X, Vector &e) 
     F.Ode_dep(T[m], x_m, f_x);
 
     // compute the matrix A = ( alpha[m] * I - f_x )
-    for (i = 0; i < n; i++) {
-        for (j = 0; j < n; j++) A[i * n + j] = -f_x[i * n + j];
+    for(i = 0; i < n; i++)
+    {   for(j = 0; j < n; j++)
+            A[i * n + j]  = - f_x[i * n + j];
         A[i * n + i] += alpha[m];
     }
 
     // LU factor (and overwrite) the matrix A
-    CppAD::vector<size_t> ip(n), jp(n);
-#ifndef NDEBUG
+    CppAD::vector<size_t> ip(n) , jp(n);
+# ifndef NDEBUG
     int sign =
-#endif
-        LuFactor(ip, jp, A);
-    CPPAD_ASSERT_KNOWN(sign != 0, "OdeGear: step size is to large");
+# endif
+    LuFactor(ip, jp, A);
+    CPPAD_ASSERT_KNOWN(
+        sign != 0,
+        "OdeGear: step size is to large"
+    );
 
     // Iterations of Newton's method
-    for (k = 0; k < 3; k++) {
+    for(k = 0; k < 3; k++)
+    {
         // only evaluate f( T[m] , x_m ) keep f_x during iteration
         F.Ode(T[m], x_m, f);
 
         // b = f + f_x x_m - alpha[0] x_0 - ... - alpha[m-1] x_{m-1}
-        for (i = 0; i < n; i++) {
-            b[i] = f[i];
-            for (j = 0; j < n; j++) b[i] -= f_x[i * n + j] * x_m[j];
-            for (j = 0; j < m; j++) b[i] -= alpha[j] * X[j * n + i];
+        for(i = 0; i < n; i++)
+        {   b[i]         = f[i];
+            for(j = 0; j < n; j++)
+                b[i]         -= f_x[i * n + j] * x_m[j];
+            for(j = 0; j < m; j++)
+                b[i] -= alpha[j] * X[ j * n + i ];
         }
         LuInvert(ip, jp, A, b);
         x_m = b;
     }
 
     // return estimate for x( t[k] ) and the estimated error bound
-    for (i = 0; i < n; i++) {
-        X[m * n + i] = x_m[i];
-        e[i] = x_m[i] - x_m0[i];
-        if (e[i] < zero) e[i] = -e[i];
+    for(i = 0; i < n; i++)
+    {   X[m * n + i] = x_m[i];
+        e[i]         = x_m[i] - x_m0[i];
+        if( e[i] < zero )
+            e[i] = - e[i];
     }
 }
 
-}  // namespace CppAD
+} // End CppAD namespace
 
-#endif
+# endif

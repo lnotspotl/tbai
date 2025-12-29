@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_BASE_COND_EXP_HPP
-#define CPPAD_CORE_BASE_COND_EXP_HPP
+# ifndef CPPAD_CORE_BASE_COND_EXP_HPP
+# define CPPAD_CORE_BASE_COND_EXP_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-16 Bradley M. Bell
 
@@ -148,7 +148,7 @@ $cref/base_alloc/base_alloc.hpp/CondExpRel/$$.
 $end
 */
 
-namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
+namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 
 /*!
 \file base_cond_exp.hpp
@@ -165,9 +165,13 @@ The argument Type is the Base type for this base require operation.
 The argument Rel is one of Lt, Le, Eq, Ge, Gt.
 The argument Op is the corresponding CompareOp value.
 */
-#define CPPAD_COND_EXP_BASE_REL(Type, Rel, Op)                                                                         \
-    inline Type CondExp##Rel(const Type &left, const Type &right, const Type &exp_if_true, const Type &exp_if_false) { \
-        return CondExpOp(Op, left, right, exp_if_true, exp_if_false);                                                  \
+# define CPPAD_COND_EXP_BASE_REL(Type, Rel, Op)       \
+    inline Type CondExp##Rel(                        \
+        const Type& left      ,                     \
+        const Type& right     ,                     \
+        const Type& exp_if_true  ,                  \
+        const Type& exp_if_false )                  \
+    {   return CondExpOp(Op, left, right, exp_if_true, exp_if_false); \
     }
 
 /*!
@@ -182,11 +186,11 @@ The macro defines the operations
 \endverbatim
 The argument Type is the Base type for this base require operation.
 */
-#define CPPAD_COND_EXP_REL(Type)                 \
-    CPPAD_COND_EXP_BASE_REL(Type, Lt, CompareLt) \
-    CPPAD_COND_EXP_BASE_REL(Type, Le, CompareLe) \
-    CPPAD_COND_EXP_BASE_REL(Type, Eq, CompareEq) \
-    CPPAD_COND_EXP_BASE_REL(Type, Ge, CompareGe) \
+# define CPPAD_COND_EXP_REL(Type)                     \
+    CPPAD_COND_EXP_BASE_REL(Type, Lt, CompareLt)     \
+    CPPAD_COND_EXP_BASE_REL(Type, Le, CompareLe)     \
+    CPPAD_COND_EXP_BASE_REL(Type, Eq, CompareEq)     \
+    CPPAD_COND_EXP_BASE_REL(Type, Ge, CompareGe)     \
     CPPAD_COND_EXP_BASE_REL(Type, Gt, CompareGt)
 
 /*!
@@ -225,51 +229,56 @@ is the return value is the comparision results in false.
 see exp_if_true and exp_if_false above.
 */
 template <class CompareType, class ResultType>
-ResultType CondExpTemplate(enum CompareOp cop, const CompareType &left, const CompareType &right,
-                           const ResultType &exp_if_true, const ResultType &exp_if_false) {
-    ResultType returnValue;
-    switch (cop) {
+ResultType CondExpTemplate(
+    enum  CompareOp            cop          ,
+    const CompareType&         left         ,
+    const CompareType&         right        ,
+    const ResultType&          exp_if_true  ,
+    const ResultType&          exp_if_false )
+{   ResultType returnValue;
+    switch( cop )
+    {
         case CompareLt:
-            if (left < right)
-                returnValue = exp_if_true;
-            else
-                returnValue = exp_if_false;
-            break;
+        if( left < right )
+            returnValue = exp_if_true;
+        else
+            returnValue = exp_if_false;
+        break;
 
         case CompareLe:
-            if (left <= right)
-                returnValue = exp_if_true;
-            else
-                returnValue = exp_if_false;
-            break;
+        if( left <= right )
+            returnValue = exp_if_true;
+        else
+            returnValue = exp_if_false;
+        break;
 
         case CompareEq:
-            if (left == right)
-                returnValue = exp_if_true;
-            else
-                returnValue = exp_if_false;
-            break;
+        if( left == right )
+            returnValue = exp_if_true;
+        else
+            returnValue = exp_if_false;
+        break;
 
         case CompareGe:
-            if (left >= right)
-                returnValue = exp_if_true;
-            else
-                returnValue = exp_if_false;
-            break;
+        if( left >= right )
+            returnValue = exp_if_true;
+        else
+            returnValue = exp_if_false;
+        break;
 
         case CompareGt:
-            if (left > right)
-                returnValue = exp_if_true;
-            else
-                returnValue = exp_if_false;
-            break;
+        if( left > right )
+            returnValue = exp_if_true;
+        else
+            returnValue = exp_if_false;
+        break;
 
         default:
-            CPPAD_ASSERT_UNKNOWN(0);
-            returnValue = exp_if_true;
+        CPPAD_ASSERT_UNKNOWN(0);
+        returnValue = exp_if_true;
     }
     return returnValue;
 }
 
-}  // namespace CppAD
-#endif
+} // END_CPPAD_NAMESPACE
+# endif

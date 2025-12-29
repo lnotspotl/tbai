@@ -1,5 +1,5 @@
-#ifndef CPPAD_UTILITY_ERROR_HANDLER_HPP
-#define CPPAD_UTILITY_ERROR_HANDLER_HPP
+# ifndef CPPAD_UTILITY_ERROR_HANDLER_HPP
+# define CPPAD_UTILITY_ERROR_HANDLER_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -122,72 +122,85 @@ $end
 ---------------------------------------------------------------------------
 */
 
-#include <cassert>
-#include <cstdlib>
-#include <iostream>
+# include <iostream>
 
-#include <cppad/configure.hpp>
-#include <cppad/local/set_get_in_parallel.hpp>
+# include <cppad/configure.hpp>
+# include <cppad/local/set_get_in_parallel.hpp>
+# include <cassert>
+# include <cstdlib>
 
-namespace CppAD {  // BEGIN CppAD namespace
+namespace CppAD { // BEGIN CppAD namespace
 
 class ErrorHandler {
     template <class Base>
     friend void parallel_ad(void);
-
-   public:
-    typedef void (*Handler)(bool, int, const char *, const char *, const char *);
+public:
+    typedef void (*Handler)
+        (bool, int, const char *, const char *, const char *);
 
     // construct a new handler
-    ErrorHandler(Handler handler) : previous(Current()) {
-        if (local::set_get_in_parallel(0)) {
-            bool known = true;
-            int line = __LINE__;
-            const char *file = __FILE__;
-            const char *exp = "! local::set_get_in_parallel(0)";
-            const char *msg = "Using ErrorHandler constructor in parallel mode.";
+    ErrorHandler(Handler handler) : previous( Current() )
+    {   if( local::set_get_in_parallel(0) )
+        {   bool known       = true;
+            int  line        = __LINE__;
+            const char* file = __FILE__;
+            const char* exp  = "! local::set_get_in_parallel(0)";
+            const char* msg  =
+                "Using ErrorHandler constructor in parallel mode.";
             Call(known, line, file, exp, msg);
         }
         Current() = handler;
     }
 
     // destructor for an error handler
-    ~ErrorHandler(void) {
-        if (local::set_get_in_parallel(0)) {
-            bool known = true;
-            int line = __LINE__;
-            const char *file = __FILE__;
-            const char *exp = "! local::set_get_in_parallel(0)";
-            const char *msg = "Using ErrorHandler destructor in parallel mode.";
+    ~ErrorHandler(void)
+    {   if( local::set_get_in_parallel(0) )
+        {   bool known       = true;
+            int  line        = __LINE__;
+            const char* file = __FILE__;
+            const char* exp  = "! local::set_get_in_parallel(0)";
+            const char* msg  =
+                "Using ErrorHandler destructor in parallel mode.";
             Call(known, line, file, exp, msg);
         }
         Current() = previous;
     }
 
     // report an error
-    static void Call(bool known, int line, const char *file, const char *exp, const char *msg) {
-        Handler handler = Current();
+    static void Call(
+        bool        known,
+        int         line ,
+        const char *file ,
+        const char *exp  ,
+        const char *msg  )
+    {   Handler handler = Current();
         handler(known, line, file, exp, msg);
     }
 
-   private:
+private:
     const Handler previous;
 
     // The default error handler
-    static void Default(bool known, int line, const char *file, const char *exp, const char *msg) {
-        using std::cerr;
+    static void Default(
+        bool        known,
+        int         line ,
+        const char *file ,
+        const char *exp  ,
+        const char *msg  )
+    {   using std::cerr;
         using std::endl;
 
         cerr << CPPAD_PACKAGE_STRING;
-        if (known)
+        if( known )
             cerr << " error from a known source:" << endl;
         else
-            cerr << " error from unknown source" << endl;
-        if (msg[0] != '\0') cerr << msg << endl;
-        cerr << "Error detected by false result for" << endl;
-        cerr << "    " << exp << endl;
+            cerr << " error from unknown source"  << endl;
+        if( msg[0] != '\0' )
+            cerr << msg << endl;
+        cerr << "Error detected by false result for"  << endl;
+        cerr << "    "     << exp                     << endl;
         cerr << "at line " << line << " in the file " << endl;
-        cerr << "    " << file << endl;
+        cerr << "    "     << file                    << endl;
 
         // terminate program execution
         assert(false);
@@ -197,16 +210,16 @@ class ErrorHandler {
     }
 
     // current error handler
-    static Handler &Current(void) {
-        static bool first_call = true;
+    static Handler &Current(void)
+    {   static bool first_call = true;
         static Handler current = Default;
-        if (first_call) {
-            if (local::set_get_in_parallel(0)) {
-                bool known = false;
-                int line = __LINE__;
-                const char *file = __FILE__;
-                const char *exp = "";
-                const char *msg = "";
+        if( first_call )
+        {   if( local::set_get_in_parallel(0) )
+            {   bool known       = false;
+                int  line        = __LINE__;
+                const char* file = __FILE__;
+                const char* exp  = "";
+                const char* msg  = "";
                 Call(known, line, file, exp, msg);
             }
             first_call = false;
@@ -215,6 +228,8 @@ class ErrorHandler {
     }
 };
 
-}  // namespace CppAD
+} // END CppAD namespace
 
-#endif
+
+
+# endif

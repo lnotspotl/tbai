@@ -23,7 +23,7 @@ namespace cg {
  * It only clones some of the nodes.
  * It is used by the symbolic solver.
  */
-template <class Scalar>
+template<class Scalar>
 class EvaluatorCloneSolve : public EvaluatorCG<Scalar, Scalar, EvaluatorCloneSolve<Scalar>> {
     /**
      * must be friends with one of its super classes since there is a cast to
@@ -31,44 +31,41 @@ class EvaluatorCloneSolve : public EvaluatorCG<Scalar, Scalar, EvaluatorCloneSol
      */
     using FinalEvaluatorType = EvaluatorCloneSolve<Scalar>;
     friend EvaluatorBase<Scalar, Scalar, CG<Scalar>, FinalEvaluatorType>;
-
-   public:
+public:
     using ActiveOut = CG<Scalar>;
     using SourceCodePath = typename CodeHandler<Scalar>::SourceCodePath;
-
-   protected:
+protected:
     using Super = EvaluatorCG<Scalar, Scalar, FinalEvaluatorType>;
-
-   private:
+private:
     /**
      * the operation paths which should be cloned or replaced with values in
      * replacement_
      */
-    const std::vector<const SourceCodePath *> *paths_;
+    const std::vector<const SourceCodePath*>* paths_;
     /**
      * replacements for the operations along the paths
      * (a null means that the original should be cloned)
      */
-    const std::vector<const std::vector<CG<Scalar> *> *> *replaceOnPath_;
+    const std::vector<const std::vector<CG<Scalar>*>*>* replaceOnPath_;
     /**
      * the operation paths which should be cloned or replaced with values in
      * replaceOnGraph_
      */
-    const BidirGraph<Scalar> *pathGraph_;
+    const BidirGraph<Scalar>* pathGraph_;
     /**
      * replacements for the operations along the paths
      */
-    const std::map<const PathNodeEdges<Scalar> *, CG<Scalar>> *replaceOnGraph_;
+    const std::map<const PathNodeEdges<Scalar>*, CG<Scalar>>* replaceOnGraph_;
     /**
      * operations which should be cloned
      */
-    const std::set<const OperationNode<Scalar> *> *clone_;
+    const std::set<const OperationNode<Scalar>*>* clone_;
     /**
      * replacements for the operations along the paths
      */
-    const std::map<const OperationPathNode<Scalar>, CG<Scalar>> *replaceArgument_;
+    const std::map<const OperationPathNode<Scalar>, CG<Scalar>>* replaceArgument_;
+public:
 
-   public:
     /**
      * Creates a new evaluator.
      *
@@ -78,15 +75,16 @@ class EvaluatorCloneSolve : public EvaluatorCG<Scalar, Scalar, EvaluatorCloneSol
      * @param replaceOnPath replacements for the operations along the paths
      *                      (a null means that the original should be cloned)
      */
-    inline EvaluatorCloneSolve(CodeHandler<Scalar> &handler, const std::vector<const SourceCodePath *> &paths,
-                               const std::vector<const std::vector<CG<Scalar> *> *> &replaceOnPath)
-        : Super(handler),
-          paths_(&paths),
-          replaceOnPath_(&replaceOnPath),
-          pathGraph_(nullptr),
-          replaceOnGraph_(nullptr),
-          clone_(nullptr),
-          replaceArgument_(nullptr) {
+    inline EvaluatorCloneSolve(CodeHandler<Scalar>& handler,
+                               const std::vector<const SourceCodePath*>& paths,
+                               const std::vector<const std::vector<CG<Scalar>*>*>& replaceOnPath) :
+            Super(handler),
+            paths_(&paths),
+            replaceOnPath_(&replaceOnPath),
+            pathGraph_(nullptr),
+            replaceOnGraph_(nullptr),
+            clone_(nullptr),
+            replaceArgument_(nullptr) {
         CPPADCG_ASSERT_UNKNOWN(paths_->size() == replaceOnPath_->size());
 #ifndef NDEBUG
         for (size_t i = 0; i < paths.size(); ++i) {
@@ -102,15 +100,17 @@ class EvaluatorCloneSolve : public EvaluatorCG<Scalar, Scalar, EvaluatorCloneSol
      * @param pathGraph the operation paths which should be cloned
      * @param replaceOnGraph replacements for the operations along the graph
      */
-    inline EvaluatorCloneSolve(CodeHandler<Scalar> &handler, const BidirGraph<Scalar> &pathGraph,
-                               const std::map<const PathNodeEdges<Scalar> *, CG<Scalar>> &replaceOnGraph)
-        : Super(handler),
-          paths_(nullptr),
-          replaceOnPath_(nullptr),
-          pathGraph_(&pathGraph),
-          replaceOnGraph_(&replaceOnGraph),
-          clone_(nullptr),
-          replaceArgument_(nullptr) {}
+    inline EvaluatorCloneSolve(CodeHandler<Scalar>& handler,
+                               const BidirGraph<Scalar>& pathGraph,
+                               const std::map<const PathNodeEdges<Scalar>*, CG<Scalar> >& replaceOnGraph) :
+            Super(handler),
+            paths_(nullptr),
+            replaceOnPath_(nullptr),
+            pathGraph_(&pathGraph),
+            replaceOnGraph_(&replaceOnGraph),
+            clone_(nullptr),
+            replaceArgument_(nullptr) {
+    }
 
     /**
      * Creates a new evaluator.
@@ -119,32 +119,35 @@ class EvaluatorCloneSolve : public EvaluatorCG<Scalar, Scalar, EvaluatorCloneSol
      * @param clone operations which should be cloned
      * @param replaceArgument replacements for the operations along the paths
      */
-    inline EvaluatorCloneSolve(CodeHandler<Scalar> &handler, const std::set<const OperationNode<Scalar> *> &clone,
-                               const std::map<const OperationPathNode<Scalar>, CG<Scalar>> &replaceArgument)
-        : Super(handler),
-          paths_(nullptr),
-          replaceOnPath_(nullptr),
-          pathGraph_(nullptr),
-          replaceOnGraph_(nullptr),
-          clone_(&clone),
-          replaceArgument_(&replaceArgument) {}
+    inline EvaluatorCloneSolve(CodeHandler<Scalar>& handler,
+                               const std::set<const OperationNode<Scalar>*>& clone,
+                               const std::map<const OperationPathNode<Scalar>, CG<Scalar>>& replaceArgument) :
+        Super(handler),
+        paths_(nullptr),
+        replaceOnPath_(nullptr),
+        pathGraph_(nullptr),
+        replaceOnGraph_(nullptr),
+        clone_(&clone),
+        replaceArgument_(&replaceArgument) {
+    }
 
-   protected:
+protected:
+
     /**
      * @note overrides the default evalOperation() even though this method
      *        is not virtual (hides a method in EvaluatorOperations)
      */
-    inline ActiveOut evalOperation(OperationNode<Scalar> &node) {
+    inline ActiveOut evalOperation(OperationNode<Scalar>& node) {
         CPPADCG_ASSERT_UNKNOWN(this->depth_ > 0);
 
-        if (paths_ != nullptr) {
-            const auto &paths = *paths_;
+        if(paths_ != nullptr) {
+            const auto& paths = *paths_;
             for (size_t i = 0; i < paths.size(); ++i) {
                 size_t d = this->depth_ - 1;
                 if (isOnPath(*paths[i])) {
                     // in one of the paths
 
-                    auto *r = (*(*replaceOnPath_)[i])[d];
+                    auto* r = (*(*replaceOnPath_)[i])[d];
                     if (r != nullptr) {
                         return *r;
                     } else {
@@ -154,8 +157,8 @@ class EvaluatorCloneSolve : public EvaluatorCG<Scalar, Scalar, EvaluatorCloneSol
             }
         }
 
-        if (pathGraph_ != nullptr) {
-            const PathNodeEdges<Scalar> *egdes = pathGraph_->find(node);
+        if(pathGraph_ != nullptr) {
+            const PathNodeEdges<Scalar>* egdes = pathGraph_->find(node);
             if (egdes != nullptr) {
                 auto it = replaceOnGraph_->find(egdes);
                 if (it != replaceOnGraph_->end()) {
@@ -182,21 +185,22 @@ class EvaluatorCloneSolve : public EvaluatorCG<Scalar, Scalar, EvaluatorCloneSol
             }
         }
 
-        return CG<Scalar>(node);  // use original
+        return CG<Scalar>(node); // use original
     }
 
-   private:
-    inline bool isOnPath(const SourceCodePath &path) const {
+private:
+    inline bool isOnPath(const SourceCodePath& path) const {
         size_t d = this->depth_ - 1;
 
-        if (d >= path.size()) return false;
+        if (d >= path.size())
+            return false;
 
-        if (this->path_[d].node != path[d].node)  // compare only the node
+        if (this->path_[d].node != path[d].node) // compare only the node
             return false;
 
         if (d > 0) {
             for (size_t j = 0; j < d; ++j) {
-                if (this->path_[j] != path[j]) {  // compare node and argument index
+                if (this->path_[j] != path[j]) { // compare node and argument index
                     return false;
                 }
             }
@@ -204,9 +208,10 @@ class EvaluatorCloneSolve : public EvaluatorCG<Scalar, Scalar, EvaluatorCloneSol
 
         return true;
     }
+
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

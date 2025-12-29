@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_GRAPH_FROM_JSON_HPP
-#define CPPAD_CORE_GRAPH_FROM_JSON_HPP
+# ifndef CPPAD_CORE_GRAPH_FROM_JSON_HPP
+# define CPPAD_CORE_GRAPH_FROM_JSON_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-19 Bradley M. Bell
 
@@ -12,9 +12,9 @@ in the Eclipse Public License, Version 2.0 are satisfied:
       GNU General Public License, Version 2.0 or later.
 ---------------------------------------------------------------------------- */
 
-#include <cppad/core/ad_fun.hpp>
-#include <cppad/core/ad_type.hpp>
-#include <cppad/local/graph/json_parser.hpp>
+# include <cppad/core/ad_fun.hpp>
+# include <cppad/core/ad_type.hpp>
+# include <cppad/local/graph/json_parser.hpp>
 
 /*
 $begin from_json$$
@@ -55,7 +55,7 @@ $end
 */
 // BEGIN_PROTOTYPE
 template <class Base, class RecBase>
-void CppAD::ADFun<Base, RecBase>::from_json(const std::string &json)
+void CppAD::ADFun<Base,RecBase>::from_json(const std::string& json)
 // END_PROTOTYPE
 {
     using CppAD::isnan;
@@ -73,4 +73,4 @@ void CppAD::ADFun<Base, RecBase>::from_json(const std::string &json)
     return;
 }
 
-#endif
+# endif

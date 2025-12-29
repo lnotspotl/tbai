@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_AD_CTOR_HPP
-#define CPPAD_CORE_AD_CTOR_HPP
+# ifndef CPPAD_CORE_AD_CTOR_HPP
+# define CPPAD_CORE_AD_CTOR_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -72,7 +72,7 @@ $end
 ------------------------------------------------------------------------------
 */
 
-namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
+namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 
 /*!
 \file ad_ctor.hpp
@@ -104,10 +104,15 @@ Default Constructor.
 Base type for this AD object.
 */
 template <class Base>
-AD<Base>::AD(void) : value_(), tape_id_(0), taddr_(0), ad_type_(constant_enum) {}
+AD<Base>::AD(void)
+: value_()
+, tape_id_(0)
+, taddr_(0)
+, ad_type_(constant_enum)
+{ }
 
 // --------------------------------------------------------------------------
-#ifdef CPPAD_FOR_TMB
+# ifdef CPPAD_FOR_TMB
 /*!
 Constructor from double.
 
@@ -121,11 +126,15 @@ This constructor is defined when CPPAD_FOR_TMB is defined.
 */
 template <class Base>
 AD<Base>::AD(const double &d)
-    : value_(Base(d)), tape_id_(0), taddr_(0), ad_type_(constant_enum) {  // check that this is a parameter
-    CPPAD_ASSERT_UNKNOWN(Parameter(*this));
+: value_( Base(d) )
+, tape_id_(0)
+, taddr_(0)
+, ad_type_(constant_enum)
+{   // check that this is a parameter
+    CPPAD_ASSERT_UNKNOWN( Parameter(*this) );
 }
 // --------------------------------------------------------------------------
-#else
+# else
 // --------------------------------------------------------------------------
 /*!
 Constructor from Base type.
@@ -143,10 +152,14 @@ This constructor is defined when CPPAD_FOR_TMB is not defined.
 */
 template <class Base>
 AD<Base>::AD(const Base &b)
-    : value_(b), tape_id_(0), taddr_(0), ad_type_(constant_enum) {  // check that this is a parameter
-    CPPAD_ASSERT_UNKNOWN(Parameter(*this));
+: value_(b)
+, tape_id_(0)
+, taddr_(0)
+, ad_type_(constant_enum)
+{   // check that this is a parameter
+    CPPAD_ASSERT_UNKNOWN( Parameter(*this) );
 }
-#endif
+# endif
 // --------------------------------------------------------------------------
 
 /*!
@@ -156,9 +169,8 @@ Constructor from an ADVec<Base> element drops the vector information.
 Base type for this AD object.
 */
 template <class Base>
-AD<Base>::AD(const VecAD_reference<Base> &x) {
-    *this = x.ADBase();
-}
+AD<Base>::AD(const VecAD_reference<Base> &x)
+{   *this = x.ADBase(); }
 
 /*!
 Constructor from any other type, converts to Base type, and uses constructor
@@ -176,7 +188,12 @@ is the object that is being converted from T to AD<Base>.
 */
 template <class Base>
 template <class T>
-AD<Base>::AD(const T &t) : value_(Base(t)), tape_id_(0), taddr_(0), ad_type_(constant_enum) {}
+AD<Base>::AD(const T &t)
+: value_(Base(t))
+, tape_id_(0)
+, taddr_(0)
+, ad_type_(constant_enum)
+{ }
 
-}  // namespace CppAD
-#endif
+} // END_CPPAD_NAMESPACE
+# endif

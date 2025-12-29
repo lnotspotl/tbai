@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_FOR_ONE_HPP
-#define CPPAD_CORE_FOR_ONE_HPP
+# ifndef CPPAD_CORE_FOR_ONE_HPP
+# define CPPAD_CORE_FOR_ONE_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -122,8 +122,8 @@ namespace CppAD {
 
 template <class Base, class RecBase>
 template <class Vector>
-Vector ADFun<Base, RecBase>::ForOne(const Vector &x, size_t j) {
-    size_t j1;
+Vector ADFun<Base,RecBase>::ForOne(const Vector &x, size_t j)
+{   size_t j1;
 
     size_t n = Domain();
     size_t m = Range();
@@ -131,15 +131,22 @@ Vector ADFun<Base, RecBase>::ForOne(const Vector &x, size_t j) {
     // check Vector is Simple Vector class with Base type elements
     CheckSimpleVector<Base, Vector>();
 
-    CPPAD_ASSERT_KNOWN(x.size() == n, "ForOne: Length of x not equal domain dimension for f");
-    CPPAD_ASSERT_KNOWN(j < n, "ForOne: the index j is not less than domain dimension for f");
+    CPPAD_ASSERT_KNOWN(
+        x.size() == n,
+        "ForOne: Length of x not equal domain dimension for f"
+    );
+    CPPAD_ASSERT_KNOWN(
+        j < n,
+        "ForOne: the index j is not less than domain dimension for f"
+    );
 
     // point at which we are evaluating the second partials
     Forward(0, x);
 
     // direction in which are are taking the derivative
     Vector dx(n);
-    for (j1 = 0; j1 < n; j1++) dx[j1] = Base(0.0);
+    for(j1 = 0; j1 < n; j1++)
+        dx[j1] = Base(0.0);
     dx[j] = Base(1.0);
 
     // dimension the return value
@@ -151,6 +158,6 @@ Vector ADFun<Base, RecBase>::ForOne(const Vector &x, size_t j) {
     return dy;
 }
 
-}  // namespace CppAD
+} // END CppAD namespace
 
-#endif
+# endif

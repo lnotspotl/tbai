@@ -24,39 +24,45 @@ namespace cg {
  *
  * @author Joao Leal
  */
-template <class Base>
+template<class Base>
 class GccCompiler : public AbstractCCompiler<Base> {
-   public:
-    GccCompiler(const std::string &gccPath = "/usr/bin/gcc") : AbstractCCompiler<Base>(gccPath) {
-        this->_compileFlags.push_back("-O2");           // Optimization level
-        this->_compileLibFlags.push_back("-O2");        // Optimization level
-        this->_compileLibFlags.push_back("-shared");    // Make shared object
-        this->_compileLibFlags.push_back("-rdynamic");  // add all symbols to the dynamic symbol table
+public:
+
+    GccCompiler(const std::string& gccPath = "/usr/bin/gcc") :
+        AbstractCCompiler<Base>(gccPath) {
+
+        this->_compileFlags.push_back("-O2"); // Optimization level
+        this->_compileLibFlags.push_back("-O2"); // Optimization level
+        this->_compileLibFlags.push_back("-shared"); // Make shared object
+        this->_compileLibFlags.push_back("-rdynamic"); // add all symbols to the dynamic symbol table
     }
 
-    GccCompiler(const GccCompiler &orig) = delete;
-    GccCompiler &operator=(const GccCompiler &rhs) = delete;
+    GccCompiler(const GccCompiler& orig) = delete;
+    GccCompiler& operator=(const GccCompiler& rhs) = delete;
 
     /**
      * Creates a dynamic library from a set of object files
      *
      * @param library the path to the dynamic library to be created
      */
-    void buildDynamic(const std::string &library, JobTimer *timer = nullptr) override {
+    void buildDynamic(const std::string& library,
+                      JobTimer* timer = nullptr) override {
+
 #if CPPAD_CG_SYSTEM_APPLE
         std::string linkerName = "-install_name";
 #elif CPPAD_CG_SYSTEM_LINUX
         std::string linkerName = "-soname";
 #endif
         std::string linkerFlags = "-Wl," + linkerName + "," + system::filenameFromPath(library);
-        for (size_t i = 0; i < this->_linkFlags.size(); i++) linkerFlags += "," + this->_linkFlags[i];
+        for (size_t i = 0; i < this->_linkFlags.size(); i++)
+            linkerFlags += "," + this->_linkFlags[i];
 
         std::vector<std::string> args;
         args.insert(args.end(), this->_compileLibFlags.begin(), this->_compileLibFlags.end());
-        args.push_back(linkerFlags);  // Pass suitable options to linker
-        args.push_back("-o");         // Output file name
-        args.push_back(library);      // Output file name
-        for (const std::string &it : this->_ofiles) {
+        args.push_back(linkerFlags); // Pass suitable options to linker
+        args.push_back("-o"); // Output file name
+        args.push_back(library); // Output file name
+        for (const std::string& it : this->_ofiles) {
             args.push_back(it);
         }
 
@@ -75,22 +81,25 @@ class GccCompiler : public AbstractCCompiler<Base> {
 
     virtual ~GccCompiler() = default;
 
-   protected:
+protected:
+
     /**
      * Compiles a single source file into an object file
      *
      * @param source the content of the source file
      * @param output the compiled output file name (the object file path)
      */
-    void compileSource(const std::string &source, const std::string &output, bool posIndepCode) override {
+    void compileSource(const std::string& source,
+                       const std::string& output,
+                       bool posIndepCode) override {
         std::vector<std::string> args;
         args.push_back("-x");
-        args.push_back("c");  // C source files
+        args.push_back("c"); // C source files
         args.insert(args.end(), this->_compileFlags.begin(), this->_compileFlags.end());
         args.push_back("-c");
         args.push_back("-");
         if (posIndepCode) {
-            args.push_back("-fPIC");  // position-independent code for dynamic linking
+            args.push_back("-fPIC"); // position-independent code for dynamic linking
         }
         args.push_back("-o");
         args.push_back(output);
@@ -98,13 +107,15 @@ class GccCompiler : public AbstractCCompiler<Base> {
         system::callExecutable(this->_path, args, nullptr, &source);
     }
 
-    void compileFile(const std::string &path, const std::string &output, bool posIndepCode) override {
+    void compileFile(const std::string& path,
+                     const std::string& output,
+                     bool posIndepCode) override {
         std::vector<std::string> args;
         args.push_back("-x");
-        args.push_back("c");  // C source files
+        args.push_back("c"); // C source files
         args.insert(args.end(), this->_compileFlags.begin(), this->_compileFlags.end());
         if (posIndepCode) {
-            args.push_back("-fPIC");  // position-independent code for dynamic linking
+            args.push_back("-fPIC"); // position-independent code for dynamic linking
         }
         args.push_back("-c");
         args.push_back(path);
@@ -113,9 +124,10 @@ class GccCompiler : public AbstractCCompiler<Base> {
 
         system::callExecutable(this->_path, args);
     }
+
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

@@ -18,7 +18,7 @@
 /**
  * LLVM requires the use of it own flags which can make it difficult to compile
  * libraries not using NDEBUG often required by LLVM.
- * The define LLVM_CPPFLAG_NDEBUG can be used to apply NDEBUG only to LLVM
+ * The define LLVM_CPPFLAG_NDEBUG can be used to apply NDEBUG only to LLVM 
  * headers.
  */
 #ifdef LLVM_WITH_NDEBUG
@@ -36,34 +36,35 @@
 
 #endif
 
-#include <clang/Basic/DiagnosticOptions.h>
-#include <clang/Basic/SourceManager.h>
-#include <clang/Basic/TargetInfo.h>
 #include <clang/CodeGen/CodeGenAction.h>
+#include <clang/Basic/DiagnosticOptions.h>
+#include <clang/Basic/TargetInfo.h>
+#include <clang/Basic/SourceManager.h>
 #include <clang/Frontend/CompilerInstance.h>
 #include <clang/Frontend/CompilerInvocation.h>
 #include <clang/Frontend/FrontendDiagnostic.h>
 #include <clang/Frontend/TextDiagnosticPrinter.h>
 #include <clang/Frontend/Utils.h>
-#include <clang/Lex/Preprocessor.h>
 #include <clang/Parse/ParseAST.h>
+#include <clang/Lex/Preprocessor.h>
+
 #include <llvm/Analysis/Passes.h>
+#include <llvm/IR/Verifier.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/ExecutionEngine/SectionMemoryManager.h>
-#include <llvm/IR/Verifier.h>
-// #include <llvm/ExecutionEngine/Interpreter.h> // force static initialisation
-// #include <llvm/ExecutionEngine/MCJIT.h>
-#include <llvm/Bitcode/ReaderWriter.h>
-#include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/Module.h>
-#include <llvm/Pass.h>
+//#include <llvm/ExecutionEngine/Interpreter.h> // force static initialisation
+//#include <llvm/ExecutionEngine/MCJIT.h>
 #include <llvm/PassManager.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/Pass.h>
+#include <llvm/Transforms/IPO/PassManagerBuilder.h>
+#include <llvm/Bitcode/ReaderWriter.h>
 #include <llvm/Support/ManagedStatic.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Support/raw_os_ostream.h>
-#include <llvm/Transforms/IPO/PassManagerBuilder.h>
-// #include <llvm/Support/system_error.h>
+//#include <llvm/Support/system_error.h>
 #include <llvm/Linker/Linker.h>
 
 #ifdef LLVM_WITH_NDEBUG
@@ -81,8 +82,8 @@
 #endif
 
 #include <cppad/cg/model/compiler/clang_compiler.hpp>
-#include <cppad/cg/model/llvm/llvm_model.hpp>
 #include <cppad/cg/model/llvm/llvm_model_library.hpp>
+#include <cppad/cg/model/llvm/llvm_model.hpp>
 #include <cppad/cg/model/llvm/v3_6/llvm_model_library_3_6.hpp>
 #include <cppad/cg/model/llvm/v3_6/llvm_model_library_processor.hpp>
 

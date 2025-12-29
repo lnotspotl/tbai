@@ -1,5 +1,5 @@
-#ifndef CPPAD_SPEED_DET_BY_LU_HPP
-#define CPPAD_SPEED_DET_BY_LU_HPP
+# ifndef CPPAD_SPEED_DET_BY_LU_HPP
+# define CPPAD_SPEED_DET_BY_LU_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -121,57 +121,62 @@ $end
 ---------------------------------------------------------------------------
 */
 // BEGIN C++
-#include <cppad/utility/lu_solve.hpp>
-#include <cppad/utility/vector.hpp>
+# include <cppad/utility/vector.hpp>
+# include <cppad/utility/lu_solve.hpp>
 
 // BEGIN CppAD namespace
 namespace CppAD {
 
 template <class Scalar>
 class det_by_lu {
-   private:
+private:
     const size_t m_;
     const size_t n_;
     CppAD::vector<Scalar> A_;
     CppAD::vector<Scalar> B_;
     CppAD::vector<Scalar> X_;
-
-   public:
-    det_by_lu(size_t n) : m_(0), n_(n), A_(n * n) {}
+public:
+    det_by_lu(size_t n) : m_(0), n_(n), A_(n * n)
+    {   }
 
     template <class Vector>
-    Scalar operator()(const Vector &x) {
-        Scalar logdet;
-        Scalar det;
-        int signdet;
-        size_t i;
+    Scalar operator()(const Vector &x)
+    {
+
+        Scalar       logdet;
+        Scalar       det;
+        int          signdet;
+        size_t       i;
 
         // copy matrix so it is not overwritten
-        for (i = 0; i < n_ * n_; i++) A_[i] = x[i];
+        for(i = 0; i < n_ * n_; i++)
+            A_[i] = x[i];
 
         // comput log determinant
-        signdet = CppAD::LuSolve(n_, m_, A_, B_, X_, logdet);
+        signdet = CppAD::LuSolve(
+            n_, m_, A_, B_, X_, logdet);
 
-        /*
-                // Do not do this for speed test because it makes floating
-                // point operation sequence very simple.
-                if( signdet == 0 )
-                    det = 0;
-                else
-                    det =  Scalar( signdet ) * exp( logdet );
-        */
+/*
+        // Do not do this for speed test because it makes floating
+        // point operation sequence very simple.
+        if( signdet == 0 )
+            det = 0;
+        else
+            det =  Scalar( signdet ) * exp( logdet );
+*/
 
         // convert to determinant
-        det = Scalar(signdet) * exp(logdet);
+        det     = Scalar( signdet ) * exp( logdet );
 
-#ifdef FADBAD
+# ifdef FADBAD
         // Fadbad requires tempories to be set to constants
-        for (i = 0; i < n_ * n_; i++) A_[i] = 0;
-#endif
+        for(i = 0; i < n_ * n_; i++)
+            A_[i] = 0;
+# endif
 
         return det;
     }
 };
-}  // namespace CppAD
+} // END CppAD namespace
 // END C++
-#endif
+# endif

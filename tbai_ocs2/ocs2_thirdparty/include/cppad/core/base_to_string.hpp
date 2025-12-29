@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_BASE_TO_STRING_HPP
-#define CPPAD_CORE_BASE_TO_STRING_HPP
+# ifndef CPPAD_CORE_BASE_TO_STRING_HPP
+# define CPPAD_CORE_BASE_TO_STRING_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -45,22 +45,21 @@ $cref base_limits$$ and $cref base_std_math$$ have already been defined
 for this type.
 This macro is defined as follows:
 $srccode%cpp% */
-#define CPPAD_TO_STRING(Base)                                         \
-    template <>                                                       \
-    struct to_string_struct<Base> {                                   \
-        std::string operator()(const Base &value) {                   \
-            std::stringstream os;                                     \
-            int n_digits = 1 + CppAD::numeric_limits<Base>::digits10; \
-            os << std::setprecision(n_digits);                        \
-            os << value;                                              \
-            return os.str();                                          \
-        }                                                             \
-    };
+# define CPPAD_TO_STRING(Base) \
+template <> struct to_string_struct<Base>\
+{   std::string operator()(const Base& value) \
+    {   std::stringstream os;\
+        int n_digits = 1 + CppAD::numeric_limits<Base>::digits10; \
+        os << std::setprecision(n_digits);\
+        os << value;\
+        return os.str();\
+    }\
+};
 /* %$$
 $end
 ------------------------------------------------------------------------------
 */
 // make sure to_string has been included
-#include <cppad/utility/to_string.hpp>
+# include <cppad/utility/to_string.hpp>
 
-#endif
+# endif

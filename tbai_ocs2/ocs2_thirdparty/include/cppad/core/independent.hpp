@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_INDEPENDENT_HPP
-#define CPPAD_CORE_INDEPENDENT_HPP
+# ifndef CPPAD_CORE_INDEPENDENT_HPP
+# define CPPAD_CORE_INDEPENDENT_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -156,13 +156,13 @@ contains an example and test of this operation.
 $end
 -----------------------------------------------------------------------------
 */
-#include <cppad/local/independent.hpp>
+# include <cppad/local/independent.hpp>
 /*!
 \file core/independent.hpp
 Declare the independent variables
 */
 
-namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
+namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 
 /*!
 Declaration of independent variables.
@@ -184,16 +184,24 @@ should comparison operators be recorded.
 is the dynamic parameter vector.
 */
 template <class ADVector>
-void Independent(ADVector &x, size_t abort_op_index, bool record_compare, ADVector &dynamic) {
-    CPPAD_ASSERT_KNOWN(abort_op_index == 0 || record_compare,
-                       "Independent: abort_op_index is non-zero and record_compare is false.");
+void Independent(
+    ADVector&  x              ,
+    size_t     abort_op_index ,
+    bool       record_compare ,
+    ADVector&  dynamic        )
+{   CPPAD_ASSERT_KNOWN(
+        abort_op_index == 0 || record_compare,
+        "Independent: abort_op_index is non-zero and record_compare is false."
+    );
     typedef typename ADVector::value_type ADBase;
-    typedef typename ADBase::value_type Base;
-    CPPAD_ASSERT_KNOWN(ADBase::tape_ptr() == CPPAD_NULL,
-                       "Independent: cannot create a new tape because\n"
-                       "a previous tape is still active (for this thread).\n"
-                       "AD<Base>::abort_recording() would abort this previous recording.");
-    local::ADTape<Base> *tape = ADBase::tape_manage(new_tape_manage);
+    typedef typename ADBase::value_type   Base;
+    CPPAD_ASSERT_KNOWN(
+        ADBase::tape_ptr() == CPPAD_NULL,
+        "Independent: cannot create a new tape because\n"
+        "a previous tape is still active (for this thread).\n"
+        "AD<Base>::abort_recording() would abort this previous recording."
+    );
+    local::ADTape<Base>* tape = ADBase::tape_manage(new_tape_manage);
     tape->Independent(x, abort_op_index, record_compare, dynamic);
 }
 // ---------------------------------------------------------------------------
@@ -214,8 +222,8 @@ of operations). The value zero corresponds to not aborting (will not match).
 should comparison operators be recorded.
 */
 template <class ADVector>
-void Independent(ADVector &x, size_t abort_op_index, bool record_compare) {
-    ADVector dynamic(0);  // empty vector
+void Independent(ADVector &x, size_t abort_op_index, bool record_compare)
+{   ADVector dynamic(0); // empty vector
     Independent(x, abort_op_index, record_compare, dynamic);
 }
 // ---------------------------------------------------------------------------
@@ -233,9 +241,9 @@ operator index at which execution will be aborted (during  the recording
 of operations). The value zero corresponds to not aborting (will not match).
 */
 template <class ADVector>
-void Independent(ADVector &x, size_t abort_op_index) {
-    bool record_compare = true;
-    ADVector dynamic(0);  // empty vector
+void Independent(ADVector &x, size_t abort_op_index)
+{   bool     record_compare = true;
+    ADVector dynamic(0); // empty vector
     Independent(x, abort_op_index, record_compare, dynamic);
 }
 // ---------------------------------------------------------------------------
@@ -250,12 +258,12 @@ This is simple vector type with elements of type AD<Base>.
 Vector of the independent variablers.
 */
 template <class ADVector>
-void Independent(ADVector &x) {
-    size_t abort_op_index = 0;
-    bool record_compare = true;
-    ADVector dynamic(0);  // empty vector
+void Independent(ADVector &x)
+{   size_t   abort_op_index = 0;
+    bool     record_compare = true;
+    ADVector dynamic(0); // empty vector
     Independent(x, abort_op_index, record_compare, dynamic);
 }
 
-}  // namespace CppAD
-#endif
+} // END_CPPAD_NAMESPACE
+# endif

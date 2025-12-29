@@ -17,9 +17,9 @@
 
 // ---------------------------------------------------------------------------
 // dot source code generation
-#include <cppad/cg/lang/dot/dot_util.hpp>
 #include <cppad/cg/lang/dot/language_dot.hpp>
 #include <cppad/cg/lang/dot/language_dot_arrays.hpp>
 #include <cppad/cg/lang/dot/language_dot_index_patterns.hpp>
+#include <cppad/cg/lang/dot/dot_util.hpp>
 
 #endif

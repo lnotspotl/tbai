@@ -20,59 +20,69 @@ namespace cg {
 
 /**
  * An index reference operation node
- *
+ * 
  * This is a custom OperationNode class and therefore cannot be transformed
  * into any other node type (makeAlias() and setOperation() might not work).
- *
+ * 
  * @author Joao Leal
  */
-template <class Base>
+template<class Base>
 class IndexOperationNode : public OperationNode<Base> {
     friend class CodeHandler<Base>;
+public:
 
-   public:
-    inline bool isDefinedLocally() const { return this->getArguments().size() > 1; }
+    inline bool isDefinedLocally() const {
+        return this->getArguments().size() > 1;
+    }
 
-    inline OperationNode<Base> &getIndexCreationNode() const {
-        const std::vector<Argument<Base> > &args = this->getArguments();
+    inline OperationNode<Base>& getIndexCreationNode() const {
+        const std::vector<Argument<Base> >& args = this->getArguments();
         CPPADCG_ASSERT_KNOWN(!args.empty(), "Invalid number of arguments");
         CPPADCG_ASSERT_KNOWN(args.back().getOperation() != nullptr, "Invalid argument type");
         return *args.back().getOperation();
     }
 
-    inline const OperationNode<Base> &getIndex() const {
-        const std::vector<Argument<Base> > &args = this->getArguments();
+    inline const OperationNode<Base>& getIndex() const {
+        const std::vector<Argument<Base> >& args = this->getArguments();
         CPPADCG_ASSERT_KNOWN(!args.empty(), "Invalid number of arguments");
 
-        OperationNode<Base> *aNode = args[0].getOperation();
-        CPPADCG_ASSERT_KNOWN(aNode != nullptr && aNode->getOperationType() == CGOpCode::IndexDeclaration,
-                             "Invalid argument operation type");
+        OperationNode<Base>* aNode = args[0].getOperation();
+        CPPADCG_ASSERT_KNOWN(aNode != nullptr && aNode->getOperationType() == CGOpCode::IndexDeclaration, "Invalid argument operation type");
 
-        return static_cast<const OperationNode<Base> &>(*aNode);
+        return static_cast<const OperationNode<Base>&> (*aNode);
     }
 
-    inline void makeAssigmentDependent(IndexAssignOperationNode<Base> &indexAssign) {
-        std::vector<Argument<Base> > &args = this->getArguments();
+    inline void makeAssigmentDependent(IndexAssignOperationNode<Base>& indexAssign) {
+        std::vector<Argument<Base> >& args = this->getArguments();
 
         args.resize(2);
         args[0] = indexAssign.getIndex();
         args[1] = indexAssign;
     }
 
-    inline virtual ~IndexOperationNode() {}
+    inline virtual ~IndexOperationNode() {
+    }
 
-   protected:
-    inline IndexOperationNode(CodeHandler<Base> *handler, OperationNode<Base> &indexDcl)
-        : OperationNode<Base>(handler, CGOpCode::Index, indexDcl) {}
+protected:
 
-    inline IndexOperationNode(CodeHandler<Base> *handler, LoopStartOperationNode<Base> &loopStart)
-        : OperationNode<Base>(handler, CGOpCode::Index, {loopStart.getIndex(), loopStart}) {}
+    inline IndexOperationNode(CodeHandler<Base>* handler,
+                              OperationNode<Base>& indexDcl) :
+        OperationNode<Base>(handler, CGOpCode::Index, indexDcl) {
+    }
 
-    inline IndexOperationNode(CodeHandler<Base> *handler, IndexAssignOperationNode<Base> &indexAssign)
-        : OperationNode<Base>(handler, CGOpCode::Index, {indexAssign.getIndex(), indexAssign}) {}
+    inline IndexOperationNode(CodeHandler<Base>* handler,
+                              LoopStartOperationNode<Base>& loopStart) :
+        OperationNode<Base>(handler, CGOpCode::Index,{loopStart.getIndex(), loopStart}) {
+    }
+
+    inline IndexOperationNode(CodeHandler<Base>* handler,
+                              IndexAssignOperationNode<Base>& indexAssign) :
+        OperationNode<Base>(handler, CGOpCode::Index,{indexAssign.getIndex(), indexAssign}) {
+    }
+
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

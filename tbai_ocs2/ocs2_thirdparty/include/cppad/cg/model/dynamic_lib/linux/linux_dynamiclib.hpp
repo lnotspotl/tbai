@@ -17,9 +17,8 @@
  */
 #if CPPAD_CG_SYSTEM_LINUX
 
-#include <dlfcn.h>
-
 #include <typeinfo>
+#include <dlfcn.h>
 
 namespace CppAD {
 namespace cg {
@@ -30,71 +29,75 @@ namespace cg {
  *
  * @author Joao Leal
  */
-template <class Base>
+template<class Base>
 class LinuxDynamicLib : public DynamicLib<Base> {
-   protected:
+protected:
     const std::string _dynLibName;
     /// the dynamic library handler
-    void *_dynLibHandle;
-    std::set<LinuxDynamicLibModel<Base> *> _models;
+    void* _dynLibHandle;
+    std::set<LinuxDynamicLibModel<Base>*> _models;
+public:
 
-   public:
-    LinuxDynamicLib(const std::string &dynLibName, int dlOpenMode = RTLD_NOW)
-        : _dynLibName(dynLibName), _dynLibHandle(nullptr) {
+    LinuxDynamicLib(const std::string& dynLibName,
+                    int dlOpenMode = RTLD_NOW) :
+        _dynLibName(dynLibName),
+        _dynLibHandle(nullptr) {
+
         std::string path;
         if (dynLibName[0] == '/') {
-            path = dynLibName;  // absolute path
-        } else if (!(dynLibName[0] == '.' && dynLibName[1] == '/') && !(dynLibName[0] == '.' && dynLibName[1] == '.')) {
-            path = "./" + dynLibName;  // relative path
+            path = dynLibName; // absolute path
+        } else if (!(dynLibName[0] == '.' && dynLibName[1] == '/') &&
+                !(dynLibName[0] == '.' && dynLibName[1] == '.')) {
+            path = "./" + dynLibName; // relative path
         } else {
             path = dynLibName;
         }
 
         // load the dynamic library
         _dynLibHandle = dlopen(path.c_str(), dlOpenMode);
-        CPPADCG_ASSERT_KNOWN(_dynLibHandle != nullptr,
-                             ("Failed to dynamically load library '" + dynLibName + "': " + dlerror()).c_str());
+        CPPADCG_ASSERT_KNOWN(_dynLibHandle != nullptr, ("Failed to dynamically load library '" + dynLibName + "': " + dlerror()).c_str());
 
         // validate the dynamic library
         this->validate();
     }
 
-    LinuxDynamicLib(const LinuxDynamicLib &) = delete;
-    LinuxDynamicLib &operator=(const LinuxDynamicLib &) = delete;
+    LinuxDynamicLib(const LinuxDynamicLib&) = delete;
+    LinuxDynamicLib& operator=(const LinuxDynamicLib&) = delete;
 
-    virtual std::unique_ptr<LinuxDynamicLibModel<Base>> modelLinuxDyn(const std::string &modelName) {
+    virtual std::unique_ptr<LinuxDynamicLibModel<Base>> modelLinuxDyn(const std::string& modelName) {
         std::unique_ptr<LinuxDynamicLibModel<Base>> m;
         std::set<std::string>::const_iterator it = this->_modelNames.find(modelName);
         if (it == this->_modelNames.end()) {
             return m;
         }
-        m.reset(new LinuxDynamicLibModel<Base>(this, modelName));
+        m.reset(new LinuxDynamicLibModel<Base> (this, modelName));
         _models.insert(m.get());
         return m;
     }
 
-    std::unique_ptr<FunctorGenericModel<Base>> modelFunctor(const std::string &modelName) override final {
+    std::unique_ptr<FunctorGenericModel<Base>> modelFunctor(const std::string& modelName) override final {
         return std::unique_ptr<FunctorGenericModel<Base>>(modelLinuxDyn(modelName).release());
     }
 
-    void *loadFunction(const std::string &functionName, bool required = true) override {
-        void *functor = dlsym(_dynLibHandle, functionName.c_str());
+    void* loadFunction(const std::string& functionName, bool required = true) override {
+        void* functor = dlsym(_dynLibHandle, functionName.c_str());
 
         if (required) {
             char *err = dlerror();
-            if (err != nullptr) throw CGException("Failed to load function '", functionName, "': ", err);
+            if (err != nullptr)
+                throw CGException("Failed to load function '", functionName, "': ", err);
         }
 
         return functor;
     }
 
     virtual ~LinuxDynamicLib() {
-        for (LinuxDynamicLibModel<Base> *model : _models) {
+        for (LinuxDynamicLibModel<Base>* model : _models) {
             model->modelLibraryClosed();
         }
 
         if (_dynLibHandle != nullptr) {
-            if (this->_onClose != nullptr) {
+            if(this->_onClose != nullptr) {
                 (*this->_onClose)();
             }
 
@@ -103,14 +106,18 @@ class LinuxDynamicLib : public DynamicLib<Base> {
         }
     }
 
-   protected:
-    virtual void destroyed(LinuxDynamicLibModel<Base> *model) { _models.erase(model); }
+protected:
+
+    virtual void destroyed(LinuxDynamicLibModel<Base>* model) {
+        _models.erase(model);
+    }
 
     friend class LinuxDynamicLibModel<Base>;
+
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif
 #endif

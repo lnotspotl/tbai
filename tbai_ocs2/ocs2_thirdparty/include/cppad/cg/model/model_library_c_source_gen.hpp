@@ -20,12 +20,12 @@ namespace cg {
 
 /**
  * Generates C source code for a bundle of models.
- *
+ * 
  * @author Joao Leal
  */
-template <class Base>
+template<class Base>
 class ModelLibraryCSourceGen : public JobTimer {
-   public:
+public:
     static const std::string FUNCTION_VERSION;
     static const std::string FUNCTION_MODELS;
     static const std::string FUNCTION_ONCLOSE;
@@ -42,15 +42,13 @@ class ModelLibraryCSourceGen : public JobTimer {
     static const std::string FUNCTION_SETTHREADPOOLNUMBEROFTIMEMEAS;
     static const std::string FUNCTION_GETTHREADPOOLNUMBEROFTIMEMEAS;
     static const unsigned long API_VERSION;
-
-   protected:
+protected:
     static const std::string CONST;
-
-   protected:
+protected:
     /**
      * Models to be contained whithin the library
      */
-    std::map<std::string, ModelCSourceGen<Base> *> _models;
+    std::map<std::string, ModelCSourceGen<Base>*> _models;
     /**
      * custom functions to be compiled in the dynamic library
      */
@@ -69,74 +67,83 @@ class ModelLibraryCSourceGen : public JobTimer {
      * temporary stream to generate source code
      */
     std::ostringstream _cache;
+public:
 
-   public:
     /**
      * Creates a new helper class for the generation of dynamic libraries
      * using the C language.
-     *
+     * 
      * @param model A model compilation helper (must only be deleted after
      *              this object)
      */
-    inline ModelLibraryCSourceGen(ModelCSourceGen<Base> &model) : _multiThreading(MultiThreadingType::NONE) {
+    inline ModelLibraryCSourceGen(ModelCSourceGen<Base>& model):
+        _multiThreading(MultiThreadingType::NONE) {
         CPPADCG_ASSERT_KNOWN(_models.find(model.getName()) == _models.end(),
                              "Another model with the same name was already registered");
 
-        _models[model.getName()] = &model;  // must not use initializer_list constructor of map!
+        _models[model.getName()] = &model; // must not use initializer_list constructor of map!
     }
 
-    template <class... Ms>
-    inline ModelLibraryCSourceGen(ModelCSourceGen<Base> &headModel, Ms &...rest) : ModelLibraryCSourceGen(rest...) {
+    template<class... Ms>
+    inline ModelLibraryCSourceGen(ModelCSourceGen<Base>& headModel, Ms&... rest) :
+        ModelLibraryCSourceGen(rest...) {
         CPPADCG_ASSERT_KNOWN(_models.find(headModel.getName()) == _models.end(),
                              "Another model with the same name was already registered");
 
         _models[headModel.getName()] = &headModel;
     }
 
-    ModelLibraryCSourceGen(const ModelLibraryCSourceGen &) = delete;
-    ModelLibraryCSourceGen &operator=(const ModelLibraryCSourceGen &) = delete;
+    ModelLibraryCSourceGen(const ModelLibraryCSourceGen&) = delete;
+    ModelLibraryCSourceGen& operator=(const ModelLibraryCSourceGen&) = delete;
 
-    virtual ~ModelLibraryCSourceGen() {}
+    virtual ~ModelLibraryCSourceGen() {
+    }
 
     /**
      * Adds additional models to be compiled into the created library.
-     *
+     * 
      * @param model a model compilation helper (must only be deleted after
      *              this object)
      */
-    inline void addModel(ModelCSourceGen<Base> &model) {
+    inline void addModel(ModelCSourceGen<Base>& model) {
         CPPADCG_ASSERT_KNOWN(_models.find(model.getName()) == _models.end(),
                              "Another model with the same name was already registered");
 
         _models[model.getName()] = &model;
 
-        _libSources.clear();  // must regenerate library sources again
+        _libSources.clear(); // must regenerate library sources again
     }
 
-    inline const std::map<std::string, ModelCSourceGen<Base> *> &getModels() const { return _models; }
+    inline const std::map<std::string, ModelCSourceGen<Base>*>& getModels() const {
+        return _models;
+    }
 
-    void addCustomFunctionSource(const std::string &filename, const std::string &source) {
+    void addCustomFunctionSource(const std::string& filename, const std::string& source) {
         CPPADCG_ASSERT_KNOWN(!filename.empty(), "The filename name cannot be empty");
 
         _customSource[filename] = source;
     }
 
     /**
-     * Provides the user defined custom sources.
-     *
+     * Provides the user defined custom sources. 
+     * 
      * @return maps filenames to the file content for the user defined
      *         sources.
      */
-    inline const std::map<std::string, std::string> &getCustomSources() const { return _customSource; }
+    inline const std::map<std::string, std::string>& getCustomSources() const {
+        return _customSource;
+    }
 
     /**
-     * Defines whether or not to generate multithreading directives to
-     * parallelize the sparse Jacobian and sparse Hessian evaluation.
-     * Parallelization can be disabled locally for each model.
-     *
-     * @return multithreading support type
-     */
-    inline MultiThreadingType getMultiThreading() const { return _multiThreading; }
+    * Defines whether or not to generate multithreading directives to
+    * parallelize the sparse Jacobian and sparse Hessian evaluation.
+    * Parallelization can be disabled locally for each model.
+    *
+    * @return multithreading support type
+    */
+    inline MultiThreadingType getMultiThreading() const {
+        return _multiThreading;
+    }
 
     /**
      * Defines whether or not to generate multithreading directives to
@@ -147,16 +154,18 @@ class ModelLibraryCSourceGen : public JobTimer {
      *
      * @param multiThreading multithreading support type
      */
-    inline void setMultiThreading(MultiThreadingType multiThreading) { _multiThreading = multiThreading; }
+    inline void setMultiThreading(MultiThreadingType multiThreading) {
+        _multiThreading = multiThreading;
+    }
 
     /**
      * Saves the generated C source code into several files.
-     *
+     * 
      * @param sourcesFolder A directory path where the files should be
      *                      created (any existing files with the same names
      *                      will be overridden).
      */
-    void saveSources(const std::string &sourcesFolder);
+    void saveSources(const std::string& sourcesFolder);
 
     /**
      * Provides the sources for the model library level.
@@ -166,23 +175,24 @@ class ModelLibraryCSourceGen : public JobTimer {
      *
      * @return model library sources
      */
-    virtual const std::map<std::string, std::string> &getLibrarySources();
+    virtual const std::map<std::string, std::string>& getLibrarySources();
+protected:
 
-   protected:
-    virtual void generateVersionSource(std::map<std::string, std::string> &sources);
+    virtual void generateVersionSource(std::map<std::string, std::string>& sources);
 
-    virtual void generateModelsSource(std::map<std::string, std::string> &sources);
+    virtual void generateModelsSource(std::map<std::string, std::string>& sources);
 
-    virtual void generateOnCloseSource(std::map<std::string, std::string> &sources);
+    virtual void generateOnCloseSource(std::map<std::string, std::string>& sources);
 
-    virtual void generateThreadPoolSources(std::map<std::string, std::string> &sources);
+    virtual void generateThreadPoolSources(std::map<std::string, std::string>& sources);
 
-    static void saveSources(const std::string &sourcesFolder, const std::map<std::string, std::string> &sources);
+    static void saveSources(const std::string& sourcesFolder,
+                            const std::map<std::string, std::string>& sources);
 
     friend class ModelLibraryProcessor<Base>;
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

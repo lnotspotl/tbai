@@ -19,17 +19,23 @@
 namespace CppAD {
 namespace cg {
 
-template <class Base>
+template<class Base>
 class AtomicExternalFunctionWrapper : public ExternalFunctionWrapper<Base> {
-   private:
-    atomic_base<Base> *atomic_;
+private:
+    atomic_base<Base>* atomic_;
+public:
 
-   public:
-    inline AtomicExternalFunctionWrapper(atomic_base<Base> &atomic) : atomic_(&atomic) {}
+    inline AtomicExternalFunctionWrapper(atomic_base<Base>& atomic) :
+        atomic_(&atomic) {
+    }
 
     inline virtual ~AtomicExternalFunctionWrapper() = default;
 
-    bool forward(FunctorGenericModel<Base> &libModel, int q, int p, const Array tx[], Array &ty) override {
+    bool forward(FunctorGenericModel<Base>& libModel,
+                 int q,
+                 int p,
+                 const Array tx[],
+                 Array& ty) override {
         size_t m = ty.size;
         size_t n = tx[0].size;
 
@@ -49,7 +55,11 @@ class AtomicExternalFunctionWrapper : public ExternalFunctionWrapper<Base> {
         return ret;
     }
 
-    bool reverse(FunctorGenericModel<Base> &libModel, int p, const Array tx[], Array &px, const Array py[]) override {
+    bool reverse(FunctorGenericModel<Base>& libModel,
+                 int p,
+                 const Array tx[],
+                 Array& px,
+                 const Array py[]) override {
         size_t m = py[0].size;
         size_t n = tx[0].size;
 
@@ -69,24 +79,30 @@ class AtomicExternalFunctionWrapper : public ExternalFunctionWrapper<Base> {
         if (libModel._evalAtomicForwardOne4CppAD) {
             // only required in order to avoid an issue with a validation inside CppAD
             CppAD::vector<bool> vx, vy;
-            if (!atomic_->forward(p, p, vx, vy, libModel._tx, libModel._ty)) return false;
+            if (!atomic_->forward(p, p, vx, vy, libModel._tx, libModel._ty))
+                return false;
         }
 #endif
 
         bool ret = atomic_->reverse(p, libModel._tx, libModel._ty, libModel._px, libModel._py);
 
-        convertAdd(libModel._px, px, n, p, 0);  // k=0 for both p=0 and p=1
+        convertAdd(libModel._px, px, n, p, 0); // k=0 for both p=0 and p=1
 
         return ret;
     }
 
-   private:
-    inline void convert(const Array from[], CppAD::vector<Base> &to, size_t n, size_t p, size_t kmax) {
+private:
+
+    inline void convert(const Array from[],
+                        CppAD::vector<Base>& to,
+                        size_t n,
+                        size_t p,
+                        size_t kmax) {
         size_t p1 = p + 1;
         to.resize(n * p1);
 
         for (size_t k = 0; k < kmax; k++) {
-            Base *values = static_cast<Base *>(from[k].data);
+            Base* values = static_cast<Base*> (from[k].data);
             if (from[k].sparse) {
                 if (p == 0) {
                     std::fill(&to[0], &to[0] + n, Base(0));
@@ -108,11 +124,15 @@ class AtomicExternalFunctionWrapper : public ExternalFunctionWrapper<Base> {
         }
     }
 
-    inline void convertAdd(const CppAD::vector<Base> &from, Array &to, size_t n, size_t p, size_t k) {
+    inline void convertAdd(const CppAD::vector<Base>& from,
+                           Array& to,
+                           size_t n,
+                           size_t p,
+                           size_t k) {
         CPPADCG_ASSERT_KNOWN(!to.sparse, "output must be a dense array");
         CPPADCG_ASSERT_KNOWN(to.size >= n, "invalid size");
 
-        Base *values = static_cast<Base *>(to.data);
+        Base* values = static_cast<Base*> (to.data);
 
         if (p == 0) {
             std::copy(&from[0], &from[0] + n, values);
@@ -123,10 +143,11 @@ class AtomicExternalFunctionWrapper : public ExternalFunctionWrapper<Base> {
                 values[j] += from[j * p1 + k];
             }
         }
+
     }
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

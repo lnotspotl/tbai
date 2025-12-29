@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_REV_JAC_SPARSITY_HPP
-#define CPPAD_CORE_REV_JAC_SPARSITY_HPP
+# ifndef CPPAD_CORE_REV_JAC_SPARSITY_HPP
+# define CPPAD_CORE_REV_JAC_SPARSITY_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -117,10 +117,10 @@ contains an example and test of this operation.
 $end
 -----------------------------------------------------------------------------
 */
-#include <cppad/core/ad_fun.hpp>
-#include <cppad/local/sparse_internal.hpp>
+# include <cppad/core/ad_fun.hpp>
+# include <cppad/local/sparse_internal.hpp>
 
-namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
+namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 
 /*!
 Reverse Jacobian sparsity patterns.
@@ -161,57 +161,98 @@ and x is any argument value.
 */
 template <class Base, class RecBase>
 template <class SizeVector>
-void ADFun<Base, RecBase>::rev_jac_sparsity(const sparse_rc<SizeVector> &pattern_in, bool transpose, bool dependency,
-                                            bool internal_bool, sparse_rc<SizeVector> &pattern_out) {
+void ADFun<Base,RecBase>::rev_jac_sparsity(
+    const sparse_rc<SizeVector>& pattern_in       ,
+    bool                         transpose        ,
+    bool                         dependency       ,
+    bool                         internal_bool    ,
+    sparse_rc<SizeVector>&       pattern_out      )
+{
     // used to identify the RecBase type in calls to sweeps
     RecBase not_used_rec_base;
     //
     // number or rows, columns, and non-zeros in pattern_in
-    size_t nr_in = pattern_in.nr();
-    size_t nc_in = pattern_in.nc();
+    size_t nr_in  = pattern_in.nr();
+    size_t nc_in  = pattern_in.nc();
     //
     size_t ell = nr_in;
-    size_t m = nc_in;
-    if (transpose) std::swap(ell, m);
+    size_t m   = nc_in;
+    if( transpose )
+        std::swap(ell, m);
     //
-    CPPAD_ASSERT_KNOWN(m == Range(),
-                       "rev_jac_sparsity: number columns in R "
-                       "is not equal number of dependent variables.");
+    CPPAD_ASSERT_KNOWN(
+        m == Range() ,
+        "rev_jac_sparsity: number columns in R "
+        "is not equal number of dependent variables."
+    );
     // number of independent variables
     size_t n = Domain();
     //
-    bool zero_empty = true;
+    bool zero_empty  = true;
     bool input_empty = true;
-    if (internal_bool) {  // allocate memory for bool sparsity calculation
+    if( internal_bool )
+    {   // allocate memory for bool sparsity calculation
         // (sparsity pattern is emtpy after a resize)
         local::sparse_pack internal_jac;
         internal_jac.resize(num_var_tape_, ell);
         //
         // set sparsity patttern for dependent variables
-        local::set_internal_sparsity(zero_empty, input_empty, !transpose, dep_taddr_, internal_jac, pattern_in);
+        local::set_internal_sparsity(
+            zero_empty            ,
+            input_empty           ,
+            ! transpose           ,
+            dep_taddr_            ,
+            internal_jac          ,
+            pattern_in
+        );
 
         // compute sparsity for other variables
-        local::sweep::rev_jac<addr_t>(&play_, dependency, n, num_var_tape_, internal_jac, not_used_rec_base
+        local::sweep::rev_jac<addr_t>(
+            &play_,
+            dependency,
+            n,
+            num_var_tape_,
+            internal_jac,
+            not_used_rec_base
 
         );
         // get sparstiy pattern for independent variables
-        local::get_internal_sparsity(!transpose, ind_taddr_, internal_jac, pattern_out);
-    } else {  // allocate memory for bool sparsity calculation
+        local::get_internal_sparsity(
+            ! transpose, ind_taddr_, internal_jac, pattern_out
+        );
+    }
+    else
+    {   // allocate memory for bool sparsity calculation
         // (sparsity pattern is emtpy after a resize)
         local::sparse_list internal_jac;
         internal_jac.resize(num_var_tape_, ell);
         //
         // set sparsity patttern for dependent variables
-        local::set_internal_sparsity(zero_empty, input_empty, !transpose, dep_taddr_, internal_jac, pattern_in);
+        local::set_internal_sparsity(
+            zero_empty            ,
+            input_empty           ,
+            ! transpose           ,
+            dep_taddr_            ,
+            internal_jac          ,
+            pattern_in
+        );
 
         // compute sparsity for other variables
-        local::sweep::rev_jac<addr_t>(&play_, dependency, n, num_var_tape_, internal_jac, not_used_rec_base
+        local::sweep::rev_jac<addr_t>(
+            &play_,
+            dependency,
+            n,
+            num_var_tape_,
+            internal_jac,
+            not_used_rec_base
 
         );
         // get sparstiy pattern for independent variables
-        local::get_internal_sparsity(!transpose, ind_taddr_, internal_jac, pattern_out);
+        local::get_internal_sparsity(
+            ! transpose, ind_taddr_, internal_jac, pattern_out
+        );
     }
     return;
 }
-}  // namespace CppAD
-#endif
+} // END_CPPAD_NAMESPACE
+# endif

@@ -1,5 +1,5 @@
-#ifndef CPPAD_LOCAL_UTILITY_VECTOR_BOOL_HPP
-#define CPPAD_LOCAL_UTILITY_VECTOR_BOOL_HPP
+# ifndef CPPAD_LOCAL_UTILITY_VECTOR_BOOL_HPP
+# define CPPAD_LOCAL_UTILITY_VECTOR_BOOL_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-19 Bradley M. Bell
 
@@ -12,12 +12,10 @@ in the Eclipse Public License, Version 2.0 are satisfied:
       GNU General Public License, Version 2.0 or later.
 ---------------------------------------------------------------------------- */
 
-#include <cstddef>
+# include <cstddef>
 
 // BEGIN_CPPAD_LOCAL_UTILITY_NAMESPACE
-namespace CppAD {
-namespace local {
-namespace utility {
+namespace CppAD { namespace local { namespace utility {
 /*
 $begin vector_bool_element$$
 $spell
@@ -55,34 +53,32 @@ is a $code bool$$.
 $head Source$$
 $srccode%hpp% */
 class vectorBoolElement {
-   private:
+private:
     typedef size_t unit_t;
-    unit_t *unit_;
-    unit_t mask_;
-
-   public:
-    vectorBoolElement(unit_t *unit, unit_t mask) : unit_(unit), mask_(mask) {}
-    vectorBoolElement(const vectorBoolElement &other) : unit_(other.unit_), mask_(other.mask_) {}
-    operator bool() const { return (*unit_ & mask_) != 0; }
-    vectorBoolElement &operator=(bool value) {
-        if (value)
-            *unit_ |= mask_;
-        else
-            *unit_ &= ~mask_;
+    unit_t* unit_;
+    unit_t  mask_;
+public:
+    vectorBoolElement(unit_t* unit, unit_t mask )
+    : unit_(unit) , mask_(mask)
+    { }
+    vectorBoolElement(const vectorBoolElement& other)
+    : unit_(other.unit_) , mask_(other.mask_)
+    { }
+    operator bool() const
+    {   return (*unit_ & mask_) != 0; }
+    vectorBoolElement& operator=(bool value)
+    {   if(value) *unit_ |= mask_;
+        else      *unit_ &= ~mask_;
         return *this;
     }
-    vectorBoolElement &operator=(const vectorBoolElement &element) {
-        if (*(element.unit_) & element.mask_)
-            *unit_ |= mask_;
-        else
-            *unit_ &= ~mask_;
+    vectorBoolElement& operator=(const vectorBoolElement& element)
+    {   if( *(element.unit_) & element.mask_ ) *unit_ |= mask_;
+        else                                   *unit_ &= ~mask_;
         return *this;
     }
 };
 /* %$$
 $end
 */
-}  // namespace utility
-}  // namespace local
-}  // namespace CppAD
-#endif
+} } } // END_CPPAD_LOCAL_UTILITY_NAMESPACE
+# endif

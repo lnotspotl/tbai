@@ -22,9 +22,9 @@ namespace cg {
  * The steps for a node during the navigation through the graph of operation nodes.
  */
 enum class StackNavigationStep {
-    Analyze,          // analyze the current node (before visiting children)
-    ChildrenVisited,  // post process node after children have been visited
-    Exit              // leave node (go to the parent node)
+    Analyze, // analyze the current node (before visiting children)
+    ChildrenVisited, // post process node after children have been visited
+    Exit // leave node (go to the parent node)
 };
 
 /**
@@ -32,21 +32,30 @@ enum class StackNavigationStep {
  *
  * @tparam Base
  */
-template <class Base>
+template<class Base>
 class SimpleOperationStackData {
-   private:
-    OperationNode<Base> *const _parent;
+private:
+    OperationNode<Base>* const _parent;
     const size_t _node;
+public:
 
-   public:
-    inline SimpleOperationStackData(OperationNode<Base> &parent, size_t nodeIndex) noexcept
-        : _parent(&parent), _node(nodeIndex) {}
+    inline SimpleOperationStackData(OperationNode<Base>& parent,
+                                    size_t nodeIndex) noexcept :
+            _parent(&parent),
+            _node(nodeIndex) {
+    }
 
-    inline OperationNode<Base> &parent() { return *_parent; }
+    inline OperationNode<Base>& parent() {
+        return *_parent;
+    }
 
-    inline OperationNode<Base> &node() { return *_parent->getArguments()[_node].getOperation(); }
+    inline OperationNode<Base>& node() {
+        return *_parent->getArguments()[_node].getOperation();
+    }
 
-    inline size_t argumentIndex() const { return _node; }
+    inline size_t argumentIndex() const {
+        return _node;
+    }
 };
 
 /**
@@ -54,16 +63,20 @@ class SimpleOperationStackData {
  *
  * @tparam Base
  */
-template <class Base>
-class OperationStackData : public SimpleOperationStackData<Base> {
-   public:
+template<class Base>
+class OperationStackData :public SimpleOperationStackData<Base> {
+public:
     size_t parentNodeScope;
     StackNavigationStep nextStep;
 
-    inline OperationStackData(OperationNode<Base> &parent, size_t nodeIndex, size_t parentNodeScope) noexcept
-        : SimpleOperationStackData<Base>(parent, nodeIndex),
-          parentNodeScope(parentNodeScope),
-          nextStep(StackNavigationStep::Analyze) {}
+    inline OperationStackData(OperationNode<Base>& parent,
+                              size_t nodeIndex,
+                              size_t parentNodeScope) noexcept :
+            SimpleOperationStackData<Base>(parent, nodeIndex),
+            parentNodeScope(parentNodeScope),
+            nextStep(StackNavigationStep::Analyze) {
+    }
+
 };
 
 /**
@@ -71,38 +84,50 @@ class OperationStackData : public SimpleOperationStackData<Base> {
  *
  * @tparam Base
  */
-template <class Element>
+template<class Element>
 class BaseOperationStack {
-   private:
+private:
     std::vector<Element> _stack;
+public:
+    inline BaseOperationStack() {
+        _stack.reserve(100);
+    }
 
-   public:
-    inline BaseOperationStack() { _stack.reserve(100); }
+    inline bool empty() const {
+        return _stack.empty();
+    }
 
-    inline bool empty() const { return _stack.empty(); }
+    inline size_t size() const {
+        return _stack.size();
+    }
 
-    inline size_t size() const { return _stack.size(); }
+    inline void pop_back() {
+        _stack.pop_back();
+    }
 
-    inline void pop_back() { _stack.pop_back(); }
+    inline Element& back() {
+        return _stack.back();
+    }
 
-    inline Element &back() { return _stack.back(); }
-
-    template <class... Args>
-    inline void emplace_back(Args &&...args) {
+    template<class... Args>
+    inline void emplace_back(Args&&... args) {
         if (_stack.size() == _stack.capacity()) {
             _stack.reserve((_stack.size() * 3) / 2 + 1);
         }
         _stack.emplace_back(std::forward<Args>(args)...);
     }
 
-    inline Element &operator[](size_t i) { return _stack[i]; }
+    inline Element& operator[](size_t i) {
+        return _stack[i];
+    }
 };
 
-template <class Base>
-class OperationStack : public BaseOperationStack<OperationStackData<Base>> {
-   public:
-    inline void pushNodeArguments(OperationNode<Base> &node, size_t parentNodeScope) {
-        auto &args = node.getArguments();
+template<class Base>
+class OperationStack : public BaseOperationStack<OperationStackData<Base> > {
+public:
+    inline void pushNodeArguments(OperationNode<Base>& node,
+                                  size_t parentNodeScope) {
+        auto& args = node.getArguments();
 
         // append in reverse order so that they are visited in correct forward order
         for (auto itArg = args.rbegin(); itArg != args.rend(); ++itArg) {
@@ -114,11 +139,11 @@ class OperationStack : public BaseOperationStack<OperationStackData<Base>> {
     }
 };
 
-template <class Base>
-class SimpleOperationStack : public BaseOperationStack<SimpleOperationStackData<Base>> {
-   public:
-    inline void pushNodeArguments(OperationNode<Base> &node) {
-        auto &args = node.getArguments();
+template<class Base>
+class SimpleOperationStack : public BaseOperationStack<SimpleOperationStackData<Base> > {
+public:
+    inline void pushNodeArguments(OperationNode<Base>& node) {
+        auto& args = node.getArguments();
 
         // append in reverse order so that they are visited in correct forward order
         for (auto itArg = args.rbegin(); itArg != args.rend(); ++itArg) {
@@ -149,9 +174,11 @@ class SimpleOperationStack : public BaseOperationStack<SimpleOperationStackData<
  * @param processRoot Whether or not to include the root in the transversal process
  *                    (call nodeAnalysis/nodePostProcessAnalysis for this node).
  */
-template <class Base, typename FunctionAnalysis, typename FunctionPostProcess>
-inline void depthFirstGraphNavigation(OperationNode<Base> &root, size_t currentScopeColor,
-                                      FunctionAnalysis &nodeAnalysis, FunctionPostProcess &nodePostProcessAnalysis,
+template<class Base, typename FunctionAnalysis, typename FunctionPostProcess>
+inline void depthFirstGraphNavigation(OperationNode<Base>& root,
+                                      size_t currentScopeColor,
+                                      FunctionAnalysis& nodeAnalysis,
+                                      FunctionPostProcess& nodePostProcessAnalysis,
                                       bool processRoot) {
     OperationStack<Base> stack;
 
@@ -164,8 +191,9 @@ inline void depthFirstGraphNavigation(OperationNode<Base> &root, size_t currentS
     }
 
     while (!stack.empty()) {
+
         if (stack.back().nextStep == StackNavigationStep::Analyze) {
-            size_t i = stack.size() - 1;  // do not use a reference because the stack may be resized
+            size_t i = stack.size() - 1; // do not use a reference because the stack may be resized
 
             bool complete = nodeAnalysis(stack[i], stack);
 
@@ -182,6 +210,7 @@ inline void depthFirstGraphNavigation(OperationNode<Base> &root, size_t currentS
         } else {
             stack.pop_back();
         }
+
     }
 }
 
@@ -198,8 +227,10 @@ inline void depthFirstGraphNavigation(OperationNode<Base> &root, size_t currentS
  * @param processRoot Whether or not to include the root in the transversal process
  *                    (call nodeAnalysis/nodePostProcessAnalysis for this node).
  */
-template <class Base, typename FunctionAnalysis>
-inline void depthFirstGraphNavigation(OperationNode<Base> &root, FunctionAnalysis &nodeAnalysis, bool processRoot) {
+template<class Base, typename FunctionAnalysis>
+inline void depthFirstGraphNavigation(OperationNode<Base>& root,
+                                      FunctionAnalysis& nodeAnalysis,
+                                      bool processRoot) {
     SimpleOperationStack<Base> stack;
 
     std::unique_ptr<OperationNode<Base>> fakeSuperRoot;
@@ -211,14 +242,14 @@ inline void depthFirstGraphNavigation(OperationNode<Base> &root, FunctionAnalysi
     }
 
     while (!stack.empty()) {
-        auto nodeEl = stack.back();  // copy
+        auto nodeEl = stack.back(); // copy
         stack.pop_back();
 
         nodeAnalysis(nodeEl, stack);
     }
 }
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

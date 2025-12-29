@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_REV_ONE_HPP
-#define CPPAD_CORE_REV_ONE_HPP
+# ifndef CPPAD_CORE_REV_ONE_HPP
+# define CPPAD_CORE_REV_ONE_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -120,8 +120,8 @@ namespace CppAD {
 
 template <class Base, class RecBase>
 template <class Vector>
-Vector ADFun<Base, RecBase>::RevOne(const Vector &x, size_t i) {
-    size_t i1;
+Vector ADFun<Base,RecBase>::RevOne(const Vector  &x, size_t i)
+{   size_t i1;
 
     size_t n = Domain();
     size_t m = Range();
@@ -129,15 +129,22 @@ Vector ADFun<Base, RecBase>::RevOne(const Vector &x, size_t i) {
     // check Vector is Simple Vector class with Base type elements
     CheckSimpleVector<Base, Vector>();
 
-    CPPAD_ASSERT_KNOWN(x.size() == n, "RevOne: Length of x not equal domain dimension for f");
-    CPPAD_ASSERT_KNOWN(i < m, "RevOne: the index i is not less than range dimension for f");
+    CPPAD_ASSERT_KNOWN(
+        x.size() == n,
+        "RevOne: Length of x not equal domain dimension for f"
+    );
+    CPPAD_ASSERT_KNOWN(
+        i < m,
+        "RevOne: the index i is not less than range dimension for f"
+    );
 
     // point at which we are evaluating the derivative
     Forward(0, x);
 
     // component which are are taking the derivative of
     Vector w(m);
-    for (i1 = 0; i1 < m; i1++) w[i1] = 0.;
+    for(i1 = 0; i1 < m; i1++)
+        w[i1] = 0.;
     w[i] = Base(1.0);
 
     // dimension the return value
@@ -149,6 +156,6 @@ Vector ADFun<Base, RecBase>::RevOne(const Vector &x, size_t i) {
     return dw;
 }
 
-}  // namespace CppAD
+} // END CppAD namespace
 
-#endif
+# endif

@@ -29,37 +29,38 @@ namespace cg {
  * mechanism to find an unmatched variable for equation node before going
  * deeper.
  */
-template <class Base>
+template<class Base>
 class AugmentPathDepthLookaheadA : public AugmentPath<Base> {
-   protected:
+protected:
     using CGBase = CppAD::cg::CG<Base>;
     using ADCG = CppAD::AD<CGBase>;
+public:
 
-   public:
-    bool augmentPath(Enode<Base> &i) override final {
-        i.color(this->logger_->log(), this->logger_->getVerbosity());  // avoids infinite recursion
+    bool augmentPath(Enode <Base>& i) override final {
+        i.color(this->logger_->log(), this->logger_->getVerbosity()); // avoids infinite recursion
 
-        const std::vector<Vnode<Base> *> &vars = i.variables();
+        const std::vector<Vnode<Base>*>&vars = i.variables();
 
         // first look for derivative variables
-        for (Vnode<Base> *jj : vars) {
-            if (jj->derivative() == nullptr &&          // highest order derivative
-                jj->antiDerivative() != nullptr &&      // not an algebraic variable
-                jj->assignmentEquation() == nullptr) {  // not assigned yet
+        for (Vnode<Base>* jj : vars) {
+            if (jj->derivative() == nullptr && // highest order derivative
+                jj->antiDerivative() != nullptr && // not an algebraic variable
+                jj->assignmentEquation() == nullptr) { // not assigned yet
 
                 jj->setAssignmentEquation(i, this->logger_->log(), this->logger_->getVerbosity());
                 return true;
             }
         }
 
-        for (Vnode<Base> *jj : vars) {
-            if (!jj->isColored() && jj->derivative() == nullptr &&  // highest order derivative
-                jj->antiDerivative() != nullptr) {                  // not an algebraic variable
+        for (Vnode<Base>* jj : vars) {
+            if (!jj->isColored() &&
+                jj->derivative() == nullptr && // highest order derivative
+                jj->antiDerivative() != nullptr) {  // not an algebraic variable
 
-                Enode<Base> &k = *jj->assignmentEquation();  // all variables are assigned to another equation
+                Enode<Base>& k = *jj->assignmentEquation(); // all variables are assigned to another equation
 
                 if (!k.isColored()) {
-                    // jj->color(this->logger_->log(), this->logger_->getVerbosity()); // do not color variables!
+                    //jj->color(this->logger_->log(), this->logger_->getVerbosity()); // do not color variables!
 
                     bool pathFound = augmentPath(k);
                     if (pathFound) {
@@ -72,9 +73,10 @@ class AugmentPathDepthLookaheadA : public AugmentPath<Base> {
 
         return false;
     }
+
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

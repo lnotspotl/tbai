@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_FUN_CHECK_HPP
-#define CPPAD_CORE_FUN_CHECK_HPP
+# ifndef CPPAD_CORE_FUN_CHECK_HPP
+# define CPPAD_CORE_FUN_CHECK_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -187,18 +187,24 @@ $end
 */
 
 namespace CppAD {
-template <class Base, class RecBase, class Fun, class Vector>
-bool FunCheck(ADFun<Base, RecBase> &f, Fun &g, const Vector &x, const Base &r, const Base &a) {
-    bool ok = true;
+    template <class Base, class RecBase, class Fun, class Vector>
+    bool FunCheck(
+        ADFun<Base, RecBase>  &f ,
+        Fun                   &g ,
+        const Vector          &x ,
+        const Base            &r ,
+        const Base            &a )
+    {   bool ok = true;
 
-    size_t m = f.Range();
-    Vector yf = f.Forward(0, x);
-    Vector yg = g(x);
+        size_t m   = f.Range();
+        Vector yf  = f.Forward(0, x);
+        Vector yg  = g(x);
 
-    size_t i;
-    for (i = 0; i < m; i++) ok &= NearEqual(yf[i], yg[i], r, a);
-    return ok;
+        size_t i;
+        for(i = 0; i < m; i++)
+            ok  &= NearEqual(yf[i], yg[i], r, a);
+        return ok;
+    }
 }
-}  // namespace CppAD
 
-#endif
+# endif

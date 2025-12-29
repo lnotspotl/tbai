@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_UNARY_PLUS_HPP
-#define CPPAD_CORE_UNARY_PLUS_HPP
+# ifndef CPPAD_CORE_UNARY_PLUS_HPP
+# define CPPAD_CORE_UNARY_PLUS_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -79,18 +79,19 @@ $end
 namespace CppAD {
 
 template <class Base>
-AD<Base> AD<Base>::operator+(void) const {
-    AD<Base> result(*this);
+AD<Base> AD<Base>::operator + (void) const
+{   AD<Base> result(*this);
 
     return result;
 }
 
-template <class Base>
-AD<Base> operator+(const VecAD_reference<Base> &right) {
-    return right.ADBase();
-}
 
-}  // namespace CppAD
+template <class Base>
+AD<Base> operator + (const VecAD_reference<Base> &right)
+{   return right.ADBase(); }
+
+}
 //  END CppAD namespace
 
-#endif
+
+# endif

@@ -18,18 +18,18 @@
 namespace CppAD {
 namespace cg {
 
-template <class Base>
+template<class Base>
 inline CG<Base> CG<Base>::operator+() const {
-    return CG<Base>(*this);  // nothing to do
+    return CG<Base> (*this); // nothing to do
 }
 
-template <class Base>
+template<class Base>
 inline CG<Base> CG<Base>::operator-() const {
     if (isParameter()) {
-        return CG<Base>(-getValue());
+        return CG<Base> (-getValue());
 
     } else {
-        CodeHandler<Base> &h = *getCodeHandler();
+        CodeHandler<Base>& h = *getCodeHandler();
         CG<Base> result(*h.makeNode(CGOpCode::UnMinus, this->argument()));
         if (isValueDefined()) {
             result.setValue(-getValue());
@@ -38,7 +38,7 @@ inline CG<Base> CG<Base>::operator-() const {
     }
 }
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

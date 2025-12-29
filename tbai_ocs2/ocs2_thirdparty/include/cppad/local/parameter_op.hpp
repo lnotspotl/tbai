@@ -1,5 +1,5 @@
-#ifndef CPPAD_LOCAL_PARAMETER_OP_HPP
-#define CPPAD_LOCAL_PARAMETER_OP_HPP
+# ifndef CPPAD_LOCAL_PARAMETER_OP_HPP
+# define CPPAD_LOCAL_PARAMETER_OP_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-16 Bradley M. Bell
 
@@ -12,12 +12,13 @@ in the Eclipse Public License, Version 2.0 are satisfied:
       GNU General Public License, Version 2.0 or later.
 ---------------------------------------------------------------------------- */
 
-namespace CppAD {
-namespace local {  // BEGIN_CPPAD_LOCAL_NAMESPACE
+
+namespace CppAD { namespace local { // BEGIN_CPPAD_LOCAL_NAMESPACE
 /*!
 \file parameter_op.hpp
 Zero order forward mode for ParOp
 */
+
 
 /*!
 Compute zero order forward mode Taylor coefficient for result of op = ParOp.
@@ -65,19 +66,24 @@ is the zero order Taylor coefficient corresponding to z.
 \li 0 < cap_order
 */
 template <class Base>
-void forward_par_op_0(size_t i_z, const addr_t *arg, size_t num_par, const Base *parameter, size_t cap_order,
-                      Base *taylor) {
+void forward_par_op_0(
+    size_t        i_z         ,
+    const addr_t* arg         ,
+    size_t        num_par     ,
+    const Base*   parameter   ,
+    size_t        cap_order   ,
+    Base*         taylor      )
+{
     // check assumptions
-    CPPAD_ASSERT_UNKNOWN(NumArg(ParOp) == 1);
-    CPPAD_ASSERT_UNKNOWN(NumRes(ParOp) == 1);
-    CPPAD_ASSERT_UNKNOWN(size_t(arg[0]) < num_par);
-    CPPAD_ASSERT_UNKNOWN(0 < cap_order);
+    CPPAD_ASSERT_UNKNOWN( NumArg(ParOp) == 1 );
+    CPPAD_ASSERT_UNKNOWN( NumRes(ParOp) == 1 );
+    CPPAD_ASSERT_UNKNOWN( size_t(arg[0]) < num_par );
+    CPPAD_ASSERT_UNKNOWN( 0 < cap_order );
 
-    Base *z = taylor + i_z * cap_order;
+    Base* z = taylor + i_z * cap_order;
 
-    z[0] = parameter[arg[0]];
+    z[0]  = parameter[ arg[0] ];
 }
 
-}  // namespace local
-}  // namespace CppAD
-#endif
+} } // END_CPPAD_LOCAL_NAMESPACE
+# endif

@@ -21,14 +21,16 @@
 namespace CppAD {
 namespace cg {
 
-template <class Base>
-inline CG<Base> CodeHandler<Base>::solveFor(OperationNode<Base> &expression, OperationNode<Base> &var) {
+template<class Base>
+inline CG<Base> CodeHandler<Base>::solveFor(OperationNode<Base>& expression,
+                                            OperationNode<Base>& var) {
     using std::vector;
 
     // find code in expression
-    if (&expression == &var) return CG<Base>(var);
+    if (&expression == &var)
+        return CG<Base>(var);
 
-    size_t bifurcations = (std::numeric_limits<size_t>::max)();  // so that it is possible to enter the loop
+    size_t bifurcations = (std::numeric_limits<size_t>::max)(); // so that it is possible to enter the loop
 
     std::vector<SourceCodePath> paths;
     BidirGraph<Base> foundGraph;
@@ -46,8 +48,7 @@ inline CG<Base> CodeHandler<Base>::solveFor(OperationNode<Base> &expression, Ope
         if (!foundGraph.contains(var)) {
             std::cerr << "Missing variable " << var << std::endl;
             printExpression(expression, std::cerr);
-            throw CGException("The provided variable ", var.getName() != nullptr ? ("(" + *var.getName() + ")") : "",
-                              " is not present in the expression");
+            throw CGException("The provided variable ", var.getName() != nullptr ? ("(" + *var.getName() + ")") : "", " is not present in the expression");
         }
 
         // find a bifurcation which does not contain any other bifurcations
@@ -69,9 +70,7 @@ inline CG<Base> CodeHandler<Base>::solveFor(OperationNode<Base> &expression, Ope
             CG<Base> expression2 = collectVariable(*root, paths[0], paths[1], bifPos);
             root = expression2.getOperationNode();
             if (root == nullptr) {
-                throw CGException(
-                    "It is not possible to solve the expression for the requested variable: the variable disappears "
-                    "after symbolic manipulations (e.g., y=x-x).");
+                throw CGException("It is not possible to solve the expression for the requested variable: the variable disappears after symbolic manipulations (e.g., y=x-x).");
             }
         }
     }
@@ -80,28 +79,30 @@ inline CG<Base> CodeHandler<Base>::solveFor(OperationNode<Base> &expression, Ope
     return solveFor(paths[0]);
 }
 
-template <class Base>
-inline CG<Base> CodeHandler<Base>::solveFor(const SourceCodePath &path) {
+template<class Base>
+inline CG<Base> CodeHandler<Base>::solveFor(const SourceCodePath& path) {
+
     CG<Base> rightHs(0.0);
 
     for (size_t n = 0; n < path.size() - 1; ++n) {
-        const OperationPathNode<Base> &pnodeOp = path[n];
+        const OperationPathNode<Base>& pnodeOp = path[n];
         size_t argIndex = path[n].argIndex;
-        const std::vector<Argument<Base> > &args = pnodeOp.node->getArguments();
+        const std::vector<Argument<Base> >& args = pnodeOp.node->getArguments();
 
         CGOpCode op = pnodeOp.node->getOperationType();
         switch (op) {
-            case CGOpCode::Mul: {
-                const Argument<Base> &other = args[argIndex == 0 ? 1 : 0];
+            case CGOpCode::Mul:
+            {
+                const Argument<Base>& other = args[argIndex == 0 ? 1 : 0];
                 rightHs /= CG<Base>(other);
                 break;
             }
             case CGOpCode::Div:
                 if (argIndex == 0) {
-                    const Argument<Base> &other = args[1];
+                    const Argument<Base>& other = args[1];
                     rightHs *= CG<Base>(other);
                 } else {
-                    const Argument<Base> &other = args[0];
+                    const Argument<Base>& other = args[0];
                     rightHs = CG<Base>(other) / rightHs;
                 }
                 break;
@@ -109,15 +110,17 @@ inline CG<Base> CodeHandler<Base>::solveFor(const SourceCodePath &path) {
             case CGOpCode::UnMinus:
                 rightHs *= Base(-1.0);
                 break;
-            case CGOpCode::Add: {
-                const Argument<Base> &other = args[argIndex == 0 ? 1 : 0];
+            case CGOpCode::Add:
+            {
+                const Argument<Base>& other = args[argIndex == 0 ? 1 : 0];
                 rightHs -= CG<Base>(other);
                 break;
             }
             case CGOpCode::Alias:
-                // do nothing
+                // do nothing 
                 break;
-            case CGOpCode::Sub: {
+            case CGOpCode::Sub:
+            {
                 if (argIndex == 0) {
                     rightHs += CG<Base>(args[1]);
                 } else {
@@ -131,14 +134,15 @@ inline CG<Base> CodeHandler<Base>::solveFor(const SourceCodePath &path) {
             case CGOpCode::Log:
                 rightHs = exp(rightHs);
                 break;
-            case CGOpCode::Pow: {
+            case CGOpCode::Pow:
+            {
                 if (argIndex == 0) {
                     // base
-                    const Argument<Base> &exponent = args[1];
+                    const Argument<Base>& exponent = args[1];
                     if (exponent.getParameter() != nullptr && *exponent.getParameter() == Base(0.0)) {
                         throw CGException("Invalid zero exponent");
                     } else if (exponent.getParameter() != nullptr && *exponent.getParameter() == Base(1.0)) {
-                        continue;  // do nothing
+                        continue; // do nothing
                     } else {
                         throw CGException("Unable to invert operation '", op, "'");
                         /*
@@ -150,8 +154,8 @@ inline CG<Base> CodeHandler<Base>::solveFor(const SourceCodePath &path) {
                          */
                     }
                 } else {
-                    //
-                    const Argument<Base> &base = args[0];
+                    // 
+                    const Argument<Base>& base = args[0];
                     rightHs = log(rightHs) / log(CG<Base>(base));
                 }
                 break;
@@ -159,23 +163,23 @@ inline CG<Base> CodeHandler<Base>::solveFor(const SourceCodePath &path) {
             case CGOpCode::Sqrt:
                 rightHs *= rightHs;
                 break;
-                // case CGAcosOp: // asin(variable)
-                // case CGAsinOp: // asin(variable)
-                // case Atan: // atan(variable)
-            case CGOpCode::Cosh:  // cosh(variable)
+                //case CGAcosOp: // asin(variable)
+                //case CGAsinOp: // asin(variable)
+                //case Atan: // atan(variable)
+            case CGOpCode::Cosh: // cosh(variable)
             {
-                rightHs = log(rightHs + sqrt(rightHs * rightHs - Base(1.0)));  // asinh
+                rightHs = log(rightHs + sqrt(rightHs * rightHs - Base(1.0))); // asinh
                 break;
-                // case Cos: //  cos(variable)
+                //case Cos: //  cos(variable)
             }
-            case CGOpCode::Sinh:                                               // sinh(variable)
-                rightHs = log(rightHs + sqrt(rightHs * rightHs + Base(1.0)));  // asinh
+            case CGOpCode::Sinh: // sinh(variable)
+                rightHs = log(rightHs + sqrt(rightHs * rightHs + Base(1.0))); // asinh
                 break;
-                // case CGSinOp: //  sin(variable)
-            case CGOpCode::Tanh:                                                              //  tanh(variable)
-                rightHs = Base(0.5) * (log(Base(1.0) + rightHs) - log(Base(1.0) - rightHs));  // atanh
+                //case CGSinOp: //  sin(variable)
+            case CGOpCode::Tanh: //  tanh(variable)
+                rightHs = Base(0.5) * (log(Base(1.0) + rightHs) - log(Base(1.0) - rightHs)); // atanh
                 break;
-                // case CGTanOp: //  tan(variable)
+                //case CGTanOp: //  tan(variable)
             default:
                 throw CGException("Unable to invert operation '", op, "'");
         };
@@ -184,35 +188,37 @@ inline CG<Base> CodeHandler<Base>::solveFor(const SourceCodePath &path) {
     return rightHs;
 }
 
-template <class Base>
-inline bool CodeHandler<Base>::isSolvable(OperationNode<Base> &expression, OperationNode<Base> &var) {
+template<class Base>
+inline bool CodeHandler<Base>::isSolvable(OperationNode<Base>& expression,
+                                          OperationNode<Base>& var) {
     size_t bifurcations = 0;
     BidirGraph<Base> g = findPathGraph(expression, var, bifurcations);
 
-    if (bifurcations == 0) {
+    if(bifurcations == 0) {
         size_t bifIndex = 0;
         auto paths = g.findSingleBifurcation(expression, var, bifIndex);
-        if (paths.empty() || paths[0].empty()) return false;
+        if (paths.empty() || paths[0].empty())
+            return false;
 
         return isSolvable(paths[0]);
     } else {
         // TODO: improve this
-        // bool v = isCollectableVariableAddSub();
+        //bool v = isCollectableVariableAddSub();
         try {
             solveFor(expression, var);
             return true;
-        } catch (const CGException &e) {
+        } catch(const CGException& e) {
             return false;
         }
     }
 }
 
-template <class Base>
-inline bool CodeHandler<Base>::isSolvable(const SourceCodePath &path) const {
+template<class Base>
+inline bool CodeHandler<Base>::isSolvable(const SourceCodePath& path) const {
     for (size_t n = 0; n < path.size() - 1; ++n) {
-        const OperationPathNode<Base> &pnodeOp = path[n];
+        const OperationPathNode<Base>& pnodeOp = path[n];
         size_t argIndex = path[n].argIndex;
-        const std::vector<Argument<Base> > &args = pnodeOp.node->getArguments();
+        const std::vector<Argument<Base> >& args = pnodeOp.node->getArguments();
 
         CGOpCode op = pnodeOp.node->getOperationType();
         switch (op) {
@@ -225,14 +231,15 @@ inline bool CodeHandler<Base>::isSolvable(const SourceCodePath &path) const {
             case CGOpCode::Exp:
             case CGOpCode::Log:
             case CGOpCode::Sqrt:
-            case CGOpCode::Cosh:  // cosh(variable)
-            case CGOpCode::Sinh:  // sinh(variable)
-            case CGOpCode::Tanh:  //  tanh(variable)
+            case CGOpCode::Cosh: // cosh(variable)
+            case CGOpCode::Sinh: // sinh(variable)
+            case CGOpCode::Tanh: //  tanh(variable)
                 break;
-            case CGOpCode::Pow: {
+            case CGOpCode::Pow:
+            {
                 if (argIndex == 0) {
                     // base
-                    const Argument<Base> &exponent = args[1];
+                    const Argument<Base>& exponent = args[1];
                     if (exponent.getParameter() != nullptr && *exponent.getParameter() == Base(0.0)) {
                         return false;
                     } else if (exponent.getParameter() != nullptr && *exponent.getParameter() == Base(1.0)) {
@@ -253,7 +260,7 @@ inline bool CodeHandler<Base>::isSolvable(const SourceCodePath &path) const {
     return true;
 }
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

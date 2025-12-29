@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_REV_HES_SPARSITY_HPP
-#define CPPAD_CORE_REV_HES_SPARSITY_HPP
+# ifndef CPPAD_CORE_REV_HES_SPARSITY_HPP
+# define CPPAD_CORE_REV_HES_SPARSITY_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -121,10 +121,10 @@ contains an example and test of this operation.
 $end
 -----------------------------------------------------------------------------
 */
-#include <cppad/core/ad_fun.hpp>
-#include <cppad/local/sparse_internal.hpp>
+# include <cppad/core/ad_fun.hpp>
+# include <cppad/local/sparse_internal.hpp>
 
-namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
+namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 
 /*!
 Reverse Hessian sparsity patterns.
@@ -161,30 +161,40 @@ and x is any argument value.
 */
 template <class Base, class RecBase>
 template <class BoolVector, class SizeVector>
-void ADFun<Base, RecBase>::rev_hes_sparsity(const BoolVector &select_range, bool transpose, bool internal_bool,
-                                            sparse_rc<SizeVector> &pattern_out) {
+void ADFun<Base,RecBase>::rev_hes_sparsity(
+    const BoolVector&            select_range     ,
+    bool                         transpose        ,
+    bool                         internal_bool    ,
+    sparse_rc<SizeVector>&       pattern_out      )
+{
     // used to identify the RecBase type in calls to sweeps
     RecBase not_used_rec_base;
     //
-    size_t n = Domain();
-    size_t m = Range();
+    size_t n  = Domain();
+    size_t m  = Range();
     //
-    CPPAD_ASSERT_KNOWN(size_t(select_range.size()) == m,
-                       "rev_hes_sparsity: size of select_range is not equal to "
-                       "number of dependent variables");
+    CPPAD_ASSERT_KNOWN(
+        size_t( select_range.size() ) == m,
+        "rev_hes_sparsity: size of select_range is not equal to "
+        "number of dependent variables"
+    );
     //
     // vector that holds reverse Jacobian sparsity flag
     local::pod_vector<bool> rev_jac_pattern(num_var_tape_);
-    for (size_t i = 0; i < num_var_tape_; i++) rev_jac_pattern[i] = false;
+    for(size_t i = 0; i < num_var_tape_; i++)
+        rev_jac_pattern[i] = false;
     //
     // initialize rev_jac_pattern for dependent variables
-    for (size_t i = 0; i < m; i++) rev_jac_pattern[dep_taddr_[i]] = select_range[i];
+    for(size_t i = 0; i < m; i++)
+        rev_jac_pattern[ dep_taddr_[i] ] = select_range[i];
     //
     //
-    if (internal_bool) {
-        CPPAD_ASSERT_KNOWN(for_jac_sparse_pack_.n_set() > 0,
-                           "rev_hes_sparsity: previous call to for_jac_sparsity did not "
-                           "use bool for interanl sparsity patterns.");
+    if( internal_bool )
+    {   CPPAD_ASSERT_KNOWN(
+            for_jac_sparse_pack_.n_set() > 0,
+            "rev_hes_sparsity: previous call to for_jac_sparsity did not "
+            "use bool for interanl sparsity patterns."
+        );
         // column dimension of internal sparstiy pattern
         size_t ell = for_jac_sparse_pack_.end();
         //
@@ -194,14 +204,26 @@ void ADFun<Base, RecBase>::rev_hes_sparsity(const BoolVector &select_range, bool
         internal_hes.resize(num_var_tape_, ell);
         //
         // compute the Hessian sparsity pattern
-        local::sweep::rev_hes<addr_t>(&play_, n, num_var_tape_, for_jac_sparse_pack_, rev_jac_pattern.data(),
-                                      internal_hes, not_used_rec_base);
+        local::sweep::rev_hes<addr_t>(
+            &play_,
+            n,
+            num_var_tape_,
+            for_jac_sparse_pack_,
+            rev_jac_pattern.data(),
+            internal_hes,
+            not_used_rec_base
+        );
         // get sparstiy pattern for independent variables
-        local::get_internal_sparsity(transpose, ind_taddr_, internal_hes, pattern_out);
-    } else {
-        CPPAD_ASSERT_KNOWN(for_jac_sparse_set_.n_set() > 0,
-                           "rev_hes_sparsity: previous call to for_jac_sparsity did not "
-                           "use bool for interanl sparsity patterns.");
+        local::get_internal_sparsity(
+            transpose, ind_taddr_, internal_hes, pattern_out
+        );
+    }
+    else
+    {   CPPAD_ASSERT_KNOWN(
+            for_jac_sparse_set_.n_set() > 0,
+            "rev_hes_sparsity: previous call to for_jac_sparsity did not "
+            "use bool for interanl sparsity patterns."
+        );
         // column dimension of internal sparstiy pattern
         size_t ell = for_jac_sparse_set_.end();
         //
@@ -211,12 +233,21 @@ void ADFun<Base, RecBase>::rev_hes_sparsity(const BoolVector &select_range, bool
         internal_hes.resize(num_var_tape_, ell);
         //
         // compute the Hessian sparsity pattern
-        local::sweep::rev_hes<addr_t>(&play_, n, num_var_tape_, for_jac_sparse_set_, rev_jac_pattern.data(),
-                                      internal_hes, not_used_rec_base);
+        local::sweep::rev_hes<addr_t>(
+            &play_,
+            n,
+            num_var_tape_,
+            for_jac_sparse_set_,
+            rev_jac_pattern.data(),
+            internal_hes,
+            not_used_rec_base
+        );
         // get sparstiy pattern for independent variables
-        local::get_internal_sparsity(transpose, ind_taddr_, internal_hes, pattern_out);
+        local::get_internal_sparsity(
+            transpose, ind_taddr_, internal_hes, pattern_out
+        );
     }
     return;
 }
-}  // namespace CppAD
-#endif
+} // END_CPPAD_NAMESPACE
+# endif

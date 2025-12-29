@@ -1,5 +1,5 @@
-#ifndef CPPAD_LOCAL_PROTOTYPE_OP_HPP
-#define CPPAD_LOCAL_PROTOTYPE_OP_HPP
+# ifndef CPPAD_LOCAL_PROTOTYPE_OP_HPP
+# define CPPAD_LOCAL_PROTOTYPE_OP_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -12,14 +12,15 @@ in the Eclipse Public License, Version 2.0 are satisfied:
       GNU General Public License, Version 2.0 or later.
 ---------------------------------------------------------------------------- */
 
-namespace CppAD {
-namespace local {  // BEGIN_CPPAD_LOCAL_NAMESPACE
+
+namespace CppAD { namespace local { // BEGIN_CPPAD_LOCAL_NAMESPACE
 /*!
 \file prototype_op.hpp
 Documentation for generic cases (these generic cases are never used).
 */
 
 // ==================== Unary operators with one result ====================
+
 
 /*!
 Prototype for forward mode unary operator with one result (not used).
@@ -66,9 +67,16 @@ is the k-th order Taylor coefficient corresponding to z.
 \li p <= q
 */
 template <class Base>
-void forward_unary1_op(size_t p, size_t q, size_t i_z, size_t i_x, size_t cap_order, Base *taylor) {
+void forward_unary1_op(
+    size_t p           ,
+    size_t q           ,
+    size_t i_z         ,
+    size_t i_x         ,
+    size_t cap_order   ,
+    Base*  taylor      )
+{
     // This routine is only for documentaiton, it should not be used
-    CPPAD_ASSERT_UNKNOWN(false);
+    CPPAD_ASSERT_UNKNOWN( false );
 }
 
 /*!
@@ -134,9 +142,16 @@ corresponding to z and the ell-th direction.
 \li q < cap_order
 */
 template <class Base>
-void forward_unary1_op_dir(size_t q, size_t r, size_t i_z, size_t i_x, size_t cap_order, Base *taylor) {
+void forward_unary1_op_dir(
+    size_t q           ,
+    size_t r           ,
+    size_t i_z         ,
+    size_t i_x         ,
+    size_t cap_order   ,
+    Base*  taylor      )
+{
     // This routine is only for documentaiton, it should not be used
-    CPPAD_ASSERT_UNKNOWN(false);
+    CPPAD_ASSERT_UNKNOWN( false );
 }
 
 /*!
@@ -171,9 +186,14 @@ is the zero order Taylor coefficient corresponding to z.
 \li 0 < cap_order
 */
 template <class Base>
-void forward_unary1_op_0(size_t i_z, size_t i_x, size_t cap_order, Base *taylor) {
+void forward_unary1_op_0(
+    size_t i_z         ,
+    size_t i_x         ,
+    size_t cap_order   ,
+    Base*  taylor      )
+{
     // This routine is only for documentaiton, it should not be used
-    CPPAD_ASSERT_UNKNOWN(false);
+    CPPAD_ASSERT_UNKNOWN( false );
 }
 
 /*!
@@ -247,10 +267,17 @@ may be used as work space; i.e., may change in an unspecified manner.
 \li d < nc_partial
 */
 template <class Base>
-void reverse_unary1_op(size_t d, size_t i_z, size_t i_x, size_t cap_order, const Base *taylor, size_t nc_partial,
-                       Base *partial) {
+void reverse_unary1_op(
+    size_t      d            ,
+    size_t      i_z          ,
+    size_t      i_x          ,
+    size_t      cap_order    ,
+    const Base* taylor       ,
+    size_t      nc_partial   ,
+    Base*       partial      )
+{
     // This routine is only for documentaiton, it should not be used
-    CPPAD_ASSERT_UNKNOWN(false);
+    CPPAD_ASSERT_UNKNOWN( false );
 }
 
 // ==================== Unary operators with two results ====================
@@ -311,9 +338,16 @@ the autillary result y.
 \li p <= q
 */
 template <class Base>
-void forward_unary2_op(size_t p, size_t q, size_t i_z, size_t i_x, size_t cap_order, Base *taylor) {
+void forward_unary2_op(
+    size_t p           ,
+    size_t q           ,
+    size_t i_z         ,
+    size_t i_x         ,
+    size_t cap_order   ,
+    Base*  taylor      )
+{
     // This routine is only for documentaiton, it should not be used
-    CPPAD_ASSERT_UNKNOWN(false);
+    CPPAD_ASSERT_UNKNOWN( false );
 }
 
 /*!
@@ -387,9 +421,16 @@ corresponding to z and the ell-th direction.
 \li q < cap_order
 */
 template <class Base>
-void forward_unary2_op_dir(size_t q, size_t r, size_t i_z, size_t i_x, size_t cap_order, Base *taylor) {
+void forward_unary2_op_dir(
+    size_t q           ,
+    size_t r           ,
+    size_t i_z         ,
+    size_t i_x         ,
+    size_t cap_order   ,
+    Base*  taylor      )
+{
     // This routine is only for documentaiton, it should not be used
-    CPPAD_ASSERT_UNKNOWN(false);
+    CPPAD_ASSERT_UNKNOWN( false );
 }
 
 /*!
@@ -429,9 +470,14 @@ the autillary result y.
 \li j < cap_order
 */
 template <class Base>
-void forward_unary2_op_0(size_t i_z, size_t i_x, size_t cap_order, Base *taylor) {
+void forward_unary2_op_0(
+    size_t i_z         ,
+    size_t i_x         ,
+    size_t cap_order   ,
+    Base*  taylor      )
+{
     // This routine is only for documentaiton, it should not be used
-    CPPAD_ASSERT_UNKNOWN(false);
+    CPPAD_ASSERT_UNKNOWN( false );
 }
 
 /*!
@@ -517,10 +563,17 @@ may be used as work space; i.e., may change in an unspecified manner.
 \li d < nc_partial
 */
 template <class Base>
-void reverse_unary2_op(size_t d, size_t i_z, size_t i_x, size_t cap_order, const Base *taylor, size_t nc_partial,
-                       Base *partial) {
+void reverse_unary2_op(
+    size_t      d            ,
+    size_t      i_z          ,
+    size_t      i_x          ,
+    size_t      cap_order    ,
+    const Base* taylor       ,
+    size_t      nc_partial   ,
+    Base*       partial      )
+{
     // This routine is only for documentaiton, it should not be used
-    CPPAD_ASSERT_UNKNOWN(false);
+    CPPAD_ASSERT_UNKNOWN( false );
 }
 // =================== Binary operators with one result ====================
 
@@ -587,10 +640,17 @@ is the k-th order Taylor coefficient corresponding to z.
 \li p <=  q
 */
 template <class Base>
-void forward_binary_op(size_t p, size_t q, size_t i_z, const addr_t *arg, const Base *parameter, size_t cap_order,
-                       Base *taylor) {
+void forward_binary_op(
+    size_t        p          ,
+    size_t        q          ,
+    size_t        i_z        ,
+    const addr_t* arg        ,
+    const Base*   parameter  ,
+    size_t        cap_order  ,
+    Base*         taylor     )
+{
     // This routine is only for documentaiton, it should not be used
-    CPPAD_ASSERT_UNKNOWN(false);
+    CPPAD_ASSERT_UNKNOWN( false );
 }
 
 /*!
@@ -674,11 +734,19 @@ corresponding to z and the ell-th direction.
 \li 0 < q <  cap_order
 */
 template <class Base>
-void forward_binary_op_dir(size_t q, size_t r, size_t i_z, const addr_t *arg, const Base *parameter, size_t cap_order,
-                           Base *taylor) {
+void forward_binary_op_dir(
+    size_t        q          ,
+    size_t        r          ,
+    size_t        i_z        ,
+    const addr_t* arg        ,
+    const Base*   parameter  ,
+    size_t        cap_order  ,
+    Base*         taylor     )
+{
     // This routine is only for documentaiton, it should not be used
-    CPPAD_ASSERT_UNKNOWN(false);
+    CPPAD_ASSERT_UNKNOWN( false );
 }
+
 
 /*!
 Prototype zero order forward mode x op y (not used)
@@ -726,9 +794,15 @@ is the zero order Taylor coefficient corresponding to z.
 \li NumRes(op) == 1
 */
 template <class Base>
-void forward_binary_op_0(size_t i_z, const addr_t *arg, const Base *parameter, size_t cap_order, Base *taylor) {
+void forward_binary_op_0(
+    size_t        i_z         ,
+    const addr_t* arg         ,
+    const Base*   parameter   ,
+    size_t        cap_order   ,
+    Base*         taylor      )
+{
     // This routine is only for documentaiton, it should not be used
-    CPPAD_ASSERT_UNKNOWN(false);
+    CPPAD_ASSERT_UNKNOWN( false );
 }
 
 /*!
@@ -829,10 +903,18 @@ may be used as work space; i.e., may change in an unspecified manner.
 \li d < nc_partial
 */
 template <class Base>
-void reverse_binary_op(size_t d, size_t i_z, addr_t *arg, const Base *parameter, size_t cap_order, const Base *taylor,
-                       size_t nc_partial, Base *partial) {
+void reverse_binary_op(
+    size_t      d            ,
+    size_t      i_z          ,
+    addr_t*     arg          ,
+    const Base* parameter    ,
+    size_t      cap_order    ,
+    const Base* taylor       ,
+    size_t      nc_partial   ,
+    Base*       partial      )
+{
     // This routine is only for documentaiton, it should not be used
-    CPPAD_ASSERT_UNKNOWN(false);
+    CPPAD_ASSERT_UNKNOWN( false );
 }
 // ======================= Pow Function ===================================
 /*!
@@ -907,10 +989,17 @@ is the k-th order Taylor coefficient corresponding to z_j.
 \li p <= q
 */
 template <class Base>
-void forward_pow_op(size_t p, size_t q, size_t i_z, const addr_t *arg, const Base *parameter, size_t cap_order,
-                    Base *taylor) {
+void forward_pow_op(
+    size_t        p          ,
+    size_t        q          ,
+    size_t        i_z        ,
+    const addr_t* arg        ,
+    const Base*   parameter  ,
+    size_t        cap_order  ,
+    Base*         taylor     )
+{
     // This routine is only for documentaiton, it should not be used
-    CPPAD_ASSERT_UNKNOWN(false);
+    CPPAD_ASSERT_UNKNOWN( false );
 }
 /*!
 Prototype for multiple direction forward mode z = pow(x, y) (not used).
@@ -1007,10 +1096,17 @@ for the ell-th direction.
 \li q < cap_order
 */
 template <class Base>
-void forward_pow_op_dir(size_t q, size_t r, size_t i_z, const addr_t *arg, const Base *parameter, size_t cap_order,
-                        Base *taylor) {
+void forward_pow_op_dir(
+    size_t        q          ,
+    size_t        r          ,
+    size_t        i_z        ,
+    const addr_t* arg        ,
+    const Base*   parameter  ,
+    size_t        cap_order  ,
+    Base*         taylor     )
+{
     // This routine is only for documentaiton, it should not be used
-    CPPAD_ASSERT_UNKNOWN(false);
+    CPPAD_ASSERT_UNKNOWN( false );
 }
 /*!
 Prototype for zero order forward mode z = pow(x, y) (not used).
@@ -1068,9 +1164,15 @@ is the zero order Taylor coefficient corresponding to z_j.
 \li If y is a variable, arg[1] < i_z - 2
 */
 template <class Base>
-void forward_pow_op_0(size_t i_z, const addr_t *arg, const Base *parameter, size_t cap_order, Base *taylor) {
+void forward_pow_op_0(
+    size_t        i_z        ,
+    const addr_t* arg        ,
+    const Base*   parameter  ,
+    size_t        cap_order  ,
+    Base*         taylor     )
+{
     // This routine is only for documentaiton, it should not be used
-    CPPAD_ASSERT_UNKNOWN(false);
+    CPPAD_ASSERT_UNKNOWN( false );
 }
 /*!
 Prototype for reverse mode z = pow(x, y) (not used).
@@ -1178,10 +1280,18 @@ may be used as work space; i.e., may change in an unspecified manner.
 \li d < nc_partial
 */
 template <class Base>
-void reverse_pow_op(size_t d, size_t i_z, addr_t *arg, const Base *parameter, size_t cap_order, const Base *taylor,
-                    size_t nc_partial, Base *partial) {
+void reverse_pow_op(
+    size_t      d            ,
+    size_t      i_z          ,
+    addr_t*     arg          ,
+    const Base* parameter    ,
+    size_t      cap_order    ,
+    const Base* taylor       ,
+    size_t      nc_partial   ,
+    Base*       partial      )
+{
     // This routine is only for documentaiton, it should not be used
-    CPPAD_ASSERT_UNKNOWN(false);
+    CPPAD_ASSERT_UNKNOWN( false );
 }
 
 // ==================== Sparsity Calculations ==============================
@@ -1242,10 +1352,15 @@ and on output it corresponds to the function H.
 */
 
 template <class Vector_set>
-void reverse_sparse_hessian_unary_op(size_t i_z, size_t i_x, bool *rev_jacobian, Vector_set &for_jac_sparsity,
-                                     Vector_set &rev_hes_sparsity) {
+void reverse_sparse_hessian_unary_op(
+    size_t              i_z               ,
+    size_t              i_x               ,
+    bool*               rev_jacobian      ,
+    Vector_set&         for_jac_sparsity  ,
+    Vector_set&         rev_hes_sparsity  )
+{
     // This routine is only for documentaiton, it should not be used
-    CPPAD_ASSERT_UNKNOWN(false);
+    CPPAD_ASSERT_UNKNOWN( false );
 }
 
 /*!
@@ -1327,12 +1442,17 @@ and on output it correspondst to H.
 \li arg[1] < i_z
 */
 template <class Vector_set>
-void reverse_sparse_hessian_binary_op(size_t i_z, const addr_t *arg, bool *jac_reverse, Vector_set &for_jac_sparsity,
-                                      Vector_set &rev_hes_sparsity) {
+void reverse_sparse_hessian_binary_op(
+    size_t            i_z                ,
+    const addr_t*     arg                ,
+    bool*             jac_reverse        ,
+    Vector_set&       for_jac_sparsity   ,
+    Vector_set&       rev_hes_sparsity   )
+{
     // This routine is only for documentaiton, it should not be used
-    CPPAD_ASSERT_UNKNOWN(false);
+    CPPAD_ASSERT_UNKNOWN( false );
 }
 
-}  // namespace local
-}  // namespace CppAD
-#endif
+
+} } // END_CPPAD_LOCAL_NAMESPACE
+# endif

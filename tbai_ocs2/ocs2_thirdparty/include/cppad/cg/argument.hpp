@@ -18,7 +18,7 @@
 namespace CppAD {
 namespace cg {
 
-template <class Base>
+template<class Base>
 class OperationNode;
 
 /**
@@ -27,25 +27,37 @@ class OperationNode;
  *
  * @author Joao Leal
  */
-template <class Base>
+template<class Base>
 class Argument {
-   private:
-    OperationNode<Base> *operation_;
+private:
+    OperationNode<Base>* operation_;
     std::unique_ptr<Base> parameter_;
+public:
 
-   public:
-    inline Argument() : operation_(nullptr) {}
+    inline Argument() :
+        operation_(nullptr) {
+    }
 
-    inline Argument(OperationNode<Base> &operation) : operation_(&operation) {}
+    inline Argument(OperationNode<Base>& operation) :
+        operation_(&operation) {
+    }
 
-    inline Argument(const Base &parameter) : operation_(nullptr), parameter_(new Base(parameter)) {}
+    inline Argument(const Base& parameter) :
+        operation_(nullptr),
+        parameter_(new Base(parameter)) {
+    }
 
-    inline Argument(const Argument &orig)
-        : operation_(orig.operation_), parameter_(orig.parameter_ != nullptr ? new Base(*orig.parameter_) : nullptr) {}
+    inline Argument(const Argument& orig) :
+        operation_(orig.operation_),
+        parameter_(orig.parameter_ != nullptr ? new Base(*orig.parameter_) : nullptr) {
+    }
 
-    inline Argument(Argument &&orig) : operation_(orig.operation_), parameter_(std::move(orig.parameter_)) {}
+    inline Argument(Argument&& orig) :
+            operation_(orig.operation_),
+            parameter_(std::move(orig.parameter_)) {
+    }
 
-    inline Argument &operator=(const Argument &rhs) {
+    inline Argument& operator=(const Argument& rhs) {
         if (&rhs == this) {
             return *this;
         }
@@ -57,14 +69,13 @@ class Argument {
             if (parameter_ != nullptr) {
                 *parameter_ = *rhs.parameter_;
             } else {
-                parameter_.reset(
-                    new Base(*rhs.parameter_));  // to replace with parameter_ = std::make_unique once c++14 is used
+                parameter_.reset(new Base(*rhs.parameter_)); // to replace with parameter_ = std::make_unique once c++14 is used
             }
         }
         return *this;
     }
 
-    inline Argument &operator=(Argument &&rhs) {
+    inline Argument& operator=(Argument&& rhs) {
         assert(this != &rhs);
 
         operation_ = rhs.operation_;
@@ -77,12 +88,17 @@ class Argument {
 
     virtual ~Argument() = default;
 
-    inline OperationNode<Base> *getOperation() const { return operation_; }
+    inline OperationNode<Base>* getOperation() const {
+        return operation_;
+    }
 
-    inline Base *getParameter() const { return parameter_.get(); }
+    inline Base* getParameter() const {
+        return parameter_.get();
+    }
+
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

@@ -23,43 +23,51 @@ namespace cg {
 
 /**
  * Useful class for generating a JIT evaluated model library.
- *
+ * 
  * @author Joao Leal
  */
-template <class Base>
+template<class Base>
 class LlvmModelLibraryProcessor : public LlvmBaseModelLibraryProcessor<Base> {
-   protected:
+protected:
     const std::string _version;
     std::vector<std::string> _includePaths;
-    std::shared_ptr<llvm::LLVMContext> _context;  // should be deleted after _linker and _module (it must come first)
+    std::shared_ptr<llvm::LLVMContext> _context; // should be deleted after _linker and _module (it must come first)
     std::unique_ptr<llvm::Linker> _linker;
     std::unique_ptr<llvm::Module> _module;
+public:
 
-   public:
     /**
      * Creates a LLVM model library processor.
      *
      * @param librarySourceGen
      */
-    LlvmModelLibraryProcessor(ModelLibraryCSourceGen<Base> &librarySourceGen)
-        : LlvmBaseModelLibraryProcessor<Base>(librarySourceGen), _version("3.8") {}
+    LlvmModelLibraryProcessor(ModelLibraryCSourceGen<Base>& librarySourceGen) :
+            LlvmBaseModelLibraryProcessor<Base>(librarySourceGen),
+            _version("3.8") {
+    }
 
     virtual ~LlvmModelLibraryProcessor() = default;
 
     /**
      * @return The version of LLVM (and Clang).
      */
-    inline const std::string &getVersion() const { return _version; }
+    inline const std::string& getVersion() const {
+        return _version;
+    }
 
     /**
      * Define additional header paths.
      */
-    inline void setIncludePaths(const std::vector<std::string> &includePaths) { _includePaths = includePaths; }
+    inline void setIncludePaths(const std::vector<std::string>& includePaths) {
+        _includePaths = includePaths;
+    }
 
     /**
      * User defined header paths.
      */
-    inline const std::vector<std::string> &getIncludePaths() const { return _includePaths; }
+    inline const std::vector<std::string>& getIncludePaths() const {
+        return _includePaths;
+    }
 
     /**
      *
@@ -98,16 +106,16 @@ class LlvmModelLibraryProcessor : public LlvmBaseModelLibraryProcessor<Base> {
 
         _context.reset(new llvm::LLVMContext());
 
-        const std::map<std::string, ModelCSourceGen<Base> *> &models = this->modelLibraryHelper_->getModels();
-        for (const auto &p : models) {
-            const std::map<std::string, std::string> &modelSources = this->getSources(*p.second);
+        const std::map<std::string, ModelCSourceGen<Base>*>& models = this->modelLibraryHelper_->getModels();
+        for (const auto& p : models) {
+            const std::map<std::string, std::string>& modelSources = this->getSources(*p.second);
             createLlvmModules(modelSources);
         }
 
-        const std::map<std::string, std::string> &sources = this->getLibrarySources();
+        const std::map<std::string, std::string>& sources = this->getLibrarySources();
         createLlvmModules(sources);
 
-        const std::map<std::string, std::string> &customSource = this->modelLibraryHelper_->getCustomSources();
+        const std::map<std::string, std::string>& customSource = this->modelLibraryHelper_->getCustomSources();
         createLlvmModules(customSource);
 
         llvm::InitializeNativeTarget();
@@ -124,7 +132,7 @@ class LlvmModelLibraryProcessor : public LlvmBaseModelLibraryProcessor<Base> {
      * @param clang  the external compiler
      * @return  a model library
      */
-    std::unique_ptr<LlvmModelLibrary<Base>> create(ClangCompiler<Base> &clang) {
+    std::unique_ptr<LlvmModelLibrary<Base>> create(ClangCompiler<Base>& clang) {
         using namespace llvm;
 
         // backup output format so that it can be restored
@@ -140,7 +148,7 @@ class LlvmModelLibraryProcessor : public LlvmBaseModelLibraryProcessor<Base> {
             /**
              * generate bit code
              */
-            const std::set<std::string> &bcFiles = this->createBitCode(clang, "3.8");
+            const std::set<std::string>& bcFiles = this->createBitCode(clang, "3.8");
 
             /**
              * Load bit code and create a single module
@@ -152,7 +160,7 @@ class LlvmModelLibraryProcessor : public LlvmBaseModelLibraryProcessor<Base> {
 
             std::unique_ptr<Module> linkerModule;
 
-            for (const std::string &itbc : bcFiles) {
+            for (const std::string& itbc : bcFiles) {
                 // load bitcode file
 
                 ErrorOr<std::unique_ptr<MemoryBuffer>> buffer = MemoryBuffer::getFile(itbc);
@@ -161,18 +169,17 @@ class LlvmModelLibraryProcessor : public LlvmBaseModelLibraryProcessor<Base> {
                 }
 
                 // create the module
-                ErrorOr<std::unique_ptr<Module>> module =
-                    llvm::parseBitcodeFile(buffer.get()->getMemBufferRef(), *_context.get());
-                if (module.get() == nullptr) {
+                ErrorOr<std::unique_ptr<Module>> module = llvm::parseBitcodeFile(buffer.get()->getMemBufferRef(), *_context.get());
+                if(module.get() == nullptr) {
                     throw CGException(module.getError().message());
                 }
 
                 // link modules together
                 if (_linker.get() == nullptr) {
                     linkerModule.reset(module.get().release());
-                    _linker.reset(new llvm::Linker(*linkerModule));  // module not destroyed
+                    _linker.reset(new llvm::Linker(*linkerModule)); // module not destroyed
                 } else {
-                    if (_linker->linkInModule(std::move(module.get()))) {  // module destroyed
+                    if (_linker->linkInModule(std::move(module.get()))) { // module destroyed
                         throw CGException("Failed to link");
                     }
                 }
@@ -194,62 +201,66 @@ class LlvmModelLibraryProcessor : public LlvmBaseModelLibraryProcessor<Base> {
         return lib;
     }
 
-    static inline std::unique_ptr<LlvmModelLibrary<Base>> create(ModelLibraryCSourceGen<Base> &modelLibraryHelper) {
+    static inline std::unique_ptr<LlvmModelLibrary<Base>> create(ModelLibraryCSourceGen<Base>& modelLibraryHelper) {
         LlvmModelLibraryProcessor<Base> p(modelLibraryHelper);
         return p.create();
     }
 
-   protected:
-    virtual void createLlvmModules(const std::map<std::string, std::string> &sources) {
-        for (const auto &p : sources) {
+protected:
+
+    virtual void createLlvmModules(const std::map<std::string, std::string>& sources) {
+        for (const auto& p : sources) {
             createLlvmModule(p.first, p.second);
         }
     }
 
-    virtual void createLlvmModule(const std::string &filename, const std::string &source) {
+    virtual void createLlvmModule(const std::string& filename,
+                                  const std::string& source) {
         using namespace llvm;
         using namespace clang;
 
         ArrayRef<StringRef> paths;
         llvm::sys::findProgramByName("clang", paths);
 
-        static const char *argv[] = {
-            "program", "-Wall", "-x", "c",
-            "string-input"};  // -Wall or -v flag is required to avoid an error inside createInvocationFromCommandLine()
-        static const int argc = sizeof(argv) / sizeof(argv[0]);
+        static const char* argv [] = {"program", "-Wall", "-x", "c", "string-input"}; // -Wall or -v flag is required to avoid an error inside createInvocationFromCommandLine()
+        static const int argc = sizeof (argv) / sizeof (argv[0]);
 
         IntrusiveRefCntPtr<DiagnosticOptions> diagOpts = new DiagnosticOptions();
-        TextDiagnosticPrinter *diagClient =
-            new TextDiagnosticPrinter(llvm::errs(), &*diagOpts);  // will be owned by diags
+        TextDiagnosticPrinter* diagClient = new TextDiagnosticPrinter(llvm::errs(), &*diagOpts); // will be owned by diags
         IntrusiveRefCntPtr<DiagnosticIDs> diagID(new DiagnosticIDs());
         IntrusiveRefCntPtr<DiagnosticsEngine> diags(new DiagnosticsEngine(diagID, &*diagOpts, diagClient));
 
-        ArrayRef<const char *> args(argv + 1,  // skip program name
-                                    argc - 1);
+        ArrayRef<const char*> args(argv + 1, // skip program name
+                                   argc - 1);
         std::unique_ptr<CompilerInvocation> invocation(createInvocationFromCommandLine(args, diags));
-        if (invocation.get() == nullptr) throw CGException("Failed to create compiler invocation");
-        CompilerInvocation::setLangDefaults(*invocation->getLangOpts(), IK_C, LangStandard::lang_unspecified);
-        invocation->getFrontendOpts().DisableFree = false;  // make sure we free memory (by default it does not)
+        if (invocation.get() == nullptr)
+            throw CGException("Failed to create compiler invocation");
+        CompilerInvocation::setLangDefaults(*invocation->getLangOpts(), IK_C,
+                                            LangStandard::lang_unspecified);
+        invocation->getFrontendOpts().DisableFree = false; // make sure we free memory (by default it does not)
 
         // Create a compiler instance to handle the actual work.
         CompilerInstance compiler;
         compiler.setInvocation(invocation.release());
 
+
         // Create the compilers actual diagnostics engine.
-        compiler.createDiagnostics();  // compiler.createDiagnostics(argc, const_cast<char**> (argv));
-        if (!compiler.hasDiagnostics()) throw CGException("No diagnostics");
+        compiler.createDiagnostics(); //compiler.createDiagnostics(argc, const_cast<char**> (argv));
+        if (!compiler.hasDiagnostics())
+            throw CGException("No diagnostics");
 
         // Create memory buffer with source text
         std::unique_ptr<llvm::MemoryBuffer> buffer = llvm::MemoryBuffer::getMemBufferCopy(source, "SIMPLE_BUFFER");
-        if (buffer.get() == nullptr) throw CGException("Failed to create memory buffer");
+        if (buffer.get() == nullptr)
+            throw CGException("Failed to create memory buffer");
 
         // Remap auxiliary name "string-input" to memory buffer
-        PreprocessorOptions &po = compiler.getInvocation().getPreprocessorOpts();
+        PreprocessorOptions& po = compiler.getInvocation().getPreprocessorOpts();
         po.addRemappedFile("string-input", buffer.release());
 
-        HeaderSearchOptions &hso = compiler.getInvocation().getHeaderSearchOpts();
+        HeaderSearchOptions& hso = compiler.getInvocation().getHeaderSearchOpts();
         std::string iClangHeaders = this->findInternalClangCHeaders("3.8", hso.ResourceDir);
-        if (!iClangHeaders.empty()) {
+        if(!iClangHeaders.empty()) {
             hso.AddPath(llvm::StringRef(iClangHeaders), clang::frontend::Angled, false, false);
         }
 
@@ -258,10 +269,12 @@ class LlvmModelLibraryProcessor : public LlvmBaseModelLibraryProcessor<Base> {
 
         // Create and execute the frontend to generate an LLVM bitcode module.
         clang::EmitLLVMOnlyAction action(_context.get());
-        if (!compiler.ExecuteAction(action)) throw CGException("Failed to emit LLVM bitcode");
+        if (!compiler.ExecuteAction(action))
+            throw CGException("Failed to emit LLVM bitcode");
 
         std::unique_ptr<llvm::Module> module = action.takeModule();
-        if (module.get() == nullptr) throw CGException("No module");
+        if (module.get() == nullptr)
+            throw CGException("No module");
 
         if (_linker.get() == nullptr) {
             _module.reset(module.release());
@@ -274,11 +287,12 @@ class LlvmModelLibraryProcessor : public LlvmBaseModelLibraryProcessor<Base> {
 
         // NO delete module;
         // NO delete invocation;
-        // llvm::llvm_shutdown();
+        //llvm::llvm_shutdown();
     }
+
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

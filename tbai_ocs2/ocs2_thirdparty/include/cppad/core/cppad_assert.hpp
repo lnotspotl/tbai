@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_CPPAD_ASSERT_HPP
-#define CPPAD_CORE_CPPAD_ASSERT_HPP
+# ifndef CPPAD_CORE_CPPAD_ASSERT_HPP
+# define CPPAD_CORE_CPPAD_ASSERT_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -89,10 +89,9 @@ $end
 ------------------------------------------------------------------------------
 */
 
-#include <cassert>
-#include <iostream>
-
-#include <cppad/utility/error_handler.hpp>
+# include <cassert>
+# include <iostream>
+# include <cppad/utility/error_handler.hpp>
 
 /*!
 \def CPPAD_ASSERT_KNOWN(exp, msg)
@@ -107,14 +106,19 @@ this macro will report the source code line number at
 which this expected result occurred.
 In addition, it will print the specified error message msg.
 */
-#ifdef NDEBUG
-#define CPPAD_ASSERT_KNOWN(exp, msg)  // do nothing
-#else
-#define CPPAD_ASSERT_KNOWN(exp, msg)                                                \
-    {                                                                               \
-        if (!(exp)) CppAD::ErrorHandler::Call(true, __LINE__, __FILE__, #exp, msg); \
-    }
-#endif
+# ifdef NDEBUG
+# define CPPAD_ASSERT_KNOWN(exp, msg)  // do nothing
+# else
+# define CPPAD_ASSERT_KNOWN(exp, msg)           \
+{   if( ! ( exp ) )                         \
+    CppAD::ErrorHandler::Call(              \
+        true       ,                    \
+        __LINE__   ,                    \
+        __FILE__   ,                    \
+        #exp       ,                    \
+        msg        );                   \
+}
+# endif
 
 /*!
 \def CPPAD_ASSERT_UNKNOWN(exp)
@@ -128,14 +132,19 @@ and exp is false,
 this macro will report the source code line number at
 which this expected result occurred.
 */
-#ifdef NDEBUG
-#define CPPAD_ASSERT_UNKNOWN(exp)  // do nothing
-#else
-#define CPPAD_ASSERT_UNKNOWN(exp)                                                   \
-    {                                                                               \
-        if (!(exp)) CppAD::ErrorHandler::Call(false, __LINE__, __FILE__, #exp, ""); \
-    }
-#endif
+# ifdef NDEBUG
+# define CPPAD_ASSERT_UNKNOWN(exp)      // do nothing
+# else
+# define CPPAD_ASSERT_UNKNOWN(exp)              \
+{   if( ! ( exp ) )                         \
+    CppAD::ErrorHandler::Call(              \
+        false      ,                    \
+        __LINE__   ,                    \
+        __FILE__   ,                    \
+        #exp       ,                    \
+        ""         );                   \
+}
+# endif
 
 /*!
 \def CPPAD_ASSERT_NARG_NRES(op, n_arg, n_res)
@@ -145,9 +154,9 @@ If NDEBUG is not defined and either the number of arguments
 or the number of results are not as expected,
 execution is terminated and the source code line number is reported.
 */
-#define CPPAD_ASSERT_NARG_NRES(op, n_arg, n_res) \
-    CPPAD_ASSERT_UNKNOWN(NumArg(op) == n_arg)    \
-    CPPAD_ASSERT_UNKNOWN(NumRes(op) == n_res)
+# define CPPAD_ASSERT_NARG_NRES(op, n_arg, n_res)   \
+    CPPAD_ASSERT_UNKNOWN( NumArg(op) == n_arg ) \
+    CPPAD_ASSERT_UNKNOWN( NumRes(op) == n_res )
 
 /*!
 \def CPPAD_ASSERT_FIRST_CALL_NOT_PARALLEL
@@ -162,16 +171,18 @@ Otherwise, the variable
 is defined and if the first call is executed in parallel mode,
 execution is terminated and the source code line number is reported.
 */
-#ifdef NDEBUG
-#define CPPAD_ASSERT_FIRST_CALL_NOT_PARALLEL
-#else
-#define CPPAD_ASSERT_FIRST_CALL_NOT_PARALLEL                                            \
-    static bool assert_first_call = true;                                               \
-    if (assert_first_call) {                                                            \
-        CPPAD_ASSERT_KNOWN(!(CppAD::thread_alloc::in_parallel()),                       \
-                           "In parallel mode and parallel_setup has not been called."); \
-        assert_first_call = false;                                                      \
+# ifdef NDEBUG
+# define CPPAD_ASSERT_FIRST_CALL_NOT_PARALLEL
+# else
+# define CPPAD_ASSERT_FIRST_CALL_NOT_PARALLEL                           \
+    static bool assert_first_call = true;                              \
+    if( assert_first_call )                                            \
+    {   CPPAD_ASSERT_KNOWN(                                           \
+        ! (CppAD::thread_alloc::in_parallel() ),                      \
+        "In parallel mode and parallel_setup has not been called."    \
+        );                                                            \
+        assert_first_call = false;                                    \
     }
-#endif
+# endif
 
-#endif
+# endif

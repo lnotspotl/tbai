@@ -22,29 +22,38 @@ namespace cg {
  * Useful class for storing matrix indexes
  */
 class CustomPosition {
-   private:
+private:
     bool filterDefined_;
     /// allowed elements
     std::vector<std::vector<bool> > elFilter_;
     bool fullDefined_;
     std::vector<std::set<size_t> > elements_;
+public:
 
-   public:
-    inline CustomPosition() : filterDefined_(false), fullDefined_(false) {}
+    inline CustomPosition() :
+        filterDefined_(false),
+        fullDefined_(false) {
+    }
 
-    template <class VectorSize>
-    inline CustomPosition(size_t m, size_t n, const VectorSize &rows, const VectorSize &cols)
-        : filterDefined_(true), elFilter_(m, std::vector<bool>(n, false)), fullDefined_(false) {
-        CPPADCG_ASSERT_KNOWN(rows.size() == cols.size(),
-                             "The number of row indexes must be the same as the number of column indexes.");
+    template<class VectorSize>
+    inline CustomPosition(size_t m, size_t n,
+                          const VectorSize& rows,
+                          const VectorSize& cols) :
+        filterDefined_(true),
+        elFilter_(m, std::vector<bool>(n, false)),
+        fullDefined_(false) {
+        CPPADCG_ASSERT_KNOWN(rows.size() == cols.size(), "The number of row indexes must be the same as the number of column indexes.");
         for (size_t i = 0; i < rows.size(); i++) {
             elFilter_[rows[i]][cols[i]] = true;
         }
     }
 
-    template <class VectorSet>
-    inline CustomPosition(size_t m, size_t n, const VectorSet &elements)
-        : filterDefined_(true), elFilter_(m, std::vector<bool>(n, false)), fullDefined_(false) {
+    template<class VectorSet>
+    inline CustomPosition(size_t m, size_t n,
+                          const VectorSet& elements) :
+        filterDefined_(true),
+        elFilter_(m, std::vector<bool>(n, false)),
+        fullDefined_(false) {
         CPPADCG_ASSERT_KNOWN(elements.size() <= m, "Invalid number of rows.");
 
         for (size_t i = 0; i < elements.size(); i++) {
@@ -54,30 +63,37 @@ class CustomPosition {
         }
     }
 
-    inline bool isFilterDefined() const { return filterDefined_; }
+    inline bool isFilterDefined() const {
+        return filterDefined_;
+    }
 
-    inline bool isFullDefined() const { return fullDefined_; }
+    inline bool isFullDefined() const {
+        return fullDefined_;
+    }
 
-    inline void setFullElements(const std::vector<std::set<size_t> > &elements) {
+    inline void setFullElements(const std::vector<std::set<size_t> >& elements) {
         elements_ = elements;
         filter(elements_);
         fullDefined_ = true;
     }
 
-    inline const std::vector<std::set<size_t> > &getFullElements() const { return elements_; }
+    inline const std::vector<std::set<size_t> >& getFullElements()const {
+        return elements_;
+    }
 
-    inline void filter(CppAD::vector<std::set<size_t> > &sparsity) const {
+    inline void filter(CppAD::vector<std::set<size_t> >& sparsity) const {
         ArrayView<std::set<size_t> > s(sparsity);
         filter(s);
     }
 
-    inline void filter(std::vector<std::set<size_t> > &sparsity) const {
+    inline void filter(std::vector<std::set<size_t> >& sparsity) const {
         ArrayView<std::set<size_t> > s(sparsity);
         filter(s);
     }
 
-    inline void filter(ArrayView<std::set<size_t> > &sparsity) const {
-        if (!filterDefined_) return;  // nothing to do
+    inline void filter(ArrayView<std::set<size_t> >& sparsity) const {
+        if (!filterDefined_)
+            return; // nothing to do
 
         std::set<size_t>::iterator it, currentIt;
 
@@ -87,14 +103,15 @@ class CustomPosition {
                 // copy the current iterator then increment it
                 currentIt = it++;
                 if (!elFilter_[i][*currentIt]) {
-                    sparsity[i].erase(currentIt);  // not in allowed elements
+                    sparsity[i].erase(currentIt); // not in allowed elements
                 }
             }
         }
     }
+
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

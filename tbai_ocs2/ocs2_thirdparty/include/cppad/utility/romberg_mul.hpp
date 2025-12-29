@@ -1,5 +1,5 @@
-#ifndef CPPAD_UTILITY_ROMBERG_MUL_HPP
-#define CPPAD_UTILITY_ROMBERG_MUL_HPP
+# ifndef CPPAD_UTILITY_ROMBERG_MUL_HPP
+# define CPPAD_UTILITY_ROMBERG_MUL_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -163,107 +163,141 @@ $code cppad/romberg_mul.hpp$$.
 $end
 */
 
-#include <cppad/utility/check_numeric_type.hpp>
-#include <cppad/utility/check_simple_vector.hpp>
-#include <cppad/utility/romberg_one.hpp>
+# include <cppad/utility/romberg_one.hpp>
+# include <cppad/utility/check_numeric_type.hpp>
+# include <cppad/utility/check_simple_vector.hpp>
 
-namespace CppAD {  // BEGIN CppAD namespace
+namespace CppAD { // BEGIN CppAD namespace
 
 template <class Fun, class FloatVector>
 class SliceLast {
     typedef typename FloatVector::value_type Float;
-
-   private:
-    Fun *F;
-    size_t last;
+private:
+    Fun        *F;
+    size_t      last;
     FloatVector x;
-
-   public:
-    SliceLast(Fun *F_, size_t last_, const FloatVector &x_) : F(F_), last(last_), x(last + 1) {
-        size_t i;
-        for (i = 0; i < last; i++) x[i] = x_[i];
+public:
+    SliceLast( Fun *F_, size_t last_, const FloatVector &x_ )
+    : F(F_) , last(last_), x(last + 1)
+    {   size_t i;
+        for(i = 0; i < last; i++)
+            x[i] = x_[i];
     }
-    double operator()(const Float &xlast) {
-        x[last] = xlast;
+    double operator()(const Float &xlast)
+    {   x[last] = xlast;
         return (*F)(x);
     }
 };
 
 template <class Fun, class SizeVector, class FloatVector, class Float>
 class IntegrateLast {
-   private:
-    Fun *F;
-    const size_t last;
-    const FloatVector a;
-    const FloatVector b;
-    const SizeVector n;
-    const SizeVector p;
-    Float esum;
-    size_t ecount;
+private:
+    Fun                 *F;
+    const size_t        last;
+    const FloatVector   a;
+    const FloatVector   b;
+    const SizeVector    n;
+    const SizeVector    p;
+    Float               esum;
+    size_t              ecount;
 
-   public:
-    IntegrateLast(Fun *F_, size_t last_, const FloatVector &a_, const FloatVector &b_, const SizeVector &n_,
-                  const SizeVector &p_)
-        : F(F_), last(last_), a(a_), b(b_), n(n_), p(p_) {}
-    Float operator()(const FloatVector &x) {
-        Float r, e;
-        SliceLast<Fun, FloatVector> S(F, last, x);
-        r = CppAD::RombergOne(S, a[last], b[last], n[last], p[last], e);
+public:
+    IntegrateLast(
+        Fun                *F_    ,
+        size_t              last_ ,
+        const FloatVector  &a_    ,
+        const FloatVector  &b_    ,
+        const SizeVector   &n_    ,
+        const SizeVector   &p_    )
+    : F(F_) , last(last_), a(a_) , b(b_) , n(n_) , p(p_)
+    { }
+    Float operator()(const FloatVector           &x)
+    {   Float r, e;
+        SliceLast<Fun, FloatVector           > S(F, last, x);
+        r     = CppAD::RombergOne(
+            S, a[last], b[last], n[last], p[last], e
+        );
         esum = esum + e;
         ecount++;
         return r;
     }
-    void ClearEsum(void) { esum = 0.; }
-    Float GetEsum(void) { return esum; }
+    void ClearEsum(void)
+    {   esum   = 0.; }
+    Float GetEsum(void)
+    {   return esum; }
 
-    void ClearEcount(void) { ecount = 0; }
-    size_t GetEcount(void) { return ecount; }
+    void ClearEcount(void)
+    {   ecount   = 0; }
+    size_t GetEcount(void)
+    {   return ecount; }
 };
 
 template <class Fun, class SizeVector, class FloatVector, size_t m>
 class RombergMul {
     typedef typename FloatVector::value_type Float;
+public:
+    RombergMul(void)
+    {   }
+    Float operator() (
+        Fun                 &F  ,
+        const FloatVector   &a  ,
+        const FloatVector   &b  ,
+        const SizeVector    &n  ,
+        const SizeVector    &p  ,
+        Float               &e  )
+    {   Float r;
 
-   public:
-    RombergMul(void) {}
-    Float operator()(Fun &F, const FloatVector &a, const FloatVector &b, const SizeVector &n, const SizeVector &p,
-                     Float &e) {
-        Float r;
+        typedef IntegrateLast<
+            Fun         ,
+            SizeVector  ,
+            FloatVector ,
+            Float       > IntegrateOne;
 
-        typedef IntegrateLast<Fun, SizeVector, FloatVector, Float> IntegrateOne;
-
-        IntegrateOne Fm1(&F, m - 1, a, b, n, p);
-        RombergMul<IntegrateOne, SizeVector, FloatVector, m - 1> RombergMulM1;
+        IntegrateOne Fm1(&F, m-1, a, b, n, p);
+        RombergMul<
+            IntegrateOne,
+            SizeVector  ,
+            FloatVector ,
+            m-1         > RombergMulM1;
 
         Fm1.ClearEsum();
         Fm1.ClearEcount();
 
-        r = RombergMulM1(Fm1, a, b, n, p, e);
+        r  = RombergMulM1(Fm1, a, b, n, p, e);
 
         size_t i, j;
         Float prod = 1;
         size_t pow2 = 1;
-        for (i = 0; i < m - 1; i++) {
-            prod *= (b[i] - a[i]);
-            for (j = 0; j < (n[i] - 1); j++) pow2 *= 2;
+        for(i = 0; i < m-1; i++)
+        {   prod *= (b[i] - a[i]);
+            for(j = 0; j < (n[i] - 1); j++)
+                pow2 *= 2;
         }
-        assert(Fm1.GetEcount() == (pow2 + 1));
+        assert( Fm1.GetEcount() == (pow2+1) );
 
-        e = e + Fm1.GetEsum() * prod / Float(double(Fm1.GetEcount()));
+        e = e + Fm1.GetEsum() * prod / Float( double(Fm1.GetEcount()) );
 
         return r;
     }
 };
 
 template <class Fun, class SizeVector, class FloatVector>
-class RombergMul<Fun, SizeVector, FloatVector, 1> {
+class RombergMul <Fun, SizeVector, FloatVector, 1> {
     typedef typename FloatVector::value_type Float;
-
-   public:
-    Float operator()(Fun &F, const FloatVector &a, const FloatVector &b, const SizeVector &n, const SizeVector &p,
-                     Float &e) {
-        Float r;
-        typedef IntegrateLast<Fun, SizeVector, FloatVector, Float> IntegrateOne;
+public:
+    Float operator() (
+        Fun                 &F  ,
+        const FloatVector   &a  ,
+        const FloatVector   &b  ,
+        const SizeVector    &n  ,
+        const SizeVector    &p  ,
+        Float               &e  )
+    {   Float r;
+        typedef IntegrateLast<
+            Fun         ,
+            SizeVector  ,
+            FloatVector ,
+            Float       > IntegrateOne;
 
         // check simple vector class specifications
         CheckSimpleVector<Float, FloatVector>();
@@ -276,15 +310,15 @@ class RombergMul<Fun, SizeVector, FloatVector, 1> {
         F0.ClearEsum();
         F0.ClearEcount();
 
-        r = F0(a);
+        r  = F0(a);
 
-        assert(F0.GetEcount() == 1);
+        assert( F0.GetEcount() == 1 );
         e = F0.GetEsum();
 
         return r;
     }
 };
 
-}  // namespace CppAD
+} // END CppAD namespace
 
-#endif
+# endif

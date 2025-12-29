@@ -18,37 +18,47 @@
 namespace CppAD {
 namespace cg {
 
-template <class Base>
+template<class Base>
 struct OperationPathNode {
     /**
      * an operation
      */
-    OperationNode<Base> *node;
+    OperationNode<Base>* node;
     /**
      * argument index for the next node in the path
      */
     size_t argIndex;
 
-    inline OperationPathNode() : node(nullptr), argIndex(0) {}
+    inline OperationPathNode() :
+            node(nullptr),
+            argIndex(0) {
+    }
 
-    inline OperationPathNode(OperationNode<Base> *node, size_t argIndex) : node(node), argIndex(argIndex) {}
+    inline OperationPathNode(OperationNode<Base>* node,
+                             size_t argIndex) :
+            node(node),
+            argIndex(argIndex) {
+    }
 
-    inline bool operator<(const OperationPathNode<Base> &right) const {
+    inline bool operator<(const OperationPathNode<Base>& right) const {
         return node < right.node || argIndex < right.argIndex;
     }
+
 };
 
-template <class Base>
-inline bool operator==(const OperationPathNode<Base> &left, const OperationPathNode<Base> &right) {
+template<class Base>
+inline bool operator==(const OperationPathNode<Base>& left,
+                       const OperationPathNode<Base>& right) {
     return left.node == right.node && left.argIndex == right.argIndex;
 }
 
-template <class Base>
-inline bool operator!=(const OperationPathNode<Base> &left, const OperationPathNode<Base> &right) {
+template<class Base>
+inline bool operator!=(const OperationPathNode<Base>& left,
+                       const OperationPathNode<Base>& right) {
     return left.node != right.node || left.argIndex != right.argIndex;
 }
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

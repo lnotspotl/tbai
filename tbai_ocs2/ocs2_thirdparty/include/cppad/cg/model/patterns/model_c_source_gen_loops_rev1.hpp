@@ -23,16 +23,16 @@ namespace cg {
  **************************************************************************/
 
 /**
- *
+ * 
  * @param sources maps files names to the generated source code
  * @param elements  [equation]{vars}
  */
-template <class Base>
-void ModelCSourceGen<Base>::prepareSparseReverseOneWithLoops(const std::map<size_t, std::vector<size_t> > &elements) {
+template<class Base>
+void ModelCSourceGen<Base>::prepareSparseReverseOneWithLoops(const std::map<size_t, std::vector<size_t> >& elements) {
     using namespace std;
     using namespace CppAD::cg::loops;
 
-    // printSparsityPattern(_jacSparsity.rows, _jacSparsity.cols, "jacobian", _fun.Range());
+    //printSparsityPattern(_jacSparsity.rows, _jacSparsity.cols, "jacobian", _fun.Range());
 
     size_t n = _fun.Domain();
 
@@ -40,12 +40,12 @@ void ModelCSourceGen<Base>::prepareSparseReverseOneWithLoops(const std::map<size
     handler.setJobTimer(_jobTimer);
     handler.setZeroDependents(false);
 
-    auto &indexJrowDcl = *handler.makeIndexDclrNode("jrow");
-    auto &indexIterationDcl = *handler.makeIndexDclrNode(LoopModel<Base>::ITERATION_INDEX_NAME);
-    auto &iterationIndexOp = *handler.makeIndexNode(indexIterationDcl);
-    auto &jrowIndexOp = *handler.makeIndexNode(indexJrowDcl);
+    auto& indexJrowDcl = *handler.makeIndexDclrNode("jrow");
+    auto& indexIterationDcl = *handler.makeIndexDclrNode(LoopModel<Base>::ITERATION_INDEX_NAME);
+    auto& iterationIndexOp = *handler.makeIndexNode(indexIterationDcl);
+    auto& jrowIndexOp = *handler.makeIndexNode(indexJrowDcl);
 
-    std::vector<OperationNode<Base> *> localNodes(4);
+    std::vector<OperationNode<Base>*> localNodes(4);
     localNodes[0] = &indexJrowDcl;
     localNodes[1] = &indexIterationDcl;
     localNodes[2] = &iterationIndexOp;
@@ -54,9 +54,9 @@ void ModelCSourceGen<Base>::prepareSparseReverseOneWithLoops(const std::map<size
     size_t nonIndexdedEqSize = _funNoLoops != nullptr ? _funNoLoops->getOrigDependentIndexes().size() : 0;
 
     std::vector<set<size_t> > noLoopEvalSparsity;
-    std::vector<map<size_t, set<size_t> > > noLoopEvalLocations;  // tape equation -> original J -> locations
-    map<LoopModel<Base> *, std::vector<set<size_t> > > loopsEvalSparsities;
-    map<LoopModel<Base> *, std::vector<JacobianWithLoopsRowInfo> > loopEqInfo;
+    std::vector<map<size_t, set<size_t> > > noLoopEvalLocations; // tape equation -> original J -> locations
+    map<LoopModel<Base>*, std::vector<set<size_t> > > loopsEvalSparsities;
+    map<LoopModel<Base>*, std::vector<JacobianWithLoopsRowInfo> > loopEqInfo;
 
     size_t nnz = _jacSparsity.rows.size();
     std::vector<size_t> rows(nnz);
@@ -64,11 +64,11 @@ void ModelCSourceGen<Base>::prepareSparseReverseOneWithLoops(const std::map<size
     std::vector<size_t> locations(nnz);
 
     size_t p = 0;
-    for (const auto &itI : elements) {  // loop dependents/equations
+    for (const auto& itI : elements) {//loop dependents/equations
         size_t i = itI.first;
-        const std::vector<size_t> &r = itI.second;
+        const std::vector<size_t>& r = itI.second;
 
-        for (size_t e = 0; e < r.size(); e++) {  // loop variables
+        for (size_t e = 0; e < r.size(); e++) { // loop variables
             rows[p] = i;
             cols[p] = r[e];
             locations[p] = e;
@@ -77,8 +77,8 @@ void ModelCSourceGen<Base>::prepareSparseReverseOneWithLoops(const std::map<size
     }
     CPPADCG_ASSERT_UNKNOWN(p == nnz);
 
-    analyseSparseJacobianWithLoops(rows, cols, locations, noLoopEvalSparsity, noLoopEvalLocations, loopsEvalSparsities,
-                                   loopEqInfo);
+    analyseSparseJacobianWithLoops(rows, cols, locations,
+                                   noLoopEvalSparsity, noLoopEvalLocations, loopsEvalSparsities, loopEqInfo);
 
     std::vector<CGBase> x(n);
     handler.makeVariables(x);
@@ -99,7 +99,7 @@ void ModelCSourceGen<Base>::prepareSparseReverseOneWithLoops(const std::map<size
      **********************************************************************/
 
     /**
-     * original equations outside the loops
+     * original equations outside the loops 
      */
     // temporaries (zero orders)
     std::vector<CGBase> tmps;
@@ -111,7 +111,7 @@ void ModelCSourceGen<Base>::prepareSparseReverseOneWithLoops(const std::map<size
      * equations NOT in loops
      ******************************************************************/
     if (_funNoLoops != nullptr) {
-        ADFun<CGBase> &fun = _funNoLoops->getTape();
+        ADFun<CGBase>& fun = _funNoLoops->getTape();
 
         /**
          * zero order
@@ -119,32 +119,31 @@ void ModelCSourceGen<Base>::prepareSparseReverseOneWithLoops(const std::map<size
         std::vector<CGBase> depNL = _funNoLoops->getTape().Forward(0, x);
 
         tmps.resize(depNL.size() - nonIndexdedEqSize);
-        for (size_t i = 0; i < tmps.size(); i++) tmps[i] = depNL[nonIndexdedEqSize + i];
+        for (size_t i = 0; i < tmps.size(); i++)
+            tmps[i] = depNL[nonIndexdedEqSize + i];
 
         /**
          * jacobian
          */
-        bool hasAtomics = isAtomicsUsed();  // TODO: improve this by checking only the current fun
-        std::vector<map<size_t, CGBase> > dydx =
-            generateLoopRev1Jac(fun, _funNoLoops->getJacobianSparsity(), noLoopEvalSparsity, x, hasAtomics);
+        bool hasAtomics = isAtomicsUsed(); // TODO: improve this by checking only the current fun
+        std::vector<map<size_t, CGBase> > dydx = generateLoopRev1Jac(fun, _funNoLoops->getJacobianSparsity(), noLoopEvalSparsity, x, hasAtomics);
 
-        const std::vector<size_t> &dependentIndexes = _funNoLoops->getOrigDependentIndexes();
-        map<size_t, std::vector<CGBase> > jacNl;  // by row
+        const std::vector<size_t>& dependentIndexes = _funNoLoops->getOrigDependentIndexes();
+        map<size_t, std::vector<CGBase> > jacNl; // by row
 
         for (size_t inl = 0; inl < nonIndexdedEqSize; inl++) {
             size_t i = dependentIndexes[inl];
 
             // prepare space for the jacobian of the original equations
-            std::vector<CGBase> &row = jacNl[i];
+            std::vector<CGBase>& row = jacNl[i];
             row.resize(dydx[inl].size());
 
-            for (const auto &itjv : dydx[inl]) {
+            for (const auto& itjv : dydx[inl]) {
                 size_t j = itjv.first;
                 // (dy_i/dx_v) elements from equations outside loops
-                const set<size_t> &locations = noLoopEvalLocations[inl][j];
+                const set<size_t>& locations = noLoopEvalLocations[inl][j];
 
-                CPPADCG_ASSERT_UNKNOWN(locations.size() ==
-                                       1);  // one jacobian element should not be placed in several locations
+                CPPADCG_ASSERT_UNKNOWN(locations.size() == 1); // one jacobian element should not be placed in several locations
                 size_t e = *locations.begin();
 
                 row[e] = itjv.second * py;
@@ -157,7 +156,7 @@ void ModelCSourceGen<Base>::prepareSparseReverseOneWithLoops(const std::map<size
         for (size_t inl = nonIndexdedEqSize; inl < dydx.size(); inl++) {
             size_t k = inl - nonIndexdedEqSize;
 
-            for (const auto &itjv : dydx[inl]) {
+            for (const auto& itjv : dydx[inl]) {
                 size_t j = itjv.first;
                 dzDx[k][j] = itjv.second;
             }
@@ -173,14 +172,14 @@ void ModelCSourceGen<Base>::prepareSparseReverseOneWithLoops(const std::map<size
     }
 
     /***********************************************************************
-     * equations in loops
+     * equations in loops 
      **********************************************************************/
-    typename map<LoopModel<Base> *, std::vector<JacobianWithLoopsRowInfo> >::iterator itl2Eq;
+    typename map<LoopModel<Base>*, std::vector<JacobianWithLoopsRowInfo> >::iterator itl2Eq;
     for (itl2Eq = loopEqInfo.begin(); itl2Eq != loopEqInfo.end(); ++itl2Eq) {
-        LoopModel<Base> &lModel = *itl2Eq->first;
-        const std::vector<JacobianWithLoopsRowInfo> &info = itl2Eq->second;
-        ADFun<CGBase> &fun = lModel.getTape();
-        const std::vector<std::vector<LoopPosition> > &dependentIndexes = lModel.getDependentIndexes();
+        LoopModel<Base>& lModel = *itl2Eq->first;
+        const std::vector<JacobianWithLoopsRowInfo>& info = itl2Eq->second;
+        ADFun<CGBase>& fun = lModel.getTape();
+        const std::vector<std::vector<LoopPosition> >& dependentIndexes = lModel.getDependentIndexes();
         size_t nIterations = lModel.getIterationCount();
 
         _cache.str("");
@@ -195,21 +194,21 @@ void ModelCSourceGen<Base>::prepareSparseReverseOneWithLoops(const std::map<size
         std::vector<CGBase> indexedIndeps = createIndexedIndependents(handler, lModel, iterationIndexOp);
         std::vector<CGBase> xl = createLoopIndependentVector(handler, lModel, indexedIndeps, x, tmps);
 
-        bool hasAtomics = isAtomicsUsed();  // TODO: improve this by checking only the current fun
-        std::vector<map<size_t, CGBase> > dyiDxtape =
-            generateLoopRev1Jac(fun, lModel.getJacobianSparsity(), loopsEvalSparsities[&lModel], xl, hasAtomics);
+        bool hasAtomics = isAtomicsUsed(); // TODO: improve this by checking only the current fun
+        std::vector<map<size_t, CGBase> > dyiDxtape = generateLoopRev1Jac(fun, lModel.getJacobianSparsity(), loopsEvalSparsities[&lModel], xl, hasAtomics);
 
         finishedJob();
 
         /**
          * process each equation pattern (row in the loop tape)
          */
-        std::vector<std::pair<CGBase, IndexPattern *> > indexedLoopResults;
+        std::vector<std::pair<CGBase, IndexPattern*> > indexedLoopResults;
         for (size_t tapeI = 0; tapeI < info.size(); tapeI++) {
-            const JacobianWithLoopsRowInfo &rowInfo = info[tapeI];
+            const JacobianWithLoopsRowInfo& rowInfo = info[tapeI];
 
             size_t maxRowEls = rowInfo.indexedPositions.size() + rowInfo.nonIndexedPositions.size();
-            if (maxRowEls == 0) continue;  // nothing to do (possibly an equation assigned to a constant value)
+            if (maxRowEls == 0)
+                continue; // nothing to do (possibly an equation assigned to a constant value)
 
             /**
              * determine iteration index through the row index
@@ -217,13 +216,12 @@ void ModelCSourceGen<Base>::prepareSparseReverseOneWithLoops(const std::map<size
             map<size_t, size_t> irow2It;
             for (size_t it = 0; it < nIterations; it++) {
                 size_t i = dependentIndexes[tapeI][it].original;
-                if (i < _fun.Range())  // some equations are not present in all iteration
+                if (i < _fun.Range()) // some equations are not present in all iteration
                     irow2It[i] = it;
             }
 
             std::unique_ptr<IndexPattern> itPattern(IndexPattern::detect(irow2It));
-            auto *iterationIndexPatternOp =
-                handler.makeIndexAssignNode(indexIterationDcl, *itPattern.get(), jrowIndexOp);
+            auto* iterationIndexPatternOp = handler.makeIndexAssignNode(indexIterationDcl, *itPattern.get(), jrowIndexOp);
             iterationIndexOp.makeAssigmentDependent(*iterationIndexPatternOp);
 
             /**
@@ -235,15 +233,19 @@ void ModelCSourceGen<Base>::prepareSparseReverseOneWithLoops(const std::map<size
 
             std::vector<IfElseInfo<Base> > ifElses;
 
-            prepareSparseJacobianRowWithLoops(handler, lModel, tapeI, rowInfo, dyiDxtape, dzDx, py, iterationIndexOp,
-                                              ifElses, jacLE, indexedLoopResults, allLocations);
+            prepareSparseJacobianRowWithLoops(handler, lModel,
+                                              tapeI, rowInfo,
+                                              dyiDxtape, dzDx,
+                                              py,
+                                              iterationIndexOp, ifElses,
+                                              jacLE, indexedLoopResults, allLocations);
             indexedLoopResults.resize(jacLE);
 
             std::vector<CGBase> pxCustom(indexedLoopResults.size());
 
             for (size_t i = 0; i < indexedLoopResults.size(); i++) {
-                const CGBase &val = indexedLoopResults[i].first;
-                IndexPattern *ip = indexedLoopResults[i].second;
+                const CGBase& val = indexedLoopResults[i].first;
+                IndexPattern* ip = indexedLoopResults[i].second;
 
                 pxCustom[i] = createLoopDependentFunctionResult(handler, i, val, ip, iterationIndexOp);
             }
@@ -251,27 +253,26 @@ void ModelCSourceGen<Base>::prepareSparseReverseOneWithLoops(const std::map<size
             /**
              * save information on: row->{compressed reverse 1 position}
              */
-            std::map<size_t, std::set<size_t> > &row2position = _loopRev1Groups[&lModel][tapeI];
+            std::map<size_t, std::set<size_t> >& row2position = _loopRev1Groups[&lModel][tapeI];
 
             for (size_t it = 0; it < nIterations; it++) {
                 size_t i = dependentIndexes[tapeI][it].original;
-                if (i < _fun.Range()) {  // some equations are not present in all iteration
+                if (i < _fun.Range()) { // some equations are not present in all iteration
                     std::set<size_t> positions;
 
-                    for (const auto &itc : rowInfo.indexedPositions) {
-                        const std::vector<size_t> &positionsC = itc.second;
-                        if (positionsC[it] !=
-                            (std::numeric_limits<size_t>::max)())  // not all elements are requested for all iterations
+                    for (const auto& itc : rowInfo.indexedPositions) {
+                        const std::vector<size_t>& positionsC = itc.second;
+                        if (positionsC[it] != (std::numeric_limits<size_t>::max)()) // not all elements are requested for all iterations
                             positions.insert(positionsC[it]);
                     }
-                    for (const auto &itc : rowInfo.nonIndexedPositions) {
-                        const std::vector<size_t> &positionsC = itc.second;
-                        if (positionsC[it] !=
-                            (std::numeric_limits<size_t>::max)())  // not all elements are requested for all iterations
+                    for (const auto& itc : rowInfo.nonIndexedPositions) {
+                        const std::vector<size_t>& positionsC = itc.second;
+                        if (positionsC[it] != (std::numeric_limits<size_t>::max)()) // not all elements are requested for all iterations
                             positions.insert(positionsC[it]);
                     }
 
-                    if (!positions.empty()) row2position[i].swap(positions);
+                    if (!positions.empty())
+                        row2position[i].swap(positions);
                 }
             }
 
@@ -303,19 +304,17 @@ void ModelCSourceGen<Base>::prepareSparseReverseOneWithLoops(const std::map<size
 
             _cache.str("");
             _cache << "#include <stdlib.h>\n"
-                      "#include <math.h>\n"
-                      "\n"
-                   << LanguageC<Base>::ATOMICFUN_STRUCT_DEFINITION
-                   << "\n"
-                      "\n"
-                      "void "
-                   << functionName << "(" << argsDcl << ") {\n";
+                    "#include <math.h>\n"
+                    "\n"
+                    << LanguageC<Base>::ATOMICFUN_STRUCT_DEFINITION << "\n"
+                    "\n"
+                    "void " << functionName << "(" << argsDcl << ") {\n";
             nameGenHess.customFunctionVariableDeclarations(_cache);
             _cache << langC.generateIndependentVariableDeclaration() << "\n";
             _cache << langC.generateDependentVariableDeclaration() << "\n";
-            _cache << langC.generateTemporaryVariableDeclaration(false, false, handler.getExternalFuncMaxForwardOrder(),
-                                                                 handler.getExternalFuncMaxReverseOrder())
-                   << "\n";
+            _cache << langC.generateTemporaryVariableDeclaration(false, false,
+                                                                 handler.getExternalFuncMaxForwardOrder(),
+                                                                 handler.getExternalFuncMaxReverseOrder()) << "\n";
             nameGenHess.prepareCustomFunctionVariables(_cache);
 
             // code inside the loop
@@ -331,18 +330,20 @@ void ModelCSourceGen<Base>::prepareSparseReverseOneWithLoops(const std::map<size
              * prepare the nodes to be reused!
              */
             if (tapeI + 1 < info.size() || &lModel != loopEqInfo.rbegin()->first) {
-                handler.resetNodes();  // uncolor nodes
+                handler.resetNodes(); // uncolor nodes
             }
         }
+
     }
 
     /**
-     *
+     * 
      */
     string functionRev1 = _name + "_" + FUNCTION_SPARSE_REVERSE_ONE;
-    _sources[functionRev1 + ".c"] =
-        generateGlobalForRevWithLoopsFunctionSource(elements, _loopRev1Groups, _nonLoopRev1Elements, functionRev1,
-                                                    _name, _baseTypeName, "dep", generateFunctionNameLoopRev1);
+    _sources[functionRev1 + ".c"] = generateGlobalForRevWithLoopsFunctionSource(elements,
+                                                                                _loopRev1Groups, _nonLoopRev1Elements,
+                                                                                functionRev1, _name, _baseTypeName, "dep",
+                                                                                generateFunctionNameLoopRev1);
     /**
      * Sparsity
      */
@@ -352,9 +353,10 @@ void ModelCSourceGen<Base>::prepareSparseReverseOneWithLoops(const std::map<size
     _cache.str("");
 }
 
-template <class Base>
-void ModelCSourceGen<Base>::createReverseOneWithLoopsNL(CodeHandler<Base> &handler, size_t i,
-                                                        std::vector<CG<Base> > &jacRow) {
+template<class Base>
+void ModelCSourceGen<Base>::createReverseOneWithLoopsNL(CodeHandler<Base>& handler,
+                                                        size_t i,
+                                                        std::vector<CG<Base> >& jacRow) {
     size_t n = _fun.Domain();
 
     _cache.str("");
@@ -377,10 +379,12 @@ void ModelCSourceGen<Base>::createReverseOneWithLoopsNL(CodeHandler<Base> &handl
     handler.resetNodes();
 }
 
-template <class Base>
-std::vector<std::map<size_t, CG<Base> > > ModelCSourceGen<Base>::generateLoopRev1Jac(
-    ADFun<CGBase> &fun, const SparsitySetType &sparsity, const SparsitySetType &evalSparsity,
-    const std::vector<CGBase> &x, bool constainsAtomics) {
+template<class Base>
+std::vector<std::map<size_t, CG<Base> > > ModelCSourceGen<Base>::generateLoopRev1Jac(ADFun<CGBase>& fun,
+                                                                                     const SparsitySetType& sparsity,
+                                                                                     const SparsitySetType& evalSparsity,
+                                                                                     const std::vector<CGBase>& x,
+                                                                                     bool constainsAtomics) {
     using namespace std;
 
     size_t m = fun.Range();
@@ -391,11 +395,12 @@ std::vector<std::map<size_t, CG<Base> > > ModelCSourceGen<Base>::generateLoopRev
         std::vector<size_t> row, col;
         generateSparsityIndexes(evalSparsity, row, col);
 
-        if (row.size() == 0) return dyDx;  // nothing to do
+        if (row.size() == 0)
+            return dyDx; // nothing to do
 
         std::vector<CGBase> jacLoop(row.size());
 
-        CppAD::sparse_jacobian_work work;  // temporary structure for CppAD
+        CppAD::sparse_jacobian_work work; // temporary structure for CppAD
         fun.SparseJacobianReverse(x, sparsity, row, col, jacLoop, work);
 
         // organize results
@@ -406,12 +411,14 @@ std::vector<std::map<size_t, CG<Base> > > ModelCSourceGen<Base>::generateLoopRev
         }
 
     } else {
+
         std::vector<CGBase> w(m);
 
         for (size_t i = 0; i < m; i++) {
-            const set<size_t> &row = evalSparsity[i];
+            const set<size_t>& row = evalSparsity[i];
 
-            if (row.empty()) continue;
+            if (row.empty())
+                continue;
 
             fun.Forward(0, x);
 
@@ -420,30 +427,35 @@ std::vector<std::map<size_t, CG<Base> > > ModelCSourceGen<Base>::generateLoopRev
             CPPADCG_ASSERT_UNKNOWN(dw.size() == fun.Domain());
             w[i] = Base(0);
 
-            map<size_t, CGBase> &dyIDx = dyDx[i];
+            map<size_t, CGBase>& dyIDx = dyDx[i];
 
             for (size_t j : row) {
                 dyIDx[j] = dw[j];
             }
         }
+
     }
 
     return dyDx;
 }
 
-template <class Base>
-void ModelCSourceGen<Base>::generateFunctionNameLoopRev1(std::ostringstream &cache, const LoopModel<Base> &loop,
+template<class Base>
+void ModelCSourceGen<Base>::generateFunctionNameLoopRev1(std::ostringstream& cache,
+                                                         const LoopModel<Base>& loop,
                                                          size_t tapeI) {
     generateFunctionNameLoopRev1(cache, _name, loop, tapeI);
 }
 
-template <class Base>
-void ModelCSourceGen<Base>::generateFunctionNameLoopRev1(std::ostringstream &cache, const std::string &modelName,
-                                                         const LoopModel<Base> &loop, size_t tapeI) {
-    cache << modelName << "_" << FUNCTION_SPARSE_REVERSE_ONE << "_loop" << loop.getLoopId() << "_g" << tapeI;
+template<class Base>
+void ModelCSourceGen<Base>::generateFunctionNameLoopRev1(std::ostringstream& cache,
+                                                         const std::string& modelName,
+                                                         const LoopModel<Base>& loop,
+                                                         size_t tapeI) {
+    cache << modelName << "_" << FUNCTION_SPARSE_REVERSE_ONE <<
+            "_loop" << loop.getLoopId() << "_g" << tapeI;
 }
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

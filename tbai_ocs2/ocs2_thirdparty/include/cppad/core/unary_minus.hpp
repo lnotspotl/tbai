@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_UNARY_MINUS_HPP
-#define CPPAD_CORE_UNARY_MINUS_HPP
+# ifndef CPPAD_CORE_UNARY_MINUS_HPP
+# define CPPAD_CORE_UNARY_MINUS_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -80,19 +80,21 @@ namespace CppAD {
 
 // Broken g++ compiler inhibits declaring unary minus a member or friend
 template <class Base>
-AD<Base> AD<Base>::operator-(void) const {  // 2DO: make a more efficient by adding unary minus to op_code.h (some day)
+AD<Base> AD<Base>::operator - (void) const
+{   // 2DO: make a more efficient by adding unary minus to op_code.h (some day)
     //
     AD<Base> result(0);
-    result -= *this;
+    result  -= *this;
     return result;
 }
 
-template <class Base>
-AD<Base> operator-(const VecAD_reference<Base> &right) {
-    return -right.ADBase();
-}
 
-}  // namespace CppAD
+template <class Base>
+AD<Base> operator - (const VecAD_reference<Base> &right)
+{   return - right.ADBase(); }
+
+}
 //  END CppAD namespace
 
-#endif
+
+# endif

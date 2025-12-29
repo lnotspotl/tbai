@@ -1,5 +1,5 @@
-#ifndef CPPAD_LOCAL_OPTIMIZE_CEXP_INFO_HPP
-#define CPPAD_LOCAL_OPTIMIZE_CEXP_INFO_HPP
+# ifndef CPPAD_LOCAL_OPTIMIZE_CEXP_INFO_HPP
+# define CPPAD_LOCAL_OPTIMIZE_CEXP_INFO_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -11,8 +11,8 @@ Secondary License when the conditions for such availability set forth
 in the Eclipse Public License, Version 2.0 are satisfied:
       GNU General Public License, Version 2.0 or later.
 ---------------------------------------------------------------------------- */
-#include <cppad/local/declare_ad.hpp>  // defines CompareOp
-#include <cppad/utility/vector.hpp>
+# include <cppad/local/declare_ad.hpp> // defines CompareOp
+# include <cppad/utility/vector.hpp>
 
 /*!
 \file cexp_info.hpp
@@ -20,9 +20,7 @@ Information about one conditional expression.
 */
 
 // BEGIN_CPPAD_LOCAL_OPTIMIZE_NAMESPACE
-namespace CppAD {
-namespace local {
-namespace optimize {
+namespace CppAD { namespace local { namespace optimize  {
 /*!
 Information about one conditional expression.
 */
@@ -69,17 +67,11 @@ struct struct_cskip_new {
     size_t i_arg;
 };
 
-}  // namespace optimize
-}  // namespace local
-}  // namespace CppAD
+} } } // END_CPPAD_LOCAL_OPTIMIZE_NAMESPACE
 
-namespace CppAD {
-namespace local {
-template <>
-inline bool is_pod<optimize::struct_cskip_new>(void) {
-    return true;
-}
-}  // namespace local
-}  // namespace CppAD
+namespace CppAD { namespace local {
+    template <> inline bool is_pod<optimize::struct_cskip_new>(void)
+    { return true; }
+} }
 
-#endif
+# endif

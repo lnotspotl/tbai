@@ -23,23 +23,29 @@ namespace cg {
  * Random pattern using two indexes
  */
 class Random2DIndexPattern : public RandomIndexPattern {
-   protected:
+protected:
     std::map<size_t, std::map<size_t, size_t> > indexes_;
     std::string name_;
+public:
 
-   public:
-    inline Random2DIndexPattern(const std::map<size_t, std::map<size_t, size_t> > &x2y2z) : indexes_(x2y2z) {
+    inline Random2DIndexPattern(const std::map<size_t, std::map<size_t, size_t> >& x2y2z) :
+        indexes_(x2y2z) {
         CPPADCG_ASSERT_UNKNOWN(!indexes_.empty());
     }
 
     inline virtual ~Random2DIndexPattern() = default;
 
-    inline IndexPatternType getType() const override { return IndexPatternType::Random2D; }
+    inline IndexPatternType getType() const override {
+        return IndexPatternType::Random2D;
+    }
 
-    inline const std::map<size_t, std::map<size_t, size_t> > &getValues() const { return indexes_; }
+    inline const std::map<size_t, std::map<size_t, size_t> >& getValues() const {
+        return indexes_;
+    }
+
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

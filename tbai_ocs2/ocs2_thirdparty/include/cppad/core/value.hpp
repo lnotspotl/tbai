@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_VALUE_HPP
-#define CPPAD_CORE_VALUE_HPP
+# ifndef CPPAD_CORE_VALUE_HPP
+# define CPPAD_CORE_VALUE_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -75,16 +75,21 @@ $end
 namespace CppAD {
 
 template <class Base>
-CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION Base Value(const AD<Base> &x) {
-    Base result;
+CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION
+Base Value(const AD<Base> &x)
+{   Base result;
     //
-    CPPAD_ASSERT_KNOWN(!(Variable(x) | Dynamic(x)), "Value: argument is a variable or dynamic parameter");
+    CPPAD_ASSERT_KNOWN(
+        ! ( Variable(x) | Dynamic(x) ) ,
+        "Value: argument is a variable or dynamic parameter"
+    );
     //
     result = x.value_;
     return result;
 }
 
-}  // namespace CppAD
+}
 //  END CppAD namespace
 
-#endif
+
+# endif

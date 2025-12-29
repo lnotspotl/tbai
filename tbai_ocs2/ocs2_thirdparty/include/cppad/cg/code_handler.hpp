@@ -24,23 +24,21 @@ namespace cg {
  *
  * @author Joao Leal
  */
-template <class Base>
+template<class Base>
 class CodeHandler {
     friend class CodeHandlerVectorSync<Base>;
-
-   public:
+public:
     using PathNode = OperationPathNode<Base>;
     using SourceCodePath = std::vector<PathNode>;
-    using ScopePath = std::vector<ScopePathElement<Base>>;
+    using ScopePath = std::vector<ScopePathElement<Base> >;
     using Node = OperationNode<Base>;
     using Arg = Argument<Base>;
     using CGB = CG<Base>;
     using ScopeIDType = unsigned short;
+protected:
+    struct LoopData; // forward declaration
 
-   protected:
-    struct LoopData;  // forward declaration
-
-   protected:
+protected:
     // counter used to determine visitation IDs for the operation tree
     size_t _idVisit;
     // counter used to generate variable IDs
@@ -54,16 +52,16 @@ class CodeHandler {
     // the independent variables
     std::vector<Node *> _independentVariables;
     // the current dependent variables
-    ArrayView<CGB> *_dependents;
+    ArrayView<CGB>* _dependents;
     /**
      * nodes managed by this code handler which include all
      * all OperationNodes created by CG<Base> objects
      */
-    std::vector<Node *> _codeBlocks;
+    std::vector<Node*> _codeBlocks;
     /**
      * All CodeHandlerVector associated with this code handler
      */
-    std::set<CodeHandlerVectorSync<Base> *> _managedVectors;
+    std::set<CodeHandlerVectorSync<Base>*> _managedVectors;
     /**
      * the ID of the last visit to each managed node
      */
@@ -101,16 +99,16 @@ class CodeHandler {
     /**
      * the order for the variable creation in the source code
      */
-    std::vector<Node *> _variableOrder;
+    std::vector<Node*> _variableOrder;
     /**
      * maps dependencies between variables in _variableOrder
      */
-    std::vector<std::set<Node *>> _variableDependencies;
+    std::vector<std::set<Node*>> _variableDependencies;
     /**
      * the order for the variable creation in the source code
      * (each level represents a different variable scope)
      */
-    std::vector<std::vector<Node *>> _scopedVariableOrder;
+    std::vector<std::vector<Node*> > _scopedVariableOrder;
     /**
      *
      */
@@ -118,7 +116,7 @@ class CodeHandler {
     /**
      * maps the IDs of the atomic functions
      */
-    std::map<size_t, CGAbstractAtomicFun<Base> *> _atomicFunctions;
+    std::map<size_t, CGAbstractAtomicFun<Base>*> _atomicFunctions;
     /**
      * already used atomic function names (may contain names which were
      * used by previous calls to this/other CondeHandlers)
@@ -128,7 +126,7 @@ class CodeHandler {
      * the order of the atomic functions (may contain names which were
      * used by previous calls to this/other CondeHandlers)
      */
-    std::vector<std::string> *_atomicFunctionsOrder;
+    std::vector<std::string>* _atomicFunctionsOrder;
     /**
      * the maximum forward mode order each atomic function is called
      * (-1 means forward mode not used)
@@ -150,9 +148,9 @@ class CodeHandler {
     // all scopes
     std::vector<ScopePath> _scopes;
     // possible altered nodes due to scope conditionals (altered node <-> clone of original)
-    std::list<std::pair<Node *, Node *>> _alteredNodes;
+    std::list<std::pair<Node*, Node* > > _alteredNodes;
     // the language used for source code generation
-    Language<Base> *_lang;
+    Language<Base>* _lang;
     // the lowest ID used for temporary variables
     size_t _minTemporaryVarID;
     /**
@@ -165,22 +163,22 @@ class CodeHandler {
     /**
      * used to track evaluation times and print out messages
      */
-    JobTimer *_jobTimer;
+    JobTimer* _jobTimer;
     /**
      * Auxiliary index declaration (might not be used)
      */
-    Node *_auxIndexI;
+    Node* _auxIndexI;
     /**
      * Auxiliary index (might not be used)
      */
-    IndexOperationNode<Base> *_auxIterationIndexOp;
+    IndexOperationNode<Base>* _auxIterationIndexOp;
+public:
 
-   public:
     CodeHandler(size_t varCount = 50);
 
-    CodeHandler(const CodeHandler &) = delete;
+    CodeHandler(const CodeHandler&) = delete;
 
-    CodeHandler &operator=(const CodeHandler &) = delete;
+    CodeHandler& operator=(const CodeHandler&) = delete;
 
     /**
      * Destructor
@@ -205,8 +203,8 @@ class CodeHandler {
      * @param variables the vector of variables that will become independent
      *                  variables.
      */
-    template <class VectorCG>
-    inline void makeVariables(VectorCG &variables) {
+    template<class VectorCG>
+    inline void makeVariables(VectorCG& variables) {
         for (size_t i = 0; i < variables.size(); i++) {
             makeVariable(variables[i]);
         }
@@ -218,7 +216,7 @@ class CodeHandler {
      * @param variables the vector of variables that will become independent
      *                  variables.
      */
-    inline void makeVariables(std::vector<AD<CGB>> &variables);
+    inline void makeVariables(std::vector<AD<CGB> >& variables);
 
     /**
      * Marks the provided variable as being an independent variable.
@@ -226,7 +224,7 @@ class CodeHandler {
      * @param variables the variable that will become an independent
      *                  variables.
      */
-    inline void makeVariable(AD<CGB> &variable);
+    inline void makeVariable(AD<CGB>& variable);
 
     /**
      * Marks the provided variable as being an independent variable.
@@ -234,7 +232,7 @@ class CodeHandler {
      * @param variables the variable that will become an independent
      *                  variables.
      */
-    inline void makeVariable(CGB &variable);
+    inline void makeVariable(CGB& variable);
 
     /**
      * The number of independent variables defined with makeVariable().
@@ -244,7 +242,7 @@ class CodeHandler {
     /**
      * @throws CGException if a variable is not found in the independent vector
      */
-    size_t getIndependentVariableIndex(const Node &var) const;
+    size_t getIndependentVariableIndex(const Node& var) const;
 
     /**
      * Provides variable IDs that were assigned to operation nodes.
@@ -252,7 +250,7 @@ class CodeHandler {
      * The first IDs are reserved for the independent variables.
      * It can be an empty vector if IDs have not yet been assigned.
      */
-    inline const CodeHandlerVector<Base, size_t> &getVariablesIDs() const;
+    inline const CodeHandlerVector<Base, size_t>& getVariablesIDs() const;
 
     inline size_t getMaximumVariableID() const;
 
@@ -260,9 +258,9 @@ class CodeHandler {
 
     inline void setVerbose(bool verbose);
 
-    inline JobTimer *getJobTimer() const;
+    inline JobTimer* getJobTimer() const;
 
-    inline void setJobTimer(JobTimer *jobTimer);
+    inline void setJobTimer(JobTimer* jobTimer);
 
     /**
      * Determines whether or not the dependent variables will be set to zero
@@ -284,15 +282,15 @@ class CodeHandler {
 
     inline void startNewOperationTreeVisit();
 
-    inline bool isVisited(const Node &node) const;
+    inline bool isVisited(const Node& node) const;
 
-    inline void markVisited(const Node &node);
+    inline void markVisited(const Node& node);
 
     /**
      * Provides the name used by an atomic function with a given ID.
      *
      * @param id the atomic function ID.
-     * @return the atomic function name if it was registered
+     * @return the atomic function name if it was registered 
      *         or an empty string otherwise.
      */
     inline std::string getAtomicFunctionName(size_t id) const;
@@ -303,21 +301,21 @@ class CodeHandler {
      * @return a map with the atomic function ID as key and the atomic
      *         function as value
      */
-    inline const std::map<size_t, CGAbstractAtomicFun<Base> *> &getAtomicFunctions() const;
+    inline const std::map<size_t, CGAbstractAtomicFun<Base>* >& getAtomicFunctions() const;
 
     /**
      * Provides the maximum forward mode order used by all atomic functions
      * in the last call to ::generateCode
      * (-1 means forward mode not used).
      */
-    const std::vector<int> &getExternalFuncMaxForwardOrder() const;
+    const std::vector<int>& getExternalFuncMaxForwardOrder() const;
 
     /**
      * Provides the maximum reverse mode order used by all atomic functions
      * in the last call to ::generateCode
      * (-1 means forward mode not used).
      */
-    const std::vector<int> &getExternalFuncMaxReverseOrder() const;
+    const std::vector<int>& getExternalFuncMaxReverseOrder() const;
 
     /**
      * Provides the name used by a loop atomic function with a given ID.
@@ -326,9 +324,9 @@ class CodeHandler {
      * @return a pointer to the atomic loop function name if it was
      *         registered or nullptr otherwise
      */
-    inline const std::string *getLoopName(size_t id) const;
+    inline const std::string* getLoopName(size_t id) const;
 
-    inline const std::vector<ScopePath> &getScopes() const;
+    inline const std::vector<ScopePath>& getScopes() const;
 
     /**************************************************************************
      *                       Graph management functions
@@ -341,11 +339,16 @@ class CodeHandler {
      * @param max the maximum number of occurrences of code to find in root
      * @return the paths from root to code
      */
-    inline std::vector<SourceCodePath> findPaths(Node &root, Node &target, size_t max);
+    inline std::vector<SourceCodePath> findPaths(Node& root,
+                                                 Node& target,
+                                                 size_t max);
 
-    inline BidirGraph<Base> findPathGraph(Node &root, Node &target);
+    inline BidirGraph<Base> findPathGraph(Node& root,
+                                          Node& target) ;
 
-    inline BidirGraph<Base> findPathGraph(Node &root, Node &target, size_t &bifurcations,
+    inline BidirGraph<Base> findPathGraph(Node& root,
+                                          Node& target,
+                                          size_t& bifurcations,
                                           size_t maxBifurcations = (std::numeric_limits<size_t>::max)());
 
     /**************************************************************************
@@ -363,14 +366,23 @@ class CodeHandler {
      *                  reduced and thus providing a more optimized code.
      * @param nameGen Provides the rules for variable name creation.
      */
-    virtual void generateCode(std::ostream &out, Language<Base> &lang, CppAD::vector<CGB> &dependent,
-                              VariableNameGenerator<Base> &nameGen, const std::string &jobName = "source");
+    virtual void generateCode(std::ostream& out,
+                              Language<Base>& lang,
+                              CppAD::vector<CGB>& dependent,
+                              VariableNameGenerator<Base>& nameGen,
+                              const std::string& jobName = "source");
 
-    virtual void generateCode(std::ostream &out, Language<Base> &lang, std::vector<CGB> &dependent,
-                              VariableNameGenerator<Base> &nameGen, const std::string &jobName = "source");
+    virtual void generateCode(std::ostream& out,
+                              Language<Base>& lang,
+                              std::vector<CGB>& dependent,
+                              VariableNameGenerator<Base>& nameGen,
+                              const std::string& jobName = "source");
 
-    virtual void generateCode(std::ostream &out, Language<Base> &lang, ArrayView<CGB> &dependent,
-                              VariableNameGenerator<Base> &nameGen, const std::string &jobName = "source");
+    virtual void generateCode(std::ostream& out,
+                              Language<Base>& lang,
+                              ArrayView<CGB>& dependent,
+                              VariableNameGenerator<Base>& nameGen,
+                              const std::string& jobName = "source");
 
     /**
      * Creates the source code from the operations registered so far.
@@ -384,17 +396,26 @@ class CodeHandler {
      * @param nameGen Provides the rules for variable name creation.
      * @param atomicFunctions The order of the atomic functions.
      */
-    virtual void generateCode(std::ostream &out, Language<Base> &lang, CppAD::vector<CGB> &dependent,
-                              VariableNameGenerator<Base> &nameGen, std::vector<std::string> &atomicFunctions,
-                              const std::string &jobName = "source");
+    virtual void generateCode(std::ostream& out,
+                              Language<Base>& lang,
+                              CppAD::vector<CGB>& dependent,
+                              VariableNameGenerator<Base>& nameGen,
+                              std::vector<std::string>& atomicFunctions,
+                              const std::string& jobName = "source");
 
-    virtual void generateCode(std::ostream &out, Language<Base> &lang, std::vector<CGB> &dependent,
-                              VariableNameGenerator<Base> &nameGen, std::vector<std::string> &atomicFunctions,
-                              const std::string &jobName = "source");
+    virtual void generateCode(std::ostream& out,
+                              Language<Base>& lang,
+                              std::vector<CGB>& dependent,
+                              VariableNameGenerator<Base>& nameGen,
+                              std::vector<std::string>& atomicFunctions,
+                              const std::string& jobName = "source");
 
-    virtual void generateCode(std::ostream &out, Language<Base> &lang, ArrayView<CGB> &dependent,
-                              VariableNameGenerator<Base> &nameGen, std::vector<std::string> &atomicFunctions,
-                              const std::string &jobName = "source");
+    virtual void generateCode(std::ostream& out,
+                              Language<Base>& lang,
+                              ArrayView<CGB>& dependent,
+                              VariableNameGenerator<Base>& nameGen,
+                              std::vector<std::string>& atomicFunctions,
+                              const std::string& jobName = "source");
 
     size_t getTemporaryVariableCount() const;
 
@@ -425,41 +446,53 @@ class CodeHandler {
     /**
      * Creates a shallow clone of an operation node
      */
-    inline Node *cloneNode(const Node &n);
+    inline Node* cloneNode(const Node& n);
 
-    inline Node *makeNode(CGOpCode op);
+    inline Node* makeNode(CGOpCode op);
 
-    inline Node *makeNode(CGOpCode op, const Arg &arg);
+    inline Node* makeNode(CGOpCode op,
+                          const Arg& arg);
 
-    inline Node *makeNode(CGOpCode op, std::vector<Arg> &&args);
+    inline Node* makeNode(CGOpCode op,
+                          std::vector<Arg>&& args);
 
-    inline Node *makeNode(CGOpCode op, std::vector<size_t> &&info, std::vector<Arg> &&args);
+    inline Node* makeNode(CGOpCode op,
+                          std::vector<size_t>&& info,
+                          std::vector<Arg>&& args);
 
-    inline Node *makeNode(CGOpCode op, const std::vector<size_t> &info, const std::vector<Arg> &args);
+    inline Node* makeNode(CGOpCode op,
+                          const std::vector<size_t>& info,
+                          const std::vector<Arg>& args);
 
-    inline LoopStartOperationNode<Base> *makeLoopStartNode(Node &indexDcl, size_t iterationCount);
+    inline LoopStartOperationNode<Base>* makeLoopStartNode(Node& indexDcl,
+                                                           size_t iterationCount);
 
-    inline LoopStartOperationNode<Base> *makeLoopStartNode(Node &indexDcl, IndexOperationNode<Base> &iterCount);
+    inline LoopStartOperationNode<Base>* makeLoopStartNode(Node& indexDcl,
+                                                           IndexOperationNode<Base>& iterCount);
 
-    inline LoopEndOperationNode<Base> *makeLoopEndNode(LoopStartOperationNode<Base> &loopStart,
-                                                       const std::vector<Arg> &endArgs);
+    inline LoopEndOperationNode<Base>* makeLoopEndNode(LoopStartOperationNode<Base>& loopStart,
+                                                       const std::vector<Arg >& endArgs);
 
-    inline PrintOperationNode<Base> *makePrintNode(const std::string &before, const Arg &arg, const std::string &after);
+    inline PrintOperationNode<Base>* makePrintNode(const std::string& before,
+                                                   const Arg& arg,
+                                                   const std::string& after);
 
-    inline IndexOperationNode<Base> *makeIndexNode(Node &indexDcl);
+    inline IndexOperationNode<Base>* makeIndexNode(Node& indexDcl);
 
-    inline IndexOperationNode<Base> *makeIndexNode(LoopStartOperationNode<Base> &loopStart);
+    inline IndexOperationNode<Base>* makeIndexNode(LoopStartOperationNode<Base>& loopStart);
 
-    inline IndexOperationNode<Base> *makeIndexNode(IndexAssignOperationNode<Base> &indexAssign);
+    inline IndexOperationNode<Base>* makeIndexNode(IndexAssignOperationNode<Base>& indexAssign);
 
-    inline IndexAssignOperationNode<Base> *makeIndexAssignNode(Node &index, IndexPattern &indexPattern,
-                                                               IndexOperationNode<Base> &index1);
+    inline IndexAssignOperationNode<Base>* makeIndexAssignNode(Node& index,
+                                                               IndexPattern& indexPattern,
+                                                               IndexOperationNode<Base>& index1);
 
-    inline IndexAssignOperationNode<Base> *makeIndexAssignNode(Node &index, IndexPattern &indexPattern,
-                                                               IndexOperationNode<Base> *index1,
-                                                               IndexOperationNode<Base> *index2);
+    inline IndexAssignOperationNode<Base>* makeIndexAssignNode(Node& index,
+                                                               IndexPattern& indexPattern,
+                                                               IndexOperationNode<Base>* index1,
+                                                               IndexOperationNode<Base>* index2);
 
-    inline Node *makeIndexDclrNode(const std::string &name);
+    inline Node* makeIndexDclrNode(const std::string& name);
 
     /**
      * Provides the current number of OperationNodes created by the model.
@@ -474,7 +507,7 @@ class CodeHandler {
     /**
      * Provides the OperationNodes created by the model.
      */
-    inline const std::vector<Node *> &getManagedNodes() const;
+    inline const std::vector<Node *>& getManagedNodes() const;
 
     /**
      * Allows to delete OperationNodes that are managed internally.
@@ -483,31 +516,33 @@ class CodeHandler {
      * @param start The index of the first OperationNode to be deleted
      * @param end The index after the last OperationNode to be deleted
      */
-    inline void deleteManagedNodes(size_t start, size_t end);
+    inline void deleteManagedNodes(size_t start,
+                                   size_t end);
 
     /**************************************************************************
      *                           Value generation
      *************************************************************************/
-    CGB createCG(const Arg &arg);
+    CGB createCG(const Arg& arg);
 
     /**************************************************************************
      *                           Loop management
      *************************************************************************/
 
-    const std::map<size_t, LoopModel<Base> *> &getLoops() const;
+    const std::map<size_t, LoopModel<Base>*>& getLoops() const;
 
-    inline LoopModel<Base> *getLoop(size_t loopId) const;
+    inline LoopModel<Base>* getLoop(size_t loopId) const;
 
-    inline size_t addLoopDependentIndexPattern(IndexPattern &jacPattern);
+    inline size_t addLoopDependentIndexPattern(IndexPattern& jacPattern);
 
-    inline void manageLoopDependentIndexPattern(const IndexPattern *pattern);
+    inline void manageLoopDependentIndexPattern(const IndexPattern* pattern);
 
-    inline size_t addLoopIndependentIndexPattern(IndexPattern &pattern, size_t hint);
+    inline size_t addLoopIndependentIndexPattern(IndexPattern& pattern, size_t hint);
 
     /***********************************************************************
      *                           Index patterns
      **********************************************************************/
-    static inline void findRandomIndexPatterns(IndexPattern *ip, std::set<RandomIndexPattern *> &found);
+    static inline void findRandomIndexPatterns(IndexPattern* ip,
+                                               std::set<RandomIndexPattern*>& found);
 
     /**************************************************************************
      *                      Operation graph manipulation
@@ -521,9 +556,11 @@ class CodeHandler {
      * @return  The expression for the variable
      * @throws CGException if it is not possible to solve the expression
      */
-    inline CGB solveFor(Node &expression, Node &var);
+    inline CGB solveFor(Node& expression,
+                             Node& var);
 
-    inline bool isSolvable(Node &expression, Node &var);
+    inline bool isSolvable(Node& expression,
+                           Node& var);
 
     /**
      * Eliminates an independent variable by substitution using the provided
@@ -539,9 +576,13 @@ class CodeHandler {
      *                         variable is not removed.
      * @throws CGException if the dependent variable does not belong to this handler
      */
-    inline void substituteIndependent(const CGB &indep, const CGB &dep, bool removeFromIndeps = true);
+    inline void substituteIndependent(const CGB& indep,
+                                      const CGB& dep,
+                                      bool removeFromIndeps = true);
 
-    inline void substituteIndependent(Node &indep, Node &dep, bool removeFromIndeps = true);
+    inline void substituteIndependent(Node& indep,
+                                      Node& dep,
+                                      bool removeFromIndeps = true);
 
     /**
      * Reverts a substitution of an independent variable that has not been
@@ -551,7 +592,7 @@ class CodeHandler {
      * @param indep The independent variable
      * @throws CGException if the dependent variable does not belong to this handler
      */
-    inline void undoSubstituteIndependent(Node &indep);
+    inline void undoSubstituteIndependent(Node& indep);
 
     /**
      * Finalizes the substitution of an independent variable by eliminating
@@ -561,7 +602,7 @@ class CodeHandler {
      * @param indep The independent variable
      * @throws CGException if the dependent variable is not an not an alias or it does not belong to this handler
      */
-    inline void removeIndependent(Node &indep);
+    inline void removeIndependent(Node& indep);
 
     /**
      * Adds an operation node to the list of nodes to be deleted when this
@@ -571,32 +612,40 @@ class CodeHandler {
      * @return true if the node was successfully added to the list or
      *         false if it had already been previously added.
      */
-    inline bool manageOperationNodeMemory(Node *code);
+    inline bool manageOperationNodeMemory(Node* code);
 
-   protected:
-    virtual Node *manageOperationNode(Node *code);
+protected:
 
-    inline void addVector(CodeHandlerVectorSync<Base> *v);
+    virtual Node* manageOperationNode(Node* code);
 
-    inline void removeVector(CodeHandlerVectorSync<Base> *v);
+    inline void addVector(CodeHandlerVectorSync<Base>* v);
 
-    virtual void markCodeBlockUsed(Node &code);
+    inline void removeVector(CodeHandlerVectorSync<Base>* v);
 
-    inline bool handleTemporaryVarInDiffScopes(Node &code, size_t oldScope, size_t newScope);
+    virtual void markCodeBlockUsed(Node& code);
 
-    inline void replaceWithConditionalTempVar(Node &tmp, IndexOperationNode<Base> &iterationIndexOp,
-                                              const std::vector<size_t> &iterationRegions, ScopeIDType oldScope,
+    inline bool handleTemporaryVarInDiffScopes(Node& code,
+                                               size_t oldScope, size_t newScope);
+
+    inline void replaceWithConditionalTempVar(Node& tmp,
+                                              IndexOperationNode<Base>& iterationIndexOp,
+                                              const std::vector<size_t>& iterationRegions,
+                                              ScopeIDType oldScope,
                                               ScopeIDType commonScopeColor);
 
-    inline void updateTemporaryVarInDiffScopes(Node &code);
+    inline void updateTemporaryVarInDiffScopes(Node& code);
 
-    inline void restoreTemporaryVar(Node &tmp);
+    inline void restoreTemporaryVar(Node& tmp);
 
-    inline void restoreTemporaryVar(Node *tmp, Node *opClone);
+    inline void restoreTemporaryVar(Node* tmp,
+                                    Node* opClone);
 
-    inline void updateVarScopeUsage(Node *node, ScopeIDType usageScope, ScopeIDType oldUsageScope);
+    inline void updateVarScopeUsage(Node* node,
+                                    ScopeIDType usageScope,
+                                    ScopeIDType oldUsageScope);
 
-    inline void addScopeToVarOrder(size_t scope, size_t &e);
+    inline void addScopeToVarOrder(size_t scope,
+                                   size_t& e);
 
     /**
      * Determines the depth of the first different scope from scope paths of
@@ -606,7 +655,8 @@ class CodeHandler {
      * @param color2 scope color 2
      * @return the depth of the first different scope
      */
-    inline size_t findFirstDifferentScope(size_t color1, size_t color2);
+    inline size_t findFirstDifferentScope(size_t color1,
+                                          size_t color2);
 
     /**
      * Attempt to reduce the number of ifs when there are consecutive ifs with
@@ -614,7 +664,9 @@ class CodeHandler {
      */
     inline void optimizeIfs();
 
-    inline void replaceScope(Node *node, ScopeIDType oldScope, ScopeIDType newScope);
+    inline void replaceScope(Node* node,
+                             ScopeIDType oldScope,
+                             ScopeIDType newScope);
 
     /**
      * Removes cyclic dependencies when 'ifs' are merged together.
@@ -624,31 +676,35 @@ class CodeHandler {
      * @param scope the scope where the cyclic dependency could appear (or scopes inside it)
      * @param endIf the dependency to remove
      */
-    inline void breakCyclicDependency(Node *node, size_t scope, Node *endIf);
+    inline void breakCyclicDependency(Node* node,
+                                      size_t scope,
+                                      Node* endIf);
 
-    inline bool containedInScope(const Node &node, ScopeIDType scope);
+    inline bool containedInScope(const Node& node,
+                                 ScopeIDType scope);
 
-    inline static bool containsArgument(const Node &node, const Node &arg);
+    inline static bool containsArgument(const Node& node,
+                                        const Node& arg);
 
-    virtual void registerAtomicFunction(CGAbstractAtomicFun<Base> &atomic);
+    virtual void registerAtomicFunction(CGAbstractAtomicFun<Base>& atomic);
 
     /***********************************************************************
      *
      **********************************************************************/
-    virtual void checkVariableCreation(Node &code);
+    virtual void checkVariableCreation(Node& code);
 
-    inline void addToEvaluationQueue(Node &arg);
+    inline void addToEvaluationQueue(Node& arg);
 
-    inline void reduceTemporaryVariables(ArrayView<CGB> &dependent);
+    inline void reduceTemporaryVariables(ArrayView<CGB>& dependent);
 
     /**
      * Change operation order so that the total number of temporary variables is
      * reduced.
      * @param dependent The vector of dependent variable values
      */
-    inline void reorderOperations(ArrayView<CGB> &dependent);
+    inline void reorderOperations(ArrayView<CGB>& dependent);
 
-    inline void reorderOperation(Node &node);
+    inline void reorderOperation(Node& node);
 
     /**
      * Determine the highest location in the evaluation queue of temporary
@@ -657,9 +713,10 @@ class CodeHandler {
      *         the location of node itself if it doesn't use any temporary
      *         variable (in the same scope)
      */
-    inline size_t findLastTemporaryLocation(Node &node);
+    inline size_t findLastTemporaryLocation(Node& node);
 
-    inline void repositionEvaluationQueue(size_t fromPos, size_t toPos);
+    inline void repositionEvaluationQueue(size_t fromPos,
+                                          size_t toPos);
 
     /**
      * Determines when each temporary variable is last used in the
@@ -667,52 +724,57 @@ class CodeHandler {
      *
      * @param node The current node for which the number of usages is to be to determined
      */
-    inline void determineLastTempVarUsage(Node &node);
+    inline void determineLastTempVarUsage(Node& node);
 
     /**
      * Determines relations between variables with an ID
      */
     inline void findVariableDependencies();
 
-    inline void findVariableDependencies(size_t i, Node &node);
+    inline void findVariableDependencies(size_t i,
+                                         Node& node);
 
     /**
      * Defines the evaluation order for the code fragments that do not
      * create variables (right hand side variables)
      * @param code The operation just added to the evaluation order
      */
-    inline void dependentAdded2EvaluationQueue(Node &node);
+    inline void dependentAdded2EvaluationQueue(Node& node);
 
-    inline void updateEvaluationQueueOrder(Node &node, size_t newEvalOrder);
+    inline void updateEvaluationQueueOrder(Node& node,
+                                           size_t newEvalOrder);
 
-    inline bool isIndependent(const Node &arg) const;
+    inline bool isIndependent(const Node& arg) const;
 
-    inline bool isTemporary(const Node &arg) const;
+    inline bool isTemporary(const Node& arg) const;
 
-    inline static bool isTemporaryArray(const Node &arg);
+    inline static bool isTemporaryArray(const Node& arg);
 
-    inline static bool isTemporarySparseArray(const Node &arg);
+    inline static bool isTemporarySparseArray(const Node& arg);
 
-    inline static Node *getOperationFromAlias(Node &alias);
+    inline static Node* getOperationFromAlias(Node& alias);
 
-    inline size_t getEvaluationOrder(const Node &node) const;
+    inline size_t getEvaluationOrder(const Node& node) const;
 
-    inline void setEvaluationOrder(Node &node, size_t order);
+    inline void setEvaluationOrder(Node& node,
+                                   size_t order);
 
-    inline size_t getLastUsageEvaluationOrder(const Node &node) const;
+    inline size_t getLastUsageEvaluationOrder(const Node& node) const;
 
-    inline void setLastUsageEvaluationOrder(const Node &node, size_t last);
+    inline void setLastUsageEvaluationOrder(const Node& node,
+                                            size_t last);
 
     /**
      * Provides the total number of times the result of an operation node is
      * being used as an argument for another operation.
      * @return the total usage count
      */
-    inline size_t getTotalUsageCount(const Node &node) const;
+    inline size_t getTotalUsageCount(const Node& node) const;
 
-    inline void setTotalUsageCount(const Node &node, size_t cout);
+    inline void setTotalUsageCount(const Node& node,
+                                   size_t cout);
 
-    inline void increaseTotalUsageCount(const Node &node);
+    inline void increaseTotalUsageCount(const Node& node);
 
     inline void resetManagedNodes();
 
@@ -720,10 +782,13 @@ class CodeHandler {
      *                       Graph management functions
      *************************************************************************/
 
-    inline void findPaths(SourceCodePath &path2node, Node &code, std::vector<SourceCodePath> &found, size_t max);
+    inline void findPaths(SourceCodePath& path2node,
+                          Node& code,
+                          std::vector<SourceCodePath>& found,
+                          size_t max);
 
     static inline std::vector<SourceCodePath> findPathsFromNode(const std::vector<SourceCodePath> nodePaths,
-                                                                Node &node);
+                                                                Node& node);
 
     /**************************************************************************
      *                        Operation graph manipulation
@@ -737,7 +802,7 @@ class CodeHandler {
      * @return  The expression for the variable
      * @throws CGException if it is not possible to solve the expression
      */
-    inline CGB solveFor(const SourceCodePath &path);
+    inline CGB solveFor(const SourceCodePath& path);
 
     /**
      * Reduces the number of occurrences of a variable in an equation.
@@ -755,39 +820,45 @@ class CodeHandler {
      * @throws CGException if it is not possible to combine the multiple
      *                     occurrences of the variable
      */
-    inline CGB collectVariable(Node &expression, const SourceCodePath &path1, const SourceCodePath &path2,
+    inline CGB collectVariable(Node& expression,
+                               const SourceCodePath& path1,
+                               const SourceCodePath& path2,
                                size_t bifPos);
 
-    inline CGB collectVariableAddSub(const SourceCodePath &pathLeft, const SourceCodePath &pathRight);
+    inline CGB collectVariableAddSub(const SourceCodePath& pathLeft,
+                                     const SourceCodePath& pathRight);
 
-    inline bool isCollectableVariableAddSub(const SourceCodePath &pathLeft, const SourceCodePath &pathRight,
+    inline bool isCollectableVariableAddSub(const SourceCodePath& pathLeft,
+                                            const SourceCodePath& pathRight,
                                             bool throwEx);
 
-    inline bool isSolvable(const SourceCodePath &path) const;
+    inline bool isSolvable(const SourceCodePath& path) const;
 
     /**************************************************************************
      *                     Loop related structure/methods
      *************************************************************************/
     struct LoopData {
         // maps the loop ids of the loop atomic functions
-        std::map<size_t, LoopModel<Base> *> loopModels;
-        std::vector<LoopEndOperationNode<Base> *> endNodes;
+        std::map<size_t, LoopModel<Base>*> loopModels;
+        std::vector<LoopEndOperationNode<Base>*> endNodes;
         // the used indexes
-        std::set<const Node *> indexes;
+        std::set<const Node*> indexes;
         // the used random index patterns
-        std::set<RandomIndexPattern *> indexRandomPatterns;
+        std::set<RandomIndexPattern*> indexRandomPatterns;
         //
-        std::vector<IndexPattern *> dependentIndexPatterns;
-        std::vector<const IndexPattern *> dependentIndexPatternManaged;  // garbage collection
-        std::vector<IndexPattern *> independentIndexPatterns;
+        std::vector<IndexPattern*> dependentIndexPatterns;
+        std::vector<const IndexPattern*> dependentIndexPatternManaged; // garbage collection
+        std::vector<IndexPattern*> independentIndexPatterns;
         // variables used inside a loop which are assigned outside (for different loop depths)
-        std::vector<std::set<Node *>> outerVars;
+        std::vector<std::set<Node*> > outerVars;
         // the current loop depth (-1 means no loop)
         int depth;
         // the evaluation order of the loop start for each loop depth
         std::vector<size_t> startEvalOrder;
 
-        inline LoopData() : depth(-1) {}
+        inline LoopData() :
+            depth(-1) {
+        }
 
         inline void prepare4NewSourceGen();
 
@@ -800,19 +871,19 @@ class CodeHandler {
          * @return a pointer to the atomic loop function name if it was
          *         registered, nullptr otherwise
          */
-        inline const std::string *getLoopName(size_t id) const;
+        inline const std::string* getLoopName(size_t id) const;
 
-        inline void registerModel(LoopModel<Base> &loop);
+        inline void registerModel(LoopModel<Base>& loop);
 
-        inline LoopModel<Base> *getLoop(size_t loopId) const;
+        inline LoopModel<Base>* getLoop(size_t loopId) const;
 
-        size_t addDependentIndexPattern(IndexPattern &jacPattern);
+        size_t addDependentIndexPattern(IndexPattern& jacPattern);
 
-        void manageDependentIndexPattern(const IndexPattern *pattern);
+        void manageDependentIndexPattern(const IndexPattern* pattern);
 
-        size_t addIndependentIndexPattern(IndexPattern &pattern, size_t hint);
+        size_t addIndependentIndexPattern(IndexPattern& pattern, size_t hint);
 
-        void addLoopEndNode(Node &node);
+        void addLoopEndNode(Node& node);
     };
 
     /**************************************************************************
@@ -822,9 +893,10 @@ class CodeHandler {
     friend class CGAbstractAtomicFun<Base>;
     friend class BaseAbstractAtomicFun<Base>;
     friend class LoopModel<Base>;
+
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

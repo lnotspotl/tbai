@@ -1,5 +1,5 @@
-#ifndef CPPAD_LOCAL_DEFINE_HPP
-#define CPPAD_LOCAL_DEFINE_HPP
+# ifndef CPPAD_LOCAL_DEFINE_HPP
+# define CPPAD_LOCAL_DEFINE_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -27,7 +27,7 @@ any enum_value that is stored using the type CPPAD_VEC_ENUM_TYPE:
         && is_pod<CPPAD_VEC_ENUM_TYPE>
 </code>
 */
-#define CPPAD_VEC_ENUM_TYPE unsigned char
+# define CPPAD_VEC_ENUM_TYPE unsigned char
 
 // ----------------------------------------------------------------------------
 /*!
@@ -49,11 +49,11 @@ and it contains the text
 This happens even if the function is not a specialization.
 This macro is defined as empty for Microsoft compilers.
 */
-#ifdef _MSC_VER
-#define CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION
-#else
-#define CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION inline
-#endif
+# ifdef _MSC_VER
+# define CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION
+# else
+# define CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION inline
+# endif
 
 // ----------------------------------------------------------------------------
 /*!
@@ -61,15 +61,16 @@ This macro is defined as empty for Microsoft compilers.
 Special macro for exporting windows DLL symbols; see
 https://cmake.org/Wiki/BuildingWinDLL
 */
-#ifdef _MSC_VER
-#ifdef cppad_lib_EXPORTS
-#define CPPAD_LIB_EXPORT __declspec(dllexport)
-#else
-#define CPPAD_LIB_EXPORT __declspec(dllimport)
-#endif  // cppad_lib_EXPORTS
-#else   // _MSC_VER
-#define CPPAD_LIB_EXPORT
-#endif
+# ifdef  _MSC_VER
+# ifdef  cppad_lib_EXPORTS
+# define CPPAD_LIB_EXPORT __declspec(dllexport)
+# else
+# define CPPAD_LIB_EXPORT __declspec(dllimport)
+# endif  // cppad_lib_EXPORTS
+# else   // _MSC_VER
+# define CPPAD_LIB_EXPORT
+# endif
+
 
 // ============================================================================
 /*!
@@ -91,26 +92,26 @@ This macro converts the operands to AD<Base> and then
 uses the definition of the same operation for that case.
 */
 
-#define CPPAD_FOLD_ASSIGNMENT_OPERATOR(Op)                                      \
-    /* ----------------------------------------------------------------*/       \
-    template <class Base>                                                       \
-    AD<Base> &operator Op(AD<Base> &left, double right) {                       \
-        return left Op AD<Base>(right);                                         \
-    }                                                                           \
-                                                                                \
-    template <class Base>                                                       \
-    AD<Base> &operator Op(AD<Base> &left, const Base & right) {                 \
-        return left Op AD<Base>(right);                                         \
-    }                                                                           \
-                                                                                \
-    inline AD<double> &operator Op(AD<double> &left, const double &right) {     \
-        return left Op AD<double>(right);                                       \
-    }                                                                           \
-                                                                                \
-    template <class Base>                                                       \
-    AD<Base> &operator Op(AD<Base> &left, const VecAD_reference<Base> &right) { \
-        return left Op right.ADBase();                                          \
-    }
+# define CPPAD_FOLD_ASSIGNMENT_OPERATOR(Op)                             \
+/* ----------------------------------------------------------------*/   \
+template <class Base>                                                   \
+AD<Base>& operator Op                                            \
+(AD<Base> &left, double right)                                          \
+{   return left Op AD<Base>(right); }                                  \
+                                                                        \
+template <class Base>                                                   \
+AD<Base>& operator Op                                            \
+(AD<Base> &left, const Base &right)                                     \
+{   return left Op AD<Base>(right); }                                  \
+                                                                        \
+inline AD<double>& operator Op                                          \
+(AD<double> &left, const double &right)                                 \
+{   return left Op AD<double>(right); }                                \
+                                                                        \
+template <class Base>                                                   \
+AD<Base>& operator Op                                            \
+(AD<Base> &left, const VecAD_reference<Base> &right)                    \
+{   return left Op right.ADBase(); }
 
 // =====================================================================
 /*!
@@ -132,87 +133,87 @@ All of the arguments are const and call by reference.
 This macro converts the operands to AD<Base> and then
 uses the definition of the same operation for that case.
 */
-#define CPPAD_FOLD_AD_VALUED_BINARY_OPERATOR(Op)                                                  \
-    /* ----------------------------------------------------------------*/                         \
-    /* Operations with VecAD_reference<Base> and AD<Base> only*/                                  \
-                                                                                                  \
-    template <class Base>                                                                         \
-    AD<Base> operator Op(const AD<Base> &left, const VecAD_reference<Base> &right) {              \
-        return left Op right.ADBase();                                                            \
-    }                                                                                             \
-                                                                                                  \
-    template <class Base>                                                                         \
-    AD<Base> operator Op(const VecAD_reference<Base> &left, const VecAD_reference<Base> &right) { \
-        return left.ADBase() Op right.ADBase();                                                   \
-    }                                                                                             \
-                                                                                                  \
-    template <class Base>                                                                         \
-    AD<Base> operator Op(const VecAD_reference<Base> &left, const AD<Base> &right) {              \
-        return left.ADBase() Op right;                                                            \
-    }                                                                                             \
-    /* ----------------------------------------------------------------*/                         \
-    /* Operations Base */                                                                         \
-                                                                                                  \
-    template <class Base>                                                                         \
-    AD<Base> operator Op(const Base & left, const AD<Base> &right) {                              \
-        return AD<Base>(left) Op right;                                                           \
-    }                                                                                             \
-                                                                                                  \
-    template <class Base>                                                                         \
-    AD<Base> operator Op(const Base & left, const VecAD_reference<Base> &right) {                 \
-        return AD<Base>(left) Op right.ADBase();                                                  \
-    }                                                                                             \
-                                                                                                  \
-    template <class Base>                                                                         \
-    AD<Base> operator Op(const AD<Base> &left, const Base & right) {                              \
-        return left Op AD<Base>(right);                                                           \
-    }                                                                                             \
-                                                                                                  \
-    template <class Base>                                                                         \
-    AD<Base> operator Op(const VecAD_reference<Base> &left, const Base & right) {                 \
-        return left.ADBase() Op AD<Base>(right);                                                  \
-    }                                                                                             \
-                                                                                                  \
-    /* ----------------------------------------------------------------*/                         \
-    /* Operations double */                                                                       \
-                                                                                                  \
-    template <class Base>                                                                         \
-    AD<Base> operator Op(const double &left, const AD<Base> &right) {                             \
-        return AD<Base>(left) Op right;                                                           \
-    }                                                                                             \
-                                                                                                  \
-    template <class Base>                                                                         \
-    AD<Base> operator Op(const double &left, const VecAD_reference<Base> &right) {                \
-        return AD<Base>(left) Op right.ADBase();                                                  \
-    }                                                                                             \
-                                                                                                  \
-    template <class Base>                                                                         \
-    AD<Base> operator Op(const AD<Base> &left, const double &right) {                             \
-        return left Op AD<Base>(right);                                                           \
-    }                                                                                             \
-                                                                                                  \
-    template <class Base>                                                                         \
-    AD<Base> operator Op(const VecAD_reference<Base> &left, const double &right) {                \
-        return left.ADBase() Op AD<Base>(right);                                                  \
-    }                                                                                             \
-    /* ----------------------------------------------------------------*/                         \
-    /* Special case to avoid ambuigity when Base is double */                                     \
-                                                                                                  \
-    inline AD<double> operator Op(const double &left, const AD<double> &right) {                  \
-        return AD<double>(left) Op right;                                                         \
-    }                                                                                             \
-                                                                                                  \
-    inline AD<double> operator Op(const double &left, const VecAD_reference<double> &right) {     \
-        return AD<double>(left) Op right.ADBase();                                                \
-    }                                                                                             \
-                                                                                                  \
-    inline AD<double> operator Op(const AD<double> &left, const double &right) {                  \
-        return left Op AD<double>(right);                                                         \
-    }                                                                                             \
-                                                                                                  \
-    inline AD<double> operator Op(const VecAD_reference<double> &left, const double &right) {     \
-        return left.ADBase() Op AD<double>(right);                                                \
-    }
+# define CPPAD_FOLD_AD_VALUED_BINARY_OPERATOR(Op)                      \
+/* ----------------------------------------------------------------*/  \
+/* Operations with VecAD_reference<Base> and AD<Base> only*/           \
+                                                                       \
+template <class Base>                                                  \
+AD<Base> operator Op                                            \
+(const AD<Base> &left, const VecAD_reference<Base> &right)             \
+{   return left Op right.ADBase(); }                                  \
+                                                                       \
+template <class Base>                                                  \
+AD<Base> operator Op                                            \
+(const VecAD_reference<Base> &left, const VecAD_reference<Base> &right)\
+{   return left.ADBase() Op right.ADBase(); }                         \
+                                                                       \
+template <class Base>                                                  \
+AD<Base> operator Op                                            \
+    (const VecAD_reference<Base> &left, const AD<Base> &right)        \
+{   return left.ADBase() Op right; }                                  \
+/* ----------------------------------------------------------------*/  \
+/* Operations Base */                                                  \
+                                                                       \
+template <class Base>                                                  \
+AD<Base> operator Op                                            \
+    (const Base &left, const AD<Base> &right)                         \
+{   return AD<Base>(left) Op right; }                                 \
+                                                                       \
+template <class Base>                                                  \
+AD<Base> operator Op                                            \
+    (const Base &left, const VecAD_reference<Base> &right)            \
+{   return AD<Base>(left) Op right.ADBase(); }                        \
+                                                                       \
+template <class Base>                                                  \
+AD<Base> operator Op                                            \
+    (const AD<Base> &left, const Base &right)                         \
+{   return left Op AD<Base>(right); }                                 \
+                                                                       \
+template <class Base>                                                  \
+AD<Base> operator Op                                            \
+    (const VecAD_reference<Base> &left, const Base &right)            \
+{   return left.ADBase() Op AD<Base>(right); }                        \
+                                                                       \
+/* ----------------------------------------------------------------*/  \
+/* Operations double */                                                \
+                                                                       \
+template <class Base>                                                  \
+AD<Base> operator Op                                            \
+    (const double &left, const AD<Base> &right)                       \
+{   return AD<Base>(left) Op right; }                                 \
+                                                                       \
+template <class Base>                                                  \
+AD<Base> operator Op                                            \
+    (const double &left, const VecAD_reference<Base> &right)          \
+{   return AD<Base>(left) Op right.ADBase(); }                        \
+                                                                       \
+template <class Base>                                                  \
+AD<Base> operator Op                                            \
+    (const AD<Base> &left, const double &right)                       \
+{   return left Op AD<Base>(right); }                                 \
+                                                                       \
+template <class Base>                                                  \
+AD<Base> operator Op                                            \
+    (const VecAD_reference<Base> &left, const double &right)          \
+{   return left.ADBase() Op AD<Base>(right); }                        \
+/* ----------------------------------------------------------------*/  \
+/* Special case to avoid ambuigity when Base is double */              \
+                                                                       \
+inline AD<double> operator Op                                          \
+    (const double &left, const AD<double> &right)                     \
+{   return AD<double>(left) Op right; }                               \
+                                                                       \
+inline AD<double> operator Op                                          \
+    (const double &left, const VecAD_reference<double> &right)        \
+{   return AD<double>(left) Op right.ADBase(); }                      \
+                                                                       \
+inline AD<double> operator Op                                          \
+    (const AD<double> &left, const double &right)                     \
+{   return left Op AD<double>(right); }                               \
+                                                                       \
+inline AD<double> operator Op                                          \
+    (const VecAD_reference<double> &left, const double &right)        \
+{   return left.ADBase() Op AD<double>(right); }
 
 // =======================================================================
 
@@ -235,86 +236,86 @@ All of the arguments are const and call by reference.
 This macro converts the operands to AD<Base> and then
 uses the definition of the same operation for that case.
 */
-#define CPPAD_FOLD_BOOL_VALUED_BINARY_OPERATOR(Op)                                            \
-    /* ----------------------------------------------------------------*/                     \
-    /* Operations with VecAD_reference<Base> and AD<Base> only*/                              \
-                                                                                              \
-    template <class Base>                                                                     \
-    bool operator Op(const AD<Base> &left, const VecAD_reference<Base> &right) {              \
-        return left Op right.ADBase();                                                        \
-    }                                                                                         \
-                                                                                              \
-    template <class Base>                                                                     \
-    bool operator Op(const VecAD_reference<Base> &left, const VecAD_reference<Base> &right) { \
-        return left.ADBase() Op right.ADBase();                                               \
-    }                                                                                         \
-                                                                                              \
-    template <class Base>                                                                     \
-    bool operator Op(const VecAD_reference<Base> &left, const AD<Base> &right) {              \
-        return left.ADBase() Op right;                                                        \
-    }                                                                                         \
-    /* ----------------------------------------------------------------*/                     \
-    /* Operations Base */                                                                     \
-                                                                                              \
-    template <class Base>                                                                     \
-    bool operator Op(const Base &left, const AD<Base> &right) {                               \
-        return AD<Base>(left) Op right;                                                       \
-    }                                                                                         \
-                                                                                              \
-    template <class Base>                                                                     \
-    bool operator Op(const Base &left, const VecAD_reference<Base> &right) {                  \
-        return AD<Base>(left) Op right.ADBase();                                              \
-    }                                                                                         \
-                                                                                              \
-    template <class Base>                                                                     \
-    bool operator Op(const AD<Base> &left, const Base &right) {                               \
-        return left Op AD<Base>(right);                                                       \
-    }                                                                                         \
-                                                                                              \
-    template <class Base>                                                                     \
-    bool operator Op(const VecAD_reference<Base> &left, const Base &right) {                  \
-        return left.ADBase() Op AD<Base>(right);                                              \
-    }                                                                                         \
-                                                                                              \
-    /* ----------------------------------------------------------------*/                     \
-    /* Operations double */                                                                   \
-                                                                                              \
-    template <class Base>                                                                     \
-    bool operator Op(const double &left, const AD<Base> &right) {                             \
-        return AD<Base>(left) Op right;                                                       \
-    }                                                                                         \
-                                                                                              \
-    template <class Base>                                                                     \
-    bool operator Op(const double &left, const VecAD_reference<Base> &right) {                \
-        return AD<Base>(left) Op right.ADBase();                                              \
-    }                                                                                         \
-                                                                                              \
-    template <class Base>                                                                     \
-    bool operator Op(const AD<Base> &left, const double &right) {                             \
-        return left Op AD<Base>(right);                                                       \
-    }                                                                                         \
-                                                                                              \
-    template <class Base>                                                                     \
-    bool operator Op(const VecAD_reference<Base> &left, const double &right) {                \
-        return left.ADBase() Op AD<Base>(right);                                              \
-    }                                                                                         \
-    /* ----------------------------------------------------------------*/                     \
-    /* Special case to avoid ambuigity when Base is double */                                 \
-                                                                                              \
-    inline bool operator Op(const double &left, const AD<double> &right) {                    \
-        return AD<double>(left) Op right;                                                     \
-    }                                                                                         \
-                                                                                              \
-    inline bool operator Op(const double &left, const VecAD_reference<double> &right) {       \
-        return AD<double>(left) Op right.ADBase();                                            \
-    }                                                                                         \
-                                                                                              \
-    inline bool operator Op(const AD<double> &left, const double &right) {                    \
-        return left Op AD<double>(right);                                                     \
-    }                                                                                         \
-                                                                                              \
-    inline bool operator Op(const VecAD_reference<double> &left, const double &right) {       \
-        return left.ADBase() Op AD<double>(right);                                            \
-    }
+# define CPPAD_FOLD_BOOL_VALUED_BINARY_OPERATOR(Op)                    \
+/* ----------------------------------------------------------------*/  \
+/* Operations with VecAD_reference<Base> and AD<Base> only*/           \
+                                                                       \
+template <class Base>                                                  \
+bool operator Op                                                \
+(const AD<Base> &left, const VecAD_reference<Base> &right)             \
+{   return left Op right.ADBase(); }                                  \
+                                                                       \
+template <class Base>                                                  \
+bool operator Op                                                \
+(const VecAD_reference<Base> &left, const VecAD_reference<Base> &right)\
+{   return left.ADBase() Op right.ADBase(); }                         \
+                                                                       \
+template <class Base>                                                  \
+bool operator Op                                                \
+    (const VecAD_reference<Base> &left, const AD<Base> &right)        \
+{   return left.ADBase() Op right; }                                  \
+/* ----------------------------------------------------------------*/  \
+/* Operations Base */                                                  \
+                                                                       \
+template <class Base>                                                  \
+bool operator Op                                                \
+    (const Base &left, const AD<Base> &right)                         \
+{   return AD<Base>(left) Op right; }                                 \
+                                                                       \
+template <class Base>                                                  \
+bool operator Op                                                \
+    (const Base &left, const VecAD_reference<Base> &right)            \
+{   return AD<Base>(left) Op right.ADBase(); }                        \
+                                                                       \
+template <class Base>                                                  \
+bool operator Op                                                \
+    (const AD<Base> &left, const Base &right)                         \
+{   return left Op AD<Base>(right); }                                 \
+                                                                       \
+template <class Base>                                                  \
+bool operator Op                                                \
+    (const VecAD_reference<Base> &left, const Base &right)            \
+{   return left.ADBase() Op AD<Base>(right); }                        \
+                                                                       \
+/* ----------------------------------------------------------------*/  \
+/* Operations double */                                                \
+                                                                       \
+template <class Base>                                                  \
+bool operator Op                                                \
+    (const double &left, const AD<Base> &right)                       \
+{   return AD<Base>(left) Op right; }                                 \
+                                                                       \
+template <class Base>                                                  \
+bool operator Op                                                \
+    (const double &left, const VecAD_reference<Base> &right)          \
+{   return AD<Base>(left) Op right.ADBase(); }                        \
+                                                                       \
+template <class Base>                                                  \
+bool operator Op                                                \
+    (const AD<Base> &left, const double &right)                       \
+{   return left Op AD<Base>(right); }                                 \
+                                                                       \
+template <class Base>                                                  \
+bool operator Op                                                \
+    (const VecAD_reference<Base> &left, const double &right)          \
+{   return left.ADBase() Op AD<Base>(right); }                        \
+/* ----------------------------------------------------------------*/  \
+/* Special case to avoid ambuigity when Base is double */              \
+                                                                       \
+inline bool operator Op                                                \
+    (const double &left, const AD<double> &right)                     \
+{   return AD<double>(left) Op right; }                               \
+                                                                       \
+inline bool operator Op                                                \
+    (const double &left, const VecAD_reference<double> &right)        \
+{   return AD<double>(left) Op right.ADBase(); }                      \
+                                                                       \
+inline bool operator Op                                                \
+    (const AD<double> &left, const double &right)                     \
+{   return left Op AD<double>(right); }                               \
+                                                                       \
+inline bool operator Op                                                \
+    (const VecAD_reference<double> &left, const double &right)        \
+{   return left.ADBase() Op AD<double>(right); }
 
-#endif
+# endif

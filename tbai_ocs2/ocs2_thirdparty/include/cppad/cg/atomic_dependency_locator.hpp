@@ -21,13 +21,13 @@ namespace cg {
 /**
  * Utility class that holds information on how atomic functions are used
  */
-template <class Base>
+template<class Base>
 class AtomicUseInfo {
-   public:
+public:
     /**
      * the atomic function
      */
-    CGAbstractAtomicFun<Base> *atom;
+    CGAbstractAtomicFun<Base>* atom;
     /**
      * pairs of independent and dependent sizes
      */
@@ -36,27 +36,30 @@ class AtomicUseInfo {
      * the outer independent variable indexes which affect a call of that atomic function
      */
     std::set<size_t> outerIndeps;
-
-   public:
-    inline AtomicUseInfo() : atom(nullptr) {}
+public:
+    inline AtomicUseInfo() :
+            atom(nullptr) {
+    }
 };
 
 /**
  * Finds atomic functions in a CppAD tape and collects some information on how
  * they are used.
  */
-template <class Base>
+template<class Base>
 class AtomicDependencyLocator {
-   private:
-    ADFun<CG<Base>> &fun_;
+private:
+    ADFun<CG<Base> >& fun_;
     std::map<size_t, AtomicUseInfo<Base>> atomicInfo_;
-    std::map<OperationNode<Base> *, std::set<size_t>> indeps_;
+    std::map<OperationNode<Base>*, std::set<size_t> > indeps_;
     CodeHandler<Base> handler_;
+public:
 
-   public:
-    inline AtomicDependencyLocator(ADFun<CG<Base>> &fun) : fun_(fun) {}
+    inline AtomicDependencyLocator(ADFun<CG<Base> >& fun) :
+        fun_(fun) {
+    }
 
-    inline const std::map<size_t, AtomicUseInfo<Base>> &findAtomicsUsage() {
+    inline const std::map<size_t, AtomicUseInfo<Base>>& findAtomicsUsage() {
         if (!atomicInfo_.empty()) {
             return atomicInfo_;
         }
@@ -64,21 +67,20 @@ class AtomicDependencyLocator {
         size_t m = fun_.Range();
         size_t n = fun_.Domain();
 
-        std::vector<CG<Base>> x(n);
+        std::vector<CG<Base> > x(n);
         handler_.makeVariables(x);
 
         // make sure the position in the code handler is the same as the independent index
-        assert(x.size() == 0 || (x[0].getOperationNode()->getHandlerPosition() == 0 &&
-                                 x[x.size() - 1].getOperationNode()->getHandlerPosition() == x.size() - 1));
+        assert(x.size() == 0 || (x[0].getOperationNode()->getHandlerPosition() == 0 && x[x.size() - 1].getOperationNode()->getHandlerPosition() == x.size() - 1));
 
-        std::vector<CG<Base>> dep = fun_.Forward(0, x);
+        std::vector<CG<Base> > dep = fun_.Forward(0, x);
 
         for (size_t i = 0; i < m; i++) {
             findAtomicsUsage(dep[i].getOperationNode());
         }
 
-        const auto &regAtomics = handler_.getAtomicFunctions();
-        for (auto &pair : atomicInfo_) {
+        const auto& regAtomics = handler_.getAtomicFunctions();
+        for (auto& pair: atomicInfo_) {
             size_t id = pair.first;
 
             pair.second.atom = regAtomics.at(id);
@@ -87,9 +89,11 @@ class AtomicDependencyLocator {
         return atomicInfo_;
     }
 
-   private:
-    inline std::set<size_t> findAtomicsUsage(OperationNode<Base> *node) {
-        if (node == nullptr) return std::set<size_t>();
+private:
+
+    inline std::set<size_t> findAtomicsUsage(OperationNode<Base>* node) {
+        if (node == nullptr)
+            return std::set<size_t>();
 
         CGOpCode op = node->getOperationType();
         if (op == CGOpCode::Inv) {
@@ -107,7 +111,7 @@ class AtomicDependencyLocator {
         handler_.markVisited(*node);
 
         std::set<size_t> indeps;
-        const std::vector<Argument<Base>> &args = node->getArguments();
+        const std::vector<Argument<Base> >& args = node->getArguments();
         for (size_t a = 0; a < args.size(); a++) {
             std::set<size_t> aindeps = findAtomicsUsage(args[a].getOperation());
             indeps.insert(aindeps.begin(), aindeps.end());
@@ -124,22 +128,23 @@ class AtomicDependencyLocator {
             CPPADCG_ASSERT_UNKNOWN(p == 0);
 #endif
 
-            OperationNode<Base> *tx = node->getArguments()[0].getOperation();
-            OperationNode<Base> *ty = node->getArguments()[1].getOperation();
+            OperationNode<Base>* tx = node->getArguments()[0].getOperation();
+            OperationNode<Base>* ty = node->getArguments()[1].getOperation();
 
             CPPADCG_ASSERT_UNKNOWN(tx != nullptr && tx->getOperationType() == CGOpCode::ArrayCreation);
             CPPADCG_ASSERT_UNKNOWN(ty != nullptr && ty->getOperationType() == CGOpCode::ArrayCreation);
 
-            auto &info = atomicInfo_[id];
+            auto& info = atomicInfo_[id];
             info.outerIndeps.insert(indeps.begin(), indeps.end());
-            info.sizes.insert(std::pair<size_t, size_t>(tx->getArguments().size(), ty->getArguments().size()));
+            info.sizes.insert(std::pair<size_t, size_t>(tx->getArguments().size(),
+                                                        ty->getArguments().size()));
         }
 
         return indeps;
     }
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

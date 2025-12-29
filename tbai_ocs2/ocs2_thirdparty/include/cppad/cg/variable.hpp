@@ -18,31 +18,31 @@
 namespace CppAD {
 namespace cg {
 
-template <class Base>
-inline CodeHandler<Base> *CG<Base>::getCodeHandler() const {
+template<class Base>
+inline CodeHandler<Base>* CG<Base>::getCodeHandler() const {
     if (node_ != nullptr)
         return node_->getCodeHandler();
     else
         return nullptr;
 }
 
-template <class Base>
+template<class Base>
 inline bool CG<Base>::isVariable() const {
     return node_ != nullptr;
 }
 
-template <class Base>
+template<class Base>
 inline bool CG<Base>::isParameter() const {
     return node_ == nullptr;
 }
 
-template <class Base>
+template<class Base>
 inline bool CG<Base>::isValueDefined() const {
     return value_ != nullptr;
 }
 
-template <class Base>
-inline const Base &CG<Base>::getValue() const {
+template<class Base>
+inline const Base& CG<Base>::getValue() const {
     if (!isValueDefined()) {
         throw CGException("No value defined for this variable");
     }
@@ -50,57 +50,58 @@ inline const Base &CG<Base>::getValue() const {
     return *value_;
 }
 
-template <class Base>
-inline void CG<Base>::setValue(const Base &b) {
+template<class Base>
+inline void CG<Base>::setValue(const Base& b) {
     if (value_ != nullptr) {
         *value_ = b;
     } else {
-        value_.reset(new Base(b));  // to replace with value_ = std::make_unique once c++14 is used
+        value_.reset(new Base(b)); // to replace with value_ = std::make_unique once c++14 is used
     }
 }
 
-template <class Base>
+template<class Base>
 inline bool CG<Base>::isIdenticalZero() const {
     return isParameter() && CppAD::IdenticalZero(getValue());
 }
 
-template <class Base>
+template<class Base>
 inline bool CG<Base>::isIdenticalOne() const {
     return isParameter() && CppAD::IdenticalOne(getValue());
 }
 
-template <class Base>
+template<class Base>
 inline void CG<Base>::makeParameter(const Base &b) {
     node_ = nullptr;
     setValue(b);
 }
 
-template <class Base>
-inline void CG<Base>::makeVariable(OperationNode<Base> &operation) {
+template<class Base>
+inline void CG<Base>::makeVariable(OperationNode<Base>& operation) {
     node_ = &operation;
     value_.reset();
 }
 
-template <class Base>
-inline void CG<Base>::makeVariable(OperationNode<Base> &operation, std::unique_ptr<Base> &value) {
+template<class Base>
+inline void CG<Base>::makeVariable(OperationNode<Base>& operation,
+                                   std::unique_ptr<Base>& value) {
     node_ = &operation;
     value_ = std::move(value);
 }
 
-template <class Base>
-inline OperationNode<Base> *CG<Base>::getOperationNode() const {
+template<class Base>
+inline OperationNode<Base>* CG<Base>::getOperationNode() const {
     return node_;
 }
 
-template <class Base>
+template<class Base>
 inline Argument<Base> CG<Base>::argument() const {
     if (node_ != nullptr)
-        return Argument<Base>(*node_);
+        return Argument<Base> (*node_);
     else
-        return Argument<Base>(*value_);
+        return Argument<Base> (*value_);
 }
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

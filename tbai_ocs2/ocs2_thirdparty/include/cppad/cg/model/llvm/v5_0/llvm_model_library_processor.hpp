@@ -26,28 +26,31 @@ namespace cg {
  *
  * @author Joao Leal
  */
-template <class Base>
+template<class Base>
 class LlvmModelLibraryProcessor : public LlvmBaseModelLibraryProcessorImpl<Base> {
-   public:
+public:
+
     /**
      * Creates a LLVM model library processor.
      *
      * @param librarySourceGen
      */
-    LlvmModelLibraryProcessor(ModelLibraryCSourceGen<Base> &librarySourceGen)
-        : LlvmBaseModelLibraryProcessorImpl<Base>(librarySourceGen, "5.0") {}
+    LlvmModelLibraryProcessor(ModelLibraryCSourceGen<Base>& librarySourceGen) :
+        LlvmBaseModelLibraryProcessorImpl<Base>(librarySourceGen, "5.0") {
+    }
 
     virtual ~LlvmModelLibraryProcessor() = default;
 
     using LlvmBaseModelLibraryProcessorImpl<Base>::create;
 
-    static inline std::unique_ptr<LlvmModelLibrary<Base>> create(ModelLibraryCSourceGen<Base> &modelLibraryHelper) {
+    static inline std::unique_ptr<LlvmModelLibrary<Base>> create(ModelLibraryCSourceGen<Base>& modelLibraryHelper) {
         LlvmModelLibraryProcessor<Base> p(modelLibraryHelper);
         return p.create();
     }
+
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

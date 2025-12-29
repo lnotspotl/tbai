@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_EPSILON_HPP
-#define CPPAD_CORE_EPSILON_HPP
+# ifndef CPPAD_CORE_EPSILON_HPP
+# define CPPAD_CORE_EPSILON_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-16 Bradley M. Bell
 
@@ -52,10 +52,9 @@ $end
 
 namespace CppAD {
 
-template <class Type>
-inline Type epsilon(void) {
-    return Type(numeric_limits<Type>::epsilon());
-}
+    template <class Type>
+    inline Type epsilon(void)
+    {   return Type ( numeric_limits<Type>::epsilon() ); }
 
-}  // namespace CppAD
-#endif
+}
+# endif

@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_TESTVECTOR_HPP
-#define CPPAD_CORE_TESTVECTOR_HPP
+# ifndef CPPAD_CORE_TESTVECTOR_HPP
+# define CPPAD_CORE_TESTVECTOR_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -56,9 +56,9 @@ $code CPPAD_CPPADVECTOR$$ will be true.
 In this case,
 $code CPPAD_TESTVECTOR$$ is defined by the following source code:
 $srccode%cpp% */
-#if CPPAD_CPPADVECTOR
-#define CPPAD_TESTVECTOR(Scalar) CppAD::vector<Scalar>
-#endif
+# if CPPAD_CPPADVECTOR
+# define CPPAD_TESTVECTOR(Scalar) CppAD::vector< Scalar >
+# endif
 /* %$$
 In this case CppAD will use its own vector for
 many of its examples and tests.
@@ -70,10 +70,10 @@ $code CPPAD_STDVECTOR$$ will be true.
 In this case,
 $code CPPAD_TESTVECTOR$$ is defined by the following source code:
 $srccode%cpp% */
-#if CPPAD_STDVECTOR
-#include <vector>
-#define CPPAD_TESTVECTOR(Scalar) std::vector<Scalar>
-#endif
+# if CPPAD_STDVECTOR
+# include <vector>
+# define CPPAD_TESTVECTOR(Scalar) std::vector< Scalar >
+# endif
 /* %$$
 In this case CppAD will use standard vector for
 many of its examples and tests.
@@ -85,10 +85,10 @@ $code CPPAD_BOOSTVECTOR$$ will be true.
 In this case,
 $code CPPAD_TESTVECTOR$$ is defined by the following source code:
 $srccode%cpp% */
-#if CPPAD_BOOSTVECTOR
-#include <boost/numeric/ublas/vector.hpp>
-#define CPPAD_TESTVECTOR(Scalar) boost::numeric::ublas::vector<Scalar>
-#endif
+# if CPPAD_BOOSTVECTOR
+# include <boost/numeric/ublas/vector.hpp>
+# define CPPAD_TESTVECTOR(Scalar) boost::numeric::ublas::vector< Scalar >
+# endif
 /* %$$
 In this case CppAD will use this boost vector for
 many of its examples and tests.
@@ -100,10 +100,10 @@ $code CPPAD_EIGENVECTOR$$ will be true.
 In this case,
 $code CPPAD_TESTVECTOR$$ is defined by the following source code:
 $srccode%cpp% */
-#if CPPAD_EIGENVECTOR
-#include <cppad/example/cppad_eigen.hpp>
-#define CPPAD_TESTVECTOR(Scalar) CppAD::eigen_vector<Scalar>
-#endif
+# if CPPAD_EIGENVECTOR
+# include <cppad/example/cppad_eigen.hpp>
+# define CPPAD_TESTVECTOR(Scalar) CppAD::eigen_vector< Scalar >
+# endif
 /* %$$
 see $cref/eigen_vector/cppad_eigen.hpp/eigen_vector/$$.
 In this case CppAD will use the Eigen vector
@@ -113,4 +113,4 @@ $end
 ------------------------------------------------------------------------
 */
 
-#endif
+# endif

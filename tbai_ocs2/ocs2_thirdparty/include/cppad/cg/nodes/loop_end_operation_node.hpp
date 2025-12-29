@@ -20,47 +20,51 @@ namespace cg {
 
 /**
  * An operation node that marks the end of a loop.
- *
+ * 
  * This is a custom OperationNode class and therefore cannot be transformed
  * into any other node type (makeAlias() and setOperation() might not work).
- *
+ * 
  * @author Joao Leal
  */
-template <class Base>
+template<class Base>
 class LoopEndOperationNode : public OperationNode<Base> {
     friend class CodeHandler<Base>;
+public:
 
-   public:
-    inline const LoopStartOperationNode<Base> &getLoopStart() const {
-        const std::vector<Argument<Base> > &args = this->getArguments();
+    inline const LoopStartOperationNode<Base>& getLoopStart() const {
+        const std::vector<Argument<Base> >& args = this->getArguments();
         CPPADCG_ASSERT_KNOWN(args.size() > 0, "There must be at least one argument");
 
-        OperationNode<Base> *aNode = args[0].getOperation();
-        CPPADCG_ASSERT_KNOWN(aNode != nullptr && aNode->getOperationType() == CGOpCode::LoopStart,
-                             "The first argument must be the loop start operation");
+        OperationNode<Base>* aNode = args[0].getOperation();
+        CPPADCG_ASSERT_KNOWN(aNode != nullptr && aNode->getOperationType() == CGOpCode::LoopStart, "The first argument must be the loop start operation");
 
-        return dynamic_cast<LoopStartOperationNode<Base> &>(*aNode);
+        return dynamic_cast<LoopStartOperationNode<Base>&> (*aNode);
     }
 
-    inline virtual ~LoopEndOperationNode() {}
-
-   protected:
-    inline LoopEndOperationNode(CodeHandler<Base> *handler, LoopStartOperationNode<Base> &loopStart,
-                                const std::vector<Argument<Base> > &endArgs)
-        : OperationNode<Base>(handler, CGOpCode::LoopEnd, std::vector<size_t>(0), createArguments(loopStart, endArgs)) {
+    inline virtual ~LoopEndOperationNode() {
     }
 
-   private:
-    static inline std::vector<Argument<Base> > createArguments(LoopStartOperationNode<Base> &lstart,
-                                                               const std::vector<Argument<Base> > &endArgs) {
+protected:
+
+    inline LoopEndOperationNode(CodeHandler<Base>* handler,
+                                LoopStartOperationNode<Base>& loopStart,
+                                const std::vector<Argument<Base> >& endArgs) :
+        OperationNode<Base>(handler, CGOpCode::LoopEnd, std::vector<size_t>(0), createArguments(loopStart, endArgs)) {
+    }
+
+private:
+
+    static inline std::vector<Argument<Base> > createArguments(LoopStartOperationNode<Base>& lstart,
+                                                               const std::vector<Argument<Base> >& endArgs) {
         std::vector<Argument<Base> > args(1 + endArgs.size());
         args[0] = lstart;
         std::copy(endArgs.begin(), endArgs.end(), args.begin() + 1);
         return args;
     }
+
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

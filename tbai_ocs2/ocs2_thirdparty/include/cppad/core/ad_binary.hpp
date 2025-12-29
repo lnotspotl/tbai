@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_AD_BINARY_HPP
-#define CPPAD_CORE_AD_BINARY_HPP
+# ifndef CPPAD_CORE_AD_BINARY_HPP
+# define CPPAD_CORE_AD_BINARY_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -135,9 +135,9 @@ $latex \[
 $end
 -----------------------------------------------------------------------------
 */
-#include <cppad/core/add.hpp>
-#include <cppad/core/div.hpp>
-#include <cppad/core/mul.hpp>
-#include <cppad/core/sub.hpp>
+# include <cppad/core/add.hpp>
+# include <cppad/core/sub.hpp>
+# include <cppad/core/mul.hpp>
+# include <cppad/core/div.hpp>
 
-#endif
+# endif

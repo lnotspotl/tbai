@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_STD_MATH_98_HPP
-#define CPPAD_CORE_STD_MATH_98_HPP
+# ifndef CPPAD_CORE_STD_MATH_98_HPP
+# define CPPAD_CORE_STD_MATH_98_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -476,137 +476,149 @@ This macro is used to define AD<Base> versions of
 acos, asin, atan, cos, cosh, exp, fabs, log, sin, sinh, sqrt, tan, tanh.
 */
 
-#define CPPAD_STANDARD_MATH_UNARY_AD(Name, Op)                                                \
-    template <class Base>                                                                     \
-    inline AD<Base> Name(const AD<Base> &x) {                                                 \
-        return x.Name##_me();                                                                 \
-    }                                                                                         \
-    template <class Base>                                                                     \
-    inline AD<Base> AD<Base>::Name##_me(void) const {                                         \
-        AD<Base> result;                                                                      \
-        result.value_ = CppAD::Name(value_);                                                  \
-        CPPAD_ASSERT_UNKNOWN(Parameter(result));                                              \
-                                                                                              \
-        local::ADTape<Base> *tape = AD<Base>::tape_ptr();                                     \
-        if (tape == CPPAD_NULL) return result;                                                \
-                                                                                              \
-        if (tape_id_ != tape->id_) return result;                                             \
-                                                                                              \
-        if (ad_type_ == dynamic_enum) {                                                       \
-            result.taddr_ = tape->Rec_.put_dyn_par(result.value_, local::Name##_dyn, taddr_); \
-            result.tape_id_ = tape_id_;                                                       \
-            result.ad_type_ = dynamic_enum;                                                   \
-        } else {                                                                              \
-            CPPAD_ASSERT_UNKNOWN(NumArg(Op) == 1);                                            \
-            tape->Rec_.PutArg(taddr_);                                                        \
-            result.taddr_ = tape->Rec_.PutOp(Op);                                             \
-            result.tape_id_ = tape->id_;                                                      \
-            result.ad_type_ = variable_enum;                                                  \
-        }                                                                                     \
-        return result;                                                                        \
-    }                                                                                         \
-    template <class Base>                                                                     \
-    inline AD<Base> Name(const VecAD_reference<Base> &x) {                                    \
-        return x.ADBase().Name##_me();                                                        \
-    }
+# define CPPAD_STANDARD_MATH_UNARY_AD(Name, Op)                   \
+    template <class Base>                                         \
+    inline AD<Base> Name(const AD<Base> &x)                       \
+    {   return x.Name##_me();                                     \
+    }                                                             \
+    template <class Base>                                         \
+    inline AD<Base> AD<Base>::Name##_me (void) const              \
+    {                                                             \
+        AD<Base> result;                                          \
+        result.value_ = CppAD::Name(value_);                      \
+        CPPAD_ASSERT_UNKNOWN( Parameter(result) );                \
+                                                                  \
+        local::ADTape<Base>* tape = AD<Base>::tape_ptr();         \
+        if( tape == CPPAD_NULL )                                  \
+            return result;                                        \
+                                                                  \
+        if( tape_id_ != tape->id_ )                               \
+            return result;                                        \
+                                                                  \
+        if(ad_type_ == dynamic_enum)                        \
+        {   result.taddr_ = tape->Rec_.put_dyn_par(               \
+                result.value_, local::Name##_dyn, taddr_          \
+            );                                                    \
+            result.tape_id_ = tape_id_;                           \
+            result.ad_type_ = dynamic_enum;                 \
+        }                                                         \
+        else                                                      \
+        {   CPPAD_ASSERT_UNKNOWN( NumArg(Op) == 1 );              \
+            tape->Rec_.PutArg(taddr_);                            \
+            result.taddr_    = tape->Rec_.PutOp(Op);              \
+            result.tape_id_  = tape->id_;                         \
+            result.ad_type_  = variable_enum;                \
+        }                                                         \
+        return result;                                            \
+    }                                                             \
+    template <class Base>                                         \
+    inline AD<Base> Name(const VecAD_reference<Base> &x)          \
+    {   return x.ADBase().Name##_me(); }
 
 //  BEGIN CppAD namespace
 namespace CppAD {
 
-CPPAD_STANDARD_MATH_UNARY_AD(acos, local::AcosOp)
-CPPAD_STANDARD_MATH_UNARY_AD(asin, local::AsinOp)
-CPPAD_STANDARD_MATH_UNARY_AD(atan, local::AtanOp)
-CPPAD_STANDARD_MATH_UNARY_AD(cos, local::CosOp)
-CPPAD_STANDARD_MATH_UNARY_AD(cosh, local::CoshOp)
-CPPAD_STANDARD_MATH_UNARY_AD(exp, local::ExpOp)
-CPPAD_STANDARD_MATH_UNARY_AD(fabs, local::AbsOp)
-CPPAD_STANDARD_MATH_UNARY_AD(log, local::LogOp)
-CPPAD_STANDARD_MATH_UNARY_AD(sin, local::SinOp)
-CPPAD_STANDARD_MATH_UNARY_AD(sinh, local::SinhOp)
-CPPAD_STANDARD_MATH_UNARY_AD(sqrt, local::SqrtOp)
-CPPAD_STANDARD_MATH_UNARY_AD(tan, local::TanOp)
-CPPAD_STANDARD_MATH_UNARY_AD(tanh, local::TanhOp)
+     CPPAD_STANDARD_MATH_UNARY_AD(acos, local::AcosOp)
+     CPPAD_STANDARD_MATH_UNARY_AD(asin, local::AsinOp)
+     CPPAD_STANDARD_MATH_UNARY_AD(atan, local::AtanOp)
+     CPPAD_STANDARD_MATH_UNARY_AD(cos, local::CosOp)
+     CPPAD_STANDARD_MATH_UNARY_AD(cosh, local::CoshOp)
+     CPPAD_STANDARD_MATH_UNARY_AD(exp, local::ExpOp)
+     CPPAD_STANDARD_MATH_UNARY_AD(fabs, local::AbsOp)
+     CPPAD_STANDARD_MATH_UNARY_AD(log, local::LogOp)
+     CPPAD_STANDARD_MATH_UNARY_AD(sin, local::SinOp)
+     CPPAD_STANDARD_MATH_UNARY_AD(sinh, local::SinhOp)
+     CPPAD_STANDARD_MATH_UNARY_AD(sqrt, local::SqrtOp)
+     CPPAD_STANDARD_MATH_UNARY_AD(tan, local::TanOp)
+     CPPAD_STANDARD_MATH_UNARY_AD(tanh, local::TanhOp)
 
-#if CPPAD_USE_CPLUSPLUS_2011
-CPPAD_STANDARD_MATH_UNARY_AD(asinh, local::AsinhOp)
-CPPAD_STANDARD_MATH_UNARY_AD(acosh, local::AcoshOp)
-CPPAD_STANDARD_MATH_UNARY_AD(atanh, local::AtanhOp)
-CPPAD_STANDARD_MATH_UNARY_AD(expm1, local::Expm1Op)
-CPPAD_STANDARD_MATH_UNARY_AD(log1p, local::Log1pOp)
-#endif
+# if CPPAD_USE_CPLUSPLUS_2011
+     CPPAD_STANDARD_MATH_UNARY_AD(asinh, local::AsinhOp)
+     CPPAD_STANDARD_MATH_UNARY_AD(acosh, local::AcoshOp)
+     CPPAD_STANDARD_MATH_UNARY_AD(atanh, local::AtanhOp)
+     CPPAD_STANDARD_MATH_UNARY_AD(expm1, local::Expm1Op)
+     CPPAD_STANDARD_MATH_UNARY_AD(log1p, local::Log1pOp)
+# endif
 
-#if CPPAD_USE_CPLUSPLUS_2011
-// Error function is a special case
-template <class Base>
-inline AD<Base> erf(const AD<Base> &x) {
-    return x.erf_me();
-}
-template <class Base>
-inline AD<Base> AD<Base>::erf_me(void) const {
-    AD<Base> result;
-    result.value_ = CppAD::erf(value_);
-    CPPAD_ASSERT_UNKNOWN(Parameter(result));
-
-    // check if there is a recording in progress
-    local::ADTape<Base> *tape = AD<Base>::tape_ptr();
-    if (tape == CPPAD_NULL) return result;
-
-    // check if operand is a constant parameter
-    if (tape_id_ != tape->id_) return result;
-
-    if (ad_type_ == dynamic_enum) {  // dynamic paramter argument
-        result.taddr_ = tape->Rec_.put_dyn_par(result.value_, local::erf_dyn, taddr_);
-        result.tape_id_ = tape_id_;
-        result.ad_type_ = dynamic_enum;
-    } else {  // variable argument
-        CPPAD_ASSERT_UNKNOWN(local::NumArg(local::ErfOp) == 3);
-
-        // arg[0] = argument to erf function
-        tape->Rec_.PutArg(taddr_);
-
-        // arg[1] = zero
-        addr_t p = tape->Rec_.put_con_par(Base(0.0));
-        tape->Rec_.PutArg(p);
-
-        // arg[2] = 2 / sqrt(pi)
-        p = tape->Rec_.put_con_par(Base(1.0 / std::sqrt(std::atan(1.0))));
-        tape->Rec_.PutArg(p);
-        //
-        result.taddr_ = tape->Rec_.PutOp(local::ErfOp);
-        result.tape_id_ = tape->id_;
-        result.ad_type_ = variable_enum;
+# if CPPAD_USE_CPLUSPLUS_2011
+    // Error function is a special case
+    template <class Base>
+    inline AD<Base> erf(const AD<Base> &x)
+    {   return x.erf_me();
     }
-    return result;
+    template <class Base>
+    inline AD<Base> AD<Base>::erf_me (void) const
+    {
+        AD<Base> result;
+        result.value_ = CppAD::erf(value_);
+        CPPAD_ASSERT_UNKNOWN( Parameter(result) );
+
+        // check if there is a recording in progress
+        local::ADTape<Base>* tape = AD<Base>::tape_ptr();
+        if( tape == CPPAD_NULL )
+            return result;
+
+        // check if operand is a constant parameter
+        if( tape_id_ != tape->id_ )
+            return result;
+
+        if(ad_type_ == dynamic_enum)
+        {   // dynamic paramter argument
+            result.taddr_   = tape->Rec_.put_dyn_par(
+                result.value_, local::erf_dyn, taddr_
+            );
+            result.tape_id_  = tape_id_;
+            result.ad_type_  = dynamic_enum;
+        }
+        else
+        {   // variable argument
+            CPPAD_ASSERT_UNKNOWN( local::NumArg(local::ErfOp) == 3 );
+
+            // arg[0] = argument to erf function
+            tape->Rec_.PutArg(taddr_);
+
+            // arg[1] = zero
+            addr_t p  = tape->Rec_.put_con_par( Base(0.0) );
+            tape->Rec_.PutArg(p);
+
+            // arg[2] = 2 / sqrt(pi)
+            p = tape->Rec_.put_con_par(Base(
+                1.0 / std::sqrt( std::atan(1.0) )
+            ));
+            tape->Rec_.PutArg(p);
+            //
+            result.taddr_   = tape->Rec_.PutOp(local::ErfOp);
+            result.tape_id_ = tape->id_;
+            result.ad_type_ = variable_enum;
+        }
+        return result;
+    }
+    template <class Base>
+    inline AD<Base> erf(const VecAD_reference<Base> &x)
+    {   return x.ADBase().erf_me(); }
+# endif
+
+     /*!
+    Compute the log of base 10 of x where  has type AD<Base>
+
+    \tparam Base
+    is the base type (different from base for log)
+    for this AD type, see base_require.
+
+    \param x
+    is the argument for the log10 function.
+
+    \result
+    if the result is y, then \f$ x = 10^y \f$.
+    */
+     template <class Base>
+     inline AD<Base> log10(const AD<Base> &x)
+    {   return CppAD::log(x) / CppAD::log( Base(10) ); }
+     template <class Base>
+     inline AD<Base> log10(const VecAD_reference<Base> &x)
+    {   return CppAD::log(x.ADBase()) / CppAD::log( Base(10) ); }
 }
-template <class Base>
-inline AD<Base> erf(const VecAD_reference<Base> &x) {
-    return x.ADBase().erf_me();
-}
-#endif
 
-/*!
-Compute the log of base 10 of x where  has type AD<Base>
+# undef CPPAD_STANDARD_MATH_UNARY_AD
 
-\tparam Base
-is the base type (different from base for log)
-for this AD type, see base_require.
-
-\param x
-is the argument for the log10 function.
-
-\result
-if the result is y, then \f$ x = 10^y \f$.
-*/
-template <class Base>
-inline AD<Base> log10(const AD<Base> &x) {
-    return CppAD::log(x) / CppAD::log(Base(10));
-}
-template <class Base>
-inline AD<Base> log10(const VecAD_reference<Base> &x) {
-    return CppAD::log(x.ADBase()) / CppAD::log(Base(10));
-}
-}  // namespace CppAD
-
-#undef CPPAD_STANDARD_MATH_UNARY_AD
-
-#endif
+# endif

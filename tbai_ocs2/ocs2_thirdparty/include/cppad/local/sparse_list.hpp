@@ -1,5 +1,5 @@
-#ifndef CPPAD_LOCAL_SPARSE_LIST_HPP
-#define CPPAD_LOCAL_SPARSE_LIST_HPP
+# ifndef CPPAD_LOCAL_SPARSE_LIST_HPP
+# define CPPAD_LOCAL_SPARSE_LIST_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-19 Bradley M. Bell
 
@@ -11,13 +11,11 @@ Secondary License when the conditions for such availability set forth
 in the Eclipse Public License, Version 2.0 are satisfied:
       GNU General Public License, Version 2.0 or later.
 ---------------------------------------------------------------------------- */
-#include <list>
+# include <cppad/local/define.hpp>
+# include <cppad/local/is_pod.hpp>
+# include <list>
 
-#include <cppad/local/define.hpp>
-#include <cppad/local/is_pod.hpp>
-
-namespace CppAD {
-namespace local {  // BEGIN_CPPAD_LOCAL_NAMESPACE
+namespace CppAD { namespace local { // BEGIN_CPPAD_LOCAL_NAMESPACE
 /*!
 \file sparse_list.hpp
 Vector of sets of positive integers stored as singly linked lists
@@ -36,8 +34,7 @@ This defines the CppAD vector_of_sets concept.
 */
 class sparse_list {
     friend class sparse_list_const_iterator;
-
-   private:
+private:
     // -----------------------------------------------------------------
     /// type used for each entry in a singly linked list.
     struct pair_size_t {
@@ -119,9 +116,11 @@ class sparse_list {
     if the set is empty, the return value is zero.
     Otherwise it is the number of sets that share the same linked list
     */
-    size_t reference_count(size_t i) const {  // start data index
+    size_t reference_count(size_t i) const
+    {   // start data index
         size_t start = start_[i];
-        if (start == 0) return 0;
+        if( start == 0 )
+            return 0;
         //
         // reference count
         return data_[start].value;
@@ -150,35 +149,38 @@ class sparse_list {
     is the additional number of elements of data_ that are not used.
     This is non-zero when the initial reference count is one.
     */
-    size_t drop(size_t i) {  // inialize count of addition elements not being used.
+    size_t drop(size_t i)
+    {   // inialize count of addition elements not being used.
         size_t number_drop = 0;
 
         // the elements in the post list will no longer be used
         size_t post = post_[i];
-        if (post != 0) {  // drop this posting
-            post_[i] = 0;
+        if( post != 0 )
+        {   // drop this posting
+            post_[i]    = 0;
             //
             // count elements in this posting
             ++number_drop;
             size_t previous = post;
-            size_t next = data_[previous].next;
-            while (next != 0) {
-                previous = next;
-                next = data_[previous].next;
+            size_t next     = data_[previous].next;
+            while( next != 0 )
+            {   previous = next;
+                next     = data_[previous].next;
                 ++number_drop;
             }
             //
             // add the posting elements to data_not_used_
             data_[previous].next = data_not_used_;
-            data_not_used_ = post;
+            data_not_used_       = post;
         }
 
         // check for empty set
         size_t start = start_[i];
-        if (start == 0) return number_drop;
+        if( start == 0 )
+            return number_drop;
 
         // decrement reference counter
-        CPPAD_ASSERT_UNKNOWN(data_[start].value > 0);
+        CPPAD_ASSERT_UNKNOWN( data_[start].value > 0 );
         data_[start].value--;
 
         // set this set to empty
@@ -186,22 +188,23 @@ class sparse_list {
 
         // If new reference count is positive, the list corresponding to
         // start is still being used.
-        if (data_[start].value > 0) return number_drop;
+        if( data_[start].value > 0 )
+            return number_drop;
 
         //
         // count elements representing this set
         ++number_drop;
         size_t previous = start;
-        size_t next = data_[previous].next;
-        while (next != 0) {
-            previous = next;
-            next = data_[previous].next;
+        size_t next     = data_[previous].next;
+        while( next != 0 )
+        {   previous = next;
+            next     = data_[previous].next;
             ++number_drop;
         }
         //
         // add representing this set to data_not_used_
         data_[previous].next = data_not_used_;
-        data_not_used_ = start;
+        data_not_used_       = start;
         //
         return number_drop;
     }
@@ -218,15 +221,16 @@ class sparse_list {
     \return
     is the index in data_ of the new element.
     */
-    size_t get_data_index(void) {
-        size_t index;
-        if (data_not_used_ > 0) {
-            CPPAD_ASSERT_UNKNOWN(number_not_used_ > 0);
+    size_t get_data_index(void)
+    {   size_t index;
+        if( data_not_used_ > 0 )
+        {   CPPAD_ASSERT_UNKNOWN( number_not_used_ > 0 );
             --number_not_used_;
-            index = data_not_used_;
+            index          = data_not_used_;
             data_not_used_ = data_[index].next;
-        } else {
-            index = data_.extend(1);
+        }
+        else
+        {   index = data_.extend(1);
         }
         return index;
     }
@@ -235,46 +239,51 @@ class sparse_list {
     Checks data structure
     (effectively const, but modifies and restores values)
     */
-#ifdef NDEBUG
-    void check_data_structure(void) { return; }
-#else
-    void check_data_structure(void) {  // number of sets
-        CPPAD_ASSERT_UNKNOWN(post_.size() == start_.size());
+# ifdef NDEBUG
+    void check_data_structure(void)
+    {   return; }
+# else
+    void check_data_structure(void)
+    {   // number of sets
+        CPPAD_ASSERT_UNKNOWN( post_.size() == start_.size() );
         size_t n_set = start_.size();
-        if (n_set == 0) {
-            CPPAD_ASSERT_UNKNOWN(end_ == 0);
-            CPPAD_ASSERT_UNKNOWN(number_not_used_ == 0);
-            CPPAD_ASSERT_UNKNOWN(data_not_used_ == 0);
-            CPPAD_ASSERT_UNKNOWN(data_.size() == 0);
-            CPPAD_ASSERT_UNKNOWN(start_.size() == 0);
+        if( n_set == 0 )
+        {   CPPAD_ASSERT_UNKNOWN( end_ == 0 );
+            CPPAD_ASSERT_UNKNOWN( number_not_used_ == 0 );
+            CPPAD_ASSERT_UNKNOWN( data_not_used_ == 0 );
+            CPPAD_ASSERT_UNKNOWN( data_.size() == 0 );
+            CPPAD_ASSERT_UNKNOWN( start_.size() == 0 );
             return;
         }
         // check data index zero
-        CPPAD_ASSERT_UNKNOWN(data_[0].value == end_);
-        CPPAD_ASSERT_UNKNOWN(data_[0].next == 0);
+        CPPAD_ASSERT_UNKNOWN( data_[0].value == end_ );
+        CPPAD_ASSERT_UNKNOWN( data_[0].next  == 0  );
         // -----------------------------------------------------------
         // save the reference counters
         pod_vector<size_t> ref_count(n_set);
-        for (size_t i = 0; i < n_set; i++) ref_count[i] = reference_count(i);
+        for(size_t i = 0; i < n_set; i++)
+            ref_count[i] = reference_count(i);
         // -----------------------------------------------------------
         // number of entries in data used by sets and posts
         size_t number_used_by_sets = 1;
         // -----------------------------------------------------------
         // count the number of entries in data_ that are used by sets
-        for (size_t i = 0; i < n_set; i++) {
-            size_t start = start_[i];
-            if (start > 0) {  // check structure for this non-empty set
+        for(size_t i = 0; i < n_set; i++)
+        {   size_t start = start_[i];
+            if( start > 0 )
+            {   // check structure for this non-empty set
                 size_t reference_count = data_[start].value;
-                size_t next = data_[start].next;
-                CPPAD_ASSERT_UNKNOWN(reference_count > 0);
-                CPPAD_ASSERT_UNKNOWN(next != 0);
-                CPPAD_ASSERT_UNKNOWN(data_[next].value < end_);
+                size_t next            = data_[start].next;
+                CPPAD_ASSERT_UNKNOWN( reference_count > 0 );
+                CPPAD_ASSERT_UNKNOWN( next != 0 );
+                CPPAD_ASSERT_UNKNOWN( data_[next].value < end_ );
                 //
                 // decrement the reference counter
                 data_[start].value--;
                 //
                 // count the entries when find last reference
-                if (data_[start].value == 0) {
+                if( data_[start].value == 0 )
+                {
                     // restore reference count
                     data_[start].value = ref_count[i];
 
@@ -291,17 +300,17 @@ class sparse_list {
         // ------------------------------------------------------------------
         // count the number of entries in data_ that are used by posts
         size_t number_used_by_posts = 0;
-        for (size_t i = 0; i < n_set; i++) {
-            size_t post = post_[i];
-            if (post > 0) {
-                size_t value = data_[post].value;
-                size_t next = data_[post].next;
-                CPPAD_ASSERT_UNKNOWN(value < end_);
+        for(size_t i = 0; i < n_set; i++)
+        {   size_t post = post_[i];
+            if( post > 0 )
+            {   size_t value = data_[post].value;
+                size_t next  = data_[post].next;
+                CPPAD_ASSERT_UNKNOWN( value < end_ );
                 //
-                while (value < end_) {
-                    ++number_used_by_posts;
+                while( value < end_ )
+                {   ++number_used_by_posts;
                     value = data_[next].value;
-                    next = data_[next].next;
+                    next  = data_[next].next;
                 }
             }
         }
@@ -309,17 +318,19 @@ class sparse_list {
         // count number of entries in data_not_used_
         size_t count = 0;
         size_t next = data_not_used_;
-        while (next != 0) {
-            ++count;
+        while( next != 0 )
+        {   ++count;
             next = data_[next].next;
         }
-        CPPAD_ASSERT_UNKNOWN(number_not_used_ == count);
+        CPPAD_ASSERT_UNKNOWN( number_not_used_ == count );
         // ------------------------------------------------------------------
         size_t number_used = number_used_by_sets + number_used_by_posts;
-        CPPAD_ASSERT_UNKNOWN(number_used + number_not_used_ == data_.size());
+        CPPAD_ASSERT_UNKNOWN(
+            number_used + number_not_used_ == data_.size()
+        );
         return;
     }
-#endif
+# endif
     // -----------------------------------------------------------------
     /*!
     Check if one of two sets is a subset of the other set
@@ -339,60 +350,69 @@ class sparse_list {
     If two, then two is a subset of one and they are not equal.
     If three, then the sets are equal.
     */
-    size_t is_subset(size_t one_this, size_t two_other, const sparse_list &other) const {
-        CPPAD_ASSERT_UNKNOWN(one_this < start_.size());
-        CPPAD_ASSERT_UNKNOWN(two_other < other.start_.size());
-        CPPAD_ASSERT_UNKNOWN(end_ == other.end_);
+    size_t is_subset(
+        size_t                  one_this    ,
+        size_t                  two_other   ,
+        const sparse_list&      other       ) const
+    {
+        CPPAD_ASSERT_UNKNOWN( one_this  < start_.size()         );
+        CPPAD_ASSERT_UNKNOWN( two_other < other.start_.size()   );
+        CPPAD_ASSERT_UNKNOWN( end_  == other.end_               );
         //
         // start
-        size_t start_one = start_[one_this];
-        size_t start_two = other.start_[two_other];
+        size_t start_one    = start_[one_this];
+        size_t start_two    = other.start_[two_other];
         //
-        if (start_one == 0) {      // set one is empty
-            if (start_two == 0) {  // set two is empty
+        if( start_one == 0 )
+        {   // set one is empty
+            if( start_two == 0 )
+            {   // set two is empty
                 return 3;
             }
             return 1;
         }
-        if (start_two == 0) {  // set two is empty and one is not empty
+        if( start_two == 0 )
+        {   // set two is empty and one is not empty
             return 2;
         }
         //
         // next
-        size_t next_one = data_[start_one].next;
-        size_t next_two = other.data_[start_two].next;
+        size_t next_one     = data_[start_one].next;
+        size_t next_two     = other.data_[start_two].next;
         //
         // value
-        size_t value_one = data_[next_one].value;
-        size_t value_two = other.data_[next_two].value;
+        size_t value_one    = data_[next_one].value;
+        size_t value_two    = other.data_[next_two].value;
         //
-        bool one_subset = true;
-        bool two_subset = true;
+        bool one_subset     = true;
+        bool two_subset     = true;
         //
         size_t value_union = std::min(value_one, value_two);
-        while ((one_subset | two_subset) & (value_union < end_)) {
-            if (value_one > value_union)
+        while( (one_subset | two_subset) & (value_union < end_) )
+        {   if( value_one > value_union )
                 two_subset = false;
-            else {
-                next_one = data_[next_one].next;
+            else
+            {   next_one = data_[next_one].next;
                 value_one = data_[next_one].value;
             }
-            if (value_two > value_union)
+            if( value_two > value_union )
                 one_subset = false;
-            else {
-                next_two = other.data_[next_two].next;
+            else
+            {   next_two = other.data_[next_two].next;
                 value_two = other.data_[next_two].value;
             }
             value_union = std::min(value_one, value_two);
         }
-        if (one_subset) {
-            if (two_subset) {  // sets are equal
+        if( one_subset )
+        {   if( two_subset )
+            {   // sets are equal
                 return 3;
             }
             // one is a subset of two
             return 1;
         }
-        if (two_subset) {  // two is a subset of one
+        if( two_subset )
+        {   // two is a subset of one
             return 2;
         }
         //
@@ -418,56 +438,64 @@ class sparse_list {
     resulting set.
     All of the elements must have value less than end();
     */
-    void binary_union(size_t target, size_t left, const pod_vector<size_t> &right) {
-        CPPAD_ASSERT_UNKNOWN(post_[left] == 0);
+    void binary_union(
+        size_t                    target ,
+        size_t                    left   ,
+        const pod_vector<size_t>& right  )
+    {   CPPAD_ASSERT_UNKNOWN( post_[left] == 0 );
         //
-        CPPAD_ASSERT_UNKNOWN(target < start_.size());
-        CPPAD_ASSERT_UNKNOWN(left < start_.size());
+        CPPAD_ASSERT_UNKNOWN( target < start_.size() );
+        CPPAD_ASSERT_UNKNOWN( left   < start_.size() );
 
         // get start indices before drop modifies modify start_ in case target
         // and left are the same.
-        size_t start_left = start_[left];
+        size_t start_left   = start_[left];
 
         // -------------------------------------------------------------------
         // Check if right is a subset of left so that we used reference count
         // and not copies of identical sets.
         //
         // initialize index for left and right sets
-        size_t current_left = start_left;
+        size_t current_left  = start_left;
         size_t current_right = 0;
         //
         // initialize value_left
-        size_t value_left = end_;
-        if (current_left > 0) {  // advance from reference counter to data
+        size_t value_left  = end_;
+        if( current_left > 0 )
+        {   // advance from reference counter to data
             current_left = data_[current_left].next;
-            CPPAD_ASSERT_UNKNOWN(current_left != 0)
+            CPPAD_ASSERT_UNKNOWN( current_left != 0 )
             //
             value_left = data_[current_left].value;
-            CPPAD_ASSERT_UNKNOWN(value_left < end_);
+            CPPAD_ASSERT_UNKNOWN( value_left < end_);
         }
         //
         // initialize value_right
         size_t value_right = end_;
-        if (right.size() > 0) value_right = right[current_right];
+        if( right.size() > 0 )
+            value_right = right[current_right];
         //
         bool subset = true;
-        while (subset & (value_right < end_)) {
-            while (value_left < value_right) {  // advance left
+        while( subset & (value_right < end_) )
+        {   while( value_left < value_right )
+            {   // advance left
                 current_left = data_[current_left].next;
                 value_left = data_[current_left].value;
             }
-            if (value_right < value_left)
+            if( value_right < value_left )
                 subset = false;
-            else {  // advance right
+            else
+            {   // advance right
                 ++current_right;
-                if (current_right == right.size())
+                if( current_right == right.size() )
                     value_right = end_;
                 else
                     value_right = right[current_right];
             }
         }
         //
-        if (subset) {  // target = left will use reference count for identical sets
+        if( subset )
+        {   // target = left will use reference count for identical sets
             assignment(target, left, *this);
             return;
         }
@@ -475,93 +503,107 @@ class sparse_list {
         // -------------------------------------------------------------------
 
         // start new version of target
-        size_t start = get_data_index();
-        data_[start].value = 1;  // reference count
+        size_t start        = get_data_index();
+        data_[start].value  = 1; // reference count
         //
         // previous index for new set
         size_t previous_target = start;
         //
         // initialize index for left and right sets
-        current_left = start_left;
+        current_left  = start_left;
         current_right = 0;
         //
         // initialize value_left
-        value_left = end_;
-        if (current_left > 0) {  // advance from reference counter to data
+        value_left  = end_;
+        if( current_left > 0 )
+        {   // advance from reference counter to data
             current_left = data_[current_left].next;
-            CPPAD_ASSERT_UNKNOWN(current_left != 0)
+            CPPAD_ASSERT_UNKNOWN( current_left != 0 )
             //
             value_left = data_[current_left].value;
-            CPPAD_ASSERT_UNKNOWN(value_left < end_);
+            CPPAD_ASSERT_UNKNOWN( value_left < end_);
         }
         //
         // initialize value_right
         value_right = end_;
-        if (right.size() > 0) value_right = right[current_right];
+        if( right.size() > 0 )
+            value_right = right[current_right];
         //
         // merge
-        while ((value_left < end_) | (value_right < end_)) {
-            if (value_left == value_right) {  // advance left so left and right are no longer equal
+        while( (value_left < end_) | (value_right < end_) )
+        {   if( value_left == value_right)
+            {   // advance left so left and right are no longer equal
                 current_left = data_[current_left].next;
-                value_left = data_[current_left].value;
-                CPPAD_ASSERT_UNKNOWN(value_right < value_left);
+                value_left   = data_[current_left].value;
+                CPPAD_ASSERT_UNKNOWN( value_right < value_left );
             }
             // place to put new element
-            size_t current_target = get_data_index();
+            size_t current_target       = get_data_index();
             data_[previous_target].next = current_target;
             //
-            if (value_left < value_right) {  // value_left case
-                CPPAD_ASSERT_UNKNOWN(value_left < end_);
+            if( value_left < value_right )
+            {   // value_left case
+                CPPAD_ASSERT_UNKNOWN( value_left < end_ );
                 data_[current_target].value = value_left;
                 //
                 // advance left
                 current_left = data_[current_left].next;
-                value_left = data_[current_left].value;
-            } else {
-                CPPAD_ASSERT_UNKNOWN(value_right < value_left)
+                value_left   = data_[current_left].value;
+            }
+            else
+            {   CPPAD_ASSERT_UNKNOWN( value_right < value_left )
                 // value_right case
-                CPPAD_ASSERT_UNKNOWN(value_right < end_);
+                CPPAD_ASSERT_UNKNOWN( value_right < end_);
                 data_[current_target].value = value_right;
                 //
                 // advance right (skip values equal to this one)
                 size_t previous_value = value_right;
-                while (value_right == previous_value) {
-                    ++current_right;
-                    if (current_right == right.size())
+                while( value_right == previous_value )
+                {   ++current_right;
+                    if( current_right == right.size() )
                         value_right = end_;
-                    else {
-                        value_right = right[current_right];
-                        CPPAD_ASSERT_UNKNOWN(value_right < end_);
+                    else
+                    {   value_right = right[current_right];
+                        CPPAD_ASSERT_UNKNOWN( value_right < end_ );
                     }
                 }
             }
             // done setting current target value
-            previous_target = current_target;
+            previous_target  = current_target;
         }
         // make end of target list
         data_[previous_target].next = 0;
 
         // adjust number_not_used_
         size_t number_drop = drop(target);
-        number_not_used_ += number_drop;
+        number_not_used_  += number_drop;
 
         // set the new start value for target
         start_[target] = start;
 
         return;
     }
-    // ===========================================================================
-   public:
+// ===========================================================================
+public:
     /// declare a const iterator
     typedef sparse_list_const_iterator const_iterator;
     // -----------------------------------------------------------------
     /*!
     Default constructor (no sets)
     */
-    sparse_list(void) : end_(0), number_not_used_(0), data_not_used_(0), data_(0), start_(0), post_(0) {}
+    sparse_list(void) :
+    end_(0)              ,
+    number_not_used_(0)  ,
+    data_not_used_(0)    ,
+    data_(0)             ,
+    start_(0)            ,
+    post_(0)
+    { }
     // -----------------------------------------------------------------
     /// Destructor
-    ~sparse_list(void) { check_data_structure(); }
+    ~sparse_list(void)
+    {   check_data_structure();
+    }
     // -----------------------------------------------------------------
     /*!
     Using copy constructor is a programing (not user) error
@@ -569,7 +611,8 @@ class sparse_list {
     \param v
     vector of sets that we are attempting to make a copy of.
     */
-    sparse_list(const sparse_list &v) {  // Error: Probably a sparse_list argument has been passed by value
+    sparse_list(const sparse_list& v)
+    {   // Error: Probably a sparse_list argument has been passed by value
         CPPAD_ASSERT_UNKNOWN(false);
     }
     // -----------------------------------------------------------------
@@ -583,13 +626,13 @@ class sparse_list {
     This public member function is not yet part of
     the vector_of_sets concept.
     */
-    void operator=(const sparse_list &other) {
-        end_ = other.end_;
+    void operator=(const sparse_list& other)
+    {   end_             = other.end_;
         number_not_used_ = other.number_not_used_;
-        data_not_used_ = other.data_not_used_;
-        data_ = other.data_;
-        start_ = other.start_;
-        post_ = other.post_;
+        data_not_used_   = other.data_not_used_;
+        data_            = other.data_;
+        start_           = other.start_;
+        post_            = other.post_;
     }
     // -----------------------------------------------------------------
     /*!
@@ -602,16 +645,17 @@ class sparse_list {
     This public member function is not yet part of
     the vector_of_sets concept.
     */
-    void swap(sparse_list &other) {  // size_t objects
-        std::swap(end_, other.end_);
-        std::swap(number_not_used_, other.number_not_used_);
-        std::swap(data_not_used_, other.data_not_used_);
+    void swap(sparse_list& other)
+    {   // size_t objects
+        std::swap(end_             , other.end_);
+        std::swap(number_not_used_ , other.number_not_used_);
+        std::swap(data_not_used_   , other.data_not_used_);
 
         // pod_vectors
-        data_.swap(other.data_);
-        start_.swap(other.start_);
-        post_.swap(other.post_);
-        temporary_.swap(other.temporary_);
+        data_.swap(       other.data_);
+        start_.swap(      other.start_);
+        post_.swap(       other.post_);
+        temporary_.swap(  other.temporary_);
     }
     // -----------------------------------------------------------------
     /*!
@@ -630,40 +674,40 @@ class sparse_list {
     is the maximum element plus one (the minimum element is 0).
     If n_set is zero, end must also be zero.
     */
-    void resize(size_t n_set, size_t end) {
-        check_data_structure();
+    void resize(size_t n_set, size_t end)
+    {   check_data_structure();
 
-        if (n_set == 0) {
-            CPPAD_ASSERT_UNKNOWN(end == 0);
+        if( n_set == 0 )
+        {   CPPAD_ASSERT_UNKNOWN( end == 0 );
             //
             // restore object to start after constructor
             // (no memory allocated for this object)
             data_.clear();
             start_.clear();
             post_.clear();
-            number_not_used_ = 0;
-            data_not_used_ = 0;
-            end_ = 0;
+            number_not_used_  = 0;
+            data_not_used_    = 0;
+            end_              = 0;
             //
             return;
         }
-        end_ = end;
+        end_                   = end;
         //
         start_.resize(n_set);
         post_.resize(n_set);
         //
-        for (size_t i = 0; i < n_set; i++) {
-            start_[i] = 0;
-            post_[i] = 0;
+        for(size_t i = 0; i < n_set; i++)
+        {   start_[i] = 0;
+            post_[i]  = 0;
         }
         //
         // last element, marks the end for all lists
         data_.resize(1);
-        data_[0].value = end_;
-        data_[0].next = 0;
+        data_[0].value    = end_;
+        data_[0].next     = 0;
         //
-        number_not_used_ = 0;
-        data_not_used_ = 0;
+        number_not_used_  = 0;
+        data_not_used_    = 0;
     }
     // -----------------------------------------------------------------
     /*!
@@ -675,24 +719,25 @@ class sparse_list {
     \par
     number of elements checks that value < end_ for each element of the set.
     */
-    size_t number_elements(size_t i) const {
-        CPPAD_ASSERT_UNKNOWN(post_[i] == 0);
+    size_t number_elements(size_t i) const
+    {   CPPAD_ASSERT_UNKNOWN( post_[i] == 0 );
 
         // check if the set is empty
-        size_t start = start_[i];
-        if (start == 0) return 0;
+        size_t start   = start_[i];
+        if( start == 0 )
+            return 0;
 
         // initialize counter
-        size_t count = 0;
+        size_t count   = 0;
 
         // advance to the first element in the set
-        size_t next = data_[start].next;
-        while (next != 0) {
-            CPPAD_ASSERT_UNKNOWN(data_[next].value < end_);
+        size_t next    = data_[start].next;
+        while( next != 0 )
+        {   CPPAD_ASSERT_UNKNOWN( data_[next].value < end_ );
             count++;
-            next = data_[next].next;
+            next  = data_[next].next;
         }
-        CPPAD_ASSERT_UNKNOWN(count > 0);
+        CPPAD_ASSERT_UNKNOWN( count > 0 );
         return count;
     }
     /*!
@@ -712,16 +757,16 @@ class sparse_list {
     that depends on the value of set i,
     before processing the posts to set i.
     */
-    void post_element(size_t i, size_t element) {
-        CPPAD_ASSERT_UNKNOWN(i < start_.size());
-        CPPAD_ASSERT_UNKNOWN(element < end_);
+    void post_element(size_t i, size_t element)
+    {   CPPAD_ASSERT_UNKNOWN( i < start_.size() );
+        CPPAD_ASSERT_UNKNOWN( element < end_ );
 
         // put element at the front of this list
-        size_t next = post_[i];
-        size_t post = get_data_index();
-        post_[i] = post;
-        data_[post].value = element;
-        data_[post].next = next;
+        size_t next         = post_[i];
+        size_t post         = get_data_index();
+        post_[i]            = post;
+        data_[post].value   = element;
+        data_[post].next    = next;
 
         return;
     }
@@ -736,19 +781,22 @@ class sparse_list {
     Upon call, post_[i] is location in data_ of the elements that get
     added to the i-th set.  Upon return, post_[i] is zero.
     */
-    void process_post(size_t i) {  // post
+    void process_post(size_t i)
+    {   // post
         size_t post = post_[i];
         //
         // check if there are no elements to process
-        if (post == 0) return;
+        if( post == 0 )
+            return;
         //
         // check if there is only one element to process
-        size_t next = data_[post].next;
-        if (next == 0) {  // done with this posting
-            size_t value = data_[post].value;
-            post_[i] = 0;
+        size_t next  = data_[post].next;
+        if( next == 0 )
+        {   // done with this posting
+            size_t value     = data_[post].value;
+            post_[i]         = 0;
             data_[post].next = data_not_used_;
-            data_not_used_ = post;
+            data_not_used_   = post;
             ++number_not_used_;
             //
             add_element(i, value);
@@ -758,29 +806,28 @@ class sparse_list {
         //
         // copy the elements that need to be processed into temporary
         temporary_.resize(0);
-        size_t previous = post;
-        size_t value = data_[previous].value;
-        CPPAD_ASSERT_UNKNOWN(value < end_);
+        size_t previous  = post;
+        size_t value     = data_[previous].value;
+        CPPAD_ASSERT_UNKNOWN( value < end_ );
         temporary_.push_back(value);
-        while (next != 0) {
-            previous = next;
-            value = data_[previous].value;
-            CPPAD_ASSERT_UNKNOWN(value < end_);
+        while( next != 0 )
+        {   previous = next;
+            value    = data_[previous].value;
+            CPPAD_ASSERT_UNKNOWN( value < end_ );
             temporary_.push_back(value);
-            next = data_[previous].next;
+            next     = data_[previous].next;
         }
         size_t number_post = temporary_.size();
         //
         // done with this posting
-        post_[i] = 0;
-        data_[previous].next = data_not_used_;
-        data_not_used_ = post;
-        number_not_used_ += number_post;
-        ;
+        post_[i]              = 0;
+        data_[previous].next  = data_not_used_;
+        data_not_used_        = post;
+        number_not_used_     += number_post;;
         //
         // sort temporary_
-        CPPAD_ASSERT_UNKNOWN(number_post > 1);
-        std::sort(temporary_.data(), temporary_.data() + number_post);
+        CPPAD_ASSERT_UNKNOWN( number_post > 1 );
+        std::sort( temporary_.data(), temporary_.data() + number_post);
         //
         // add the elements to the set
         binary_union(i, i, temporary_);
@@ -797,22 +844,22 @@ class sparse_list {
     \param element
     is the element we are adding to the set.
     */
-    void add_element(size_t i, size_t element) {
-        CPPAD_ASSERT_UNKNOWN(i < start_.size());
-        CPPAD_ASSERT_UNKNOWN(element < end_);
+    void add_element(size_t i, size_t element)
+    {   CPPAD_ASSERT_UNKNOWN( i   < start_.size() );
+        CPPAD_ASSERT_UNKNOWN( element < end_ );
 
         // check for case where starting set is empty
         size_t start = start_[i];
-        if (start == 0) {
-            start = get_data_index();
-            start_[i] = start;
-            data_[start].value = 1;  // reference count
+        if( start == 0 )
+        {   start              = get_data_index();
+            start_[i]          = start;
+            data_[start].value = 1; // reference count
             //
-            size_t next = get_data_index();
-            data_[start].next = next;
+            size_t next        = get_data_index();
+            data_[start].next  = next;
             //
-            data_[next].value = element;
-            data_[next].next = 0;
+            data_[next].value  = element;
+            data_[next].next   = 0;
             return;
         }
         //
@@ -820,79 +867,82 @@ class sparse_list {
         size_t previous = start_[i];
         //
         // first entry in this set
-        size_t next = data_[previous].next;
-        size_t value = data_[next].value;
+        size_t next     = data_[previous].next;
+        size_t value    = data_[next].value;
         //
         // locate place to insert this element
-        while (value < element) {
-            previous = next;
-            next = data_[next].next;
+        while( value < element )
+        {   previous = next;
+            next     = data_[next].next;
             value = data_[next].value;
         }
         //
         // check for case where element is in the set
-        if (value == element) return;
+        if( value == element )
+            return;
         //
         //
         // check for case where this is the only reference to this set
-        CPPAD_ASSERT_UNKNOWN(element < value);
-        if (data_[start].value == 1) {
-            size_t insert = get_data_index();
-            data_[insert].next = next;
-            data_[insert].value = element;
-            data_[previous].next = insert;
+        CPPAD_ASSERT_UNKNOWN( element < value );
+        if( data_[start].value == 1 )
+        {   size_t insert         = get_data_index();
+            data_[insert].next    = next;
+            data_[insert].value   = element;
+            data_[previous].next  = insert;
             //
             return;
         }
         //
         // must make a separate copy with new element inserted
-        CPPAD_ASSERT_UNKNOWN(data_[start].value > 1);
-        data_[start].value--;  // reverence counter for old list
+        CPPAD_ASSERT_UNKNOWN( data_[start].value > 1 );
+        data_[start].value--;   // reverence counter for old list
         //
-        size_t start_new = get_data_index();
-        data_[start_new].value = 1;  // reference counter for new list
-        size_t previous_new = start_new;
+        size_t start_new       = get_data_index();
+        data_[start_new].value = 1;         // reference counter for new list
+        size_t previous_new    = start_new;
         //
         // start of old set with this index
-        previous = start_[i];
+        previous  = start_[i];
         //
         // first entry in old set
-        next = data_[previous].next;
-        value = data_[next].value;
+        next    = data_[previous].next;
+        value   = data_[next].value;
         //
         // locate place to insert this element
-        while (value < element) {  // copy to new list
-            size_t next_new = get_data_index();
+        while( value < element )
+        {   // copy to new list
+            size_t next_new          = get_data_index();
             data_[previous_new].next = next_new;
-            data_[next_new].value = value;
-            previous_new = next_new;
+            data_[next_new].value    = value;
+            previous_new             = next_new;
             //
             // get next value
             previous = next;
-            next = data_[next].next;
+            next     = data_[next].next;
             value = data_[next].value;
         }
-        CPPAD_ASSERT_UNKNOWN(element < value);
+        CPPAD_ASSERT_UNKNOWN( element < value );
         //
         // insert the element
-        size_t next_new = get_data_index();
+        size_t next_new          = get_data_index();
         data_[previous_new].next = next_new;
-        data_[next_new].value = element;
-        previous_new = next_new;
+        data_[next_new].value    = element;
+        previous_new             = next_new;
         //
         // copy rest of the old set
-        while (value < end_) {  // copy to new list
-            next_new = get_data_index();
+        while( value < end_ )
+        {   // copy to new list
+            next_new                 = get_data_index();
             data_[previous_new].next = next_new;
-            data_[next_new].value = value;
-            previous_new = next_new;
+            data_[next_new].value    = value;
+            previous_new             = next_new;
             //
             // get next value
             previous = next;
-            next = data_[next].next;
+            next     = data_[next].next;
             value = data_[next].value;
         }
-        CPPAD_ASSERT_UNKNOWN(next == 0);
+        CPPAD_ASSERT_UNKNOWN( next == 0 );
         data_[previous_new].next = 0;
         //
         // hook up new list
@@ -909,17 +959,18 @@ class sparse_list {
     \param element
     is the element we are checking to see if it is in the set.
     */
-    bool is_element(size_t i, size_t element) const {
-        CPPAD_ASSERT_UNKNOWN(post_[i] == 0);
-        CPPAD_ASSERT_UNKNOWN(element < end_);
+    bool is_element(size_t i, size_t element) const
+    {   CPPAD_ASSERT_UNKNOWN( post_[i] == 0 );
+        CPPAD_ASSERT_UNKNOWN( element < end_ );
         //
         size_t start = start_[i];
-        if (start == 0) return false;
+        if( start == 0 )
+            return false;
         //
-        size_t next = data_[start].next;
+        size_t next  = data_[start].next;
         size_t value = data_[next].value;
-        while (value < element) {
-            next = data_[next].next;
+        while( value < element )
+        {   next  = data_[next].next;
             value = data_[next].value;
         }
         return element == value;
@@ -935,12 +986,12 @@ class sparse_list {
     increments this value by additional number of data_ elements that are
     no longer being used.
     */
-    void clear(size_t target) {
-        CPPAD_ASSERT_UNKNOWN(target < start_.size());
+    void clear(size_t target)
+    {   CPPAD_ASSERT_UNKNOWN( target < start_.size() );
 
         // adjust number_not_used_
         size_t number_drop = drop(target);
-        number_not_used_ += number_drop;
+        number_not_used_  += number_drop;
 
         return;
     }
@@ -962,53 +1013,60 @@ class sparse_list {
     \par number_not_used_
     increments this value by additional number of elements not being used.
     */
-    void assignment(size_t this_target, size_t other_source, const sparse_list &other) {
-        CPPAD_ASSERT_UNKNOWN(other.post_[other_source] == 0);
+    void assignment(
+        size_t               this_target  ,
+        size_t               other_source ,
+        const sparse_list&   other        )
+    {   CPPAD_ASSERT_UNKNOWN( other.post_[ other_source ] == 0 );
         //
-        CPPAD_ASSERT_UNKNOWN(this_target < start_.size());
-        CPPAD_ASSERT_UNKNOWN(other_source < other.start_.size());
-        CPPAD_ASSERT_UNKNOWN(end_ == other.end_);
+        CPPAD_ASSERT_UNKNOWN( this_target  <   start_.size()        );
+        CPPAD_ASSERT_UNKNOWN( other_source <   other.start_.size()  );
+        CPPAD_ASSERT_UNKNOWN( end_        == other.end_   );
 
         // check if we are assigning a set to itself
-        if ((this == &other) & (this_target == other_source)) return;
+        if( (this == &other) & (this_target == other_source) )
+            return;
 
         // set depending on cases below
         size_t this_start;
 
         // If this and other are the same, use another reference to same list
         size_t other_start = other.start_[other_source];
-        if (this == &other) {
-            this_start = other_start;
-            if (other_start != 0) {
-                data_[other_start].value++;  // increment reference count
-                CPPAD_ASSERT_UNKNOWN(data_[other_start].value > 1);
+        if( this == &other )
+        {   this_start = other_start;
+            if( other_start != 0 )
+            {   data_[other_start].value++; // increment reference count
+                CPPAD_ASSERT_UNKNOWN( data_[other_start].value > 1 );
             }
-        } else if (other_start == 0) {
-            this_start = 0;
-        } else {  // make a copy of the other list in this sparse_list
-            this_start = get_data_index();
-            size_t this_next = get_data_index();
-            data_[this_start].value = 1;  // reference count
-            data_[this_start].next = this_next;
+        }
+        else if( other_start  == 0 )
+        {   this_start = 0;
+        }
+        else
+        {   // make a copy of the other list in this sparse_list
+            this_start        = get_data_index();
+            size_t this_next  = get_data_index();
+            data_[this_start].value = 1; // reference count
+            data_[this_start].next  = this_next;
             //
-            size_t next = other.data_[other_start].next;
-            CPPAD_ASSERT_UNKNOWN(next != 0);
-            while (next != 0) {
-                data_[this_next].value = other.data_[next].value;
-                next = other.data_[next].next;
-                if (next == 0)
+            size_t next  = other.data_[other_start].next;
+            CPPAD_ASSERT_UNKNOWN( next != 0 );
+            while( next != 0 )
+            {   data_[this_next].value = other.data_[next].value;
+                next                   = other.data_[next].next;
+                if( next == 0 )
                     data_[this_next].next = 0;
-                else {
-                    size_t tmp = get_data_index();
+                else
+                {   size_t tmp = get_data_index();
                     data_[this_next].next = tmp;
-                    this_next = tmp;
+                    this_next             = tmp;
                 }
             }
         }
 
         // adjust number_not_used_
         size_t number_drop = drop(this_target);
-        number_not_used_ += number_drop;
+        number_not_used_  += number_drop;
 
         // set the new start value for this_target
         start_[this_target] = this_start;
@@ -1036,72 +1094,78 @@ class sparse_list {
     is the other sparse_list object (which may be the same as this
     sparse_list object).
     */
-    void binary_union(size_t this_target, size_t this_left, size_t other_right, const sparse_list &other) {
-        CPPAD_ASSERT_UNKNOWN(post_[this_left] == 0);
-        CPPAD_ASSERT_UNKNOWN(other.post_[other_right] == 0);
+    void binary_union(
+        size_t                  this_target  ,
+        size_t                  this_left    ,
+        size_t                  other_right  ,
+        const sparse_list&      other        )
+    {   CPPAD_ASSERT_UNKNOWN( post_[this_left] == 0 );
+        CPPAD_ASSERT_UNKNOWN( other.post_[ other_right ] == 0 );
         //
-        CPPAD_ASSERT_UNKNOWN(this_target < start_.size());
-        CPPAD_ASSERT_UNKNOWN(this_left < start_.size());
-        CPPAD_ASSERT_UNKNOWN(other_right < other.start_.size());
-        CPPAD_ASSERT_UNKNOWN(end_ == other.end_);
+        CPPAD_ASSERT_UNKNOWN( this_target < start_.size()         );
+        CPPAD_ASSERT_UNKNOWN( this_left   < start_.size()         );
+        CPPAD_ASSERT_UNKNOWN( other_right < other.start_.size()   );
+        CPPAD_ASSERT_UNKNOWN( end_        == other.end_           );
 
         // check if one of the two operands is a subset of the the other
         size_t subset = is_subset(this_left, other_right, other);
 
         // case where right is a subset of left or right and left are equal
-        if (subset == 2 || subset == 3) {
-            assignment(this_target, this_left, *this);
+        if( subset == 2 || subset == 3 )
+        {   assignment(this_target, this_left, *this);
             return;
         }
         // case where the left is a subset of right and they are not equal
-        if (subset == 1) {
-            assignment(this_target, other_right, other);
+        if( subset == 1 )
+        {   assignment(this_target, other_right, other);
             return;
         }
         // if niether case holds, then both left and right are non-empty
-        CPPAD_ASSERT_UNKNOWN(reference_count(this_left) > 0);
-        CPPAD_ASSERT_UNKNOWN(other.reference_count(other_right) > 0);
+        CPPAD_ASSERT_UNKNOWN( reference_count(this_left) > 0 );
+        CPPAD_ASSERT_UNKNOWN( other.reference_count(other_right) > 0 );
 
         // must get all the start indices before modify start_this
         // (incase start_this is the same as start_left or start_right)
-        size_t start_left = start_[this_left];
-        size_t start_right = other.start_[other_right];
+        size_t start_left    = start_[this_left];
+        size_t start_right   = other.start_[other_right];
 
         // start the new list
-        size_t start = get_data_index();
-        size_t next = start;
-        data_[start].value = 1;  // reference count
+        size_t start        = get_data_index();
+        size_t next         = start;
+        data_[start].value  = 1; // reference count
 
         // next for left and right lists
-        size_t next_left = data_[start_left].next;
-        size_t next_right = other.data_[start_right].next;
+        size_t next_left   = data_[start_left].next;
+        size_t next_right  = other.data_[start_right].next;
 
         // value for left and right sets
-        size_t value_left = data_[next_left].value;
+        size_t value_left  = data_[next_left].value;
         size_t value_right = other.data_[next_right].value;
 
-        CPPAD_ASSERT_UNKNOWN(value_left < end_ && value_right < end_);
-        while ((value_left < end_) | (value_right < end_)) {
-            if (value_left == value_right) {  // advance right so left and right are no longer equal
-                next_right = other.data_[next_right].next;
+        CPPAD_ASSERT_UNKNOWN( value_left < end_ && value_right < end_ );
+        while( (value_left < end_) | (value_right < end_) )
+        {   if( value_left == value_right )
+            {   // advance right so left and right are no longer equal
+                next_right  = other.data_[next_right].next;
                 value_right = other.data_[next_right].value;
             }
-            if (value_left < value_right) {
-                size_t tmp = get_data_index();
-                data_[next].next = tmp;
-                next = tmp;
+            if( value_left < value_right )
+            {   size_t tmp        = get_data_index();
+                data_[next].next  = tmp;
+                next              = tmp;
                 data_[next].value = value_left;
                 // advance left to its next element
-                next_left = data_[next_left].next;
+                next_left  = data_[next_left].next;
                 value_left = data_[next_left].value;
-            } else {
-                CPPAD_ASSERT_UNKNOWN(value_right < value_left)
-                size_t tmp = get_data_index();
-                data_[next].next = tmp;
-                next = tmp;
+            }
+            else
+            {   CPPAD_ASSERT_UNKNOWN( value_right < value_left )
+                size_t tmp        = get_data_index();
+                data_[next].next  = tmp;
+                next              = tmp;
                 data_[next].value = value_right;
                 // advance right to its next element
-                next_right = other.data_[next_right].next;
+                next_right  = other.data_[next_right].next;
                 value_right = other.data_[next_right].value;
             }
         }
@@ -1109,7 +1173,7 @@ class sparse_list {
 
         // adjust number_not_used_
         size_t number_drop = drop(this_target);
-        number_not_used_ += number_drop;
+        number_not_used_  += number_drop;
 
         // set the new start value for this_target
         start_[this_target] = start;
@@ -1137,87 +1201,94 @@ class sparse_list {
     is the other sparse_list object (which may be the same as this
     sparse_list object).
     */
-    void binary_intersection(size_t this_target, size_t this_left, size_t other_right, const sparse_list &other) {
-        CPPAD_ASSERT_UNKNOWN(post_[this_left] == 0);
-        CPPAD_ASSERT_UNKNOWN(other.post_[other_right] == 0);
+    void binary_intersection(
+        size_t                  this_target  ,
+        size_t                  this_left    ,
+        size_t                  other_right  ,
+        const sparse_list&      other        )
+    {   CPPAD_ASSERT_UNKNOWN( post_[this_left] == 0 );
+        CPPAD_ASSERT_UNKNOWN( other.post_[ other_right ] == 0 );
         //
-        CPPAD_ASSERT_UNKNOWN(this_target < start_.size());
-        CPPAD_ASSERT_UNKNOWN(this_left < start_.size());
-        CPPAD_ASSERT_UNKNOWN(other_right < other.start_.size());
-        CPPAD_ASSERT_UNKNOWN(end_ == other.end_);
+        CPPAD_ASSERT_UNKNOWN( this_target < start_.size()         );
+        CPPAD_ASSERT_UNKNOWN( this_left   < start_.size()         );
+        CPPAD_ASSERT_UNKNOWN( other_right < other.start_.size()   );
+        CPPAD_ASSERT_UNKNOWN( end_        == other.end_           );
         //
         // check if one of the two operands is a subset of the the other
         size_t subset = is_subset(this_left, other_right, other);
 
         // case where left is a subset of right or left and right are equal
-        if (subset == 1 || subset == 3) {
-            assignment(this_target, this_left, *this);
+        if( subset == 1 || subset == 3 )
+        {   assignment(this_target, this_left, *this);
             return;
         }
         // case where the right is a subset of left and they are not equal
-        if (subset == 2) {
-            assignment(this_target, other_right, other);
+        if( subset == 2 )
+        {   assignment(this_target, other_right, other);
             return;
         }
         // if niether case holds, then both left and right are non-empty
-        CPPAD_ASSERT_UNKNOWN(reference_count(this_left) > 0);
-        CPPAD_ASSERT_UNKNOWN(other.reference_count(other_right) > 0);
+        CPPAD_ASSERT_UNKNOWN( reference_count(this_left) > 0 );
+        CPPAD_ASSERT_UNKNOWN( other.reference_count(other_right) > 0 );
 
         // must get all the start indices before modify start_this
         // (incase start_this is the same as start_left or start_right)
-        size_t start_left = start_[this_left];
-        size_t start_right = other.start_[other_right];
+        size_t start_left    = start_[this_left];
+        size_t start_right   = other.start_[other_right];
 
         // start the new list as emptyh
-        size_t start = 0;
-        size_t next = start;
+        size_t start        = 0;
+        size_t next         = start;
 
         // next for left and right lists
-        size_t next_left = data_[start_left].next;
-        size_t next_right = other.data_[start_right].next;
+        size_t next_left   = data_[start_left].next;
+        size_t next_right  = other.data_[start_right].next;
 
         // value for left and right sets
-        size_t value_left = data_[next_left].value;
+        size_t value_left  = data_[next_left].value;
         size_t value_right = other.data_[next_right].value;
 
-        CPPAD_ASSERT_UNKNOWN(value_left < end_ && value_right < end_);
-        while ((value_left < end_) & (value_right < end_)) {
-            if (value_left == value_right) {
-                if (start == 0) {  // this is the first element in the intersection
-                    start = get_data_index();
-                    next = start;
-                    data_[start].value = 1;  // reference count
-                    CPPAD_ASSERT_UNKNOWN(start > 0);
+        CPPAD_ASSERT_UNKNOWN( value_left < end_ && value_right < end_ );
+        while( (value_left < end_) & (value_right < end_) )
+        {   if( value_left == value_right )
+            {   if( start == 0 )
+                {   // this is the first element in the intersection
+                    start               = get_data_index();
+                    next                = start;
+                    data_[start].value  = 1; // reference count
+                    CPPAD_ASSERT_UNKNOWN( start > 0 );
                     // must delay this until after drop below
                     // start_[this_target] = start;
                 }
-                size_t tmp = get_data_index();
-                data_[next].next = tmp;
-                next = tmp;
+                size_t tmp        = get_data_index();
+                data_[next].next  = tmp;
+                next              = tmp;
                 data_[next].value = value_left;
                 //
                 // advance left
-                next_left = data_[next_left].next;
+                next_left  = data_[next_left].next;
                 value_left = data_[next_left].value;
                 //
             }
-            if (value_left > value_right) {  // advance right
-                next_right = other.data_[next_right].next;
+            if( value_left > value_right )
+            {   // advance right
+                next_right  = other.data_[next_right].next;
                 value_right = other.data_[next_right].value;
             }
-            if (value_right > value_left) {  // advance left
-                next_left = data_[next_left].next;
+            if( value_right > value_left )
+            {   // advance left
+                next_left  = data_[next_left].next;
                 value_left = data_[next_left].value;
             }
         }
-        if (start != 0) {
-            CPPAD_ASSERT_UNKNOWN(next != 0);
+        if( start != 0 )
+        {   CPPAD_ASSERT_UNKNOWN( next != 0 );
             data_[next].next = 0;
         }
 
         // adjust number_not_used_
         size_t number_drop = drop(this_target);
-        number_not_used_ += number_drop;
+        number_not_used_  += number_drop;
 
         // set new start for this_target
         start_[this_target] = start;
@@ -1230,21 +1301,25 @@ class sparse_list {
     \return
     Number of from sets for this vector of sets object
     */
-    size_t n_set(void) const { return start_.size(); }
+    size_t n_set(void) const
+    {   return start_.size(); }
     // -----------------------------------------------------------------
     /*! Fetch end for this vector of sets object.
 
     \return
     is the maximum element value plus one (the minimum element value is 0).
     */
-    size_t end(void) const { return end_; }
+    size_t end(void) const
+    {   return end_; }
     // -----------------------------------------------------------------
     /*! Amount of memory used by this vector of sets
 
     \return
     The amount of memory in units of type unsigned char memory.
     */
-    size_t memory(void) const { return data_.capacity() * sizeof(pair_size_t); }
+    size_t memory(void) const
+    {   return data_.capacity() * sizeof(pair_size_t);
+    }
     /*!
     Print the vector of sets (used for debugging)
     */
@@ -1259,64 +1334,70 @@ sparse_pack_const_iterator and sparse_sizevec_const_iterator classes.
 This defines the CppAD vector_of_sets iterator concept.
 */
 class sparse_list_const_iterator {
-   private:
+private:
     /// type used by sparse_list to represent one element of the list
     typedef sparse_list::pair_size_t pair_size_t;
 
     /// data for the entire vector of sets
-    const pod_vector<pair_size_t> &data_;
+    const pod_vector<pair_size_t>& data_;
 
     /// Possible elements in a list are 0, 1, ..., end_ - 1;
-    const size_t end_;
+    const size_t                   end_;
 
     /// next element in the singly linked list
     /// (next_pair_.value == end_ for past end of list)
-    pair_size_t next_pair_;
-
-   public:
+    pair_size_t                    next_pair_;
+public:
     /// construct a const_iterator for a list in a sparse_list object
-    sparse_list_const_iterator(const sparse_list &list, size_t i) : data_(list.data_), end_(list.end_) {
-        CPPAD_ASSERT_UNKNOWN(list.post_[i] == 0);
+    sparse_list_const_iterator (const sparse_list& list, size_t i)
+    :
+    data_( list.data_ )    ,
+    end_ ( list.end_ )
+    {   CPPAD_ASSERT_UNKNOWN( list.post_[i] == 0 );
         //
         size_t start = list.start_[i];
-        if (start == 0) {
-            next_pair_.next = 0;
+        if( start == 0 )
+        {   next_pair_.next  = 0;
             next_pair_.value = end_;
-        } else {  // value for this entry is reference count for list
-            CPPAD_ASSERT_UNKNOWN(data_[start].value > 0);
+        }
+        else
+        {   // value for this entry is reference count for list
+            CPPAD_ASSERT_UNKNOWN( data_[start].value > 0 );
 
             // data index where list truely starts
             size_t next = data_[start].next;
-            CPPAD_ASSERT_UNKNOWN(next != 0);
+            CPPAD_ASSERT_UNKNOWN( next != 0 );
 
             // true first entry in the list
             next_pair_ = data_[next];
-            CPPAD_ASSERT_UNKNOWN(next_pair_.value < end_);
+            CPPAD_ASSERT_UNKNOWN( next_pair_.value < end_ );
         }
     }
 
     /// advance to next element in this list
-    sparse_list_const_iterator &operator++(void) {
-        next_pair_ = data_[next_pair_.next];
+    sparse_list_const_iterator& operator++(void)
+    {   next_pair_  = data_[next_pair_.next];
         return *this;
     }
 
     /// obtain value of this element of the set of positive integers
     /// (end_ for no such element)
-    size_t operator*(void) { return next_pair_.value; }
+    size_t operator*(void)
+    {   return next_pair_.value; }
 };
 // =========================================================================
 /*!
 Print the vector of sets (used for debugging)
 */
-inline void sparse_list::print(void) const {
-    std::cout << "sparse_list:\n";
-    for (size_t i = 0; i < n_set(); i++) {
-        std::cout << "set[" << i << "] = {";
+inline void sparse_list::print(void) const
+{   std::cout << "sparse_list:\n";
+    for(size_t i = 0; i < n_set(); i++)
+    {   std::cout << "set[" << i << "] = {";
         const_iterator itr(*this, i);
-        while (*itr != end()) {
-            std::cout << *itr;
-            if (*(++itr) != end()) std::cout << ",";
+        while( *itr != end() )
+        {   std::cout << *itr;
+            if( *(++itr) != end() )
+                std::cout << ",";
         }
         std::cout << "}\n";
     }
@@ -1325,10 +1406,8 @@ inline void sparse_list::print(void) const {
 // =========================================================================
 // Tell pod_vector class that each pair_size_t is plain old data and hence
 // the corresponding constructor need not be called.
-template <>
-inline bool is_pod<sparse_list::pair_size_t>(void) {
-    return true;
-}
+template <> inline bool is_pod<sparse_list::pair_size_t>(void)
+{   return true; }
 
 /*!
 Copy a user vector of sets sparsity pattern to an internal sparse_list object.
@@ -1357,13 +1436,21 @@ if true, the user sparsity patter is the transposed.
 is the error message to display if some values in the user sparstiy
 pattern are not valid.
 */
-template <class SetVector>
-void sparsity_user2internal(sparse_list &internal, const SetVector &user, size_t n_set, size_t end, bool transpose,
-                            const char *error_msg) {
-#ifndef NDEBUG
-    if (transpose) CPPAD_ASSERT_KNOWN(end == size_t(user.size()), error_msg);
-    if (!transpose) CPPAD_ASSERT_KNOWN(n_set == size_t(user.size()), error_msg);
-#endif
+template<class SetVector>
+void sparsity_user2internal(
+    sparse_list&            internal  ,
+    const SetVector&        user      ,
+    size_t                  n_set     ,
+    size_t                  end       ,
+    bool                    transpose ,
+    const char*             error_msg )
+{
+# ifndef NDEBUG
+    if( transpose )
+        CPPAD_ASSERT_KNOWN( end == size_t( user.size() ), error_msg);
+    if( ! transpose )
+        CPPAD_ASSERT_KNOWN( n_set == size_t( user.size() ), error_msg);
+# endif
 
     // iterator for user set
     std::set<size_t>::const_iterator itr;
@@ -1371,21 +1458,23 @@ void sparsity_user2internal(sparse_list &internal, const SetVector &user, size_t
     // size of internal sparsity pattern
     internal.resize(n_set, end);
 
-    if (transpose) {  // transposed pattern case
-        for (size_t j = 0; j < end; j++) {
-            itr = user[j].begin();
-            while (itr != user[j].end()) {
-                size_t i = *itr++;
+    if( transpose )
+    {   // transposed pattern case
+        for(size_t j = 0; j < end; j++)
+        {   itr = user[j].begin();
+            while(itr != user[j].end())
+            {   size_t i = *itr++;
                 CPPAD_ASSERT_KNOWN(i < n_set, error_msg);
                 internal.add_element(i, j);
             }
         }
-    } else {
-        for (size_t i = 0; i < n_set; i++) {
-            itr = user[i].begin();
-            while (itr != user[i].end()) {
-                size_t j = *itr++;
-                CPPAD_ASSERT_KNOWN(j < end, error_msg);
+    }
+    else
+    {   for(size_t i = 0; i < n_set; i++)
+        {   itr = user[i].begin();
+            while(itr != user[i].end())
+            {   size_t j = *itr++;
+                CPPAD_ASSERT_KNOWN( j < end, error_msg);
                 internal.add_element(i, j);
             }
         }
@@ -1393,6 +1482,5 @@ void sparsity_user2internal(sparse_list &internal, const SetVector &user, size_t
     return;
 }
 
-}  // namespace local
-}  // namespace CppAD
-#endif
+} } // END_CPPAD_LOCAL_NAMESPACE
+# endif

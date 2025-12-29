@@ -24,28 +24,31 @@ namespace cg {
  *
  * @author Joao Leal
  */
-template <class Base>
+template<class Base>
 class ModelLibraryProcessor {
-   protected:
-    ModelLibraryCSourceGen<Base> *modelLibraryHelper_;
+protected:
+    ModelLibraryCSourceGen<Base>* modelLibraryHelper_;
+public:
 
-   public:
-    inline ModelLibraryProcessor(ModelLibraryCSourceGen<Base> &modelLibraryHelper)
-        : modelLibraryHelper_(&modelLibraryHelper) {}
+    inline ModelLibraryProcessor(ModelLibraryCSourceGen<Base>& modelLibraryHelper) :
+        modelLibraryHelper_(&modelLibraryHelper) {
+    }
 
     inline virtual ~ModelLibraryProcessor() = default;
 
-   protected:
-    inline const std::map<std::string, std::string> &getLibrarySources() {
+protected:
+
+    inline const std::map<std::string, std::string>& getLibrarySources() {
         return modelLibraryHelper_->getLibrarySources();
     }
 
-    inline const std::map<std::string, std::string> &getSources(ModelCSourceGen<Base> &model) {
+    inline const std::map<std::string, std::string>& getSources(ModelCSourceGen<Base>& model) {
         return model.getSources(modelLibraryHelper_->getMultiThreading(), modelLibraryHelper_);
     }
+
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

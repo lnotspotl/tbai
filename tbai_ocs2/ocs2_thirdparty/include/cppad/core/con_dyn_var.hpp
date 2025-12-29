@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_CON_DYN_VAR_HPP
-#define CPPAD_CORE_CON_DYN_VAR_HPP
+# ifndef CPPAD_CORE_CON_DYN_VAR_HPP
+# define CPPAD_CORE_CON_DYN_VAR_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -95,72 +95,77 @@ $end
 */
 
 namespace CppAD {
-// -----------------------------------------------------------------------
-// Constant
-template <class Base>
-bool Constant(const AD<Base> &x) {
-    CPPAD_ASSERT_UNKNOWN(x.tape_id_ == 0 || x.ad_type_ != constant_enum);
-    if (x.tape_id_ == 0) return true;
-    //
-    size_t thread = size_t(x.tape_id_ % CPPAD_MAX_NUM_THREADS);
-    return x.tape_id_ != *AD<Base>::tape_id_ptr(thread);
-}
-template <class Base>
-bool Constant(const VecAD<Base> &x) {
-    return Parameter(x);
-}
+    // -----------------------------------------------------------------------
+    // Constant
+    template <class Base>
+    bool Constant(const AD<Base> &x)
+    {   CPPAD_ASSERT_UNKNOWN( x.tape_id_==0 || x.ad_type_!=constant_enum );
+        if( x.tape_id_ == 0 )
+            return true;
+        //
+        size_t thread = size_t(x.tape_id_ % CPPAD_MAX_NUM_THREADS);
+        return x.tape_id_ != *AD<Base>::tape_id_ptr(thread);
+    }
+    template <class Base>
+    bool Constant(const VecAD<Base> &x)
+    {   return Parameter(x); }
 
-// -----------------------------------------------------------------------
-// Dynamic
-template <class Base>
-bool Dynamic(const AD<Base> &x) {
-    CPPAD_ASSERT_UNKNOWN(x.tape_id_ == 0 || x.ad_type_ != constant_enum);
-    if ((x.tape_id_ == 0) | (x.ad_type_ != dynamic_enum)) return false;
-    //
-    size_t thread = size_t(x.tape_id_ % CPPAD_MAX_NUM_THREADS);
-    return x.tape_id_ == *AD<Base>::tape_id_ptr(thread);
-}
-template <class Base>
-bool Dynamic(const VecAD<Base> &x) {
-    return false;
-}
+    // -----------------------------------------------------------------------
+    // Dynamic
+    template <class Base>
+    bool Dynamic(const AD<Base> &x)
+    {   CPPAD_ASSERT_UNKNOWN( x.tape_id_==0 || x.ad_type_!=constant_enum );
+        if( (x.tape_id_ == 0) | (x.ad_type_ != dynamic_enum) )
+            return false;
+        //
+        size_t thread = size_t(x.tape_id_ % CPPAD_MAX_NUM_THREADS);
+        return x.tape_id_ == *AD<Base>::tape_id_ptr(thread);
+    }
+    template <class Base>
+    bool Dynamic(const VecAD<Base> &x)
+    {   return false; }
 
-// -----------------------------------------------------------------------
-// Parameter
-template <class Base>
-bool Parameter(const AD<Base> &x) {
-    CPPAD_ASSERT_UNKNOWN(x.tape_id_ == 0 || x.ad_type_ != constant_enum);
-    if ((x.tape_id_ == 0) | (x.ad_type_ == dynamic_enum)) return true;
-    //
-    size_t thread = size_t(x.tape_id_ % CPPAD_MAX_NUM_THREADS);
-    return x.tape_id_ != *AD<Base>::tape_id_ptr(thread);
-}
-template <class Base>
-bool Parameter(const VecAD<Base> &x) {
-    if (x.tape_id_ == 0) return true;
-    //
-    size_t thread = size_t(x.tape_id_ % CPPAD_MAX_NUM_THREADS);
-    return x.tape_id_ != *AD<Base>::tape_id_ptr(thread);
-}
+    // -----------------------------------------------------------------------
+    // Parameter
+    template <class Base>
+    bool Parameter(const AD<Base> &x)
+    {   CPPAD_ASSERT_UNKNOWN( x.tape_id_==0 || x.ad_type_!=constant_enum );
+        if( (x.tape_id_ == 0) | (x.ad_type_ == dynamic_enum) )
+            return true;
+        //
+        size_t thread = size_t(x.tape_id_ % CPPAD_MAX_NUM_THREADS);
+        return x.tape_id_ != *AD<Base>::tape_id_ptr(thread);
+    }
+    template <class Base>
+    bool Parameter(const VecAD<Base> &x)
+    {   if( x.tape_id_ == 0 )
+            return true;
+        //
+        size_t thread = size_t(x.tape_id_ % CPPAD_MAX_NUM_THREADS);
+        return x.tape_id_ != *AD<Base>::tape_id_ptr(thread);
+    }
 
-// -----------------------------------------------------------------------
-// Variable
-template <class Base>
-bool Variable(const AD<Base> &x) {
-    CPPAD_ASSERT_UNKNOWN(x.tape_id_ == 0 || x.ad_type_ != constant_enum);
-    if ((x.tape_id_ == 0) | (x.ad_type_ != variable_enum)) return false;
-    //
-    size_t thread = size_t(x.tape_id_ % CPPAD_MAX_NUM_THREADS);
-    return x.tape_id_ == *AD<Base>::tape_id_ptr(thread);
+    // -----------------------------------------------------------------------
+    // Variable
+    template <class Base>
+    bool Variable(const AD<Base> &x)
+    {   CPPAD_ASSERT_UNKNOWN( x.tape_id_==0 || x.ad_type_!=constant_enum );
+        if( (x.tape_id_ == 0) | (x.ad_type_ != variable_enum) )
+            return false;
+        //
+        size_t thread = size_t(x.tape_id_ % CPPAD_MAX_NUM_THREADS);
+        return x.tape_id_ == *AD<Base>::tape_id_ptr(thread);
+    }
+    template <class Base>
+    bool Variable(const VecAD<Base> &x)
+    {   if( x.tape_id_ == 0 )
+            return false;
+        //
+        size_t thread = size_t(x.tape_id_ % CPPAD_MAX_NUM_THREADS);
+        return x.tape_id_ == *AD<Base>::tape_id_ptr(thread);
+    }
 }
-template <class Base>
-bool Variable(const VecAD<Base> &x) {
-    if (x.tape_id_ == 0) return false;
-    //
-    size_t thread = size_t(x.tape_id_ % CPPAD_MAX_NUM_THREADS);
-    return x.tape_id_ == *AD<Base>::tape_id_ptr(thread);
-}
-}  // namespace CppAD
 // END CppAD namespace
 
-#endif
+
+# endif

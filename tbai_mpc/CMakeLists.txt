@@ -72,24 +72,7 @@ add_library(tbai_mpc
     src/quadruped_mpc/quadruped_models/QuadrupedPinocchioMapping.cpp
 
     # concrete interfaces
-    src/quadruped_mpc/quadruped_interfaces/Interfaces.cpp
-
-    # terrain
-    src/quadruped_mpc/terrain/PlaneFitting.cpp
-    src/quadruped_mpc/terrain/PlanarSignedDistanceField.cpp
-    src/quadruped_mpc/terrain/PlanarTerrainModel.cpp
-    src/quadruped_mpc/terrain/TerrainPlane.cpp
-
-    # reference trajectory generator
-    src/reference/LocalTerrainEstimator.cpp
-    src/reference/ReferenceTrajectoryGenerator.cpp
-
-    # quadruped commands
-    src/quadruped_mpc/quadruped_commands/ReferenceExtrapolation.cpp
-    src/quadruped_mpc/quadruped_commands/TerrainAdaptation.cpp
-
-    # controller
-    src/MpcController.cpp
+    src/quadruped_mpc/anymal_interface/Interface.cpp
 )
 
 target_include_directories(tbai_mpc
@@ -101,11 +84,7 @@ target_include_directories(tbai_mpc
 target_link_libraries(tbai_mpc
     PUBLIC
         tbai_core
-        tbai_reference
         ocs2_core
-        ocs2_ddp
-        ocs2_sqp
-        ocs2_mpc
         ocs2_pinocchio_interface
         ocs2::qpoases
 )

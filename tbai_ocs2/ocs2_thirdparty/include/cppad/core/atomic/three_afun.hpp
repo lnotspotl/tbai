@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_ATOMIC_THREE_AFUN_HPP
-#define CPPAD_CORE_ATOMIC_THREE_AFUN_HPP
+# ifndef CPPAD_CORE_ATOMIC_THREE_AFUN_HPP
+# define CPPAD_CORE_ATOMIC_THREE_AFUN_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -81,7 +81,7 @@ $end
 -----------------------------------------------------------------------------
 */
 
-namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
+namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 /*!
 \file atomic/three_afun.hpp
 Implement user call to an atomic_three function.
@@ -104,25 +104,28 @@ ay.size() determines the number of results.
 // BEGIN_PROTOTYPE
 template <class Base>
 template <class ADVector>
-void atomic_three<Base>::operator()(const ADVector &ax, ADVector &ay)
+void atomic_three<Base>::operator()(
+    const ADVector&  ax     ,
+    ADVector&        ay     )
 // END_PROTOTYPE
 {
+
     size_t n = ax.size();
     size_t m = ay.size();
-#ifndef NDEBUG
+# ifndef NDEBUG
     bool ok = true;
     std::string msg = "atomic_three: " + afun_name() + ".eval: ";
-    if ((n == 0) | (m == 0)) {
-        msg += "ax.size() or ay.size() is zero";
-        CPPAD_ASSERT_KNOWN(false, msg.c_str());
+    if( (n == 0) | (m == 0) )
+    {   msg += "ax.size() or ay.size() is zero";
+        CPPAD_ASSERT_KNOWN(false, msg.c_str() );
     }
-#endif
+# endif
     size_t thread = thread_alloc::thread_num();
     allocate_work(thread);
-    vector<Base> &taylor_x = work_[thread]->taylor_x;
-    vector<Base> &taylor_y = work_[thread]->taylor_y;
-    vector<ad_type_enum> &type_x = work_[thread]->type_x;
-    vector<ad_type_enum> &type_y = work_[thread]->type_y;
+    vector<Base>& taylor_x        = work_[thread]->taylor_x;
+    vector<Base>& taylor_y        = work_[thread]->taylor_y;
+    vector<ad_type_enum>& type_x  = work_[thread]->type_x;
+    vector<ad_type_enum>& type_y  = work_[thread]->type_y;
     //
     type_x.resize(n);
     taylor_x.resize(n);
@@ -131,127 +134,144 @@ void atomic_three<Base>::operator()(const ADVector &ax, ADVector &ay)
     taylor_y.resize(m);
     //
     // Determine tape corresponding to variables in ax
-    tape_id_t tape_id = 0;
-    local::ADTape<Base> *tape = CPPAD_NULL;
-    for (size_t j = 0; j < n; j++) {
-        taylor_x[j] = ax[j].value_;
-        if (Constant(ax[j]))
+    tape_id_t            tape_id  = 0;
+    local::ADTape<Base>* tape     = CPPAD_NULL;
+    for(size_t j = 0; j < n; j++)
+    {   taylor_x[j]  = ax[j].value_;
+        if( Constant( ax[j] ) )
             type_x[j] = constant_enum;
-        else {
-            type_x[j] = ax[j].ad_type_;
-            if (tape_id == 0) {
-                tape = ax[j].tape_this();
+        else
+        {   type_x[j] = ax[j].ad_type_;
+            if( tape_id == 0 )
+            {   tape    = ax[j].tape_this();
                 tape_id = ax[j].tape_id_;
-                CPPAD_ASSERT_UNKNOWN(tape != CPPAD_NULL);
+                CPPAD_ASSERT_UNKNOWN( tape != CPPAD_NULL );
             }
-#ifndef NDEBUG
-            if (Dynamic(ax[j])) {
-                CPPAD_ASSERT_UNKNOWN(type_x[j] == dynamic_enum);
-            } else {
-                CPPAD_ASSERT_UNKNOWN(Variable(ax[j]));
-                CPPAD_ASSERT_UNKNOWN(type_x[j] == variable_enum);
+# ifndef NDEBUG
+            if( Dynamic( ax[j] ) )
+            {    CPPAD_ASSERT_UNKNOWN( type_x[j] == dynamic_enum );
             }
-            if (tape_id != ax[j].tape_id_) {
-                msg += afun_name() + ": ax contains non-constant values from different threads.";
+            else
+            {   CPPAD_ASSERT_UNKNOWN( Variable( ax[j] ) );
+                CPPAD_ASSERT_UNKNOWN( type_x[j] == variable_enum );
+            }
+            if( tape_id != ax[j].tape_id_ )
+            {   msg += afun_name() +
+                ": ax contains non-constant values from different threads.";
                 CPPAD_ASSERT_KNOWN(false, msg.c_str());
             }
-#endif
+# endif
         }
     }
     // Use zero order forward mode to compute all the components of y
-    size_t need_y = size_t(variable_enum) + 1;
+    size_t need_y    = size_t(variable_enum) + 1;
     size_t order_low = 0;
-    size_t order_up = 0;
-    CPPAD_ASSERT_UNKNOWN(need_y > size_t(variable_enum));
-#ifdef NDEBUG
+    size_t order_up  = 0;
+    CPPAD_ASSERT_UNKNOWN( need_y > size_t(variable_enum) );
+# ifdef NDEBUG
     forward(taylor_x, type_x, need_y, order_low, order_up, taylor_x, taylor_y);
-    for (size_t j = 0; j < n; ++j)
-        if (type_x[j] == variable_enum) taylor_x[j] = CppAD::numeric_limits<Base>::quiet_NaN();
+    for(size_t j = 0; j < n; ++j)
+        if( type_x[j] == variable_enum )
+            taylor_x[j] = CppAD::numeric_limits<Base>::quiet_NaN();
     for_type(taylor_x, type_x, type_y);
-#else
-    ok &= forward(taylor_x, type_x, need_y, order_low, order_up, taylor_x, taylor_y);
-    for (size_t j = 0; j < n; ++j)
-        if (type_x[j] == variable_enum) taylor_x[j] = CppAD::numeric_limits<Base>::quiet_NaN();
+# else
+    ok &= forward(
+        taylor_x, type_x, need_y, order_low, order_up, taylor_x, taylor_y
+    );
+    for(size_t j = 0; j < n; ++j)
+        if( type_x[j] == variable_enum )
+            taylor_x[j] = CppAD::numeric_limits<Base>::quiet_NaN();
     ok &= for_type(taylor_x, type_x, type_y);
-    if (!ok) {
-        msg += afun_name() +
-               ": ok is false for "
-               "type or zero order forward mode calculation.";
+    if( ! ok )
+    {   msg += afun_name() + ": ok is false for "
+            "type or zero order forward mode calculation.";
         CPPAD_ASSERT_KNOWN(false, msg.c_str());
     }
-#endif
+# endif
     bool record_dynamic = false;
     bool record_variable = false;
     //
     // set ay to be vector of constant parameters with correct value
-    for (size_t i = 0; i < m; i++) {  // pass back values
+    for(size_t i = 0; i < m; i++)
+    {   // pass back values
         ay[i].value_ = taylor_y[i];
 
         // initialize entire vector as constants
         ay[i].tape_id_ = 0;
-        ay[i].taddr_ = 0;
+        ay[i].taddr_   = 0;
 
         // we need to record this operation if
         // any of the elemnts of ay are dynamics or variables,
-        record_dynamic |= type_y[i] == dynamic_enum;
+        record_dynamic  |= type_y[i] == dynamic_enum;
         record_variable |= type_y[i] == variable_enum;
     }
-#ifndef NDEBUG
-    if ((record_dynamic || record_variable) && tape == CPPAD_NULL) {
-        msg += "all elements of x are constants but y contains a non-constant";
-        CPPAD_ASSERT_KNOWN(false, msg.c_str());
+# ifndef NDEBUG
+    if( (record_dynamic || record_variable) && tape == CPPAD_NULL )
+    {   msg +=
+        "all elements of x are constants but y contains a non-constant";
+        CPPAD_ASSERT_KNOWN(false, msg.c_str() );
     }
-#endif
-    if (record_dynamic) {
-        tape->Rec_.put_dyn_atomic(tape_id, index_, type_x, type_y, ax, ay);
+# endif
+    if( record_dynamic)
+    {   tape->Rec_.put_dyn_atomic(tape_id, index_, type_x, type_y, ax, ay);
     }
     // case where result contains a variable
-    if (record_variable) {  // atomic_two uses old_id to implement atomic_one interface
+    if( record_variable )
+    {   // atomic_two uses old_id to implement atomic_one interface
         addr_t old_id = 0;
         //
         // Operator that marks beginning of this atomic operation
-        CPPAD_ASSERT_UNKNOWN(local::NumRes(local::AFunOp) == 0);
-        CPPAD_ASSERT_UNKNOWN(local::NumArg(local::AFunOp) == 4);
-        CPPAD_ASSERT_KNOWN(size_t(std::numeric_limits<addr_t>::max()) >= std::max(std::max(index_, n), m),
-                           "atomic_three: cppad_tape_addr_type maximum not large enough");
+        CPPAD_ASSERT_UNKNOWN( local::NumRes(local::AFunOp) == 0 );
+        CPPAD_ASSERT_UNKNOWN( local::NumArg(local::AFunOp) == 4 );
+        CPPAD_ASSERT_KNOWN(
+            size_t( std::numeric_limits<addr_t>::max() ) >=
+            std::max( std::max(index_, n), m ),
+            "atomic_three: cppad_tape_addr_type maximum not large enough"
+        );
         tape->Rec_.PutArg(addr_t(index_), old_id, addr_t(n), addr_t(m));
         tape->Rec_.PutOp(local::AFunOp);
 
         // Now put n operators, one for each element of argument vector
-        CPPAD_ASSERT_UNKNOWN(local::NumRes(local::FunavOp) == 0);
-        CPPAD_ASSERT_UNKNOWN(local::NumRes(local::FunapOp) == 0);
-        CPPAD_ASSERT_UNKNOWN(local::NumArg(local::FunavOp) == 1);
-        CPPAD_ASSERT_UNKNOWN(local::NumArg(local::FunapOp) == 1);
-        for (size_t j = 0; j < n; j++) {
-            if (type_x[j] == variable_enum) {  // information for an argument that is a variable
+        CPPAD_ASSERT_UNKNOWN( local::NumRes(local::FunavOp) == 0 );
+        CPPAD_ASSERT_UNKNOWN( local::NumRes(local::FunapOp) == 0 );
+        CPPAD_ASSERT_UNKNOWN( local::NumArg(local::FunavOp) == 1 );
+        CPPAD_ASSERT_UNKNOWN( local::NumArg(local::FunapOp) == 1 );
+        for(size_t j = 0; j < n; j++)
+        {   if( type_x[j] == variable_enum )
+            {   // information for an argument that is a variable
                 tape->Rec_.PutArg(ax[j].taddr_);
                 tape->Rec_.PutOp(local::FunavOp);
-            } else {  // information for an argument that is parameter
+            }
+            else
+            {   // information for an argument that is parameter
                 addr_t par = ax[j].taddr_;
-                if (type_x[j] == constant_enum) par = tape->Rec_.put_con_par(ax[j].value_);
+                if( type_x[j] == constant_enum )
+                    par = tape->Rec_.put_con_par(ax[j].value_);
                 tape->Rec_.PutArg(par);
                 tape->Rec_.PutOp(local::FunapOp);
             }
         }
 
         // Now put m operators, one for each element of result vector
-        CPPAD_ASSERT_UNKNOWN(local::NumArg(local::FunrpOp) == 1);
-        CPPAD_ASSERT_UNKNOWN(local::NumRes(local::FunrpOp) == 0);
-        for (size_t i = 0; i < m; i++) {
-            if (type_y[i] == variable_enum) {
-                CPPAD_ASSERT_NARG_NRES(local::FunrvOp, 0, 1);
-                ay[i].taddr_ = tape->Rec_.PutOp(local::FunrvOp);
-                ay[i].tape_id_ = tape_id;
-                ay[i].ad_type_ = variable_enum;
-                CPPAD_ASSERT_UNKNOWN(Variable(ay[i]));
-            } else {
-                CPPAD_ASSERT_NARG_NRES(local::FunrpOp, 1, 0);
+        CPPAD_ASSERT_UNKNOWN( local::NumArg(local::FunrpOp) == 1 );
+        CPPAD_ASSERT_UNKNOWN( local::NumRes(local::FunrpOp) == 0 );
+        for(size_t i = 0; i < m; i++)
+        {   if( type_y[i] == variable_enum )
+            {   CPPAD_ASSERT_NARG_NRES(local::FunrvOp, 0, 1);
+                ay[i].taddr_    = tape->Rec_.PutOp(local::FunrvOp);
+                ay[i].tape_id_  = tape_id;
+                ay[i].ad_type_  = variable_enum;
+                CPPAD_ASSERT_UNKNOWN( Variable( ay[i] ) );
+            }
+            else
+            {   CPPAD_ASSERT_NARG_NRES(local::FunrpOp, 1, 0);
                 addr_t par = ay[i].taddr_;
-                if (type_y[i] == constant_enum) {
-                    Constant(ay[i]);
-                    par = tape->Rec_.put_con_par(ay[i].value_);
-                } else {
-                    Dynamic(ay[i]);
+                if( type_y[i] == constant_enum )
+                {   Constant( ay[i] );
+                    par = tape->Rec_.put_con_par( ay[i].value_ );
+                }
+                else
+                {   Dynamic( ay[i] );
                 }
                 tape->Rec_.PutArg(par);
                 tape->Rec_.PutOp(local::FunrpOp);
@@ -259,13 +279,16 @@ void atomic_three<Base>::operator()(const ADVector &ax, ADVector &ay)
         }
 
         // Put a duplicate AFunOp at end of AFunOp sequence
-        CPPAD_ASSERT_KNOWN(size_t(std::numeric_limits<addr_t>::max()) >= std::max(std::max(index_, n), m),
-                           "atomic_three: cppad_tape_addr_type maximum not large enough");
+        CPPAD_ASSERT_KNOWN(
+            size_t( std::numeric_limits<addr_t>::max() ) >=
+            std::max( std::max(index_, n), m ),
+            "atomic_three: cppad_tape_addr_type maximum not large enough"
+        );
         tape->Rec_.PutArg(addr_t(index_), old_id, addr_t(n), addr_t(m));
         tape->Rec_.PutOp(local::AFunOp);
     }
     return;
 }
 
-}  // namespace CppAD
-#endif
+} // END_CPPAD_NAMESPACE
+# endif

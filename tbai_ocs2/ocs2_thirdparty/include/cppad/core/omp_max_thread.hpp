@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_OMP_MAX_THREAD_HPP
-#define CPPAD_CORE_OMP_MAX_THREAD_HPP
+# ifndef CPPAD_CORE_OMP_MAX_THREAD_HPP
+# define CPPAD_CORE_OMP_MAX_THREAD_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-16 Bradley M. Bell
 
@@ -73,15 +73,21 @@ $end
 namespace CppAD {
 
 template <class Base>
-void AD<Base>::omp_max_thread(size_t number) {
-#ifdef _OPENMP
-    thread_alloc::parallel_setup(number, omp_alloc::in_parallel, omp_alloc::get_thread_num);
-#else
-    CPPAD_ASSERT_KNOWN(number == 1, "omp_max_thread: number > 1 and _OPENMP is not defined");
-#endif
+void AD<Base>::omp_max_thread(size_t number)
+{
+# ifdef _OPENMP
+    thread_alloc::parallel_setup(
+        number, omp_alloc::in_parallel, omp_alloc::get_thread_num
+    );
+# else
+    CPPAD_ASSERT_KNOWN(
+        number == 1,
+        "omp_max_thread: number > 1 and _OPENMP is not defined"
+    );
+# endif
     parallel_ad<Base>();
 }
 
-}  // namespace CppAD
+} // END CppAD namespace
 
-#endif
+# endif

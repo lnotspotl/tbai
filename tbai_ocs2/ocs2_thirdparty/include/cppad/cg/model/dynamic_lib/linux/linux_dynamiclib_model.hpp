@@ -17,9 +17,8 @@
  */
 #if CPPAD_CG_SYSTEM_LINUX
 
-#include <dlfcn.h>
-
 #include <typeinfo>
+#include <dlfcn.h>
 
 namespace CppAD {
 namespace cg {
@@ -30,36 +29,40 @@ namespace cg {
  *
  * @author Joao Leal
  */
-template <class Base>
+template<class Base>
 class LinuxDynamicLibModel : public FunctorGenericModel<Base> {
-   protected:
+protected:
     /// the dynamic library
-    LinuxDynamicLib<Base> *_dynLib;
+    LinuxDynamicLib<Base>* _dynLib;
 
-   public:
+public:
+
     virtual ~LinuxDynamicLibModel() {
         if (_dynLib != nullptr) {
             _dynLib->destroyed(this);
         }
     }
 
-   protected:
+protected:
+
     /**
      * Creates a new model
      *
      * @param name The model name
      */
-    LinuxDynamicLibModel(LinuxDynamicLib<Base> *dynLib, const std::string &name)
-        : FunctorGenericModel<Base>(name), _dynLib(dynLib) {
+    LinuxDynamicLibModel(LinuxDynamicLib<Base>* dynLib, const std::string& name) :
+        FunctorGenericModel<Base>(name),
+        _dynLib(dynLib) {
+
         CPPADCG_ASSERT_UNKNOWN(_dynLib != nullptr);
 
         this->init();
     }
 
-    LinuxDynamicLibModel(const LinuxDynamicLibModel &) = delete;
-    LinuxDynamicLibModel &operator=(const LinuxDynamicLibModel &) = delete;
+    LinuxDynamicLibModel(const LinuxDynamicLibModel&) = delete;
+    LinuxDynamicLibModel& operator=(const LinuxDynamicLibModel&) = delete;
 
-    void *loadFunction(const std::string &functionName, bool required = true) override {
+    void* loadFunction(const std::string& functionName, bool required = true) override {
         return _dynLib->loadFunction(functionName, required);
     }
 
@@ -71,8 +74,8 @@ class LinuxDynamicLibModel : public FunctorGenericModel<Base> {
     friend class LinuxDynamicLib<Base>;
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif
 #endif

@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_ABORT_RECORDING_HPP
-#define CPPAD_CORE_ABORT_RECORDING_HPP
+# ifndef CPPAD_CORE_ABORT_RECORDING_HPP
+# define CPPAD_CORE_ABORT_RECORDING_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -45,12 +45,14 @@ $end
 ----------------------------------------------------------------------------
 */
 
-namespace CppAD {
-template <class Base>
-void AD<Base>::abort_recording(void) {
-    local::ADTape<Base> *tape = AD<Base>::tape_ptr();
-    if (tape != CPPAD_NULL) AD<Base>::tape_manage(delete_tape_manage);
-}
-}  // namespace CppAD
 
-#endif
+namespace CppAD {
+    template <class Base>
+    void AD<Base>::abort_recording(void)
+    {   local::ADTape<Base>* tape = AD<Base>::tape_ptr();
+        if( tape != CPPAD_NULL )
+            AD<Base>::tape_manage(delete_tape_manage);
+    }
+}
+
+# endif

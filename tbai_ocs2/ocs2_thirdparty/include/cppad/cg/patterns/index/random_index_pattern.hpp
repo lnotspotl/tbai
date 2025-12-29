@@ -23,22 +23,26 @@ namespace cg {
  * Random pattern
  */
 class RandomIndexPattern : public IndexPattern {
-   protected:
+protected:
     std::string name_;
+public:
 
-   public:
-    inline void getSubIndexes(std::set<IndexPattern *> &indexes) const override {
+    inline void getSubIndexes(std::set<IndexPattern*>& indexes) const override {
         // nothing to add
     }
 
-    inline const std::string &getName() const { return name_; }
+    inline const std::string& getName() const {
+        return name_;
+    }
 
-    inline void setName(const std::string &name) { name_ = name; }
+    inline void setName(const std::string& name) {
+        name_ = name;
+    }
 
     inline virtual ~RandomIndexPattern() = default;
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

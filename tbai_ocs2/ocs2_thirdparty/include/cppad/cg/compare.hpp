@@ -18,8 +18,8 @@
 namespace CppAD {
 namespace cg {
 
-template <class Base>
-inline bool operator==(const CG<Base> &left, const CG<Base> &right) {
+template<class Base>
+inline bool operator ==(const CG<Base>& left, const CG<Base>& right) {
     if (left.isParameter() && right.isParameter()) {
         return left.getValue() == right.getValue();
     } else if (left.isParameter() || right.isParameter()) {
@@ -29,8 +29,8 @@ inline bool operator==(const CG<Base> &left, const CG<Base> &right) {
     }
 }
 
-template <class Base>
-inline bool operator!=(const CG<Base> &left, const CG<Base> &right) {
+template<class Base>
+inline bool operator !=(const CG<Base>& left, const CG<Base>& right) {
     if (left.isParameter() && right.isParameter()) {
         return left.getValue() != right.getValue();
     } else if (left.isParameter() || right.isParameter()) {
@@ -40,23 +40,23 @@ inline bool operator!=(const CG<Base> &left, const CG<Base> &right) {
     }
 }
 
-#define CPPAD_CG_OPERATOR(Op)                                                                           \
-    template <class Base>                                                                               \
-    inline bool operator Op(const CG<Base> &left, const CG<Base> &right) {                              \
-        if (left.isParameter() && right.isParameter()) {                                                \
-            return left.getValue() Op right.getValue();                                                 \
-        } else {                                                                                        \
-            throw CGException("Cannot use the " #Op " comparison operator in non parameter variables"); \
-        }                                                                                               \
+#define CPPAD_CG_OPERATOR(Op)                                                  \
+    template<class Base>                                                       \
+    inline bool operator Op(const CG<Base> &left, const CG<Base> &right) {     \
+        if (left.isParameter() && right.isParameter()) {                       \
+            return left.getValue() Op right.getValue();                        \
+        } else {                                                               \
+            throw CGException("Cannot use the "#Op" comparison operator in non parameter variables");\
+        }                                                                      \
     }
 
 CPPAD_CG_OPERATOR(>)
-CPPAD_CG_OPERATOR(>=)
+CPPAD_CG_OPERATOR( >=)
 CPPAD_CG_OPERATOR(<)
-CPPAD_CG_OPERATOR(<=)
+CPPAD_CG_OPERATOR( <=)
 
-template <class Base>
-inline bool operator==(const CG<Base> &left, const Base &right) {
+template<class Base>
+inline bool operator==(const CG<Base>& left, const Base& right) {
     if (left.isParameter()) {
         return left.getValue() == right;
     } else {
@@ -64,8 +64,8 @@ inline bool operator==(const CG<Base> &left, const Base &right) {
     }
 }
 
-template <class Base>
-inline bool operator==(const Base &left, const CG<Base> &right) {
+template<class Base>
+inline bool operator==(const Base& left, const CG<Base>& right) {
     if (right.isParameter()) {
         return left == right.getValue();
     } else {
@@ -73,8 +73,8 @@ inline bool operator==(const Base &left, const CG<Base> &right) {
     }
 }
 
-template <class Base>
-inline bool operator!=(const CG<Base> &left, Base right) {
+template<class Base>
+inline bool operator!=(const CG<Base>& left, Base right) {
     if (left.isParameter()) {
         return left.getValue() != right;
     } else {
@@ -82,8 +82,8 @@ inline bool operator!=(const CG<Base> &left, Base right) {
     }
 }
 
-template <class Base>
-inline bool operator!=(const Base &left, const CG<Base> &right) {
+template<class Base>
+inline bool operator!=(const Base& left, const CG<Base>& right) {
     if (right.isParameter()) {
         return left != right.getValue();
     } else {
@@ -92,7 +92,7 @@ inline bool operator!=(const Base &left, const CG<Base> &right) {
 }
 
 // comparison with double (required by CppAD SparseHessian)
-template <class Base>
+template<class Base>
 inline bool operator!=(const CG<Base> &left, double right) {
     if (left.isParameter()) {
         return left.getValue() != right;
@@ -101,7 +101,8 @@ inline bool operator!=(const CG<Base> &left, double right) {
     }
 }
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif
+

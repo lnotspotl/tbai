@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_HASH_CODE_HPP
-#define CPPAD_CORE_HASH_CODE_HPP
+# ifndef CPPAD_CORE_HASH_CODE_HPP
+# define CPPAD_CORE_HASH_CODE_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -15,9 +15,9 @@ in the Eclipse Public License, Version 2.0 are satisfied:
 \file core/hash_code.hpp
 CppAD hashing utility.
 */
-#include <cppad/local/hash_code.hpp>
+# include <cppad/local/hash_code.hpp>
 
-namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
+namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 /*!
 General purpose hash code for an arbitrary value.
 
@@ -41,9 +41,8 @@ is a hash code that is between zero and CPPAD_HASH_TABLE_SIZE - 1.
 \li sizeof(unsigned short)  == 2
 */
 template <class Value>
-unsigned short hash_code(const Value &value) {
-    return local::local_hash_code(value);
-}
+unsigned short hash_code(const Value& value)
+{   return local::local_hash_code(value); }
 
 /*!
 hash code for an AD<Base> object.
@@ -58,13 +57,14 @@ the AD value that we are generating a hash code for.
 is a hash code that is between zero and CPPAD_HASH_TABLE_SIZE - 1.
 */
 template <class Base>
-unsigned short hash_code(const AD<Base> &u) {
-    size_t code = hash_code(u.value_);
-    code += size_t(u.taddr_);
-    code += size_t(u.ad_type_ == dynamic_enum);
+unsigned short hash_code(const AD<Base>& u)
+{   size_t code = hash_code(u.value_);
+    code       += size_t(u.taddr_);
+    code       += size_t(u.ad_type_ == dynamic_enum);
     return (unsigned short)(code % CPPAD_HASH_TABLE_SIZE);
 }
 
-}  // namespace CppAD
+} // END_CPPAD_NAMESPACE
 
-#endif
+
+# endif

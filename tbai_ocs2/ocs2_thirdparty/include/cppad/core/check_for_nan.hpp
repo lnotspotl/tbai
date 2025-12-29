@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_CHECK_FOR_NAN_HPP
-#define CPPAD_CORE_CHECK_FOR_NAN_HPP
+# ifndef CPPAD_CORE_CHECK_FOR_NAN_HPP
+# define CPPAD_CORE_CHECK_FOR_NAN_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -130,23 +130,23 @@ contains an example and test of these operations.
 $end
 */
 
-#include <fstream>
+# include <cppad/utility/vector.hpp>
+# include <cppad/configure.hpp>
+# include <fstream>
 
-#include <cppad/configure.hpp>
-#include <cppad/utility/vector.hpp>
+# if CPPAD_HAS_MKSTEMP
+# include <stdlib.h>
+# include <unistd.h>
+# else
+# if CPPAD_HAS_TMPNAM_S
+# include <stdio.h>
+# else
+# include <stdlib.h>
+# endif
+# endif
 
-#if CPPAD_HAS_MKSTEMP
-#include <stdlib.h>
-#include <unistd.h>
-#else
-#if CPPAD_HAS_TMPNAM_S
-#include <stdio.h>
-#else
-#include <stdlib.h>
-#endif
-#endif
 
-namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
+namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 
 /*!
 Set check_for_nan
@@ -155,9 +155,8 @@ Set check_for_nan
 new value for this flag.
 */
 template <class Base, class RecBase>
-void ADFun<Base, RecBase>::check_for_nan(bool value) {
-    check_for_nan_ = value;
-}
+void ADFun<Base,RecBase>::check_for_nan(bool value)
+{   check_for_nan_ = value; }
 
 /*!
 Get check_for_nan
@@ -166,9 +165,8 @@ Get check_for_nan
 current value of check_for_nan_.
 */
 template <class Base, class RecBase>
-bool ADFun<Base, RecBase>::check_for_nan(void) const {
-    return check_for_nan_;
-}
+bool ADFun<Base,RecBase>::check_for_nan(void) const
+{   return check_for_nan_; }
 
 /*!
 Stores a vector in a file when nans occur.
@@ -180,34 +178,38 @@ is the vector that is stored.
 is the file where the vector is stored
 */
 template <class Base>
-void put_check_for_nan(const CppAD::vector<Base> &vec, std::string &file_name) {
+void put_check_for_nan(const CppAD::vector<Base>& vec, std::string& file_name)
+{
     size_t char_size = sizeof(Base) * vec.size();
     // 2DO: add vec.data() to C11 tests and use it when C11 true
     // const char* char_ptr   = reinterpret_cast<const char*>( vec.data() );
-    const char *char_ptr = reinterpret_cast<const char *>(&vec[0]);
+    const char* char_ptr   = reinterpret_cast<const char*>( &vec[0] );
 
-#if CPPAD_HAS_MKSTEMP
+# if CPPAD_HAS_MKSTEMP
     char pattern[] = "/tmp/fileXXXXXX";
     int fd = mkstemp(pattern);
     file_name = pattern;
     write(fd, char_ptr, char_size);
     close(fd);
-#else
-#if CPPAD_HAS_TMPNAM_S
-    std::vector<char> name(L_tmpnam_s);
-    // if( tmpnam_s( name.data(), L_tmpnam_s ) != 0 )
-    if (tmpnam_s(&name[0], L_tmpnam_s) != 0) {
-        CPPAD_ASSERT_KNOWN(false, "Cannot create a temporary file name");
-    }
-    // file_name = name.data();
-    file_name = &name[0];
-#else
-    file_name = tmpnam(CPPAD_NULL);
-#endif
-    std::fstream file_out(file_name.c_str(), std::ios::out | std::ios::binary);
+# else
+# if CPPAD_HAS_TMPNAM_S
+        std::vector<char> name(L_tmpnam_s);
+        // if( tmpnam_s( name.data(), L_tmpnam_s ) != 0 )
+        if( tmpnam_s( &name[0], L_tmpnam_s ) != 0 )
+        {   CPPAD_ASSERT_KNOWN(
+                false,
+                "Cannot create a temporary file name"
+            );
+        }
+        // file_name = name.data();
+        file_name = &name[0];
+# else
+        file_name = tmpnam( CPPAD_NULL );
+# endif
+    std::fstream file_out(file_name.c_str(), std::ios::out|std::ios::binary );
     file_out.write(char_ptr, char_size);
     file_out.close();
-#endif
+# endif
     return;
 }
 
@@ -221,17 +223,18 @@ is the vector that is stored.
 is the file where the vector is stored
 */
 template <class Base>
-void get_check_for_nan(CppAD::vector<Base> &vec, const std::string &file_name) {  //
-    std::streamsize char_size = std::streamsize(sizeof(Base) * vec.size());
+void get_check_for_nan(CppAD::vector<Base>& vec, const std::string& file_name)
+{   //
+    std::streamsize char_size = std::streamsize( sizeof(Base) * vec.size() );
     // char* char_ptr   = reinterpret_cast<char*>( vec.data() );
-    char *char_ptr = reinterpret_cast<char *>(&vec[0]);
+    char* char_ptr   = reinterpret_cast<char*>( &vec[0] );
     //
-    std::fstream file_in(file_name.c_str(), std::ios::in | std::ios::binary);
+    std::fstream file_in(file_name.c_str(), std::ios::in|std::ios::binary );
     file_in.read(char_ptr, char_size);
     //
     return;
 }
 
-}  // namespace CppAD
+} // END_CPPAD_NAMESPACE
 
-#endif
+# endif

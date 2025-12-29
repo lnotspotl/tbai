@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_SUBGRAPH_SPARSITY_HPP
-#define CPPAD_CORE_SUBGRAPH_SPARSITY_HPP
+# ifndef CPPAD_CORE_SUBGRAPH_SPARSITY_HPP
+# define CPPAD_CORE_SUBGRAPH_SPARSITY_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -133,10 +133,10 @@ contains an example and test of this operation.
 $end
 -----------------------------------------------------------------------------
 */
-#include <cppad/core/ad_fun.hpp>
-#include <cppad/local/subgraph/sparsity.hpp>
+# include <cppad/core/ad_fun.hpp>
+# include <cppad/local/subgraph/sparsity.hpp>
 
-namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
+namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 
 /*!
 Subgraph sparsity patterns.
@@ -167,47 +167,76 @@ is the sparsity pattern transposed.
 */
 template <class Base, class RecBase>
 template <class BoolVector, class SizeVector>
-void ADFun<Base, RecBase>::subgraph_sparsity(const BoolVector &select_domain, const BoolVector &select_range,
-                                             bool transpose, sparse_rc<SizeVector> &pattern_out) {
+void ADFun<Base,RecBase>::subgraph_sparsity(
+    const BoolVector&            select_domain    ,
+    const BoolVector&            select_range     ,
+    bool                         transpose        ,
+    sparse_rc<SizeVector>&       pattern_out      )
+{
     // compute the sparsity pattern in row, col
     local::pod_vector<size_t> row;
     local::pod_vector<size_t> col;
 
     // create the optimized recording
-    switch (play_.address_type()) {
+    switch( play_.address_type() )
+    {
         case local::play::unsigned_short_enum:
-            local::subgraph::subgraph_sparsity<unsigned short>(&play_, subgraph_info_, dep_taddr_, select_domain,
-                                                               select_range, row, col);
-            break;
+        local::subgraph::subgraph_sparsity<unsigned short>(
+            &play_,
+            subgraph_info_,
+            dep_taddr_,
+            select_domain,
+            select_range,
+            row,
+            col
+        );
+        break;
 
         case local::play::unsigned_int_enum:
-            local::subgraph::subgraph_sparsity<unsigned int>(&play_, subgraph_info_, dep_taddr_, select_domain,
-                                                             select_range, row, col);
-            break;
+        local::subgraph::subgraph_sparsity<unsigned int>(
+            &play_,
+            subgraph_info_,
+            dep_taddr_,
+            select_domain,
+            select_range,
+            row,
+            col
+        );
+        break;
 
         case local::play::size_t_enum:
-            local::subgraph::subgraph_sparsity<size_t>(&play_, subgraph_info_, dep_taddr_, select_domain, select_range,
-                                                       row, col);
-            break;
+        local::subgraph::subgraph_sparsity<size_t>(
+            &play_,
+            subgraph_info_,
+            dep_taddr_,
+            select_domain,
+            select_range,
+            row,
+            col
+        );
+        break;
 
         default:
-            CPPAD_ASSERT_UNKNOWN(false);
+        CPPAD_ASSERT_UNKNOWN(false);
     }
 
-    CPPAD_ASSERT_UNKNOWN(row.size() == col.size());
+    CPPAD_ASSERT_UNKNOWN( row.size() == col.size() );
 
     // return the sparsity pattern
-    size_t nr = dep_taddr_.size();
-    size_t nc = ind_taddr_.size();
+    size_t nr  = dep_taddr_.size();
+    size_t nc  = ind_taddr_.size();
     size_t nnz = row.size();
-    if (transpose) {
-        pattern_out.resize(nc, nr, nnz);
-        for (size_t k = 0; k < nnz; k++) pattern_out.set(k, col[k], row[k]);
-    } else {
-        pattern_out.resize(nr, nc, nnz);
-        for (size_t k = 0; k < nnz; k++) pattern_out.set(k, row[k], col[k]);
+    if( transpose )
+    {   pattern_out.resize(nc, nr, nnz);
+        for(size_t k = 0; k < nnz; k++)
+            pattern_out.set(k, col[k], row[k]);
+    }
+    else
+    {   pattern_out.resize(nr, nc, nnz);
+        for(size_t k = 0; k < nnz; k++)
+            pattern_out.set(k, row[k], col[k]);
     }
     return;
 }
-}  // namespace CppAD
-#endif
+} // END_CPPAD_NAMESPACE
+# endif

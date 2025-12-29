@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_GRAPH_TO_JSON_HPP
-#define CPPAD_CORE_GRAPH_TO_JSON_HPP
+# ifndef CPPAD_CORE_GRAPH_TO_JSON_HPP
+# define CPPAD_CORE_GRAPH_TO_JSON_HPP
 
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-19 Bradley M. Bell
@@ -13,11 +13,11 @@ in the Eclipse Public License, Version 2.0 are satisfied:
       GNU General Public License, Version 2.0 or later.
 ---------------------------------------------------------------------------- */
 
-#include <cppad/core/ad_fun.hpp>
-#include <cppad/core/graph/cpp_graph.hpp>
-#include <cppad/local/graph/cpp_graph_op.hpp>
-#include <cppad/local/graph/json_writer.hpp>
-#include <cppad/local/op_code_dyn.hpp>
+# include <cppad/core/ad_fun.hpp>
+# include <cppad/local/op_code_dyn.hpp>
+# include <cppad/local/graph/cpp_graph_op.hpp>
+# include <cppad/core/graph/cpp_graph.hpp>
+# include <cppad/local/graph/json_writer.hpp>
 
 /*
 ------------------------------------------------------------------------------
@@ -63,14 +63,15 @@ $end
 */
 // BEGIN_PROTOTYPE
 template <class Base, class RecBase>
-std::string CppAD::ADFun<Base, RecBase>::to_json(void)
+std::string CppAD::ADFun<Base,RecBase>::to_json(void)
 // END_PROTOTYPE
-{
+{   using local::pod_vector;
     using local::opcode_t;
-    using local::pod_vector;
     // --------------------------------------------------------------------
-    if (local::graph::op_name2enum.size() == 0) {
-        CPPAD_ASSERT_KNOWN(!thread_alloc::in_parallel(), "call to set_operator_info in parallel mode");
+    if( local::graph::op_name2enum.size() == 0 )
+    {   CPPAD_ASSERT_KNOWN( ! thread_alloc::in_parallel() ,
+            "call to set_operator_info in parallel mode"
+        );
         local::graph::set_operator_info();
     }
     //
@@ -87,4 +88,4 @@ std::string CppAD::ADFun<Base, RecBase>::to_json(void)
     return json;
 }
 
-#endif
+# endif

@@ -23,14 +23,15 @@ namespace cg {
 /**
  * Prints the graph resulting in a single dependent variable.
  */
-template <class Base>
-inline void printDotExpression(CG<Base> &dep, std::ostream &out = std::cout) {
+template<class Base>
+inline void printDotExpression(CG<Base>& dep,
+                               std::ostream& out = std::cout) {
     if (dep.getOperationNode() != nullptr) {
         if (dep.getOperationNode()->getCodeHandler() == nullptr) {
             throw CGException("Unable to print expression: found an operation node without a CodeHandler!");
         }
 
-        CodeHandler<Base> &handler = *dep.getOperationNode()->getCodeHandler();
+        CodeHandler<Base>& handler = *dep.getOperationNode()->getCodeHandler();
         LanguageDot<double> langDot;
         LangCDefaultVariableNameGenerator<double> nameGen;
 
@@ -42,20 +43,18 @@ inline void printDotExpression(CG<Base> &dep, std::ostream &out = std::cout) {
         out << code.str();
     } else {
         out << "digraph {\n"
-               "\""
-            << dep.getValue()
-            << "\" -> \"y[0]\"\n"
-               "}"
-            << std::endl;
+                "\"" << dep.getValue() << "\" -> \"y[0]\"\n"
+                "}" << std::endl;
     }
 }
 
-template <class Base>
-inline void printDotExpression(OperationNode<Base> &dep, std::ostream &out = std::cout) {
+template<class Base>
+inline void printDotExpression(OperationNode<Base>& dep,
+                               std::ostream& out = std::cout) {
     printDotExpression(CG<Base>(dep), out);
 }
 
-}  // namespace cg
-}  // namespace CppAD
+}
+}
 
 #endif

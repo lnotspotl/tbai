@@ -18,7 +18,7 @@
 /**
  * LLVM requires the use of it own flags which can make it difficult to compile
  * libraries not using NDEBUG often required by LLVM.
- * The define LLVM_CPPFLAG_NDEBUG can be used to apply NDEBUG only to LLVM
+ * The define LLVM_CPPFLAG_NDEBUG can be used to apply NDEBUG only to LLVM 
  * headers.
  */
 #ifdef LLVM_WITH_NDEBUG
@@ -36,35 +36,37 @@
 
 #endif
 
-#include <clang/Basic/DiagnosticOptions.h>
-#include <clang/Basic/SourceManager.h>
-#include <clang/Basic/TargetInfo.h>
 #include <clang/CodeGen/CodeGenAction.h>
+#include <clang/Basic/DiagnosticOptions.h>
+#include <clang/Basic/TargetInfo.h>
+#include <clang/Basic/SourceManager.h>
 #include <clang/Frontend/CompilerInstance.h>
 #include <clang/Frontend/CompilerInvocation.h>
 #include <clang/Frontend/FrontendDiagnostic.h>
 #include <clang/Frontend/TextDiagnosticPrinter.h>
 #include <clang/Frontend/Utils.h>
-#include <clang/Lex/Preprocessor.h>
 #include <clang/Parse/ParseAST.h>
-#include <llvm/ADT/OwningPtr.h>
-#include <llvm/ADT/SmallString.h>
+#include <clang/Lex/Preprocessor.h>
+
 #include <llvm/Analysis/Passes.h>
 #include <llvm/Analysis/Verifier.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/ExecutionEngine/JIT.h>
-#include <llvm/LLVMContext.h>
-#include <llvm/Linker.h>
+#include <llvm/PassManager.h>
 #include <llvm/Module.h>
 #include <llvm/Pass.h>
-#include <llvm/PassManager.h>
+#include <llvm/Transforms/IPO/PassManagerBuilder.h>
+#include <llvm/ADT/OwningPtr.h>
+#include <llvm/ADT/SmallString.h>
+#include <llvm/LLVMContext.h>
 #include <llvm/Support/Host.h>
 #include <llvm/Support/ManagedStatic.h>
-#include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/Path.h>
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Support/raw_ostream.h>
-#include <llvm/Transforms/IPO/PassManagerBuilder.h>
+#include <llvm/Support/MemoryBuffer.h>
+#include <llvm/Support/Host.h>
+#include <llvm/Linker.h>
 
 #ifdef LLVM_WITH_NDEBUG
 
@@ -80,8 +82,8 @@
 
 #endif
 
-#include <cppad/cg/model/llvm/llvm_model.hpp>
 #include <cppad/cg/model/llvm/llvm_model_library.hpp>
+#include <cppad/cg/model/llvm/llvm_model.hpp>
 #include <cppad/cg/model/llvm/v3_2/llvm_model_library_3_2.hpp>
 #include <cppad/cg/model/llvm/v3_2/llvm_model_library_processor.hpp>
 

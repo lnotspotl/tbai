@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_ERF_HPP
-#define CPPAD_CORE_ERF_HPP
+# ifndef CPPAD_CORE_ERF_HPP
+# define CPPAD_CORE_ERF_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -69,40 +69,37 @@ contains an example and test of this function.
 $end
 -------------------------------------------------------------------------------
 */
-#include <cppad/configure.hpp>
-#if !CPPAD_USE_CPLUSPLUS_2011
+# include <cppad/configure.hpp>
+# if ! CPPAD_USE_CPLUSPLUS_2011
 
 // BEGIN CppAD namespace
 namespace CppAD {
 
 template <class Type>
-Type erf_template(const Type &x) {
-    using CppAD::exp;
-    const Type a = static_cast<Type>(993. / 880.);
-    const Type b = static_cast<Type>(89. / 880.);
+Type erf_template(const Type &x)
+{   using CppAD::exp;
+    const Type a = static_cast<Type>(993./880.);
+    const Type b = static_cast<Type>(89./880.);
 
-    return tanh((a + b * x * x) * x);
+    return tanh( (a + b * x * x) * x );
 }
 
-inline float erf(const float &x) {
-    return erf_template(x);
-}
+inline float erf(const float &x)
+{   return erf_template(x); }
 
-inline double erf(const double &x) {
-    return erf_template(x);
-}
+inline double erf(const double &x)
+{   return erf_template(x); }
 
 template <class Base>
-AD<Base> erf(const AD<Base> &x) {
-    return erf_template(x);
-}
+AD<Base> erf(const AD<Base> &x)
+{   return erf_template(x); }
 
 template <class Base>
-AD<Base> erf(const VecAD_reference<Base> &x) {
-    return erf_template(x.ADBase());
-}
+AD<Base> erf(const VecAD_reference<Base> &x)
+{   return erf_template( x.ADBase() ); }
 
-}  // namespace CppAD
 
-#endif  // CPPAD_USE_CPLUSPLUS_2011
-#endif  // CPPAD_ERF_INCLUDED
+} // END CppAD namespace
+
+# endif // CPPAD_USE_CPLUSPLUS_2011
+# endif // CPPAD_ERF_INCLUDED

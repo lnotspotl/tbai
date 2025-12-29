@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_ATOMIC_TWO_CTOR_HPP
-#define CPPAD_CORE_ATOMIC_TWO_CTOR_HPP
+# ifndef CPPAD_CORE_ATOMIC_TWO_CTOR_HPP
+# define CPPAD_CORE_ATOMIC_TWO_CTOR_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -110,7 +110,7 @@ $end
 -------------------------------------------------------------------------------
 */
 
-namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
+namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 /*!
 \file atomic/two_ctor.hpp
 Constructors for atomic_base class.
@@ -126,8 +126,10 @@ This class is used for defining an AD<Base> atomic operation y = f(x).
 make sure user does not invoke the default constructor
 */
 template <class Base>
-atomic_base<Base>::atomic_base(void) {
-    CPPAD_ASSERT_KNOWN(false, "Attempt to use the atomic_base default constructor");
+atomic_base<Base>::atomic_base(void)
+{   CPPAD_ASSERT_KNOWN(false,
+        "Attempt to use the atomic_base default constructor"
+    );
 }
 /*!
 Constructor
@@ -141,21 +143,31 @@ bool_sparsity_enum or set_sparsity_enum. Default value is
 bool sparsity patterns.
 */
 template <class Base>
-atomic_base<Base>::atomic_base(const std::string &name, option_enum sparsity) : sparsity_(sparsity) {
-    CPPAD_ASSERT_KNOWN(!thread_alloc::in_parallel(), "atomic_base: constructor cannot be called in parallel mode.");
-    CPPAD_ASSERT_UNKNOWN(constant_enum < dynamic_enum);
-    CPPAD_ASSERT_UNKNOWN(dynamic_enum < variable_enum);
+atomic_base<Base>::atomic_base(
+        const std::string&     name,
+        option_enum            sparsity
+) :
+sparsity_( sparsity               )
+{   CPPAD_ASSERT_KNOWN(
+        ! thread_alloc::in_parallel() ,
+        "atomic_base: constructor cannot be called in parallel mode."
+    );
+    CPPAD_ASSERT_UNKNOWN( constant_enum < dynamic_enum );
+    CPPAD_ASSERT_UNKNOWN( dynamic_enum < variable_enum );
     //
     // atomic_index
-    bool set_null = false;
-    size_t index = 0;
-    size_t type = 2;
+    bool        set_null  = false;
+    size_t      index     = 0;
+    size_t      type      = 2;
     std::string copy_name = name;
-    void *copy_this = reinterpret_cast<void *>(this);
-    index_ = local::atomic_index<Base>(set_null, index, type, &copy_name, copy_this);
+    void*       copy_this = reinterpret_cast<void*>( this );
+    index_  = local::atomic_index<Base>(
+        set_null, index, type, &copy_name, copy_this
+    );
     // initialize work pointers as null;
-    for (size_t thread = 0; thread < CPPAD_MAX_NUM_THREADS; thread++) work_[thread] = CPPAD_NULL;
+    for(size_t thread = 0; thread < CPPAD_MAX_NUM_THREADS; thread++)
+        work_[thread] = CPPAD_NULL;
 }
 
-}  // namespace CppAD
-#endif
+} // END_CPPAD_NAMESPACE
+# endif

@@ -19,7 +19,7 @@
 namespace CppAD {
 namespace cg {
 
-template <class Base>
+template<class Base>
 std::unique_ptr<DynamicLib<Base>> DynamicModelLibraryProcessor<Base>::loadDynamicLibrary() {
     std::unique_ptr<DynamicLib<Base>> lib;
     const auto it = _options.find("dlOpenMode");
@@ -32,8 +32,8 @@ std::unique_ptr<DynamicLib<Base>> DynamicModelLibraryProcessor<Base>::loadDynami
     return lib;
 }
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif
 #endif

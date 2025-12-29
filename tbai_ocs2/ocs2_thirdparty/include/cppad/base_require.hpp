@@ -1,5 +1,5 @@
-#ifndef CPPAD_BASE_REQUIRE_HPP
-#define CPPAD_BASE_REQUIRE_HPP
+# ifndef CPPAD_BASE_REQUIRE_HPP
+# define CPPAD_BASE_REQUIRE_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -125,11 +125,12 @@ namespace CppAD {
 %$$
 where the macro is defined by
 $srccode%cpp% */
-#define CPPAD_AZMUL(Base)                             \
-    inline Base azmul(const Base &x, const Base &y) { \
-        Base zero(0.0);                               \
-        if (x == zero) return zero;                   \
-        return x * y;                                 \
+# define CPPAD_AZMUL(Base) \
+    inline Base azmul(const Base& x, const Base& y) \
+    {   Base zero(0.0);   \
+        if( x == zero ) \
+            return zero;  \
+        return x * y;     \
     }
 /* %$$
 
@@ -149,28 +150,28 @@ $end
 */
 
 // definitions that must come before base implementations
-#include <cppad/core/cppad_assert.hpp>
-#include <cppad/local/declare_ad.hpp>
-#include <cppad/local/define.hpp>
-#include <cppad/utility/error_handler.hpp>
+# include <cppad/utility/error_handler.hpp>
+# include <cppad/local/define.hpp>
+# include <cppad/core/cppad_assert.hpp>
+# include <cppad/local/declare_ad.hpp>
 
 // grouping documentation by feature
-#include <cppad/core/base_cond_exp.hpp>
-#include <cppad/core/base_hash.hpp>
-#include <cppad/core/base_limits.hpp>
-#include <cppad/core/base_std_math.hpp>
-#include <cppad/core/base_to_string.hpp>
+# include <cppad/core/base_cond_exp.hpp>
+# include <cppad/core/base_std_math.hpp>
+# include <cppad/core/base_limits.hpp>
+# include <cppad/core/base_to_string.hpp>
+# include <cppad/core/base_hash.hpp>
 
 // must define template class numeric_limits before the base cases
-#include <cppad/core/epsilon.hpp>  // deprecated
-#include <cppad/core/numeric_limits.hpp>
+# include <cppad/core/numeric_limits.hpp>
+# include <cppad/core/epsilon.hpp> // deprecated
 
 // base cases that come with CppAD
-#include <cppad/core/base_complex.hpp>
-#include <cppad/core/base_double.hpp>
-#include <cppad/core/base_float.hpp>
+# include <cppad/core/base_float.hpp>
+# include <cppad/core/base_double.hpp>
+# include <cppad/core/base_complex.hpp>
 
 // deprecated base type
-#include <cppad/core/zdouble.hpp>
+# include <cppad/core/zdouble.hpp>
 
-#endif
+# endif

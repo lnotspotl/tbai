@@ -1,5 +1,5 @@
-#ifndef CPPAD_UTILITY_TRACK_NEW_DEL_HPP
-#define CPPAD_UTILITY_TRACK_NEW_DEL_HPP
+# ifndef CPPAD_UTILITY_TRACK_NEW_DEL_HPP
+# define CPPAD_UTILITY_TRACK_NEW_DEL_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -226,60 +226,68 @@ Use the $cref thread_alloc$$ routines instead.
 $end
 ------------------------------------------------------------------------------
 */
-#include <sstream>
-#include <string>
+# include <cppad/local/define.hpp>
+# include <cppad/core/cppad_assert.hpp>
+# include <cppad/utility/thread_alloc.hpp>
+# include <sstream>
+# include <string>
 
-#include <cppad/core/cppad_assert.hpp>
-#include <cppad/local/define.hpp>
-#include <cppad/utility/thread_alloc.hpp>
-
-#ifndef CPPAD_TRACK_DEBUG
-#define CPPAD_TRACK_DEBUG 0
-#endif
+# ifndef CPPAD_TRACK_DEBUG
+# define CPPAD_TRACK_DEBUG 0
+# endif
 
 // -------------------------------------------------------------------------
-#define CPPAD_TRACK_NEW_VEC(newlen, oldptr) CppAD::TrackNewVec(__FILE__, __LINE__, newlen, oldptr)
+# define CPPAD_TRACK_NEW_VEC(newlen, oldptr) \
+    CppAD::TrackNewVec(__FILE__, __LINE__, newlen, oldptr)
 
-#define CPPAD_TRACK_DEL_VEC(oldptr) CppAD::TrackDelVec(__FILE__, __LINE__, oldptr)
+# define CPPAD_TRACK_DEL_VEC(oldptr) \
+    CppAD::TrackDelVec(__FILE__, __LINE__, oldptr)
 
-#define CPPAD_TRACK_EXTEND(newlen, ncopy, oldptr) CppAD::TrackExtend(__FILE__, __LINE__, newlen, ncopy, oldptr)
+# define CPPAD_TRACK_EXTEND(newlen, ncopy, oldptr) \
+    CppAD::TrackExtend(__FILE__, __LINE__, newlen, ncopy, oldptr)
 
-#define CPPAD_TRACK_COUNT() CppAD::TrackCount(__FILE__, __LINE__)
+# define CPPAD_TRACK_COUNT() \
+    CppAD::TrackCount(__FILE__, __LINE__)
 // -------------------------------------------------------------------------
-#define CppADTrackNewVec CPPAD_TRACK_NEW_VEC
-#define CppADTrackDelVec CPPAD_TRACK_DEL_VEC
-#define CppADTrackExtend CPPAD_TRACK_EXTEND
-#define CppADTrackCount CPPAD_TRACK_COUNT
+# define CppADTrackNewVec CPPAD_TRACK_NEW_VEC
+# define CppADTrackDelVec CPPAD_TRACK_DEL_VEC
+# define CppADTrackExtend CPPAD_TRACK_EXTEND
+# define CppADTrackCount  CPPAD_TRACK_COUNT
 // -------------------------------------------------------------------------
-namespace CppAD {  // Begin CppAD namespace
+namespace CppAD { // Begin CppAD namespace
 
 // TrackElement ------------------------------------------------------------
 class TrackElement {
-   public:
-    std::string file;    // corresponding file name
-    int line;            // corresponding line number
-    void *ptr;           // value returned by TrackNew
-    TrackElement *next;  // next element in linked list
+
+public:
+    std::string   file;   // corresponding file name
+    int           line;   // corresponding line number
+    void          *ptr;   // value returned by TrackNew
+    TrackElement *next;   // next element in linked list
 
     // default contructor (used to initialize root)
-    TrackElement(void) : file(""), line(0), ptr(CPPAD_NULL), next(CPPAD_NULL) {}
+    TrackElement(void)
+    : file(""), line(0), ptr(CPPAD_NULL), next(CPPAD_NULL)
+    { }
 
-    TrackElement(const char *f, int l, void *p) : file(f), line(l), ptr(p), next(CPPAD_NULL) {
-        CPPAD_ASSERT_UNKNOWN(p != CPPAD_NULL);
+    TrackElement(const char *f, int l, void *p)
+    : file(f), line(l), ptr(p), next(CPPAD_NULL)
+    {   CPPAD_ASSERT_UNKNOWN( p != CPPAD_NULL);
     }
 
     // There is only one tracking list and it starts it here
-    static TrackElement *Root(void) {
-        CPPAD_ASSERT_UNKNOWN(!thread_alloc::in_parallel());
+    static TrackElement *Root(void)
+    {   CPPAD_ASSERT_UNKNOWN( ! thread_alloc::in_parallel() );
         static TrackElement root;
         return &root;
     }
 
     // Print one tracking element
-    static void Print(TrackElement *E) {
-        CPPAD_ASSERT_UNKNOWN(!thread_alloc::in_parallel());
+    static void Print(TrackElement* E)
+    {
+        CPPAD_ASSERT_UNKNOWN( ! thread_alloc::in_parallel() );
         using std::cout;
-        cout << "E = " << E;
+        cout << "E = "         << E;
         cout << ", E->next = " << E->next;
         cout << ", E->ptr  = " << E->ptr;
         cout << ", E->line = " << E->line;
@@ -288,15 +296,16 @@ class TrackElement {
     }
 
     // Print the linked list for a thread
-    static void Print(void) {
-        CPPAD_ASSERT_UNKNOWN(!thread_alloc::in_parallel());
+    static void Print(void)
+    {
+        CPPAD_ASSERT_UNKNOWN( ! thread_alloc::in_parallel() );
         using std::cout;
         using std::endl;
         TrackElement *E = Root();
         // convert int(size_t) to avoid warning on _MSC_VER systems
         cout << "Begin Track List" << endl;
-        while (E->next != CPPAD_NULL) {
-            E = E->next;
+        while( E->next != CPPAD_NULL )
+        {   E = E->next;
             Print(E);
         }
         cout << "End Track List:" << endl;
@@ -304,45 +313,71 @@ class TrackElement {
     }
 };
 
+
 // TrackError ----------------------------------------------------------------
-inline void TrackError(const char *routine, const char *file, int line, const char *msg) {
-    CPPAD_ASSERT_UNKNOWN(!thread_alloc::in_parallel());
+inline void TrackError(
+    const char *routine,
+    const char *file,
+    int         line,
+    const char *msg )
+{
+    CPPAD_ASSERT_UNKNOWN( ! thread_alloc::in_parallel() );
     std::ostringstream buf;
-    buf << routine << ": at line " << line << " in file " << file << std::endl << msg;
+    buf << routine
+        << ": at line "
+        << line
+        << " in file "
+        << file
+        << std::endl
+        << msg;
     std::string str = buf.str();
-    size_t n = str.size();
+    size_t      n   = str.size();
     size_t i;
     char *message = new char[n + 1];
-    for (i = 0; i < n; i++) message[i] = str[i];
+    for(i = 0; i < n; i++)
+        message[i] = str[i];
     message[n] = '\0';
-    CPPAD_ASSERT_KNOWN(false, message);
+    CPPAD_ASSERT_KNOWN( false , message);
 }
 
 // TrackNewVec ---------------------------------------------------------------
-#ifdef NDEBUG
+# ifdef NDEBUG
 template <class Type>
-Type *TrackNewVec(const char *file, int line, size_t len, Type * /* oldptr */) {
-#if CPPAD_TRACK_DEBUG
+Type *TrackNewVec(
+    const char *file, int line, size_t len, Type * /* oldptr */ )
+{
+# if CPPAD_TRACK_DEBUG
     static bool first = true;
-    if (first) {
-        std::cout << "NDEBUG is defined for TrackNewVec" << std::endl;
+    if( first )
+    {   std::cout << "NDEBUG is defined for TrackNewVec" << std::endl;
         first = false;
     }
-#endif
+# endif
     return (new Type[len]);
 }
 
-#else
+# else
 
 template <class Type>
-Type *TrackNewVec(const char *file, int line, size_t len, Type * /* oldptr */) {
-    CPPAD_ASSERT_KNOWN(!thread_alloc::in_parallel(), "attempt to use TrackNewVec in parallel execution mode.");
+Type *TrackNewVec(
+    const char *file          ,
+    int         line          ,
+    size_t      len           ,
+    Type       * /* oldptr */ )
+{
+    CPPAD_ASSERT_KNOWN(
+        ! thread_alloc::in_parallel() ,
+        "attempt to use TrackNewVec in parallel execution mode."
+    );
     // try to allocate the new memrory
     Type *newptr = CPPAD_NULL;
-    try {
-        newptr = new Type[len];
-    } catch (...) {
-        TrackError("TrackNewVec", file, line, "Cannot allocate sufficient memory");
+    try
+    {   newptr = new Type[len];
+    }
+    catch(...)
+    {   TrackError("TrackNewVec", file, line,
+            "Cannot allocate sufficient memory"
+        );
     }
     // create tracking element
     void *vptr = static_cast<void *>(newptr);
@@ -352,66 +387,75 @@ Type *TrackNewVec(const char *file, int line, size_t len, Type * /* oldptr */) {
     TrackElement *root = TrackElement::Root();
 
     // put this elemenent at the front of linked list
-    E->next = root->next;
+    E->next    = root->next;
     root->next = E;
 
-#if CPPAD_TRACK_DEBUG
+# if CPPAD_TRACK_DEBUG
     std::cout << "TrackNewVec: ";
     TrackElement::Print(E);
-#endif
+# endif
 
     return newptr;
 }
 
-#endif
+# endif
 
 // TrackDelVec --------------------------------------------------------------
-#ifdef NDEBUG
+# ifdef NDEBUG
 template <class Type>
-void TrackDelVec(const char *file, int line, Type *oldptr) {
-#if CPPAD_TRACK_DEBUG
+void TrackDelVec(const char *file, int line, Type *oldptr)
+{
+# if CPPAD_TRACK_DEBUG
     static bool first = true;
-    if (first) {
-        std::cout << "NDEBUG is defined in TrackDelVec" << std::endl;
+    if( first )
+    {   std::cout << "NDEBUG is defined in TrackDelVec" << std::endl;
         first = false;
     }
-#endif
-    delete[] oldptr;
+# endif
+     delete [] oldptr;
 }
 
-#else
+# else
 
 template <class Type>
-void TrackDelVec(const char *file, int line, Type *oldptr) {
-    CPPAD_ASSERT_KNOWN(!thread_alloc::in_parallel(), "attempt to use TrackDelVec in parallel execution mode.");
-    TrackElement *P;
-    TrackElement *E;
+void TrackDelVec(
+    const char *file    ,
+    int         line    ,
+    Type       *oldptr  )
+{
+    CPPAD_ASSERT_KNOWN(
+        ! thread_alloc::in_parallel() ,
+        "attempt to use TrackDelVec in parallel execution mode."
+    );
+    TrackElement        *P;
+    TrackElement        *E;
 
     // search list for pointer
-    P = TrackElement::Root();
-    E = P->next;
+    P          = TrackElement::Root();
+    E          = P->next;
     void *vptr = static_cast<void *>(oldptr);
-    while (E != CPPAD_NULL && E->ptr != vptr) {
-        P = E;
+    while(E != CPPAD_NULL && E->ptr != vptr)
+    {   P = E;
         E = E->next;
     }
 
     // check if pointer was not in list
-    if (E == CPPAD_NULL || E->ptr != vptr)
-        TrackError("TrackDelVec", file, line,
-                   "Invalid value for the argument oldptr.\n"
-                   "Possible linking of debug and NDEBUG compilations of CppAD.");
+    if( E == CPPAD_NULL || E->ptr != vptr ) TrackError(
+        "TrackDelVec", file, line,
+        "Invalid value for the argument oldptr.\n"
+        "Possible linking of debug and NDEBUG compilations of CppAD."
+    );
 
-#if CPPAD_TRACK_DEBUG
+# if CPPAD_TRACK_DEBUG
     std::cout << "TrackDelVec: ";
     TrackElement::Print(E);
-#endif
+# endif
 
     // remove tracking element from list
     P->next = E->next;
 
     // delete allocated pointer
-    delete[] oldptr;
+    delete [] oldptr;
 
     // delete tracking element
     delete E;
@@ -419,14 +463,23 @@ void TrackDelVec(const char *file, int line, Type *oldptr) {
     return;
 }
 
-#endif
+# endif
 
 // TrackExtend --------------------------------------------------------------
 template <class Type>
-Type *TrackExtend(const char *file, int line, size_t newlen, size_t ncopy, Type *oldptr) {
-    CPPAD_ASSERT_KNOWN(!thread_alloc::in_parallel(), "attempt to use TrackExtend in parallel execution mode.");
+Type *TrackExtend(
+    const char *file    ,
+    int         line    ,
+    size_t      newlen  ,
+    size_t      ncopy   ,
+    Type       *oldptr  )
+{
+    CPPAD_ASSERT_KNOWN(
+        ! thread_alloc::in_parallel() ,
+        "attempt to use TrackExtend in parallel execution mode."
+    );
 
-#if CPPAD_TRACK_DEBUG
+# if CPPAD_TRACK_DEBUG
     using std::cout;
     cout << "TrackExtend: file = " << file;
     cout << ", line = " << line;
@@ -434,38 +487,47 @@ Type *TrackExtend(const char *file, int line, size_t newlen, size_t ncopy, Type 
     cout << ", ncopy = " << ncopy;
     cout << ", oldptr = " << oldptr;
     cout << std::endl;
-#endif
-    CPPAD_ASSERT_KNOWN(ncopy <= newlen, "TrackExtend: ncopy is greater than newlen.");
+# endif
+    CPPAD_ASSERT_KNOWN(
+        ncopy <= newlen,
+        "TrackExtend: ncopy is greater than newlen."
+    );
 
     // allocate the new memrory
     Type *newptr = TrackNewVec(file, line, newlen, oldptr);
 
     // copy the data
     size_t i;
-    for (i = 0; i < ncopy; i++) newptr[i] = oldptr[i];
+    for(i = 0; i < ncopy; i++)
+        newptr[i] = oldptr[i];
 
     // delete the old vector
-    if (ncopy > 0) TrackDelVec(file, line, oldptr);
+    if( ncopy > 0 )
+        TrackDelVec(file, line, oldptr);
 
     return newptr;
 }
 
 // TrackCount --------------------------------------------------------------
-inline size_t TrackCount(const char *file, int line) {
-    CPPAD_ASSERT_KNOWN(!thread_alloc::in_parallel(), "attempt to use TrackCount in parallel execution mode.");
+inline size_t TrackCount(const char *file, int line)
+{
+    CPPAD_ASSERT_KNOWN(
+        ! thread_alloc::in_parallel() ,
+        "attempt to use TrackCount in parallel execution mode."
+    );
     size_t count = 0;
     TrackElement *E = TrackElement::Root();
-    while (E->next != CPPAD_NULL) {
-        ++count;
+    while( E->next != CPPAD_NULL )
+    {   ++count;
         E = E->next;
     }
     return count;
 }
 // ---------------------------------------------------------------------------
 
-}  // namespace CppAD
+} // End CppAD namespace
 
 // preprocessor symbols local to this file
-#undef CPPAD_TRACK_DEBUG
+# undef CPPAD_TRACK_DEBUG
 
-#endif
+# endif

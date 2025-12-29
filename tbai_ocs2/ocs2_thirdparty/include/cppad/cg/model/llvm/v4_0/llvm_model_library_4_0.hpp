@@ -19,37 +19,38 @@
 namespace CppAD {
 namespace cg {
 
-template <class Base>
-class LlvmModel;
+template<class Base> class LlvmModel;
 
 /**
  * Class used to load JIT'ed models by LLVM 4.0
  *
  * @author Joao Leal
  */
-template <class Base>
+template<class Base>
 class LlvmModelLibrary4_0 : public LlvmModelLibrary<Base> {
-   protected:
-    llvm::Module *_module;  // owned by _executionEngine
+protected:
+    llvm::Module* _module; // owned by _executionEngine
     std::shared_ptr<llvm::LLVMContext> _context;
     std::unique_ptr<llvm::ExecutionEngine> _executionEngine;
     std::unique_ptr<llvm::legacy::FunctionPassManager> _fpm;
+public:
 
-   public:
-    LlvmModelLibrary4_0(std::unique_ptr<llvm::Module> module, std::shared_ptr<llvm::LLVMContext> context)
-        : _module(module.get()), _context(context) {
+    LlvmModelLibrary4_0(std::unique_ptr<llvm::Module> module,
+                        std::shared_ptr<llvm::LLVMContext> context) :
+        _module(module.get()),
+        _context(context) {
         using namespace llvm;
 
         // Create the JIT.  This takes ownership of the module.
         std::string errStr;
         _executionEngine.reset(EngineBuilder(std::move(module))
-                                   .setErrorStr(&errStr)
-                                   .setEngineKind(EngineKind::JIT)
+                               .setErrorStr(&errStr)
+                               .setEngineKind(EngineKind::JIT)
 #ifndef NDEBUG
-                                   .setVerifyModules(true)
+                .setVerifyModules(true)
 #endif
-                                   // .setMCJITMemoryManager(llvm::make_unique<llvm::SectionMemoryManager>())
-                                   .create());
+                // .setMCJITMemoryManager(llvm::make_unique<llvm::SectionMemoryManager>())
+                               .create());
         if (!_executionEngine.get()) {
             throw CGException("Could not create ExecutionEngine: ", errStr);
         }
@@ -66,10 +67,12 @@ class LlvmModelLibrary4_0 : public LlvmModelLibrary<Base> {
         this->validate();
     }
 
-    LlvmModelLibrary4_0(const LlvmModelLibrary4_0 &) = delete;
-    LlvmModelLibrary4_0 &operator=(const LlvmModelLibrary4_0 &) = delete;
+    LlvmModelLibrary4_0(const LlvmModelLibrary4_0&) = delete;
+    LlvmModelLibrary4_0& operator=(const LlvmModelLibrary4_0&) = delete;
 
-    inline virtual ~LlvmModelLibrary4_0() { this->cleanUp(); }
+    inline virtual ~LlvmModelLibrary4_0() {
+        this->cleanUp();
+    }
 
     /**
      * Set up the optimizer pipeline
@@ -81,10 +84,11 @@ class LlvmModelLibrary4_0 : public LlvmModelLibrary<Base> {
         //_fpm.add(new DataLayoutPass());
     }
 
-    void *loadFunction(const std::string &functionName, bool required = true) override {
-        llvm::Function *func = _module->getFunction(functionName);
+    void* loadFunction(const std::string& functionName, bool required = true) override {
+        llvm::Function* func = _module->getFunction(functionName);
         if (func == nullptr) {
-            if (required) throw CGException("Unable to find function '", functionName, "' in LLVM module");
+            if (required)
+                throw CGException("Unable to find function '", functionName, "' in LLVM module");
             return nullptr;
         }
 
@@ -92,7 +96,8 @@ class LlvmModelLibrary4_0 : public LlvmModelLibrary<Base> {
         // Validate the generated code, checking for consistency.
         llvm::raw_os_ostream os(std::cerr);
         bool failed = llvm::verifyFunction(*func, &os);
-        if (failed) throw CGException("Function '", functionName, "' verification failed");
+        if (failed)
+            throw CGException("Function '", functionName, "' verification failed");
 #endif
 
         // Optimize the function.
@@ -103,13 +108,14 @@ class LlvmModelLibrary4_0 : public LlvmModelLibrary<Base> {
         if (fPtr == 0 && required) {
             throw CGException("Unable to find function '", functionName, "' in LLVM module");
         }
-        return (void *)fPtr;
+        return (void*) fPtr;
     }
 
     friend class LlvmModel<Base>;
+
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

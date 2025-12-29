@@ -22,9 +22,12 @@ namespace mpc {
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
-MpcController::MpcController(const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
+MpcController::MpcController(const std::string &robotName,
+                             const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
                              std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> velocityGeneratorPtr)
-    : stateSubscriberPtr_(stateSubscriberPtr), velocityGeneratorPtr_(std::move(velocityGeneratorPtr)) {
+    : robotName_(robotName),
+      stateSubscriberPtr_(stateSubscriberPtr),
+      velocityGeneratorPtr_(std::move(velocityGeneratorPtr)) {
     logger_ = tbai::getLogger("mpc_controller");
     initTime_ = tbai::readInitTime();
 }
@@ -36,13 +39,18 @@ void MpcController::initialize(const std::string &urdfString, const std::string 
                                const std::string &frameDeclarationFile, const std::string &controllerConfigFile,
                                const std::string &targetCommandFile, scalar_t trajdt, size_t trajKnots) {
     // Create quadruped interface
-    // quadrupedInterfacePtr_ =
-    //     anymal::getAnymalInterface(urdfString, switched_model::loadQuadrupedSettings(taskSettingsFile),
-    //                                anymal::frameDeclarationFromFile(frameDeclarationFile));
+    if (robotName_ == "anymal_d" || robotName_ == "anymal_c" || robotName_ == "anymal_b") {
+        quadrupedInterfacePtr_ =
+            anymal::getAnymalInterface(urdfString, switched_model::loadQuadrupedSettings(taskSettingsFile),
+                                       anymal::frameDeclarationFromFile(frameDeclarationFile));
+    } else if (robotName_ == "go2" || robotName_ == "spot") {
+        quadrupedInterfacePtr_ =
+            anymal::getGo2Interface(urdfString, switched_model::loadQuadrupedSettings(taskSettingsFile),
+                                    anymal::frameDeclarationFromFile(frameDeclarationFile));
+    } else {
+        TBAI_THROW("Robot name not supported: {}", robotName_);
+    }
 
-    quadrupedInterfacePtr_ =
-        anymal::getGo2Interface(urdfString, switched_model::loadQuadrupedSettings(taskSettingsFile),
-                                anymal::frameDeclarationFromFile(frameDeclarationFile));
     // Create WBC
     wbcPtr_ =
         tbai::mpc::getWbcUnique(controllerConfigFile, urdfString, quadrupedInterfacePtr_->getComModel(),
@@ -65,7 +73,7 @@ void MpcController::initialize(const std::string &urdfString, const std::string 
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 std::unique_ptr<ocs2::MPC_BASE> MpcController::createMpcInterface() {
-    throw std::runtime_error("createMpcInterface not implemented");
+    TBAI_THROW("createMpcInterface not implemented");
     // auto sqpSettings = ocs2::sqp::Settings();
     // auto mpcSettings = ocs2::mpc::Settings();
     // return getSqpMpc(*quadrupedInterfacePtr_, mpcSettings, sqpSettings);
@@ -119,32 +127,20 @@ std::vector<MotorCommand> MpcController::getMotorCommands(scalar_t currentTime, 
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 void MpcController::referenceThreadLoop() {
-    std::cerr << "Reference trajectory generator reset" << std::endl;
-    TBAI_LOG_WARN(logger_, "Reference trajectory generator reset");
     referenceTrajectoryGeneratorPtr_->reset();
-    std::cerr << "Reference trajectory generator reset2" << std::endl;
-    TBAI_LOG_WARN(logger_, "Reference trajectory generator reset2");
 
     // Wait for initial observation
     stateSubscriberPtr_->waitTillInitialized();
-    ocs2::SystemObservation observation = generateSystemObservation();
-    referenceTrajectoryGeneratorPtr_->updateObservation(observation);
-    TBAI_LOG_WARN(logger_, "Reference trajectory generator initialized");
 
     // Reference loop
     auto sleepDuration = std::chrono::milliseconds(static_cast<int>(1000.0 / referenceThreadRate_));
     while (!stopReferenceThread_) {
-        std::cerr << "Reference thread loop" << std::endl;
-        TBAI_LOG_WARN_THROTTLE(logger_, 0.005, "Reference thread loop");
-        // Generate and publish reference trajectory
         auto observation = generateSystemObservation();
+        referenceTrajectoryGeneratorPtr_->updateObservation(observation);
         auto targetTrajectories = referenceTrajectoryGeneratorPtr_->generateReferenceTrajectory(tNow_, observation);
         mrtPtr_->setTargetTrajectories(targetTrajectories);
 
-        TBAI_LOG_INFO_THROTTLE(logger_, 5.0, "Publishing reference");
         std::this_thread::sleep_for(sleepDuration);
-        observation = generateSystemObservation();
-        referenceTrajectoryGeneratorPtr_->updateObservation(observation);
     }
 }
 
@@ -191,10 +187,9 @@ void MpcController::startReferenceThread() {
     // Stop existing thread if running
     stopReferenceThread();
 
-    TBAI_LOG_WARN(logger_, "Starting reference thread");
+    TBAI_LOG_INFO(logger_, "Starting reference thread");
     stopReferenceThread_ = false;
     referenceThread_ = std::thread(&MpcController::referenceThreadLoop, this);
-    TBAI_LOG_WARN(logger_, "Reference thread started");
 }
 
 /*********************************************************************************************************************/

@@ -1,5 +1,5 @@
-#ifndef CPPAD_LOCAL_OPTIMIZE_HASH_CODE_HPP
-#define CPPAD_LOCAL_OPTIMIZE_HASH_CODE_HPP
+# ifndef CPPAD_LOCAL_OPTIMIZE_HASH_CODE_HPP
+# define CPPAD_LOCAL_OPTIMIZE_HASH_CODE_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -16,10 +16,9 @@ in the Eclipse Public License, Version 2.0 are satisfied:
 CppAD hashing utility.
 */
 
+
 // BEGIN_CPPAD_LOCAL_OPTIMIZE_NAMESPACE
-namespace CppAD {
-namespace local {
-namespace optimize {
+namespace CppAD { namespace local { namespace optimize {
 /*!
 Specialized hash code for a CppAD operator and its arguments
 (used during optimization).
@@ -38,15 +37,18 @@ containing the corresponding argument indices for this operator.
 is a hash code that is between zero and CPPAD_HASH_TABLE_SIZE - 1.
 */
 
-inline size_t optimize_hash_code(opcode_t op, size_t num_arg, const addr_t *arg) {
+inline size_t optimize_hash_code(
+    opcode_t      op      ,
+    size_t        num_arg ,
+    const addr_t* arg     )
+{
     size_t sum = size_t(op);
-    for (size_t i = 0; i < num_arg; i++) sum += size_t(arg[i]);
+    for(size_t i = 0; i < num_arg; i++)
+        sum += size_t(arg[i]);
     //
     return sum % CPPAD_HASH_TABLE_SIZE;
 }
 
-}  // namespace optimize
-}  // namespace local
-}  // namespace CppAD
+} } } // END_CPPAD_LOCAL_OPTIMIZE_NAMESPACE
 
-#endif
+# endif

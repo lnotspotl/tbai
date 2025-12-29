@@ -73,3 +73,4 @@ void cppadcg_openmp_apply_scheduler_strategy() {
 })*=*";
 
 const size_t CPPADCG_OPENMP_C_FILE_SIZE = 2066;
+

@@ -23,42 +23,50 @@ namespace cg {
 
 /**
  * Useful class for generating a JIT evaluated model library.
- *
+ * 
  * @author Joao Leal
  */
-template <class Base>
+template<class Base>
 class LlvmModelLibraryProcessor : public LlvmBaseModelLibraryProcessor<Base> {
-   protected:
+protected:
     const std::string _version;
     std::vector<std::string> _includePaths;
     std::unique_ptr<llvm::Linker> _linker;
     std::unique_ptr<llvm::LLVMContext> _context;
+public:
 
-   public:
     /**
-     *
+     * 
      * @param modelLibraryHelper
      */
-    LlvmModelLibraryProcessor(ModelLibraryCSourceGen<Base> &modelLibraryHelper)
-        : LlvmBaseModelLibraryProcessor<Base>(modelLibraryHelper), _version("3.4") {}
+    LlvmModelLibraryProcessor(ModelLibraryCSourceGen<Base>& modelLibraryHelper) :
+            LlvmBaseModelLibraryProcessor<Base>(modelLibraryHelper),
+            _version("3.4") {
+    }
 
     virtual ~LlvmModelLibraryProcessor() = default;
 
     /**
      * @return The version of LLVM (and Clang).
      */
-    inline const std::string &getVersion() const { return _version; }
+    inline const std::string& getVersion() const {
+        return _version;
+    }
 
-    inline void setIncludePaths(const std::vector<std::string> &includePaths) { _includePaths = includePaths; }
+    inline void setIncludePaths(const std::vector<std::string>& includePaths) {
+        _includePaths = includePaths;
+    }
 
-    inline const std::vector<std::string> &getIncludePaths() const { return _includePaths; }
+    inline const std::vector<std::string>& getIncludePaths() const {
+        return _includePaths;
+    }
 
     std::unique_ptr<LlvmModelLibrary<Base>> create() {
         ClangCompiler<Base> clang;
         return create(clang);
     }
 
-    std::unique_ptr<LlvmModelLibrary<Base>> create(ClangCompiler<Base> &clang) {
+    std::unique_ptr<LlvmModelLibrary<Base>> create(ClangCompiler<Base>& clang) {
         using namespace llvm;
 
         // backup output format so that it can be restored
@@ -74,7 +82,7 @@ class LlvmModelLibraryProcessor : public LlvmBaseModelLibraryProcessor<Base> {
             /**
              * generate bit code
              */
-            const std::set<std::string> &bcFiles = this->createBitCode(clang, "3.4");
+            const std::set<std::string>& bcFiles = this->createBitCode(clang, "3.4");
 
             /**
              * Load bit code and create a single module
@@ -84,23 +92,25 @@ class LlvmModelLibraryProcessor : public LlvmBaseModelLibraryProcessor<Base> {
 
             _context.reset(new llvm::LLVMContext());
 
-            for (const std::string &itbc : bcFiles) {
+            for (const std::string& itbc : bcFiles) {
                 // load bitcode file
                 OwningPtr<MemoryBuffer> buffer;
 
                 error_code ec = MemoryBuffer::getFile(itbc, buffer);
-                if (buffer.get() == nullptr) throw CGException(ec.message());
+                if (buffer.get() == nullptr)
+                    throw CGException(ec.message());
 
                 // create the module
                 std::string errMsg;
-                Module *module = llvm::ParseBitcodeFile(buffer.get(), *_context.get(), &errMsg);
-                if (module == nullptr) throw CGException("Failed to create LLVM bitcode: ", errMsg);
+                Module* module = llvm::ParseBitcodeFile(buffer.get(), *_context.get(), &errMsg);
+                if(module == nullptr)
+                    throw CGException("Failed to create LLVM bitcode: ", errMsg);
 
                 // link modules together
                 if (_linker.get() == nullptr) {
-                    _linker.reset(new llvm::Linker(module));  // module not destroyed
+                    _linker.reset(new llvm::Linker(module)); // module not destroyed
                 } else {
-                    if (_linker->linkInModule(module, &errMsg)) {  // module destroyed
+                    if (_linker->linkInModule(module, &errMsg)) { // module destroyed
                         throw CGException(errMsg);
                     }
                 }
@@ -122,12 +132,12 @@ class LlvmModelLibraryProcessor : public LlvmBaseModelLibraryProcessor<Base> {
         return lib;
     }
 
-    static inline std::unique_ptr<LlvmModelLibrary<Base>> create(ModelLibraryCSourceGen<Base> &modelLibraryHelper) {
+    static inline std::unique_ptr<LlvmModelLibrary<Base>> create(ModelLibraryCSourceGen<Base>& modelLibraryHelper) {
         LlvmModelLibraryProcessor<Base> p(modelLibraryHelper);
         return p.create();
     }
 
-   protected:
+protected:
 #if 0
 
     /**
@@ -203,7 +213,7 @@ class LlvmModelLibraryProcessor : public LlvmBaseModelLibraryProcessor<Base> {
 #endif
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

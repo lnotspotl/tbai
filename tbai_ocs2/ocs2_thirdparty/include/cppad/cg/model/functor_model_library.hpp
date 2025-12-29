@@ -24,11 +24,11 @@ namespace cg {
  *
  * @author Joao Leal
  */
-template <class Base>
+template<class Base>
 class FunctorModelLibrary : public ModelLibrary<Base> {
-   protected:
+protected:
     std::set<std::string> _modelNames;
-    unsigned long _version;  // API version
+    unsigned long _version; // API version
     void (*_onClose)();
     void (*_setThreadPoolDisabled)(int);
     int (*_isThreadPoolDisabled)();
@@ -42,9 +42,11 @@ class FunctorModelLibrary : public ModelLibrary<Base> {
     float (*_getThreadPoolGuidedMaxWork)();
     void (*_setThreadPoolNumberOfTimeMeas)(unsigned int n);
     unsigned int (*_getThreadPoolNumberOfTimeMeas)();
+public:
 
-   public:
-    std::set<std::string> getModelNames() override { return _modelNames; }
+    std::set<std::string> getModelNames() override {
+        return _modelNames;
+    }
 
     /**
      * Creates a new FunctorGenericModel object that can be used to evaluate
@@ -55,10 +57,10 @@ class FunctorModelLibrary : public ModelLibrary<Base> {
      * @return The model object or nullptr if no model exists with the provided
      *         name.
      */
-    virtual std::unique_ptr<FunctorGenericModel<Base>> modelFunctor(const std::string &modelName) = 0;
+    virtual std::unique_ptr<FunctorGenericModel<Base>> modelFunctor(const std::string& modelName) = 0;
 
-    std::unique_ptr<GenericModel<Base>> model(const std::string &modelName) override final {
-        return std::unique_ptr<GenericModel<Base>>(modelFunctor(modelName).release());
+    std::unique_ptr<GenericModel<Base>> model(const std::string& modelName) override final {
+        return std::unique_ptr<GenericModel<Base>> (modelFunctor(modelName).release());
     }
 
     /**
@@ -66,7 +68,9 @@ class FunctorModelLibrary : public ModelLibrary<Base> {
      *
      * @return the API version
      */
-    virtual unsigned long getAPIVersion() { return _version; }
+    virtual unsigned long getAPIVersion() {
+        return _version;
+    }
 
     /**
      * Provides a pointer to a function in the model library.
@@ -81,16 +85,17 @@ class FunctorModelLibrary : public ModelLibrary<Base> {
      *         exists, nullptr otherwise.
      * @throws CGException If there is a problem loading the function symbol
      */
-    virtual void *loadFunction(const std::string &functionName, bool required = true) = 0;
+    virtual void* loadFunction(const std::string& functionName,
+                               bool required = true) = 0;
 
     void setThreadPoolDisabled(bool disabled) override {
-        if (_setThreadPoolDisabled != nullptr) {
+        if(_setThreadPoolDisabled != nullptr) {
             (*_setThreadPoolDisabled)(disabled);
         }
     }
 
     virtual bool isThreadPoolDisabled() const override {
-        if (_isThreadPoolDisabled != nullptr) {
+        if(_isThreadPoolDisabled != nullptr) {
             return bool((*_isThreadPoolDisabled)());
         }
         return true;
@@ -163,45 +168,44 @@ class FunctorModelLibrary : public ModelLibrary<Base> {
 
     inline virtual ~FunctorModelLibrary() = default;
 
-   protected:
-    FunctorModelLibrary()
-        : _version(0),  // not really required (but it avoids warnings)
-          _onClose(nullptr),
-          _setThreadPoolDisabled(nullptr),
-          _isThreadPoolDisabled(nullptr),
-          _setThreads(nullptr),
-          _getThreads(nullptr),
-          _setSchedulerStrategy(nullptr),
-          _getSchedulerStrategy(nullptr),
-          _setThreadPoolVerbose(nullptr),
-          _isThreadPoolVerbose(nullptr),
-          _setThreadPoolGuidedMaxWork(nullptr),
-          _getThreadPoolGuidedMaxWork(nullptr),
-          _setThreadPoolNumberOfTimeMeas(nullptr),
-          _getThreadPoolNumberOfTimeMeas(nullptr) {}
+protected:
+    FunctorModelLibrary() :
+            _version(0), // not really required (but it avoids warnings)
+            _onClose(nullptr),
+            _setThreadPoolDisabled(nullptr),
+            _isThreadPoolDisabled(nullptr),
+            _setThreads(nullptr),
+            _getThreads(nullptr),
+            _setSchedulerStrategy(nullptr),
+            _getSchedulerStrategy(nullptr),
+            _setThreadPoolVerbose(nullptr),
+            _isThreadPoolVerbose(nullptr),
+            _setThreadPoolGuidedMaxWork(nullptr),
+            _getThreadPoolGuidedMaxWork(nullptr),
+            _setThreadPoolNumberOfTimeMeas(nullptr),
+            _getThreadPoolNumberOfTimeMeas(nullptr) {
+    }
 
     inline void validate() {
         /**
          * Check the version
          */
         unsigned long (*versionFunc)();
-        versionFunc =
-            reinterpret_cast<decltype(versionFunc)>(loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_VERSION));
+        versionFunc = reinterpret_cast<decltype(versionFunc)> (loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_VERSION));
 
         _version = (*versionFunc)();
         if (ModelLibraryCSourceGen<Base>::API_VERSION != _version)
             throw CGException("The API version of the dynamic library (", _version,
-                              ") is incompatible with the current version (", ModelLibraryCSourceGen<Base>::API_VERSION,
-                              ")");
+                              ") is incompatible with the current version (",
+                              ModelLibraryCSourceGen<Base>::API_VERSION, ")");
 
         /**
          * Load the list of models
          */
-        void (*modelsFunc)(char const *const **, int *);
-        modelsFunc =
-            reinterpret_cast<decltype(modelsFunc)>(loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_MODELS));
+        void (*modelsFunc)(char const *const**, int*);
+        modelsFunc = reinterpret_cast<decltype(modelsFunc)> (loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_MODELS));
 
-        char const *const *model_names = nullptr;
+        char const*const* model_names = nullptr;
         int model_count;
         (*modelsFunc)(&model_names, &model_count);
 
@@ -212,44 +216,31 @@ class FunctorModelLibrary : public ModelLibrary<Base> {
         /**
          * Load the the on close function
          */
-        _onClose =
-            reinterpret_cast<decltype(_onClose)>(loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_ONCLOSE, false));
+        _onClose = reinterpret_cast<decltype(_onClose)> (loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_ONCLOSE, false));
 
         /**
          * Thread pool related functions
          */
-        _setThreadPoolDisabled = reinterpret_cast<decltype(_setThreadPoolDisabled)>(
-            loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_SETTHREADPOOLDISABLED, false));
-        _isThreadPoolDisabled = reinterpret_cast<decltype(_isThreadPoolDisabled)>(
-            loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_ISTHREADPOOLDISABLED, false));
-        _setThreads = reinterpret_cast<decltype(_setThreads)>(
-            loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_SETTHREADS, false));
-        _getThreads = reinterpret_cast<decltype(_getThreads)>(
-            loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_GETTHREADS, false));
-        _setSchedulerStrategy = reinterpret_cast<decltype(_setSchedulerStrategy)>(
-            this->loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_SETTHREADSCHEDULERSTRAT, false));
-        _getSchedulerStrategy = reinterpret_cast<decltype(_getSchedulerStrategy)>(
-            this->loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_GETTHREADSCHEDULERSTRAT, false));
-        _setThreadPoolVerbose = reinterpret_cast<decltype(_setThreadPoolVerbose)>(
-            this->loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_SETTHREADPOOLVERBOSE, false));
-        _isThreadPoolVerbose = reinterpret_cast<decltype(_isThreadPoolVerbose)>(
-            this->loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_ISTHREADPOOLVERBOSE, false));
-        _setThreadPoolGuidedMaxWork = reinterpret_cast<decltype(_setThreadPoolGuidedMaxWork)>(
-            this->loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_SETTHREADPOOLGUIDEDMAXGROUPWORK, false));
-        _getThreadPoolGuidedMaxWork = reinterpret_cast<decltype(_getThreadPoolGuidedMaxWork)>(
-            this->loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_GETTHREADPOOLGUIDEDMAXGROUPWORK, false));
-        _setThreadPoolNumberOfTimeMeas = reinterpret_cast<decltype(_setThreadPoolNumberOfTimeMeas)>(
-            this->loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_SETTHREADPOOLNUMBEROFTIMEMEAS, false));
-        _getThreadPoolNumberOfTimeMeas = reinterpret_cast<decltype(_getThreadPoolNumberOfTimeMeas)>(
-            this->loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_GETTHREADPOOLNUMBEROFTIMEMEAS, false));
+        _setThreadPoolDisabled = reinterpret_cast<decltype(_setThreadPoolDisabled)> (loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_SETTHREADPOOLDISABLED, false));
+        _isThreadPoolDisabled = reinterpret_cast<decltype(_isThreadPoolDisabled)> (loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_ISTHREADPOOLDISABLED, false));
+        _setThreads = reinterpret_cast<decltype(_setThreads)> (loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_SETTHREADS, false));
+        _getThreads = reinterpret_cast<decltype(_getThreads)> (loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_GETTHREADS, false));
+        _setSchedulerStrategy = reinterpret_cast<decltype(_setSchedulerStrategy)> (this->loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_SETTHREADSCHEDULERSTRAT, false));
+        _getSchedulerStrategy = reinterpret_cast<decltype(_getSchedulerStrategy)> (this->loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_GETTHREADSCHEDULERSTRAT, false));
+        _setThreadPoolVerbose = reinterpret_cast<decltype(_setThreadPoolVerbose)> (this->loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_SETTHREADPOOLVERBOSE, false));
+        _isThreadPoolVerbose = reinterpret_cast<decltype(_isThreadPoolVerbose)> (this->loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_ISTHREADPOOLVERBOSE, false));
+        _setThreadPoolGuidedMaxWork = reinterpret_cast<decltype(_setThreadPoolGuidedMaxWork)> (this->loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_SETTHREADPOOLGUIDEDMAXGROUPWORK, false));
+        _getThreadPoolGuidedMaxWork = reinterpret_cast<decltype(_getThreadPoolGuidedMaxWork)> (this->loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_GETTHREADPOOLGUIDEDMAXGROUPWORK, false));
+        _setThreadPoolNumberOfTimeMeas = reinterpret_cast<decltype(_setThreadPoolNumberOfTimeMeas)> (this->loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_SETTHREADPOOLNUMBEROFTIMEMEAS, false));
+        _getThreadPoolNumberOfTimeMeas = reinterpret_cast<decltype(_getThreadPoolNumberOfTimeMeas)> (this->loadFunction(ModelLibraryCSourceGen<Base>::FUNCTION_GETTHREADPOOLNUMBEROFTIMEMEAS, false));
 
-        if (_setThreads != nullptr) {
+        if(_setThreads != nullptr) {
             (*_setThreads)(std::thread::hardware_concurrency());
         }
     }
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

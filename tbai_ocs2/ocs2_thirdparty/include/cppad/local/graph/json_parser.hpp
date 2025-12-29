@@ -1,5 +1,5 @@
-#ifndef CPPAD_LOCAL_GRAPH_JSON_PARSER_HPP
-#define CPPAD_LOCAL_GRAPH_JSON_PARSER_HPP
+# ifndef CPPAD_LOCAL_GRAPH_JSON_PARSER_HPP
+# define CPPAD_LOCAL_GRAPH_JSON_PARSER_HPP
 
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-19 Bradley M. Bell
@@ -13,11 +13,10 @@ CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-19 Bradley M. Bell
         GNU General Public License, Version 2.0 or later.
 -------------------------------------------------------------------------- */
 
-#include <string>
-
-#include <cppad/core/graph/cpp_graph.hpp>
-#include <cppad/local/graph/cpp_graph_op.hpp>
-#include <cppad/utility/vector.hpp>
+# include <string>
+# include <cppad/utility/vector.hpp>
+# include <cppad/local/graph/cpp_graph_op.hpp>
+# include <cppad/core/graph/cpp_graph.hpp>
 
 /*
 $begin json_parser$$
@@ -42,15 +41,15 @@ Upon return it is a $cref cpp_ad_graph$$ representation of this function.
 
 $head Prototype$$
 $srccode%hpp% */
-namespace CppAD {
-namespace local {
-namespace graph {
-void json_parser(const std::string &json, cpp_graph &graph_obj);
-}
-}  // namespace local
-}  // namespace CppAD
+namespace CppAD { namespace local { namespace graph {
+    void json_parser(
+        const std::string&  json      ,
+        cpp_graph&          graph_obj
+    );
+} } }
 /* %$$
 $end
 */
 
-#endif
+
+# endif

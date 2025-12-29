@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_ATOMIC_THREE_CTOR_HPP
-#define CPPAD_CORE_ATOMIC_THREE_CTOR_HPP
+# ifndef CPPAD_CORE_ATOMIC_THREE_CTOR_HPP
+# define CPPAD_CORE_ATOMIC_THREE_CTOR_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -107,7 +107,7 @@ $end
 -------------------------------------------------------------------------------
 */
 
-namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
+namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 /*!
 \file atomic/three_ctor.hpp
 Constructors for atomic_three class.
@@ -123,8 +123,10 @@ This class is used for defining an AD<Base> atomic operation y = g(x).
 make sure user does not invoke the default constructor
 */
 template <class Base>
-atomic_three<Base>::atomic_three(void) {
-    CPPAD_ASSERT_KNOWN(false, "Attempt to use the atomic_three default constructor");
+atomic_three<Base>::atomic_three(void)
+{   CPPAD_ASSERT_KNOWN(false,
+        "Attempt to use the atomic_three default constructor"
+    );
 }
 /*!
 Constructor
@@ -134,21 +136,26 @@ name used for error reporting
 */
 // BEGIN_PROTOTYPE
 template <class Base>
-atomic_three<Base>::atomic_three(const std::string &name)
+atomic_three<Base>::atomic_three(const std::string& name )
 // END_PROTOTYPE
-{
-    CPPAD_ASSERT_KNOWN(!thread_alloc::in_parallel(), "atomic_three: constructor cannot be called in parallel mode.");
+{   CPPAD_ASSERT_KNOWN(
+        ! thread_alloc::in_parallel() ,
+        "atomic_three: constructor cannot be called in parallel mode."
+    );
     //
     // atomic_index
-    bool set_null = false;
-    size_t index = 0;
-    size_t type = 3;
+    bool        set_null  = false;
+    size_t      index     = 0;
+    size_t      type      = 3;
     std::string copy_name = name;
-    void *copy_this = reinterpret_cast<void *>(this);
-    index_ = local::atomic_index<Base>(set_null, index, type, &copy_name, copy_this);
+    void*       copy_this = reinterpret_cast<void*>( this );
+    index_  = local::atomic_index<Base>(
+        set_null, index, type, &copy_name, copy_this
+    );
     // initialize work pointers as null;
-    for (size_t thread = 0; thread < CPPAD_MAX_NUM_THREADS; thread++) work_[thread] = CPPAD_NULL;
+    for(size_t thread = 0; thread < CPPAD_MAX_NUM_THREADS; thread++)
+        work_[thread] = CPPAD_NULL;
 }
 
-}  // namespace CppAD
-#endif
+} // END_CPPAD_NAMESPACE
+# endif

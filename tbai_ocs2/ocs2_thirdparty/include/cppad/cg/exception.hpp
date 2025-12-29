@@ -21,22 +21,25 @@ namespace cg {
 
 /**
  * The exception used by CppADCodeGen
- *
+ * 
  * @author Joao Leal
  */
 class CGException : public std::exception {
-   protected:
+protected:
     std::string _message;
 
-   public:
-    inline explicit CGException(std::string message) noexcept : _message(std::move(message)) {}
+public:
 
-    inline CGException(const CGException &e) = default;
+    inline explicit CGException(std::string message) noexcept :
+        _message(std::move(message)) {
+    }
 
-    inline CGException(CGException &&e) = default;
+    inline CGException(const CGException& e) = default;
 
-    template <typename... Ts>
-    explicit CGException(const Ts &...ts) noexcept {
+    inline CGException(CGException&& e) = default;
+
+    template<typename... Ts>
+    explicit CGException(const Ts&... ts) noexcept {
         std::ostringstream s;
         createMessage(s, ts...);
         _message = s.str();
@@ -44,29 +47,33 @@ class CGException : public std::exception {
 
     CGException() noexcept = delete;
 
-    const char *what() const noexcept override { return _message.c_str(); }
+    const char* what() const noexcept override {
+        return _message.c_str();
+    }
 
     ~CGException() noexcept override = default;
 
-   private:
+private:
+
     template <typename T, typename... Ts>
-    inline void createMessage(std::ostringstream &s, const T &t, const Ts &...ts) noexcept {
+    inline void createMessage(std::ostringstream& s, const T& t, const Ts&... ts) noexcept {
         s << t;
         createMessage(s, ts...);
     }
 
     template <typename T>
-    inline void createMessage(std::ostringstream &s, const T &t) noexcept {
+    inline void createMessage(std::ostringstream& s, const T& t) noexcept {
         s << t;
     }
+
 };
 
-inline std::ostream &operator<<(std::ostream &out, const CGException &rhs) {
+inline std::ostream& operator<<(std::ostream& out, const CGException& rhs) {
     out << rhs.what();
     return out;
 }
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

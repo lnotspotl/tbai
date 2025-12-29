@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_ATOMIC_TWO_REVERSE_HPP
-#define CPPAD_CORE_ATOMIC_TWO_REVERSE_HPP
+# ifndef CPPAD_CORE_ATOMIC_TWO_REVERSE_HPP
+# define CPPAD_CORE_ATOMIC_TWO_REVERSE_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -244,7 +244,7 @@ $end
 -----------------------------------------------------------------------------
 */
 
-namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
+namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 /*!
 \file atomic/two_reverse.hpp
 Atomic reverse mode.
@@ -270,16 +270,22 @@ Partials w.r.t. the y Taylor coefficients.
 See atomic_reverse mode use documentation
 */
 template <class Base>
-bool atomic_base<Base>::reverse(size_t q, const vector<Base> &tx, const vector<Base> &ty, vector<Base> &px,
-                                const vector<Base> &py) {
-    return false;
-}
+bool atomic_base<Base>::reverse(
+    size_t                    q  ,
+    const vector<Base>&       tx ,
+    const vector<Base>&       ty ,
+          vector<Base>&       px ,
+    const vector<Base>&       py )
+{   return false; }
 
 template <class Base>
-bool atomic_base<Base>::reverse(size_t q, const vector<AD<Base> > &atx, const vector<AD<Base> > &aty,
-                                vector<AD<Base> > &apx, const vector<AD<Base> > &apy) {
-    return false;
-}
+bool atomic_base<Base>::reverse(
+    size_t                    q  ,
+    const vector< AD<Base> >& atx ,
+    const vector< AD<Base> >& aty ,
+          vector< AD<Base> >& apx ,
+    const vector< AD<Base> >& apy )
+{   return false; }
 
-}  // namespace CppAD
-#endif
+} // END_CPPAD_NAMESPACE
+# endif

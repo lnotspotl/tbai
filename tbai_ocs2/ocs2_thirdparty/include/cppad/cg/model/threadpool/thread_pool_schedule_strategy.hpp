@@ -19,12 +19,12 @@ namespace CppAD {
 namespace cg {
 
 enum class ThreadPoolScheduleStrategy {
-    STATIC = 1,   // all jobs are assigned to a thread at the beginning
-    DYNAMIC = 2,  // each thread only executes a single job at a time
-    GUIDED = 3    // each thread can execute multiple jobs before returning to the pool
+    STATIC = 1, // all jobs are assigned to a thread at the beginning
+    DYNAMIC = 2, // each thread only executes a single job at a time
+    GUIDED = 3 // each thread can execute multiple jobs before returning to the pool
 };
 
 }
-}  // namespace CppAD
+}
 
 #endif

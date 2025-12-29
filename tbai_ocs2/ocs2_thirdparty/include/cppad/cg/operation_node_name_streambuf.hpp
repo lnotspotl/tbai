@@ -28,21 +28,19 @@ namespace cg {
  *
  * @author Joao Leal
  */
-template <class Base>
+template<class Base>
 class OperationNodeNameStreambuf : public std::streambuf {
-   private:
+private:
     using char_type = typename std::streambuf::char_type;
     using int_type = typename std::streambuf::int_type;
     using pos_type = typename std::streambuf::pos_type;
-
-   private:
-    thread_local static OperationNodeNameStreambuf<Base> *BUF;
-
-   private:
-    OperationNode<Base> *node_;
-
-   public:
-    OperationNodeNameStreambuf() : node_(nullptr) {
+private:
+    thread_local static OperationNodeNameStreambuf<Base>* BUF;
+private:
+    OperationNode <Base>* node_;
+public:
+    OperationNodeNameStreambuf() :
+            node_(nullptr) {
         if (BUF != nullptr) {
             throw CGException("Only one OperationNodeNameStreambuf can exist at a time in each thread");
         }
@@ -58,7 +56,8 @@ class OperationNodeNameStreambuf : public std::streambuf {
         CGOStreamFunc<Base>::FUNC = nullptr;
     }
 
-    std::streamsize xsputn(const char_type *s, std::streamsize n) override {
+    std::streamsize xsputn(const char_type* s,
+                           std::streamsize n) override {
         if (node_ != nullptr && n > 0) {
             node_->setName(std::string(s, n));
             node_ = nullptr;
@@ -66,23 +65,24 @@ class OperationNodeNameStreambuf : public std::streambuf {
         return n;
     }
 
-    // int_type overflow(int_type c) override {
-    //     return traits_type::eof();
-    // }
+    //int_type overflow(int_type c) override {
+    //    return traits_type::eof();
+    //}
 
-   private:
-    static std::ostream &registerNode(std::ostream &os, const CG<Base> &c) {
-        if (c.isVariable()) {
+private:
+    static std::ostream& registerNode(std::ostream& os,
+                                      const CG<Base>& c) {
+        if(c.isVariable()) {
             BUF->node_ = c.getOperationNode();
         }
         return os;
     }
 };
 
-template <class Base>
-thread_local OperationNodeNameStreambuf<Base> *OperationNodeNameStreambuf<Base>::BUF = nullptr;
+template<class Base>
+thread_local OperationNodeNameStreambuf<Base>* OperationNodeNameStreambuf<Base>::BUF = nullptr;
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

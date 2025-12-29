@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_CHKPOINT_TWO_CTOR_HPP
-#define CPPAD_CORE_CHKPOINT_TWO_CTOR_HPP
+# ifndef CPPAD_CORE_CHKPOINT_TWO_CTOR_HPP
+# define CPPAD_CORE_CHKPOINT_TWO_CTOR_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -80,7 +80,7 @@ that can be used during the recording of $codei%AD<%Base%>%$$ operations.
 
 $end
 */
-namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
+namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 /*!
 \file chkpoint_two/ctor.hpp
 Constructor for chkpoint_two class.
@@ -113,17 +113,27 @@ will this checkpoint function be used in parallel mode.
 
 // BEGIN_PROTOTYPE
 template <class Base>
-chkpoint_two<Base>::chkpoint_two(const ADFun<Base> &fun, const std::string &name, bool internal_bool,
-                                 bool use_hes_sparsity, bool use_base2ad, bool use_in_parallel)
-    // END_PROTOTYPE
-    : atomic_three<Base>(name),
-      internal_bool_(internal_bool),
-      use_hes_sparsity_(use_hes_sparsity),
-      use_base2ad_(use_base2ad),
-      use_in_parallel_(use_in_parallel) {
-    CPPAD_ASSERT_KNOWN(!thread_alloc::in_parallel(), "chkpoint_two: constructor cannot be called in parallel mode.");
+chkpoint_two<Base>::chkpoint_two(
+        const ADFun<Base>& fun    ,
+        const std::string& name   ,
+        bool  internal_bool       ,
+        bool  use_hes_sparsity    ,
+        bool  use_base2ad         ,
+        bool  use_in_parallel     )
+// END_PROTOTYPE
+:
+atomic_three<Base>(name)              ,
+internal_bool_( internal_bool )       ,
+use_hes_sparsity_( use_hes_sparsity ) ,
+use_base2ad_ ( use_base2ad )          ,
+use_in_parallel_ ( use_in_parallel )
+{   CPPAD_ASSERT_KNOWN(
+        ! thread_alloc::in_parallel() ,
+        "chkpoint_two: constructor cannot be called in parallel mode."
+    );
     // initialize member pointers as null;
-    for (size_t thread = 0; thread < CPPAD_MAX_NUM_THREADS; thread++) member_[thread] = CPPAD_NULL;
+    for(size_t thread = 0; thread < CPPAD_MAX_NUM_THREADS; thread++)
+        member_[thread] = CPPAD_NULL;
     //
     // g_
     g_ = fun;
@@ -133,52 +143,80 @@ chkpoint_two<Base>::chkpoint_two(const ADFun<Base> &fun, const std::string &name
     g_.check_for_nan(false);
     //
     // ag_
-    if (use_base2ad) ag_ = g_.base2ad();
+    if( use_base2ad )
+        ag_ = g_.base2ad();
     //
     // jac_sparsity__
     size_t n = g_.Domain();
     size_t m = g_.Range();
-    sparse_rc<vector<size_t> > pattern_in;
-    bool transpose = false;
-    bool dependency = true;
-    if (n <= m || use_hes_sparsity) {  // use forward mode
+    sparse_rc< vector<size_t> > pattern_in;
+    bool transpose     = false;
+    bool dependency    = true;
+    if( n <= m || use_hes_sparsity )
+    {   // use forward mode
         pattern_in.resize(n, n, n);
-        for (size_t k = 0; k < n; ++k) pattern_in.set(k, k, k);
-        g_.for_jac_sparsity(pattern_in, transpose, dependency, internal_bool, jac_sparsity_);
-    } else {  // use reverse mode
+        for(size_t k = 0; k < n; ++k)
+            pattern_in.set(k, k, k);
+        g_.for_jac_sparsity(
+            pattern_in,
+            transpose,
+            dependency,
+            internal_bool,
+            jac_sparsity_
+        );
+    }
+    else
+    {   // use reverse mode
         pattern_in.resize(m, m, m);
-        for (size_t k = 0; k < m; ++k) pattern_in.set(k, k, k);
-        g_.rev_jac_sparsity(pattern_in, transpose, dependency, internal_bool, jac_sparsity_);
+        for(size_t k = 0; k < m; ++k)
+            pattern_in.set(k, k, k);
+        g_.rev_jac_sparsity(
+            pattern_in,
+            transpose,
+            dependency,
+            internal_bool,
+            jac_sparsity_
+        );
     }
     //
     // hes_sparsity_
-    if (use_hes_sparsity) {
-        vector<bool> select_y(m), select_x(n);
-        for (size_t i = 0; i < m; ++i) select_y[i] = true;
-        if (n <= m) {
-            for (size_t j = 0; j < n; ++j) select_x[j] = true;
-            g_.for_hes_sparsity(select_x, select_y, internal_bool, hes_sparsity_);
-        } else {  // forward jacobian sparsity is stored in g_
-            g_.rev_hes_sparsity(select_y, transpose, internal_bool, hes_sparsity_);
+    if( use_hes_sparsity )
+    {   vector<bool> select_y(m), select_x(n);
+        for(size_t i = 0; i < m; ++i)
+            select_y[i] = true;
+        if( n <= m )
+        {   for(size_t j = 0; j < n; ++j)
+                select_x[j] = true;
+            g_.for_hes_sparsity(
+                select_x, select_y, internal_bool, hes_sparsity_
+            );
+        }
+        else
+        {   // forward jacobian sparsity is stored in g_
+            g_.rev_hes_sparsity(
+                select_y, transpose, internal_bool, hes_sparsity_
+            );
         }
     }
     // free memory holding forward Jacobian sparsity
-    if (internal_bool)
+    if( internal_bool )
         g_.size_forward_bool(0);
     else
         g_.size_forward_set(0);
 }
 /// destructor
 template <class Base>
-chkpoint_two<Base>::~chkpoint_two(void) {
-#ifndef NDEBUG
-    if (thread_alloc::in_parallel()) {
-        std::string msg = atomic_three<Base>::afun_name();
+chkpoint_two<Base>::~chkpoint_two(void)
+{
+# ifndef NDEBUG
+    if( thread_alloc::in_parallel() )
+    {   std::string msg = atomic_three<Base>::afun_name();
         msg += ": chkpoint_two destructor called in parallel mode.";
-        CPPAD_ASSERT_KNOWN(false, msg.c_str());
+        CPPAD_ASSERT_KNOWN(false, msg.c_str() );
     }
-#endif
-    for (size_t thread = 0; thread < CPPAD_MAX_NUM_THREADS; ++thread) free_member(thread);
-}
-}  // namespace CppAD
-#endif
+# endif
+    for(size_t thread = 0; thread < CPPAD_MAX_NUM_THREADS; ++thread)
+        free_member(thread);
+    }
+} // END_CPPAD_NAMESPACE
+# endif

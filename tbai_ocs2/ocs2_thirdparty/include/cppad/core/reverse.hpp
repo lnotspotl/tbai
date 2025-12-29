@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_REVERSE_HPP
-#define CPPAD_CORE_REVERSE_HPP
+# ifndef CPPAD_CORE_REVERSE_HPP
+# define CPPAD_CORE_REVERSE_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -12,16 +12,16 @@ in the Eclipse Public License, Version 2.0 are satisfied:
       GNU General Public License, Version 2.0 or later.
 ---------------------------------------------------------------------------- */
 
-#include <algorithm>
+# include <algorithm>
+# include <cppad/local/pod_vector.hpp>
+# include <cppad/local/play/sequential_iterator.hpp>
 
-#include <cppad/local/play/sequential_iterator.hpp>
-#include <cppad/local/pod_vector.hpp>
-
-namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
+namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 /*!
 \file core/reverse.hpp
 Compute derivatives using reverse mode.
 */
+
 
 /*!
 Use reverse mode to compute derivative of forward mode Taylor coefficients.
@@ -89,8 +89,8 @@ for the independent variables as specified by previous calls to Forward.
 */
 template <class Base, class RecBase>
 template <class BaseVector>
-BaseVector ADFun<Base, RecBase>::Reverse(size_t q,
-                                         const BaseVector &w) {  // used to identify the RecBase type in calls to sweeps
+BaseVector ADFun<Base,RecBase>::Reverse(size_t q, const BaseVector &w)
+{   // used to identify the RecBase type in calls to sweeps
     RecBase not_used_rec_base;
 
     // constants
@@ -108,73 +108,102 @@ BaseVector ADFun<Base, RecBase>::Reverse(size_t q,
     // check BaseVector is Simple Vector class with Base type elements
     CheckSimpleVector<Base, BaseVector>();
 
-    CPPAD_ASSERT_KNOWN(size_t(w.size()) == m || size_t(w.size()) == (m * q),
-                       "Argument w to Reverse does not have length equal to\n"
-                       "the dimension of the range or dimension of range times q.");
-    CPPAD_ASSERT_KNOWN(q > 0, "The first argument to Reverse must be greater than zero.");
-    CPPAD_ASSERT_KNOWN(num_order_taylor_ >= q,
-                       "Less than q Taylor coefficients are currently stored"
-                       " in this ADFun object.");
+    CPPAD_ASSERT_KNOWN(
+        size_t(w.size()) == m || size_t(w.size()) == (m * q),
+        "Argument w to Reverse does not have length equal to\n"
+        "the dimension of the range or dimension of range times q."
+    );
+    CPPAD_ASSERT_KNOWN(
+        q > 0,
+        "The first argument to Reverse must be greater than zero."
+    );
+    CPPAD_ASSERT_KNOWN(
+        num_order_taylor_ >= q,
+        "Less than q Taylor coefficients are currently stored"
+        " in this ADFun object."
+    );
     // special case where multiple forward directions have been computed,
     // but we are only using the one direction zero order results
-    if ((q == 1) & (num_direction_taylor_ > 1)) {
-        num_order_taylor_ = 1;         // number of orders to copy
-        size_t c = cap_order_taylor_;  // keep the same capacity setting
-        size_t r = 1;                  // only keep one direction
+    if( (q == 1) & (num_direction_taylor_ > 1) )
+    {   num_order_taylor_ = 1;        // number of orders to copy
+        size_t c = cap_order_taylor_; // keep the same capacity setting
+        size_t r = 1;                 // only keep one direction
         capacity_order(c, r);
     }
-    CPPAD_ASSERT_KNOWN(num_direction_taylor_ == 1,
-                       "Reverse mode for Forward(q, r, xq) with more than one direction"
-                       "\n(r > 1) is not yet supported for q > 1.");
+    CPPAD_ASSERT_KNOWN(
+        num_direction_taylor_ == 1,
+        "Reverse mode for Forward(q, r, xq) with more than one direction"
+        "\n(r > 1) is not yet supported for q > 1."
+    );
 
     // initialize entire Partial matrix to zero
     local::pod_vector_maybe<Base> Partial(num_var_tape_ * q);
-    for (i = 0; i < num_var_tape_; i++)
-        for (j = 0; j < q; j++) Partial[i * q + j] = zero;
+    for(i = 0; i < num_var_tape_; i++)
+        for(j = 0; j < q; j++)
+            Partial[i * q + j] = zero;
 
     // set the dependent variable direction
     // (use += because two dependent variables can point to same location)
-    for (i = 0; i < m; i++) {
-        CPPAD_ASSERT_UNKNOWN(dep_taddr_[i] < num_var_tape_);
-        if (size_t(w.size()) == m)
+    for(i = 0; i < m; i++)
+    {   CPPAD_ASSERT_UNKNOWN( dep_taddr_[i] < num_var_tape_  );
+        if( size_t(w.size()) == m )
             Partial[dep_taddr_[i] * q + q - 1] += w[i];
-        else {
-            for (k = 0; k < q; k++)
+        else
+        {   for(k = 0; k < q; k++)
                 // ? should use += here, first make test to demonstrate bug
-                Partial[dep_taddr_[i] * q + k] = w[i * q + k];
+                Partial[ dep_taddr_[i] * q + k ] = w[i * q + k ];
         }
     }
 
     // evaluate the derivatives
-    CPPAD_ASSERT_UNKNOWN(cskip_op_.size() == play_.num_op_rec());
-    CPPAD_ASSERT_UNKNOWN(load_op_.size() == play_.num_load_op_rec());
+    CPPAD_ASSERT_UNKNOWN( cskip_op_.size() == play_.num_op_rec() );
+    CPPAD_ASSERT_UNKNOWN( load_op_.size()  == play_.num_load_op_rec() );
     local::play::const_sequential_iterator play_itr = play_.end();
-    local::sweep::reverse(q - 1, n, num_var_tape_, &play_, cap_order_taylor_, taylor_.data(), q, Partial.data(),
-                          cskip_op_.data(), load_op_, play_itr, not_used_rec_base);
+    local::sweep::reverse(
+        q - 1,
+        n,
+        num_var_tape_,
+        &play_,
+        cap_order_taylor_,
+        taylor_.data(),
+        q,
+        Partial.data(),
+        cskip_op_.data(),
+        load_op_,
+        play_itr,
+        not_used_rec_base
+    );
 
     // return the derivative values
     BaseVector value(n * q);
-    for (j = 0; j < n; j++) {
-        CPPAD_ASSERT_UNKNOWN(ind_taddr_[j] < num_var_tape_);
+    for(j = 0; j < n; j++)
+    {   CPPAD_ASSERT_UNKNOWN( ind_taddr_[j] < num_var_tape_  );
 
         // independent variable taddr equals its operator taddr
-        CPPAD_ASSERT_UNKNOWN(play_.GetOp(ind_taddr_[j]) == local::InvOp);
+        CPPAD_ASSERT_UNKNOWN( play_.GetOp( ind_taddr_[j] ) == local::InvOp );
 
         // by the Reverse Identity Theorem
         // partial of y^{(k)} w.r.t. u^{(0)} is equal to
         // partial of y^{(q-1)} w.r.t. u^{(q - 1 - k)}
-        if (size_t(w.size()) == m) {
-            for (k = 0; k < q; k++) value[j * q + k] = Partial[ind_taddr_[j] * q + q - 1 - k];
-        } else {
-            for (k = 0; k < q; k++) value[j * q + k] = Partial[ind_taddr_[j] * q + k];
+        if( size_t(w.size()) == m )
+        {   for(k = 0; k < q; k++)
+                value[j * q + k ] =
+                    Partial[ind_taddr_[j] * q + q - 1 - k];
+        }
+        else
+        {   for(k = 0; k < q; k++)
+                value[j * q + k ] =
+                    Partial[ind_taddr_[j] * q + k];
         }
     }
-    CPPAD_ASSERT_KNOWN(!(hasnan(value) && check_for_nan_),
-                       "dw = f.Reverse(q, w): has a nan,\n"
-                       "but none of its Taylor coefficents are nan.");
+    CPPAD_ASSERT_KNOWN( ! ( hasnan(value) && check_for_nan_ ) ,
+        "dw = f.Reverse(q, w): has a nan,\n"
+        "but none of its Taylor coefficents are nan."
+    );
 
     return value;
 }
 
-}  // namespace CppAD
-#endif
+
+} // END_CPPAD_NAMESPACE
+# endif

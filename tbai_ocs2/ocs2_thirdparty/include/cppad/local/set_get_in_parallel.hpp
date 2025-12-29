@@ -1,5 +1,5 @@
-#ifndef CPPAD_LOCAL_SET_GET_IN_PARALLEL_HPP
-#define CPPAD_LOCAL_SET_GET_IN_PARALLEL_HPP
+# ifndef CPPAD_LOCAL_SET_GET_IN_PARALLEL_HPP
+# define CPPAD_LOCAL_SET_GET_IN_PARALLEL_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-16 Bradley M. Bell
 
@@ -12,11 +12,9 @@ in the Eclipse Public License, Version 2.0 are satisfied:
       GNU General Public License, Version 2.0 or later.
 ---------------------------------------------------------------------------- */
 
-#include <cassert>
-
-#include <cppad/configure.hpp>
-namespace CppAD {
-namespace local {  // BEGIN_CPPAD_LOCAL_NAMESPACE
+# include <cassert>
+# include <cppad/configure.hpp>
+namespace CppAD { namespace local { // BEGIN_CPPAD_LOCAL_NAMESPACE
 
 /*!
 \file set_get_in_parallel.hpp
@@ -43,11 +41,13 @@ If set is true, then parallel_new is becomes the most
 recent setting for this set_get_in_parallel.
 In this case, it is assumed that we are currently in sequential execution mode.
 */
-static bool set_get_in_parallel(bool (*in_parallel_new)(void), bool set = false) {
-    static bool (*in_parallel_user)(void) = CPPAD_NULL;
+static bool set_get_in_parallel(
+    bool (*in_parallel_new)(void) ,
+    bool set = false           )
+{   static bool (*in_parallel_user)(void) = CPPAD_NULL;
 
-    if (set) {
-        in_parallel_user = in_parallel_new;
+    if( set )
+    {   in_parallel_user = in_parallel_new;
         // Doing a raw assert in this case because set_get_in_parallel is used
         // by ErrorHandler and hence cannot use ErrorHandler.
         // CPPAD_ASSERT_UNKNOWN( in_parallel_user() == false )
@@ -55,12 +55,12 @@ static bool set_get_in_parallel(bool (*in_parallel_new)(void), bool set = false)
         return false;
     }
     //
-    if (in_parallel_user == CPPAD_NULL) return false;
+    if( in_parallel_user == CPPAD_NULL )
+        return false;
     //
     return in_parallel_user();
 }
 
-}  // namespace local
-}  // namespace CppAD
+} } // END_CPPAD_LOCAL_NAMESPACE
 
-#endif
+# endif

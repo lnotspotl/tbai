@@ -7,9 +7,10 @@ help:
 # Format C++ files in all directories (excluding dependencies and build)
 format:
     #!/usr/bin/env bash
-    folders=$(ls -d */ | grep -v dependencies | grep -v build)
+    OCS2_THIRD_PARTY_DIR="tbai_ocs2/ocs2_thirdparty"
+    folders=$(ls -d */ | grep -v dependencies | grep -v build | grep -v "$OCS2_THIRD_PARTY_DIR")
     for folder in $folders; do
-        for file in $(find $folder -name "*.hpp" -o -name "*.cpp"); do
+        for file in $(find $folder -type f \( -name "*.hpp" -o -name "*.cpp" \) ! -path "$OCS2_THIRD_PARTY_DIR/*"); do
             echo "[TBAI] Formatting $file"
             clang-format -i -style=file $file
         done

@@ -19,7 +19,7 @@
 namespace CppAD {
 namespace cg {
 
-template <class Base>
+template<class Base>
 class LlvmModel;
 
 /**
@@ -27,52 +27,53 @@ class LlvmModel;
  *
  * @author Joao Leal
  */
-template <class Base>
+template<class Base>
 class LlvmModelLibrary : public FunctorModelLibrary<Base> {
-   protected:
-    std::set<LlvmModel<Base> *> _models;
-
-   public:
+protected:
+    std::set<LlvmModel<Base>*> _models;
+public:
     inline virtual ~LlvmModelLibrary() {
         // do not call clean-up here
         // cleanUp() must be called by the subclass (before destruction of the execution engine...)
     }
 
-    virtual std::unique_ptr<LlvmModel<Base>> modelLlvm(const std::string &modelName) {
+    virtual std::unique_ptr<LlvmModel<Base>> modelLlvm(const std::string& modelName) {
         std::unique_ptr<LlvmModel<Base>> m;
         typename std::set<std::string>::const_iterator it = this->_modelNames.find(modelName);
         if (it == this->_modelNames.end()) {
             return m;
         }
-        m.reset(new LlvmModel<Base>(this, modelName));
+        m.reset(new LlvmModel<Base> (this, modelName));
         _models.insert(m.get());
         return m;
     }
 
-    std::unique_ptr<FunctorGenericModel<Base>> modelFunctor(const std::string &modelName) override final {
+    std::unique_ptr<FunctorGenericModel<Base>> modelFunctor(const std::string& modelName) override final {
         return std::unique_ptr<FunctorGenericModel<Base>>(modelLlvm(modelName).release());
     }
 
-   protected:
+protected:
     inline LlvmModelLibrary() = default;
 
     inline void cleanUp() {
-        for (LlvmModel<Base> *model : _models) {
+        for (LlvmModel<Base>* model : _models) {
             model->modelLibraryClosed();
         }
 
-        if (this->_onClose != nullptr) {
+        if(this->_onClose != nullptr) {
             (*this->_onClose)();
             this->_onClose = nullptr;
         }
     }
 
-    virtual void destroyed(LlvmModel<Base> *model) { _models.erase(model); }
+    virtual void destroyed(LlvmModel<Base>* model) {
+        _models.erase(model);
+    }
 
     friend class LlvmModel<Base>;
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_USER_AD_HPP
-#define CPPAD_CORE_USER_AD_HPP
+# ifndef CPPAD_CORE_USER_AD_HPP
+# define CPPAD_CORE_USER_AD_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-16 Bradley M. Bell
 
@@ -60,12 +60,12 @@ $end
 ---------------------------------------------------------------------------
 */
 
-#include <cppad/core/ad_assign.hpp>
-#include <cppad/core/ad_ctor.hpp>
-#include <cppad/core/ad_valued.hpp>
-#include <cppad/core/bool_valued.hpp>
-#include <cppad/core/convert.hpp>
-#include <cppad/core/vec_ad.hpp>
-#include <cppad/core/zdouble.hpp>
+# include <cppad/core/ad_ctor.hpp>
+# include <cppad/core/ad_assign.hpp>
+# include <cppad/core/convert.hpp>
+# include <cppad/core/vec_ad.hpp>
+# include <cppad/core/ad_valued.hpp>
+# include <cppad/core/bool_valued.hpp>
+# include <cppad/core/zdouble.hpp>
 
-#endif
+# endif

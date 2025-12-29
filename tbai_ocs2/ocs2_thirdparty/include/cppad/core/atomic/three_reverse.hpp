@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_ATOMIC_THREE_REVERSE_HPP
-#define CPPAD_CORE_ATOMIC_THREE_REVERSE_HPP
+# ifndef CPPAD_CORE_ATOMIC_THREE_REVERSE_HPP
+# define CPPAD_CORE_ATOMIC_THREE_REVERSE_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -251,7 +251,7 @@ $end
 -----------------------------------------------------------------------------
 */
 
-namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
+namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 /*!
 \file atomic/three_reverse.hpp
 Third Generation Atomic reverse mode.
@@ -284,13 +284,16 @@ See atomic_three_reverse mode use documentation
 */
 // BEGIN_PROTOTYPE_BASE
 template <class Base>
-bool atomic_three<Base>::reverse(const vector<Base> &parameter_x, const vector<ad_type_enum> &type_x, size_t order_up,
-                                 const vector<Base> &taylor_x, const vector<Base> &taylor_y, vector<Base> &partial_x,
-                                 const vector<Base> &partial_y)
+bool atomic_three<Base>::reverse(
+    const vector<Base>&         parameter_x ,
+    const vector<ad_type_enum>& type_x      ,
+    size_t                      order_up    ,
+    const vector<Base>&         taylor_x    ,
+    const vector<Base>&         taylor_y    ,
+    vector<Base>&               partial_x   ,
+    const vector<Base>&         partial_y   )
 // END_PROTOTYPE_BASE
-{
-    return false;
-}
+{   return false; }
 
 /*!
 Link from reverse mode sweep to users routine.
@@ -321,14 +324,16 @@ See atomic_three_reverse mode use documentation
 */
 // BEGIN_PROTOTYPE_AD_BASE
 template <class Base>
-bool atomic_three<Base>::reverse(const vector<AD<Base> > &aparameter_x, const vector<ad_type_enum> &type_x,
-                                 size_t order_up, const vector<AD<Base> > &ataylor_x,
-                                 const vector<AD<Base> > &ataylor_y, vector<AD<Base> > &apartial_x,
-                                 const vector<AD<Base> > &apartial_y)
+bool atomic_three<Base>::reverse(
+    const vector< AD<Base> >&       aparameter_x ,
+    const vector<ad_type_enum>&     type_x       ,
+    size_t                          order_up     ,
+    const vector< AD<Base> >&       ataylor_x    ,
+    const vector< AD<Base> >&       ataylor_y    ,
+    vector< AD<Base> >&             apartial_x   ,
+    const vector< AD<Base> >&       apartial_y   )
 // END_PROTOTYPE_AD_BASE
-{
-    return false;
-}
+{   return false; }
 
-}  // namespace CppAD
-#endif
+} // END_CPPAD_NAMESPACE
+# endif

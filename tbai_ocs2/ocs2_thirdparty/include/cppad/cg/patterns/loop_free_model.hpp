@@ -26,16 +26,15 @@ namespace cg {
  */
 template <class Base>
 class LoopFreeModel {
-   public:
+public:
     using CGB = CppAD::cg::CG<Base>;
     using Arg = Argument<Base>;
     using VectorSet = std::vector<std::set<size_t> >;
-
-   protected:
+protected:
     /**
      * The tape
      */
-    ADFun<CGB> *const fun_;
+    ADFun<CGB> * const fun_;
     /**
      * The dependent variables in this tape to their original indexes
      */
@@ -58,40 +57,57 @@ class LoopFreeModel {
     VectorSet hessTapeOrigEqSparsity_;
     // whether or not the hessian sparsities have been evaluated
     bool hessSparsity_;
+public:
 
-   public:
     /**
      * Creates a model for the non-indexed operations
      *
      * @param fun
      * @param dependentOrigIndexes
      */
-    LoopFreeModel(ADFun<CGB> *fun, const std::vector<size_t> &dependentOrigIndexes)
-        : fun_(fun), dependentIndexes_(dependentOrigIndexes), jacSparsity_(false), hessSparsity_(false) {
+    LoopFreeModel(ADFun<CGB>* fun,
+                  const std::vector<size_t>& dependentOrigIndexes) :
+        fun_(fun),
+        dependentIndexes_(dependentOrigIndexes),
+        jacSparsity_(false),
+        hessSparsity_(false) {
         CPPADCG_ASSERT_KNOWN(fun != nullptr, "fun cannot be null");
         CPPADCG_ASSERT_KNOWN(dependentOrigIndexes.size() <= fun->Range(), "invalid size");
 
-        for (size_t il = 0; il < dependentIndexes_.size(); il++) dependentOrig2Local[dependentIndexes_[il]] = il;
+        for (size_t il = 0; il < dependentIndexes_.size(); il++)
+            dependentOrig2Local[dependentIndexes_[il]] = il;
     }
 
-    LoopFreeModel(const LoopFreeModel<Base> &) = delete;
-    LoopFreeModel &operator=(const LoopFreeModel<Base> &) = delete;
+    LoopFreeModel(const LoopFreeModel<Base>&) = delete;
+    LoopFreeModel& operator=(const LoopFreeModel<Base>&) = delete;
 
-    inline ADFun<CGB> &getTape() const { return *fun_; }
+    inline ADFun<CGB>& getTape() const {
+        return *fun_;
+    }
 
-    inline size_t getTapeDependentCount() const { return fun_->Range(); }
+    inline size_t getTapeDependentCount() const {
+        return fun_->Range();
+    }
 
-    inline size_t getTemporaryDependentCount() const { return fun_->Range() - dependentIndexes_.size(); }
+    inline size_t getTemporaryDependentCount() const {
+        return fun_->Range() - dependentIndexes_.size();
+    }
 
-    inline size_t getTapeIndependentCount() const { return fun_->Domain(); }
+    inline size_t getTapeIndependentCount() const {
+        return fun_->Domain();
+    }
 
     /**
      * Provides the dependent variables indexes present in the original
      * model
      */
-    inline const std::vector<size_t> &getOrigDependentIndexes() const { return dependentIndexes_; }
+    inline const std::vector<size_t>& getOrigDependentIndexes() const {
+        return dependentIndexes_;
+    }
 
-    inline size_t getLocalDependentIndex(size_t origI) const { return dependentOrig2Local.at(origI); }
+    inline size_t getLocalDependentIndex(size_t origI) const {
+        return dependentOrig2Local.at(origI);
+    }
 
     inline void evalJacobianSparsity() {
         if (!jacSparsity_) {
@@ -100,7 +116,9 @@ class LoopFreeModel {
         }
     }
 
-    inline const VectorSet &getJacobianSparsity() const { return jacTapeSparsity_; }
+    inline const VectorSet& getJacobianSparsity() const {
+        return jacTapeSparsity_;
+    }
 
     inline void evalHessianSparsity() {
         if (!hessSparsity_) {
@@ -111,7 +129,8 @@ class LoopFreeModel {
             // hessian for the original equations
             std::set<size_t> eqs;
             if (mo != 0) {
-                for (size_t i = 0; i < mo; i++) eqs.insert(eqs.end(), i);
+                for (size_t i = 0; i < mo; i++)
+                    eqs.insert(eqs.end(), i);
 
                 hessTapeOrigEqSparsity_ = hessianSparsitySet<std::vector<std::set<size_t> >, CGB>(*fun_, eqs);
             }
@@ -119,7 +138,8 @@ class LoopFreeModel {
             // hessian for the temporary variable equations
             if (m != mo) {
                 eqs.clear();
-                for (size_t i = mo; i < m; i++) eqs.insert(eqs.end(), i);
+                for (size_t i = mo; i < m; i++)
+                    eqs.insert(eqs.end(), i);
                 hessTapeTempSparsity_ = hessianSparsitySet<std::vector<std::set<size_t> >, CGB>(*fun_, eqs);
             } else {
                 hessTapeTempSparsity_.resize(n);
@@ -129,12 +149,12 @@ class LoopFreeModel {
         }
     }
 
-    inline const VectorSet &getHessianTempEqsSparsity() const {
+    inline const VectorSet& getHessianTempEqsSparsity() const {
         CPPADCG_ASSERT_UNKNOWN(hessSparsity_);
         return hessTapeTempSparsity_;
     }
 
-    inline const VectorSet &getHessianOrigEqsSparsity() const {
+    inline const VectorSet& getHessianOrigEqsSparsity() const {
         CPPADCG_ASSERT_UNKNOWN(hessSparsity_);
         return hessTapeOrigEqSparsity_;
     }
@@ -149,9 +169,11 @@ class LoopFreeModel {
      * @param iterationIndexOp the iteration index operation for this loop
      * @return
      */
-    inline CG<Base> createConditionalOperation(CodeHandler<Base> &handler, const std::set<size_t> &iterations,
-                                               size_t iterCount, const CG<Base> &value,
-                                               IndexOperationNode<Base> &iterationIndexOp) {
+    inline CG<Base> createConditionalOperation(CodeHandler<Base>& handler,
+                                               const std::set<size_t>& iterations,
+                                               size_t iterCount,
+                                               const CG<Base>& value,
+                                               IndexOperationNode<Base>& iterationIndexOp) {
         using namespace std;
 
         if (iterations.size() == iterCount) {
@@ -160,39 +182,41 @@ class LoopFreeModel {
             return value;
 
         } else {
+
             // no point in creating branches where both branch sides are zero
-            if (value.isIdenticalZero()) return value;
+            if (value.isIdenticalZero())
+                return value;
 
             /**
              * must create a conditional element so that this
              * contribution is only evaluated at the relevant iterations
              */
-            OperationNode<Base> *tmpDclVar = handler.makeNode(CGOpCode::TmpDcl);
+            OperationNode<Base>* tmpDclVar = handler.makeNode(CGOpCode::TmpDcl);
             Argument<Base> tmpArg(*tmpDclVar);
 
             set<size_t> usedIter;
-            OperationNode<Base> *cond = loops::createIndexConditionExpressionOp<Base>(handler, iterations, usedIter,
-                                                                                      iterCount - 1, iterationIndexOp);
+            OperationNode<Base>* cond = loops::createIndexConditionExpressionOp<Base>(handler, iterations, usedIter, iterCount - 1, iterationIndexOp);
 
             // if
-            OperationNode<Base> *ifStart = handler.makeNode(CGOpCode::StartIf, *cond);
+            OperationNode<Base>* ifStart = handler.makeNode(CGOpCode::StartIf, *cond);
 
-            OperationNode<Base> *tmpAssign1 = handler.makeNode(CGOpCode::LoopIndexedTmp, {tmpArg, asArgument(value)});
-            OperationNode<Base> *ifAssign = handler.makeNode(CGOpCode::CondResult, {*ifStart, *tmpAssign1});
+            OperationNode<Base>* tmpAssign1 = handler.makeNode(CGOpCode::LoopIndexedTmp,{tmpArg, asArgument(value)});
+            OperationNode<Base>* ifAssign = handler.makeNode(CGOpCode::CondResult,{*ifStart, *tmpAssign1});
 
             // else
-            OperationNode<Base> *elseStart = handler.makeNode(CGOpCode::Else, {*ifStart, *ifAssign});
+            OperationNode<Base>* elseStart = handler.makeNode(CGOpCode::Else,{*ifStart, *ifAssign});
 
-            OperationNode<Base> *tmpAssign2 = handler.makeNode(CGOpCode::LoopIndexedTmp, {tmpArg, Base(0)});
-            OperationNode<Base> *elseAssign = handler.makeNode(CGOpCode::CondResult, {*elseStart, *tmpAssign2});
+            OperationNode<Base>* tmpAssign2 = handler.makeNode(CGOpCode::LoopIndexedTmp,{tmpArg, Base(0)});
+            OperationNode<Base>* elseAssign = handler.makeNode(CGOpCode::CondResult,{*elseStart, *tmpAssign2});
 
             // end if
-            OperationNode<Base> *endIf = handler.makeNode(CGOpCode::EndIf, {*elseStart, *elseAssign});
+            OperationNode<Base>* endIf = handler.makeNode(CGOpCode::EndIf,{*elseStart, *elseAssign});
 
             //
-            OperationNode<Base> *tmpVar = handler.makeNode(CGOpCode::Tmp, {tmpArg, *endIf});
+            OperationNode<Base>* tmpVar = handler.makeNode(CGOpCode::Tmp,{tmpArg, *endIf});
             return CG<Base>(*tmpVar);
         }
+
     }
 
     /**
@@ -207,14 +231,16 @@ class LoopFreeModel {
      * @param iterationIndexOp
      * @return
      */
-    inline std::map<size_t, std::map<size_t, CGB> > calculateJacobianHessianUsedByLoops(
-        CodeHandler<Base> &handler, std::map<LoopModel<Base> *, loops::HessianWithLoopsInfo<Base> > &loopHessInfo,
-        const std::vector<CGB> &x, std::vector<CGB> &temps, const VectorSet &noLoopEvalJacSparsity,
-        bool individualColoring) {
+    inline std::map<size_t, std::map<size_t, CGB> > calculateJacobianHessianUsedByLoops(CodeHandler<Base>& handler,
+                                                                                        std::map<LoopModel<Base>*, loops::HessianWithLoopsInfo<Base> >& loopHessInfo,
+                                                                                        const std::vector<CGB>& x,
+                                                                                        std::vector<CGB>& temps,
+                                                                                        const VectorSet& noLoopEvalJacSparsity,
+                                                                                        bool individualColoring) {
         using namespace std;
         using namespace CppAD::cg::loops;
 
-        CPPADCG_ASSERT_UNKNOWN(hessSparsity_);  // check that the sparsities have been evaluated
+        CPPADCG_ASSERT_UNKNOWN(hessSparsity_); // check that the sparsities have been evaluated
 
         size_t mo = dependentIndexes_.size();
         size_t m = getTapeDependentCount();
@@ -228,8 +254,8 @@ class LoopFreeModel {
          */
         std::vector<std::set<size_t> > noLoopEvalHessTempsSparsity(n);
 
-        for (const auto &itLoop2Info : loopHessInfo) {
-            const HessianWithLoopsInfo<Base> &info = itLoop2Info.second;
+        for (const auto& itLoop2Info : loopHessInfo) {
+            const HessianWithLoopsInfo<Base>& info = itLoop2Info.second;
 
             addMatrixSparsity(info.noLoopEvalHessTempsSparsity, noLoopEvalHessTempsSparsity);
         }
@@ -237,15 +263,15 @@ class LoopFreeModel {
         generateSparsityIndexes(noLoopEvalHessTempsSparsity, hesRow, hesCol);
 
         size_t l = 0;
-        for (const auto &itLoop2Info : loopHessInfo) {
-            LoopModel<Base> *loop = itLoop2Info.first;
-            const HessianWithLoopsInfo<Base> &info = itLoop2Info.second;
+        for (const auto& itLoop2Info : loopHessInfo) {
+            LoopModel<Base>* loop = itLoop2Info.first;
+            const HessianWithLoopsInfo<Base>& info = itLoop2Info.second;
 
-            const std::vector<IterEquationGroup<Base> > &eqGroups = loop->getEquationsGroups();
+            const std::vector<IterEquationGroup<Base> >& eqGroups = loop->getEquationsGroups();
             size_t nIterations = loop->getIterationCount();
             size_t nEqGroups = eqGroups.size();
 
-            std::vector<CGB> &wNoLoop = vwNoLoop[l];
+            std::vector<CGB>& wNoLoop = vwNoLoop[l];
             wNoLoop.resize(m);
             for (size_t inl = 0; inl < mo; inl++) {
                 wNoLoop[inl] = Base(0);
@@ -253,19 +279,20 @@ class LoopFreeModel {
 
             for (size_t inl = mo; inl < m; inl++) {
                 size_t k = inl - mo;
-                const LoopPosition *posK = loop->getTempIndepIndexes(k);
+                const LoopPosition* posK = loop->getTempIndepIndexes(k);
 
                 if (posK != nullptr) {
+
                     for (size_t g = 0; g < nEqGroups; g++) {
-                        const IterEquationGroup<Base> &group = eqGroups[g];
+                        const IterEquationGroup<Base>& group = eqGroups[g];
 
                         CGB v = Base(0);
 
                         for (size_t tapeI : group.tapeI) {
-                            const map<size_t, CGB> &row = info.dyiDzk[tapeI];
+                            const map<size_t, CGB>& row = info.dyiDzk[tapeI];
                             typename map<size_t, CGB>::const_iterator itCol = row.find(posK->tape);
                             if (itCol != row.end()) {
-                                const CGB &dydz = itCol->second;
+                                const CGB& dydz = itCol->second;
                                 v += dydz * info.w[tapeI];
                             }
                         }
@@ -273,11 +300,15 @@ class LoopFreeModel {
                         /**
                          * Some equations are not present in all iterations
                          */
-                        v = createConditionalOperation(handler, group.iterations, nIterations, v,
+                        v = createConditionalOperation(handler,
+                                                       group.iterations,
+                                                       nIterations,
+                                                       v,
                                                        *info.iterationIndexOp);
 
                         wNoLoop[inl] += v;
                     }
+
                 }
             }
 
@@ -285,8 +316,14 @@ class LoopFreeModel {
         }
 
         std::vector<map<size_t, CGB> > dyDx;
-        generateLoopForJacHes(*fun_, x, vwNoLoop, temps, getJacobianSparsity(), noLoopEvalJacSparsity, dyDx,
-                              hessTapeTempSparsity_, noLoopEvalHessTempsSparsity, vhessNoLoop, individualColoring);
+        generateLoopForJacHes(*fun_, x, vwNoLoop, temps,
+                              getJacobianSparsity(),
+                              noLoopEvalJacSparsity,
+                              dyDx,
+                              hessTapeTempSparsity_,
+                              noLoopEvalHessTempsSparsity,
+                              vhessNoLoop,
+                              individualColoring);
 
         // save Jacobian
         map<size_t, map<size_t, CGB> > dzDx;
@@ -298,8 +335,8 @@ class LoopFreeModel {
 
         // save Hessian
         l = 0;
-        for (auto &itLoop2Info : loopHessInfo) {
-            HessianWithLoopsInfo<Base> &info = itLoop2Info.second;
+        for (auto& itLoop2Info : loopHessInfo) {
+            HessianWithLoopsInfo<Base>& info = itLoop2Info.second;
             info.dzDxx = vhessNoLoop[l];
             l++;
         }
@@ -307,13 +344,15 @@ class LoopFreeModel {
         return dzDx;
     }
 
-    inline void calculateHessian4OrignalEquations(
-        const std::vector<CGB> &x, const std::vector<CGB> &w, const VectorSet &noLoopEvalHessSparsity,
-        const std::vector<std::map<size_t, std::set<size_t> > > &noLoopEvalHessLocations, std::vector<CGB> &hess) {
+    inline void calculateHessian4OrignalEquations(const std::vector<CGB>& x,
+                                                  const std::vector<CGB>& w,
+                                                  const VectorSet& noLoopEvalHessSparsity,
+                                                  const std::vector<std::map<size_t, std::set<size_t> > >& noLoopEvalHessLocations,
+                                                  std::vector<CGB>& hess) {
         using namespace std;
         using namespace CppAD::cg::loops;
 
-        CPPADCG_ASSERT_UNKNOWN(hessSparsity_);  // check that the sparsities have been evaluated
+        CPPADCG_ASSERT_UNKNOWN(hessSparsity_); // check that the sparsities have been evaluated
 
         std::vector<CGB> wNoLoop(getTapeDependentCount());
         std::vector<CGB> hessNoLoop;
@@ -331,7 +370,7 @@ class LoopFreeModel {
                 wNoLoop[inl] = w[dependentIndexes_[inl]];
             }
 
-            CppAD::sparse_hessian_work work;  // temporary structure for CPPAD
+            CppAD::sparse_hessian_work work; // temporary structure for CPPAD
             // "cppad.symmetric" may have missing values for functions using
             // atomic functions which only provide half of the elements
             // (some values could be zeroed)
@@ -342,16 +381,20 @@ class LoopFreeModel {
             for (size_t el = 0; el < row.size(); el++) {
                 size_t j1 = row[el];
                 size_t j2 = col[el];
-                const set<size_t> &locations = noLoopEvalHessLocations[j1].at(j2);
-                for (size_t itE : locations) hess[itE] = hessNoLoop[el];
+                const set<size_t>& locations = noLoopEvalHessLocations[j1].at(j2);
+                for (size_t itE : locations)
+                    hess[itE] = hessNoLoop[el];
             }
         }
     }
 
-    virtual ~LoopFreeModel() { delete fun_; }
+    virtual ~LoopFreeModel() {
+        delete fun_;
+    }
+
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

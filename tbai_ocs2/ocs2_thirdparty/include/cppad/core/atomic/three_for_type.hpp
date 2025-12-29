@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_ATOMIC_THREE_FOR_TYPE_HPP
-#define CPPAD_CORE_ATOMIC_THREE_FOR_TYPE_HPP
+# ifndef CPPAD_CORE_ATOMIC_THREE_FOR_TYPE_HPP
+# define CPPAD_CORE_ATOMIC_THREE_FOR_TYPE_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -84,7 +84,7 @@ $end
 -----------------------------------------------------------------------------
 */
 
-namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
+namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 /*!
 \file atomic/three_for_type.hpp
 Third generation atomic type computation.
@@ -106,13 +106,13 @@ constants, dynamics, and variables
 */
 // BEGIN_PROTOTYPE
 template <class Base>
-bool atomic_three<Base>::for_type(const vector<Base> &parameter_x, const vector<ad_type_enum> &type_x,
-                                  vector<ad_type_enum> &type_y)
+bool atomic_three<Base>::for_type(
+    const vector<Base>&          parameter_x ,
+    const vector<ad_type_enum>&  type_x      ,
+    vector<ad_type_enum>&        type_y      )
 // END_PROTOTYPE
-{
-    return false;
-}
+{   return false; }
 
-}  // namespace CppAD
+} // END_CPPAD_NAMESPACE
 
-#endif
+# endif

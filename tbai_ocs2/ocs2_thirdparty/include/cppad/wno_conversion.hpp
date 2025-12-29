@@ -1,5 +1,5 @@
-#ifndef CPPAD_WNO_CONVERSION_HPP
-#define CPPAD_WNO_CONVERSION_HPP
+# ifndef CPPAD_WNO_CONVERSION_HPP
+# define CPPAD_WNO_CONVERSION_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -36,10 +36,10 @@ to a $icode%*%.cpp%$$ file).
 $end
 */
 
-#include <cppad/configure.hpp>
-#if CPPAD_COMPILER_HAS_CONVERSION_WARN
-#pragma GCC diagnostic ignored "-Wfloat-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
-#endif
+# include <cppad/configure.hpp>
+# if CPPAD_COMPILER_HAS_CONVERSION_WARN
+# pragma GCC diagnostic ignored "-Wfloat-conversion"
+# pragma GCC diagnostic ignored "-Wconversion"
+# endif
 
-#endif
+# endif

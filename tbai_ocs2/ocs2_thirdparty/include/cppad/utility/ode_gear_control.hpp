@@ -1,5 +1,5 @@
-#ifndef CPPAD_UTILITY_ODE_GEAR_CONTROL_HPP
-#define CPPAD_UTILITY_ODE_GEAR_CONTROL_HPP
+# ifndef CPPAD_UTILITY_ODE_GEAR_CONTROL_HPP
+# define CPPAD_UTILITY_ODE_GEAR_CONTROL_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -362,31 +362,59 @@ $end
 */
 
 // link exp and log for float and double
-#include <cppad/base_require.hpp>
-#include <cppad/utility/ode_gear.hpp>
+# include <cppad/base_require.hpp>
 
-namespace CppAD {  // Begin CppAD namespace
+# include <cppad/utility/ode_gear.hpp>
+
+namespace CppAD { // Begin CppAD namespace
 
 template <class Scalar, class Vector, class Fun>
-Vector OdeGearControl(Fun &F, size_t M, const Scalar &ti, const Scalar &tf, const Vector &xi, const Scalar &smin,
-                      const Scalar &smax, Scalar &sini, const Vector &eabs, const Scalar &erel, Vector &ef,
-                      Vector &maxabs, size_t &nstep) {
+Vector OdeGearControl(
+    Fun             &F     ,
+    size_t           M     ,
+    const Scalar    &ti    ,
+    const Scalar    &tf    ,
+    const Vector    &xi    ,
+    const Scalar    &smin  ,
+    const Scalar    &smax  ,
+    Scalar          &sini  ,
+    const Vector    &eabs  ,
+    const Scalar    &erel  ,
+    Vector          &ef    ,
+    Vector          &maxabs,
+    size_t          &nstep )
+{
     // check simple vector class specifications
     CheckSimpleVector<Scalar, Vector>();
 
     // dimension of the state space
     size_t n = size_t(xi.size());
 
-    CPPAD_ASSERT_KNOWN(M >= 1, "Error in OdeGearControl: M is less than one");
-    CPPAD_ASSERT_KNOWN(smin <= smax, "Error in OdeGearControl: smin is greater than smax");
-    CPPAD_ASSERT_KNOWN(sini <= smax, "Error in OdeGearControl: sini is greater than smax");
-    CPPAD_ASSERT_KNOWN(size_t(eabs.size()) == n, "Error in OdeGearControl: size of eabs is not equal to n");
-    CPPAD_ASSERT_KNOWN(size_t(maxabs.size()) == n, "Error in OdeGearControl: size of maxabs is not equal to n");
+    CPPAD_ASSERT_KNOWN(
+        M >= 1,
+        "Error in OdeGearControl: M is less than one"
+    );
+    CPPAD_ASSERT_KNOWN(
+        smin <= smax,
+        "Error in OdeGearControl: smin is greater than smax"
+    );
+    CPPAD_ASSERT_KNOWN(
+        sini <= smax,
+        "Error in OdeGearControl: sini is greater than smax"
+    );
+    CPPAD_ASSERT_KNOWN(
+        size_t(eabs.size()) == n,
+        "Error in OdeGearControl: size of eabs is not equal to n"
+    );
+    CPPAD_ASSERT_KNOWN(
+        size_t(maxabs.size()) == n,
+        "Error in OdeGearControl: size of maxabs is not equal to n"
+    );
 
     // some constants
     const Scalar zero(0);
     const Scalar one(1);
-    const Scalar one_plus(Scalar(3) / Scalar(2));
+    const Scalar one_plus( Scalar(3) / Scalar(2) );
     const Scalar two(2);
     const Scalar ten(10);
 
@@ -397,105 +425,120 @@ Vector OdeGearControl(Fun &F, size_t M, const Scalar &ti, const Scalar &tf, cons
     Scalar step, sprevious, lambda, axi, a, root, r;
 
     // vectors of Scalars
-    Vector T(M + 1);
-    Vector X((M + 1) * n);
+    Vector T  (M + 1);
+    Vector X( (M + 1) * n );
     Vector e(n);
     Vector xf(n);
 
     // initial integer values
     size_t m = 1;
-    nstep = 0;
+    nstep    = 0;
 
     // initialize T
     T[0] = ti;
 
     // initialize X, ef, maxabs
-    for (i = 0; i < n; i++)
-        for (i = 0; i < n; i++) {
-            X[i] = xi[i];
-            ef[i] = zero;
-            X[i] = xi[i];
-            if (zero <= xi[i])
-                maxabs[i] = xi[i];
-            else
-                maxabs[i] = -xi[i];
-        }
+    for(i = 0; i < n; i++)
+    for(i = 0; i < n; i++)
+    {   X[i] = xi[i];
+        ef[i] = zero;
+        X[i]  = xi[i];
+        if( zero <= xi[i] )
+            maxabs[i] = xi[i];
+        else
+            maxabs[i] = - xi[i];
+
+    }
 
     // initial step size
     step = smin;
 
-    while (T[m - 1] < tf) {
-        sprevious = step;
+    while( T[m-1] < tf )
+    {   sprevious = step;
 
         // check maximum
-        if (smax <= step) step = smax;
+        if( smax <= step )
+            step = smax;
 
         // check minimum
-        if (m < M) {
-            if (step <= sini) step = sini;
-        } else if (step <= smin)
-            step = smin;
+        if( m < M )
+        {   if( step <= sini )
+                step = sini;
+        }
+        else
+            if( step <= smin )
+                step = smin;
 
         // check if near the end
-        if (tf <= T[m - 1] + one_plus * step)
+        if( tf <= T[m-1] + one_plus * step )
             T[m] = tf;
         else
-            T[m] = T[m - 1] + step;
+            T[m] = T[m-1] + step;
 
         // try using this step size
         nstep++;
         OdeGear(F, m, n, T, X, e);
-        step = T[m] - T[m - 1];
+        step = T[m] - T[m-1];
 
         // compute value of lambda for this step
-        lambda = Scalar(10) * sprevious / step;
-        for (i = 0; i < n; i++) {
-            axi = X[m * n + i];
-            if (axi <= zero) axi = -axi;
-            a = eabs[i] + erel * axi;
-            if (e[i] > zero) {
-                if (m == 1)
+        lambda = Scalar(10) *  sprevious / step;
+        for(i = 0; i < n; i++)
+        {   axi = X[m * n + i];
+            if( axi <= zero )
+                axi = - axi;
+            a  = eabs[i] + erel * axi;
+            if( e[i] > zero )
+            {   if( m == 1 )
                     root = (a / e[i]) / ten;
-                else {
-                    r = (a / e[i]) * step / (tf - ti);
-                    root = exp(log(r) / Scalar(m - 1));
+                else
+                {   r = ( a / e[i] ) * step / (tf - ti);
+                    root = exp( log(r) / Scalar(m-1) );
                 }
-                if (root <= lambda) lambda = root;
+                if( root <= lambda )
+                    lambda = root;
             }
         }
 
         bool advance;
-        if (m == M)
+        if( m == M )
             advance = one <= lambda || step <= one_plus * smin;
         else
             advance = one <= lambda || step <= one_plus * sini;
 
-        if (advance) {  // accept the results of this time step
-            CPPAD_ASSERT_UNKNOWN(m <= M);
-            if (m == M) {  // shift for next step
-                for (k = 0; k < m; k++) {
-                    T[k] = T[k + 1];
-                    for (i = 0; i < n; i++) X[k * n + i] = X[(k + 1) * n + i];
+
+        if( advance )
+        {   // accept the results of this time step
+            CPPAD_ASSERT_UNKNOWN( m <= M );
+            if( m == M )
+            {   // shift for next step
+                for(k = 0; k < m; k++)
+                {   T[k] = T[k+1];
+                    for(i = 0; i < n; i++)
+                        X[k*n + i] = X[(k+1)*n + i];
                 }
             }
             // update ef and maxabs
-            for (i = 0; i < n; i++) {
-                ef[i] = ef[i] + e[i];
+            for(i = 0; i < n; i++)
+            {   ef[i] = ef[i] + e[i];
                 axi = X[m * n + i];
-                if (axi <= zero) axi = -axi;
-                if (axi > maxabs[i]) maxabs[i] = axi;
+                if( axi <= zero )
+                    axi = - axi;
+                if( axi > maxabs[i] )
+                    maxabs[i] = axi;
             }
-            if (m != M) m++;  // all we need do in this case
+            if( m != M )
+                m++;  // all we need do in this case
         }
 
         // new step suggested by error criteria
-        step = std::min(lambda, ten) * step / two;
+        step = std::min(lambda , ten) * step / two;
     }
-    for (i = 0; i < n; i++) xf[i] = X[(m - 1) * n + i];
+    for(i = 0; i < n; i++)
+        xf[i] = X[(m-1) * n + i];
 
     return xf;
 }
 
-}  // namespace CppAD
+} // End CppAD namespace
 
-#endif
+# endif

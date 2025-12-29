@@ -16,11 +16,11 @@
  * Author: Joao Leal
  */
 
-#define CPPAD_CG_C_LANG_FUNCNAME(fn)                   \
-    inline virtual const std::string &fn##FuncName() { \
-        static const std::string name(#fn);            \
-        return name;                                   \
-    }
+#define CPPAD_CG_C_LANG_FUNCNAME(fn) \
+inline virtual const std::string& fn ## FuncName() {\
+    static const std::string name(#fn);\
+    return name;\
+}
 
 namespace CppAD {
 namespace cg {
@@ -30,17 +30,15 @@ namespace cg {
  *
  * @author Joao Leal
  */
-template <class Base>
+template<class Base>
 class LanguageC : public Language<Base> {
-   public:
+public:
     using Node = OperationNode<Base>;
     using Arg = Argument<Base>;
-
-   public:
+public:
     static const std::string U_INDEX_TYPE;
     static const std::string ATOMICFUN_STRUCT_DEFINITION;
-
-   protected:
+protected:
     static const std::string _C_COMP_OP_LT;
     static const std::string _C_COMP_OP_LE;
     static const std::string _C_COMP_OP_EQ;
@@ -53,10 +51,9 @@ class LanguageC : public Language<Base> {
     static const std::string _ATOMIC_TY;
     static const std::string _ATOMIC_PX;
     static const std::string _ATOMIC_PY;
-
-   private:
-    class AtomicFuncArray;  // forward declaration
-   protected:
+private:
+    class AtomicFuncArray; //forward declaration
+protected:
     // the type name of the Base class (e.g. "double")
     const std::string _baseTypeName;
     // spaces for 1 level indentation
@@ -74,7 +71,7 @@ class LanguageC : public Language<Base> {
     // output stream for the generated source code
     std::ostringstream _code;
     // creates the variable names
-    VariableNameGenerator<Base> *_nameGen;
+    VariableNameGenerator<Base>* _nameGen;
     // auxiliary string stream
     std::ostringstream _ss;
     //
@@ -87,9 +84,9 @@ class LanguageC : public Language<Base> {
     // (some IDs may be the same as the independent variables when dep = indep)
     std::map<size_t, size_t> _dependentIDs;
     // the dependent variable vector
-    const ArrayView<CG<Base>> *_dependent;
+    const ArrayView<CG<Base> >* _dependent;
     // the temporary variables that may require a declaration
-    std::map<size_t, Node *> _temporary;
+    std::map<size_t, Node*> _temporary;
     // the operator used for assignment of dependent variables
     std::string _depAssignOperation;
     // whether or not to ignore assignment of constant zero values to dependent variables
@@ -101,68 +98,84 @@ class LanguageC : public Language<Base> {
     // the maximum number of operations per variable assignment
     size_t _maxOperationsPerAssignment;
     //  maps file names to with their contents
-    std::map<std::string, std::string> *_sources;
+    std::map<std::string, std::string>* _sources;
     // the values in the temporary array
-    std::vector<const Arg *> _tmpArrayValues;
+    std::vector<const Arg*> _tmpArrayValues;
     // the values in the temporary sparse array
-    std::vector<const Arg *> _tmpSparseArrayValues;
+    std::vector<const Arg*> _tmpSparseArrayValues;
     // the current state of Array structures used by atomic functions
     std::map<std::string, AtomicFuncArray> _atomicFuncArrays;
     // indexes defined as function arguments
-    std::vector<const Node *> _funcArgIndexes;
-    std::vector<const LoopStartOperationNode<Base> *> _currentLoops;
+    std::vector<const Node*> _funcArgIndexes;
+    std::vector<const LoopStartOperationNode<Base>*> _currentLoops;
     // the maximum precision used to print values
     size_t _parameterPrecision;
-
-   private:
+private:
     std::vector<std::string> funcArgDcl_;
     std::vector<std::string> localFuncArgDcl_;
     std::string localFuncArgs_;
     std::string auxArrayName_;
 
-   public:
+public:
+
     /**
      * Creates a C language source code generator
      *
      * @param varTypeName variable data type (e.g. double)
      * @param spaces number of spaces for indentations
      */
-    explicit LanguageC(std::string varTypeName, size_t spaces = 3)
-        : _baseTypeName(std::move(varTypeName)),
-          _spaces(spaces, ' '),
-          _info(nullptr),
-          _inArgName("in"),
-          _outArgName("out"),
-          _atomicArgName("atomicFun"),
-          _nameGen(nullptr),
-          _streamStack(_code),
-          _independentSize(0),    // not really required (but it avoids warnings)
-          _minTemporaryVarID(0),  // not really required (but it avoids warnings)
-          _dependent(nullptr),
-          _depAssignOperation("="),
-          _ignoreZeroDepAssign(false),
-          _maxAssignmentsPerFunction(0),
-          _maxOperationsPerAssignment((std::numeric_limits<size_t>::max)()),
-          _sources(nullptr),
-          _parameterPrecision(std::numeric_limits<Base>::digits10) {}
+    explicit LanguageC(std::string varTypeName,
+                       size_t spaces = 3) :
+        _baseTypeName(std::move(varTypeName)),
+        _spaces(spaces, ' '),
+        _info(nullptr),
+        _inArgName("in"),
+        _outArgName("out"),
+        _atomicArgName("atomicFun"),
+        _nameGen(nullptr),
+        _streamStack(_code),
+        _independentSize(0), // not really required (but it avoids warnings)
+        _minTemporaryVarID(0), // not really required (but it avoids warnings)
+        _dependent(nullptr),
+        _depAssignOperation("="),
+        _ignoreZeroDepAssign(false),
+        _maxAssignmentsPerFunction(0),
+        _maxOperationsPerAssignment((std::numeric_limits<size_t>::max)()),
+        _sources(nullptr),
+        _parameterPrecision(std::numeric_limits<Base>::digits10) {
+    }
 
     inline virtual ~LanguageC() = default;
 
-    inline const std::string &getArgumentIn() const { return _inArgName; }
+    inline const std::string& getArgumentIn() const {
+        return _inArgName;
+    }
 
-    inline void setArgumentIn(const std::string &inArgName) { _inArgName = inArgName; }
+    inline void setArgumentIn(const std::string& inArgName) {
+        _inArgName = inArgName;
+    }
 
-    inline const std::string &getArgumentOut() const { return _outArgName; }
+    inline const std::string& getArgumentOut() const {
+        return _outArgName;
+    }
 
-    inline void setArgumentOut(const std::string &outArgName) { _outArgName = outArgName; }
+    inline void setArgumentOut(const std::string& outArgName) {
+        _outArgName = outArgName;
+    }
 
-    inline const std::string &getArgumentAtomic() const { return _atomicArgName; }
+    inline const std::string& getArgumentAtomic() const {
+        return _atomicArgName;
+    }
 
-    inline void setArgumentAtomic(const std::string &atomicArgName) { _atomicArgName = atomicArgName; }
+    inline void setArgumentAtomic(const std::string& atomicArgName) {
+        _atomicArgName = atomicArgName;
+    }
 
-    inline const std::string &getDependentAssignOperation() const { return _depAssignOperation; }
+    inline const std::string& getDependentAssignOperation() const {
+        return _depAssignOperation;
+    }
 
-    inline void setDependentAssignOperation(const std::string &depAssignOperation) {
+    inline void setDependentAssignOperation(const std::string& depAssignOperation) {
         _depAssignOperation = depAssignOperation;
     }
 
@@ -173,7 +186,9 @@ class LanguageC : public Language<Base> {
      *
      * @return true if source code to explicitly set dependent variables to zero will NOT be created.
      */
-    inline bool isIgnoreZeroDepAssign() const { return _ignoreZeroDepAssign; }
+    inline bool isIgnoreZeroDepAssign() const {
+        return _ignoreZeroDepAssign;
+    }
 
     /**
      * Whether or not to generate expressions to set dependent variables to zero.
@@ -182,20 +197,26 @@ class LanguageC : public Language<Base> {
      *
      * @param ignore true if source code to explicitly set dependent variables to zero will NOT be created.
      */
-    inline void setIgnoreZeroDepAssign(bool ignore) { _ignoreZeroDepAssign = ignore; }
+    inline void setIgnoreZeroDepAssign(bool ignore) {
+        _ignoreZeroDepAssign = ignore;
+    }
 
-    virtual void setGenerateFunction(const std::string &functionName) { _functionName = functionName; }
+    virtual void setGenerateFunction(const std::string& functionName) {
+        _functionName = functionName;
+    }
 
-    virtual void setFunctionIndexArgument(const Node &funcArgIndex) {
+    virtual void setFunctionIndexArgument(const Node& funcArgIndex) {
         _funcArgIndexes.resize(1);
         _funcArgIndexes[0] = &funcArgIndex;
     }
 
-    virtual void setFunctionIndexArguments(const std::vector<const Node *> &funcArgIndexes) {
+    virtual void setFunctionIndexArguments(const std::vector<const Node*>& funcArgIndexes) {
         _funcArgIndexes = funcArgIndexes;
     }
 
-    virtual const std::vector<const Node *> &getFunctionIndexArguments() const { return _funcArgIndexes; }
+    virtual const std::vector<const Node*>& getFunctionIndexArguments() const {
+        return _funcArgIndexes;
+    }
 
     /**
      * Provides the maximum precision used to print constant values in the
@@ -203,7 +224,9 @@ class LanguageC : public Language<Base> {
      *
      * @return the maximum number of digits
      */
-    virtual size_t getParameterPrecision() const { return _parameterPrecision; }
+    virtual size_t getParameterPrecision() const {
+        return _parameterPrecision;
+    }
 
     /**
      * Defines the maximum precision used to print constant values in the
@@ -211,7 +234,9 @@ class LanguageC : public Language<Base> {
      *
      * @param p the maximum number of digits
      */
-    virtual void setParameterPrecision(size_t p) { _parameterPrecision = p; }
+    virtual void setParameterPrecision(size_t p) {
+        _parameterPrecision = p;
+    }
 
     /**
      * Defines the maximum number of assignment per generated function.
@@ -225,7 +250,7 @@ class LanguageC : public Language<Base> {
      * @param sources A map where the file names are associated with their contents.
      */
     virtual void setMaxAssignmentsPerFunction(size_t maxAssignmentsPerFunction,
-                                              std::map<std::string, std::string> *sources) {
+                                              std::map<std::string, std::string>* sources) {
         _maxAssignmentsPerFunction = maxAssignmentsPerFunction;
         _sources = sources;
     }
@@ -235,7 +260,9 @@ class LanguageC : public Language<Base> {
      *
      * @return The maximum number of operations per variable assignment
      */
-    inline size_t getMaxOperationsPerAssignment() const { return _maxOperationsPerAssignment; }
+    inline size_t getMaxOperationsPerAssignment() const {
+        return _maxOperationsPerAssignment;
+    }
 
     /**
      * Defines the maximum number of operations per variable assignment.
@@ -247,16 +274,20 @@ class LanguageC : public Language<Base> {
         _maxOperationsPerAssignment = maxOperationsPerAssignment;
     }
 
-    inline std::string generateTemporaryVariableDeclaration(bool isWrapperFunction, bool zeroArrayDependents,
-                                                            const std::vector<int> &atomicMaxForward,
-                                                            const std::vector<int> &atomicMaxReverse) {
+    inline std::string generateTemporaryVariableDeclaration(bool isWrapperFunction,
+                                                            bool zeroArrayDependents,
+                                                            const std::vector<int>& atomicMaxForward,
+                                                            const std::vector<int>& atomicMaxReverse) {
         int maxForward = -1;
-        if (!atomicMaxForward.empty()) maxForward = *std::max_element(atomicMaxForward.begin(), atomicMaxForward.end());
+        if (!atomicMaxForward.empty())
+            maxForward = *std::max_element(atomicMaxForward.begin(), atomicMaxForward.end());
 
         int maxReverse = -1;
-        if (!atomicMaxReverse.empty()) maxReverse = *std::max_element(atomicMaxReverse.begin(), atomicMaxReverse.end());
+        if (!atomicMaxReverse.empty())
+            maxReverse = *std::max_element(atomicMaxReverse.begin(), atomicMaxReverse.end());
 
-        return generateTemporaryVariableDeclaration(isWrapperFunction, zeroArrayDependents, maxForward, maxReverse);
+        return generateTemporaryVariableDeclaration(isWrapperFunction, zeroArrayDependents,
+                                                    maxForward, maxReverse);
     }
 
     /**
@@ -275,14 +306,16 @@ class LanguageC : public Language<Base> {
      * @return the string with the declarations for the temporary variables
      */
     virtual std::string generateTemporaryVariableDeclaration(bool isWrapperFunction = false,
-                                                             bool zeroArrayDependents = false, int maxForwardOrder = -1,
+                                                             bool zeroArrayDependents = false,
+                                                             int maxForwardOrder = -1,
                                                              int maxReverseOrder = -1) {
         CPPADCG_ASSERT_UNKNOWN(_nameGen != nullptr);
 
         // declare variables
-        const std::vector<FuncArgument> &tmpArg = _nameGen->getTemporary();
+        const std::vector<FuncArgument>& tmpArg = _nameGen->getTemporary();
 
-        CPPADCG_ASSERT_KNOWN(tmpArg.size() == 3, "There must be two temporary variables")
+        CPPADCG_ASSERT_KNOWN(tmpArg.size() == 3,
+                             "There must be two temporary variables")
 
         _ss << _spaces << "// auxiliary variables\n";
         /**
@@ -294,18 +327,18 @@ class LanguageC : public Language<Base> {
                 _ss << _spaces << _baseTypeName << " " << tmpArg[0].name << "[" << size << "];\n";
             }
         } else if (_temporary.size() > 0) {
-            for (const std::pair<size_t, Node *> &p : _temporary) {
-                Node *var = p.second;
+            for (const std::pair<size_t, Node*>& p : _temporary) {
+                Node* var = p.second;
                 if (var->getName() == nullptr) {
                     var->setName(_nameGen->generateTemporary(*var, getVariableID(*var)));
                 }
             }
 
-            Node *var1 = _temporary.begin()->second;
-            const std::string &varName1 = *var1->getName();
+            Node* var1 = _temporary.begin()->second;
+            const std::string& varName1 = *var1->getName();
             _ss << _spaces << _baseTypeName << " " << varName1;
 
-            typename std::map<size_t, Node *>::const_iterator it = _temporary.begin();
+            typename std::map<size_t, Node*>::const_iterator it = _temporary.begin();
             for (it++; it != _temporary.end(); ++it) {
                 _ss << ", " << *it->second->getName();
             }
@@ -339,7 +372,7 @@ class LanguageC : public Language<Base> {
         }
 
         if ((isWrapperFunction && zeroArrayDependents) ||
-            (!isWrapperFunction && (arraySize > 0 || sArraySize > 0 || zeroArrayDependents))) {
+                (!isWrapperFunction && (arraySize > 0 || sArraySize > 0 || zeroArrayDependents))) {
             _ss << _spaces << U_INDEX_TYPE << " i;\n";
         }
 
@@ -353,23 +386,27 @@ class LanguageC : public Language<Base> {
         return code;
     }
 
-    inline void generateArrayContainersDeclaration(std::ostringstream &ss, const std::vector<int> &atomicMaxForward,
-                                                   const std::vector<int> &atomicMaxReverse) {
+    inline void generateArrayContainersDeclaration(std::ostringstream& ss,
+                                                   const std::vector<int>& atomicMaxForward,
+                                                   const std::vector<int>& atomicMaxReverse) {
         int maxForward = -1;
-        if (!atomicMaxForward.empty()) maxForward = *std::max_element(atomicMaxForward.begin(), atomicMaxForward.end());
+        if (!atomicMaxForward.empty())
+            maxForward = *std::max_element(atomicMaxForward.begin(), atomicMaxForward.end());
 
         int maxReverse = -1;
-        if (!atomicMaxReverse.empty()) maxReverse = *std::max_element(atomicMaxReverse.begin(), atomicMaxReverse.end());
+        if (!atomicMaxReverse.empty())
+            maxReverse = *std::max_element(atomicMaxReverse.begin(), atomicMaxReverse.end());
 
         generateArrayContainersDeclaration(ss, maxForward, maxReverse);
     }
 
-    virtual void generateArrayContainersDeclaration(std::ostringstream &ss, int maxForwardOrder = -1,
+    virtual void generateArrayContainersDeclaration(std::ostringstream& ss,
+                                                    int maxForwardOrder = -1,
                                                     int maxReverseOrder = -1) {
         if (maxForwardOrder >= 0 || maxReverseOrder >= 0) {
-            ss << _spaces << "Array " << _ATOMIC_TX << "[" << (std::max<int>(maxForwardOrder, maxReverseOrder) + 1)
-               << "];\n";
-            if (maxForwardOrder >= 0) ss << _spaces << "Array " << _ATOMIC_TY << ";\n";
+            ss << _spaces << "Array " << _ATOMIC_TX << "[" << (std::max<int>(maxForwardOrder, maxReverseOrder) + 1) << "];\n";
+            if (maxForwardOrder >= 0)
+                ss << _spaces << "Array " << _ATOMIC_TY << ";\n";
             if (maxReverseOrder >= 0) {
                 ss << _spaces << "Array " << _ATOMIC_PX << ";\n";
                 ss << _spaces << "Array " << _ATOMIC_PY << "[" << (maxReverseOrder + 1) << "];\n";
@@ -378,8 +415,9 @@ class LanguageC : public Language<Base> {
     }
 
     virtual std::string generateDependentVariableDeclaration() {
-        const std::vector<FuncArgument> &depArg = _nameGen->getDependent();
-        CPPADCG_ASSERT_KNOWN(!depArg.empty(), "There must be at least one dependent argument")
+        const std::vector<FuncArgument>& depArg = _nameGen->getDependent();
+        CPPADCG_ASSERT_KNOWN(!depArg.empty(),
+                             "There must be at least one dependent argument")
 
         _ss << _spaces << "//dependent variables\n";
         for (size_t i = 0; i < depArg.size(); i++) {
@@ -392,8 +430,9 @@ class LanguageC : public Language<Base> {
     }
 
     virtual std::string generateIndependentVariableDeclaration() {
-        const std::vector<FuncArgument> &indArg = _nameGen->getIndependent();
-        CPPADCG_ASSERT_KNOWN(!indArg.empty(), "There must be at least one independent argument")
+        const std::vector<FuncArgument>& indArg = _nameGen->getIndependent();
+        CPPADCG_ASSERT_KNOWN(!indArg.empty(),
+                             "There must be at least one independent argument")
 
         _ss << _spaces << "//independent variables\n";
         for (size_t i = 0; i < indArg.size(); i++) {
@@ -405,11 +444,14 @@ class LanguageC : public Language<Base> {
         return code;
     }
 
-    inline std::string generateArgumentAtomicDcl() const { return "struct LangCAtomicFun " + _atomicArgName; }
+    inline std::string generateArgumentAtomicDcl() const {
+        return "struct LangCAtomicFun " + _atomicArgName;
+    }
 
     virtual std::string generateFunctionArgumentsDcl() const {
         std::string args = generateFunctionIndexArgumentsDcl();
-        if (!args.empty()) args += ", ";
+        if (!args.empty())
+            args += ", ";
         args += generateDefaultFunctionArgumentsDcl();
 
         return args;
@@ -427,8 +469,9 @@ class LanguageC : public Language<Base> {
     }
 
     virtual std::vector<std::string> generateDefaultFunctionArgumentsDcl2() const {
-        return std::vector<std::string>{_baseTypeName + " const *const * " + _inArgName,
-                                        _baseTypeName + "*const * " + _outArgName, generateArgumentAtomicDcl()};
+        return std::vector<std::string> {_baseTypeName + " const *const * " + _inArgName,
+                                         _baseTypeName + "*const * " + _outArgName,
+                                         generateArgumentAtomicDcl()};
     }
 
     virtual std::string generateFunctionIndexArgumentsDcl() const {
@@ -491,21 +534,22 @@ class LanguageC : public Language<Base> {
      * @param arguments function arguments
      * @param arguments2 additional function arguments
      */
-    static inline void printFunctionDeclaration(std::ostringstream &out, const std::string &returnType,
-                                                const std::string &functionName,
-                                                const std::vector<std::string> &arguments,
-                                                const std::vector<std::string> &arguments2 = {}) {
+    static inline void printFunctionDeclaration(std::ostringstream& out,
+                                                const std::string& returnType,
+                                                const std::string& functionName,
+                                                const std::vector<std::string>& arguments,
+                                                const std::vector<std::string>& arguments2 = {}) {
         out << returnType << " " << functionName << "(";
         size_t i = 0;
         size_t offset = returnType.size() + 1 + functionName.size() + 1;
-        for (const std::string &a : arguments) {
+        for (const std::string& a : arguments) {
             if (i > 0) {
                 out << ",\n" << std::setw(offset) << " ";
             }
             out << a;
             ++i;
         }
-        for (const std::string &a : arguments2) {
+        for (const std::string& a : arguments2) {
             if (i > 0) {
                 out << ",\n" << std::setw(offset) << " ";
             }
@@ -515,10 +559,10 @@ class LanguageC : public Language<Base> {
         out << ")";
     }
 
-    static inline void printIndexCondExpr(std::ostringstream &out, const std::vector<size_t> &info,
-                                          const std::string &index) {
-        CPPADCG_ASSERT_KNOWN(info.size() > 1 && info.size() % 2 == 0,
-                             "Invalid number of information elements for an index condition expression operation")
+    static inline void printIndexCondExpr(std::ostringstream& out,
+                                          const std::vector<size_t>& info,
+                                          const std::string& index) {
+        CPPADCG_ASSERT_KNOWN(info.size() > 1 && info.size() % 2 == 0, "Invalid number of information elements for an index condition expression operation")
 
         size_t infoSize = info.size();
         for (size_t e = 0; e < infoSize; e += 2) {
@@ -534,14 +578,16 @@ class LanguageC : public Language<Base> {
             } else if (max == (std::numeric_limits<size_t>::max)()) {
                 out << min << " <= " << index;
             } else {
-                if (infoSize != 2) out << "(";
+                if (infoSize != 2)
+                    out << "(";
 
                 if (max - min == 1)
                     out << min << " == " << index << " || " << index << " == " << max;
                 else
                     out << min << " <= " << index << " && " << index << " <= " << max;
 
-                if (infoSize != 2) out << ")";
+                if (infoSize != 2)
+                    out << ")";
             }
         }
     }
@@ -550,49 +596,72 @@ class LanguageC : public Language<Base> {
      *
      **********************************************************************/
 
-    static inline void printStaticIndexArray(std::ostringstream &os, const std::string &name,
-                                             const std::vector<size_t> &values);
+    static inline void printStaticIndexArray(std::ostringstream& os,
+                                             const std::string& name,
+                                             const std::vector<size_t>& values);
 
-    static inline void printStaticIndexMatrix(std::ostringstream &os, const std::string &name,
-                                              const std::map<size_t, std::map<size_t, size_t>> &values);
+    static inline void printStaticIndexMatrix(std::ostringstream& os,
+                                              const std::string& name,
+                                              const std::map<size_t, std::map<size_t, size_t> >& values);
 
     /***********************************************************************
      * index patterns
      **********************************************************************/
-    static inline void generateNames4RandomIndexPatterns(const std::set<RandomIndexPattern *> &randomPatterns);
+    static inline void generateNames4RandomIndexPatterns(const std::set<RandomIndexPattern*>& randomPatterns);
 
-    static inline void printRandomIndexPatternDeclaration(std::ostringstream &os, const std::string &identation,
-                                                          const std::set<RandomIndexPattern *> &randomPatterns);
+    static inline void printRandomIndexPatternDeclaration(std::ostringstream& os,
+                                                          const std::string& identation,
+                                                          const std::set<RandomIndexPattern*>& randomPatterns);
 
-    static inline std::string indexPattern2String(const IndexPattern &ip, const Node &index);
+    static inline std::string indexPattern2String(const IndexPattern& ip,
+                                                  const Node& index);
 
-    static inline std::string indexPattern2String(const IndexPattern &ip, const std::string &index);
+    static inline std::string indexPattern2String(const IndexPattern& ip,
+                                                  const std::string& index);
 
-    static inline std::string indexPattern2String(const IndexPattern &ip, const std::vector<const Node *> &indexes);
+    static inline std::string indexPattern2String(const IndexPattern& ip,
+                                                  const std::vector<const Node*>& indexes);
 
-    static inline std::string indexPattern2String(const IndexPattern &ip,
-                                                  const std::vector<const std::string *> &indexes);
+    static inline std::string indexPattern2String(const IndexPattern& ip,
+                                                  const std::vector<const std::string*>& indexes);
 
-    static inline std::string linearIndexPattern2String(const LinearIndexPattern &lip, const Node &index);
+    static inline std::string linearIndexPattern2String(const LinearIndexPattern& lip,
+                                                        const Node& index);
 
-    static inline std::string linearIndexPattern2String(const LinearIndexPattern &lip, const std::string &index);
+    static inline std::string linearIndexPattern2String(const LinearIndexPattern& lip,
+                                                        const std::string& index);
 
-    static inline bool isOffsetBy(const IndexPattern *ip, const IndexPattern *refIp, long offset);
+    static inline bool isOffsetBy(const IndexPattern* ip,
+                                  const IndexPattern* refIp,
+                                  long offset);
 
-    static inline bool isOffsetBy(const LinearIndexPattern *lIp, const LinearIndexPattern *refLIp, long offset);
+    static inline bool isOffsetBy(const LinearIndexPattern* lIp,
+                                  const LinearIndexPattern* refLIp,
+                                  long offset);
 
-    static inline bool isOffsetBy(const LinearIndexPattern &lIp, const LinearIndexPattern &refLIp, long offset);
+    static inline bool isOffsetBy(const LinearIndexPattern& lIp,
+                                  const LinearIndexPattern& refLIp,
+                                  long offset);
 
-    static inline bool isOffsetBy(const SectionedIndexPattern *sIp, const SectionedIndexPattern *refSecp, long offset);
 
-    static inline bool isOffsetBy(const SectionedIndexPattern &lIp, const SectionedIndexPattern &refSecp, long offset);
+    static inline bool isOffsetBy(const SectionedIndexPattern* sIp,
+                                  const SectionedIndexPattern* refSecp,
+                                  long offset);
 
-    static inline Plane2DIndexPattern *encapsulateIndexPattern(const LinearIndexPattern &refLIp, size_t starti);
+    static inline bool isOffsetBy(const SectionedIndexPattern& lIp,
+                                  const SectionedIndexPattern& refSecp,
+                                  long offset);
 
-    static inline Plane2DIndexPattern *encapsulateIndexPattern(const SectionedIndexPattern &refSecp, size_t starti);
+    static inline Plane2DIndexPattern* encapsulateIndexPattern(const LinearIndexPattern& refLIp,
+                                                               size_t starti);
 
-   protected:
-    void generateSourceCode(std::ostream &out, std::unique_ptr<LanguageGenerationData<Base>> info) override {
+    static inline Plane2DIndexPattern* encapsulateIndexPattern(const SectionedIndexPattern& refSecp,
+                                                               size_t starti);
+protected:
+
+    void generateSourceCode(std::ostream& out,
+                            std::unique_ptr<LanguageGenerationData<Base> > info) override {
+
         const bool createFunction = !_functionName.empty();
         const bool multiFunction = createFunction && _maxAssignmentsPerFunction > 0 && _sources != nullptr;
 
@@ -615,8 +684,8 @@ class LanguageC : public Language<Base> {
         _dependent = &_info->dependent;
         _nameGen = &_info->nameGen;
         _minTemporaryVarID = _info->minTemporaryVarID;
-        const ArrayView<CG<Base>> &dependent = _info->dependent;
-        const std::vector<Node *> &variableOrder = _info->variableOrder;
+        const ArrayView<CG<Base> >& dependent = _info->dependent;
+        const std::vector<Node*>& variableOrder = _info->variableOrder;
 
         _tmpArrayValues.resize(_nameGen->getMaxTemporaryArrayVariableID());
         std::fill(_tmpArrayValues.begin(), _tmpArrayValues.end(), nullptr);
@@ -631,9 +700,9 @@ class LanguageC : public Language<Base> {
         /**
          * generate variable names
          */
-        // generate names for the independent variables
+        //generate names for the independent variables
         for (size_t j = 0; j < _independentSize; j++) {
-            Node &op = *_info->independent[j];
+            Node& op = *_info->independent[j];
             if (op.getName() == nullptr) {
                 op.setName(_nameGen->generateIndependent(op, getVariableID(op)));
             }
@@ -641,11 +710,11 @@ class LanguageC : public Language<Base> {
 
         // generate names for the dependent variables (must be after naming independents)
         for (size_t i = 0; i < dependent.size(); i++) {
-            Node *node = dependent[i].getOperationNode();
+            Node* node = dependent[i].getOperationNode();
             if (node != nullptr && node->getOperationType() != CGOpCode::LoopEnd && node->getName() == nullptr) {
                 if (node->getOperationType() == CGOpCode::LoopIndexedDep) {
                     size_t pos = node->getInfo()[0];
-                    const IndexPattern *ip = _info->loopDependentIndexPatterns[pos];
+                    const IndexPattern* ip = _info->loopDependentIndexPatterns[pos];
                     node->setName(_nameGen->generateIndexedDependent(*node, getVariableID(*node), *ip));
 
                 } else {
@@ -657,12 +726,13 @@ class LanguageC : public Language<Base> {
         /**
          * function variable declaration
          */
-        const std::vector<FuncArgument> &indArg = _nameGen->getIndependent();
-        const std::vector<FuncArgument> &depArg = _nameGen->getDependent();
-        const std::vector<FuncArgument> &tmpArg = _nameGen->getTemporary();
+        const std::vector<FuncArgument>& indArg = _nameGen->getIndependent();
+        const std::vector<FuncArgument>& depArg = _nameGen->getDependent();
+        const std::vector<FuncArgument>& tmpArg = _nameGen->getTemporary();
         CPPADCG_ASSERT_KNOWN(!indArg.empty() && !depArg.empty(),
                              "There must be at least one dependent and one independent argument")
-        CPPADCG_ASSERT_KNOWN(tmpArg.size() == 3, "There must be three temporary variables")
+        CPPADCG_ASSERT_KNOWN(tmpArg.size() == 3,
+                             "There must be three temporary variables")
 
         if (createFunction) {
             funcArgDcl_ = generateFunctionArgumentsDcl2();
@@ -674,8 +744,11 @@ class LanguageC : public Language<Base> {
             localFuncArgDcl_.push_back(argumentDeclaration(tmpArg[2]));
             localFuncArgDcl_.push_back(U_INDEX_TYPE + "* " + _C_SPARSE_INDEX_ARRAY);
 
-            localFuncArgs_ = generateDefaultFunctionArguments() + ", " + tmpArg[0].name + ", " + tmpArg[1].name + ", " +
-                             tmpArg[2].name + ", " + _C_SPARSE_INDEX_ARRAY;
+            localFuncArgs_ = generateDefaultFunctionArguments() + ", "
+                    + tmpArg[0].name + ", "
+                    + tmpArg[1].name + ", "
+                    + tmpArg[2].name + ", "
+                    + _C_SPARSE_INDEX_ARRAY;
         }
 
         auxArrayName_ = tmpArg[1].name + "p";
@@ -687,7 +760,7 @@ class LanguageC : public Language<Base> {
         std::set<size_t> dependentDuplicates;
 
         for (size_t i = 0; i < dependent.size(); i++) {
-            Node *node = dependent[i].getOperationNode();
+            Node* node = dependent[i].getOperationNode();
             if (node != nullptr) {
                 CGOpCode type = node->getOperationType();
                 if (type != CGOpCode::Inv && type != CGOpCode::LoopEnd) {
@@ -716,13 +789,11 @@ class LanguageC : public Language<Base> {
          */
         if (variableOrder.size() > 0) {
             // generate names for temporary variables
-            for (Node *node : variableOrder) {
+            for (Node* node : variableOrder) {
                 CGOpCode op = node->getOperationType();
                 if (!isDependent(*node) && op != CGOpCode::IndexDeclaration) {
-                    // variable names for temporaries must always be created since they might have been used before with
-                    // a different name/id
-                    if (requiresVariableName(*node) && op != CGOpCode::ArrayCreation &&
-                        op != CGOpCode::SparseArrayCreation) {
+                    // variable names for temporaries must always be created since they might have been used before with a different name/id
+                    if (requiresVariableName(*node) && op != CGOpCode::ArrayCreation && op != CGOpCode::SparseArrayCreation) {
                         node->setName(_nameGen->generateTemporary(*node, getVariableID(*node)));
                     } else if (op == CGOpCode::ArrayCreation) {
                         node->setName(_nameGen->generateTemporaryArray(*node, getVariableID(*node)));
@@ -738,10 +809,9 @@ class LanguageC : public Language<Base> {
             if (_info->zeroDependents) {
                 // zero initial values
                 for (size_t i = 0; i < depArg.size(); i++) {
-                    const FuncArgument &a = depArg[i];
+                    const FuncArgument& a = depArg[i];
                     if (a.array) {
-                        _code << _indentation << "for(i = 0; i < " << _dependent->size() << "; i++) " << a.name
-                              << "[i]";
+                        _code << _indentation << "for(i = 0; i < " << _dependent->size() << "; i++) " << a.name << "[i]";
                     } else {
                         _code << _indentation << _nameGen->generateDependent(i);
                     }
@@ -753,7 +823,7 @@ class LanguageC : public Language<Base> {
 
             size_t assignCount = 0;
             for (size_t i = 0; i < variableOrder.size(); ++i) {
-                Node *it = variableOrder[i];
+                Node* it = variableOrder[i];
 
                 // check if a new function should start
                 if (assignCount >= _maxAssignmentsPerFunction && multiFunction && _currentLoops.empty()) {
@@ -761,14 +831,13 @@ class LanguageC : public Language<Base> {
                     saveLocalFunction(localFuncNames, localFuncNames.empty() && _info->zeroDependents);
                 }
 
-                Node &node = *it;
+                Node& node = *it;
 
                 // a dependent variable assigned by a loop does require any source code (its done inside the loop)
                 if (node.getOperationType() == CGOpCode::DependentRefRhs) {
-                    continue;  // nothing to do (this operation is right hand side only)
-                } else if (node.getOperationType() ==
-                           CGOpCode::TmpDcl) {  // temporary variable declaration does not need any source code here
-                    continue;                   // nothing to do (bogus operation)
+                    continue; // nothing to do (this operation is right hand side only)
+                } else if (node.getOperationType() == CGOpCode::TmpDcl) { // temporary variable declaration does not need any source code here
+                    continue; // nothing to do (bogus operation)
                 } else if (node.getOperationType() == CGOpCode::LoopIndexedDep) {
                     // try to detect a pattern and use a loop instead of individual assignments
                     i = printLoopIndexDeps(variableOrder, i);
@@ -776,7 +845,7 @@ class LanguageC : public Language<Base> {
                 }
 
                 assignCount += printAssignment(node);
-
+                
                 CPPAD_ASSERT_KNOWN(_streamStack.empty(), "Error writing all operations to output stream")
             }
 
@@ -790,27 +859,26 @@ class LanguageC : public Language<Base> {
             /**
              * Create the wrapper function which calls the other functions
              */
-            CPPADCG_ASSERT_KNOWN(
-                tmpArg[0].array,
-                "The temporary variables must be saved in an array in order to generate multiple functions")
+            CPPADCG_ASSERT_KNOWN(tmpArg[0].array,
+                                 "The temporary variables must be saved in an array in order to generate multiple functions")
 
             _code << ATOMICFUN_STRUCT_DEFINITION << "\n\n";
             // forward declarations
             std::string localFuncArgDcl2 = implode(localFuncArgDcl_, ", ");
-            for (auto &localFuncName : localFuncNames) {
+            for (auto & localFuncName : localFuncNames) {
                 _code << "void " << localFuncName << "(" << localFuncArgDcl2 << ");\n";
             }
             _code << "\n";
             printFunctionDeclaration(_code, "void", _functionName, funcArgDcl_);
-            _code << " {\n";
+            _code  << " {\n";
             _nameGen->customFunctionVariableDeclarations(_code);
             _code << generateIndependentVariableDeclaration() << "\n";
             _code << generateDependentVariableDeclaration() << "\n";
-            _code << generateTemporaryVariableDeclaration(true, false, _info->atomicFunctionsMaxForward,
-                                                          _info->atomicFunctionsMaxReverse)
-                  << "\n";
+            _code << generateTemporaryVariableDeclaration(true, false,
+                                                          _info->atomicFunctionsMaxForward,
+                                                          _info->atomicFunctionsMaxReverse) << "\n";
             _nameGen->prepareCustomFunctionVariables(_code);
-            for (auto &localFuncName : localFuncNames) {
+            for (auto & localFuncName : localFuncNames) {
                 _code << _spaces << localFuncName << "(" << localFuncArgs_ << ");\n";
             }
         }
@@ -819,9 +887,9 @@ class LanguageC : public Language<Base> {
         if (!dependentDuplicates.empty()) {
             _code << _spaces << "// variable duplicates: " << dependentDuplicates.size() << "\n";
             for (size_t index : dependentDuplicates) {
-                const CG<Base> &dep = (*_dependent)[index];
+                const CG<Base>& dep = (*_dependent)[index];
                 std::string varName = _nameGen->generateDependent(index);
-                const std::string &origVarName = *dep.getOperationNode()->getName();
+                const std::string& origVarName = *dep.getOperationNode()->getName();
 
                 _code << _spaces << varName << " " << _depAssignOperation << " " << origVarName << ";\n";
             }
@@ -847,7 +915,7 @@ class LanguageC : public Language<Base> {
                     commentWritten = true;
                 }
                 std::string varName = _nameGen->generateDependent(i);
-                const std::string &indepName = *dependent[i].getOperationNode()->getName();
+                const std::string& indepName = *dependent[i].getOperationNode()->getName();
                 _code << _spaces << varName << " " << _depAssignOperation << " " << indepName << ";\n";
             }
         }
@@ -858,7 +926,7 @@ class LanguageC : public Language<Base> {
         if (createFunction) {
             if (localFuncNames.empty()) {
                 _ss << "#include <math.h>\n"
-                       "#include <stdio.h>\n\n"
+                        "#include <stdio.h>\n\n"
                     << ATOMICFUN_STRUCT_DEFINITION << "\n\n";
                 printFunctionDeclaration(_ss, "void", _functionName, funcArgDcl_);
                 _ss << " {\n";
@@ -867,8 +935,7 @@ class LanguageC : public Language<Base> {
                 _ss << generateDependentVariableDeclaration() << "\n";
                 _ss << generateTemporaryVariableDeclaration(false, _info->zeroDependents,
                                                             _info->atomicFunctionsMaxForward,
-                                                            _info->atomicFunctionsMaxReverse)
-                    << "\n";
+                                                            _info->atomicFunctionsMaxReverse) << "\n";
                 _nameGen->prepareCustomFunctionVariables(_ss);
                 _ss << _code.str();
                 _nameGen->finalizeCustomFunctionVariables(_ss);
@@ -890,11 +957,16 @@ class LanguageC : public Language<Base> {
         }
     }
 
-    inline size_t getVariableID(const Node &node) const { return _info->varId[node]; }
+    inline size_t getVariableID(const Node& node) const {
+        return _info->varId[node];
+    }
 
-    inline unsigned printAssignment(Node &node) { return pushAssignment(node, node); }
+    inline unsigned printAssignment(Node& node) {
+        return pushAssignment(node, node);
+    }
 
-    inline unsigned pushAssignment(Node &nodeName, const Arg &nodeRhs) {
+    inline unsigned pushAssignment(Node& nodeName,
+                                   const Arg& nodeRhs) {
         if (nodeRhs.getOperation() != nullptr) {
             return pushAssignment(nodeName, *nodeRhs.getOperation());
         } else {
@@ -908,8 +980,9 @@ class LanguageC : public Language<Base> {
         }
     }
 
-    inline unsigned pushAssignment(Node &nodeName, Node &nodeRhs) {
-        bool createsVar = directlyAssignsVariable(nodeRhs);  // do we need to do the assignment here?
+    inline unsigned pushAssignment(Node& nodeName,
+                                   Node& nodeRhs) {
+        bool createsVar = directlyAssignsVariable(nodeRhs); // do we need to do the assignment here?
         if (!createsVar) {
             pushAssignmentStart(nodeName);
         }
@@ -921,23 +994,25 @@ class LanguageC : public Language<Base> {
         _streamStack.flush();
 
         if (nodeRhs.getOperationType() == CGOpCode::ArrayElement) {
-            Node *array = nodeRhs.getArguments()[0].getOperation();
+            Node* array = nodeRhs.getArguments()[0].getOperation();
             size_t arrayId = getVariableID(*array);
             size_t pos = nodeRhs.getInfo()[0];
             if (array->getOperationType() == CGOpCode::ArrayCreation)
-                _tmpArrayValues[arrayId - 1 + pos] = nullptr;  // this could probably be removed!
+                _tmpArrayValues[arrayId - 1 + pos] = nullptr; // this could probably be removed!
             else
-                _tmpSparseArrayValues[arrayId - 1 + pos] = nullptr;  // this could probably be removed!
+                _tmpSparseArrayValues[arrayId - 1 + pos] = nullptr; // this could probably be removed!
         }
 
         return lines;
     }
 
-    inline virtual void pushAssignmentStart(Node &op) {
+    inline virtual void pushAssignmentStart(Node& op) {
         pushAssignmentStart(op, createVariableName(op), isDependent(op));
     }
 
-    inline virtual void pushAssignmentStart(Node &node, const std::string &varName, bool isDep) {
+    inline virtual void pushAssignmentStart(Node& node,
+                                            const std::string& varName,
+                                            bool isDep) {
         if (!isDep) {
             _temporary[getVariableID(node)] = &node;
         }
@@ -956,9 +1031,11 @@ class LanguageC : public Language<Base> {
         _streamStack << " ";
     }
 
-    inline virtual void pushAssignmentEnd(Node &op) { _streamStack << ";\n"; }
+    inline virtual void pushAssignmentEnd(Node& op) {
+        _streamStack << ";\n";
+    }
 
-    virtual std::string argumentDeclaration(const FuncArgument &funcArg) const {
+    virtual std::string argumentDeclaration(const FuncArgument& funcArg) const {
         std::string dcl = _baseTypeName;
         if (funcArg.array) {
             dcl += "*";
@@ -966,14 +1043,15 @@ class LanguageC : public Language<Base> {
         return dcl + " " + funcArg.name;
     }
 
-    virtual void saveLocalFunction(std::vector<std::string> &localFuncNames, bool zeroDependentArray) {
+    virtual void saveLocalFunction(std::vector<std::string>& localFuncNames,
+                                   bool zeroDependentArray) {
         _ss << _functionName << "__" << (localFuncNames.size() + 1);
         std::string funcName = _ss.str();
         _ss.str("");
 
         _ss << "#include <math.h>\n"
-               "#include <stdio.h>\n\n"
-            << ATOMICFUN_STRUCT_DEFINITION << "\n\n";
+                "#include <stdio.h>\n\n"
+                << ATOMICFUN_STRUCT_DEFINITION << "\n\n";
         printFunctionDeclaration(_ss, "void", funcName, localFuncArgDcl_);
         _ss << " {\n";
         _nameGen->customFunctionVariableDeclarations(_ss);
@@ -985,7 +1063,9 @@ class LanguageC : public Language<Base> {
             _ss << _spaces << _baseTypeName << "* " << auxArrayName_ << ";\n";
         }
 
-        generateArrayContainersDeclaration(_ss, _info->atomicFunctionsMaxForward, _info->atomicFunctionsMaxReverse);
+        generateArrayContainersDeclaration(_ss,
+                                           _info->atomicFunctionsMaxForward,
+                                           _info->atomicFunctionsMaxReverse);
 
         if (arraySize > 0 || sArraySize > 0 || zeroDependentArray) {
             _ss << _spaces << U_INDEX_TYPE << " i;\n";
@@ -1006,29 +1086,49 @@ class LanguageC : public Language<Base> {
         _ss.str("");
     }
 
-    bool createsNewVariable(const Node &var, size_t totalUseCount, size_t opCount) const override {
+    bool createsNewVariable(const Node& var,
+                            size_t totalUseCount,
+                            size_t opCount) const override {
         CGOpCode op = var.getOperationType();
         if (totalUseCount > 1) {
-            return op != CGOpCode::ArrayElement && op != CGOpCode::Index && op != CGOpCode::IndexDeclaration &&
-                   op != CGOpCode::Tmp;
+            return op != CGOpCode::ArrayElement && op != CGOpCode::Index && op != CGOpCode::IndexDeclaration && op != CGOpCode::Tmp;
         } else {
-            return (op == CGOpCode::ArrayCreation || op == CGOpCode::SparseArrayCreation ||
-                    op == CGOpCode::AtomicForward || op == CGOpCode::AtomicReverse || op == CGOpCode::ComLt ||
-                    op == CGOpCode::ComLe || op == CGOpCode::ComEq || op == CGOpCode::ComGe || op == CGOpCode::ComGt ||
-                    op == CGOpCode::ComNe || op == CGOpCode::LoopIndexedDep || op == CGOpCode::LoopIndexedTmp ||
-                    op == CGOpCode::IndexAssign || op == CGOpCode::Assign || opCount >= _maxOperationsPerAssignment) &&
-                   op != CGOpCode::CondResult;
+            return (op == CGOpCode::ArrayCreation ||
+                    op == CGOpCode::SparseArrayCreation ||
+                    op == CGOpCode::AtomicForward ||
+                    op == CGOpCode::AtomicReverse ||
+                    op == CGOpCode::ComLt ||
+                    op == CGOpCode::ComLe ||
+                    op == CGOpCode::ComEq ||
+                    op == CGOpCode::ComGe ||
+                    op == CGOpCode::ComGt ||
+                    op == CGOpCode::ComNe ||
+                    op == CGOpCode::LoopIndexedDep ||
+                    op == CGOpCode::LoopIndexedTmp ||
+                    op == CGOpCode::IndexAssign ||
+                    op == CGOpCode::Assign ||
+                    opCount >= _maxOperationsPerAssignment) &&
+                    op != CGOpCode::CondResult;
         }
     }
 
-    virtual bool requiresVariableName(const Node &var) const {
+    virtual bool requiresVariableName(const Node& var) const {
         CGOpCode op = var.getOperationType();
         if (_info->totalUseCount.get(var) > 1) {
-            return (op != CGOpCode::Pri && op != CGOpCode::AtomicForward && op != CGOpCode::AtomicReverse &&
-                    op != CGOpCode::LoopStart && op != CGOpCode::LoopEnd && op != CGOpCode::Index &&
-                    op != CGOpCode::IndexAssign && op != CGOpCode::StartIf && op != CGOpCode::ElseIf &&
-                    op != CGOpCode::Else && op != CGOpCode::EndIf && op != CGOpCode::CondResult &&
-                    op != CGOpCode::LoopIndexedTmp && op != CGOpCode::Tmp);
+            return (op != CGOpCode::Pri &&
+                    op != CGOpCode::AtomicForward &&
+                    op != CGOpCode::AtomicReverse &&
+                    op != CGOpCode::LoopStart &&
+                    op != CGOpCode::LoopEnd &&
+                    op != CGOpCode::Index &&
+                    op != CGOpCode::IndexAssign &&
+                    op != CGOpCode::StartIf &&
+                    op != CGOpCode::ElseIf &&
+                    op != CGOpCode::Else &&
+                    op != CGOpCode::EndIf &&
+                    op != CGOpCode::CondResult &&
+                    op != CGOpCode::LoopIndexedTmp &&
+                    op != CGOpCode::Tmp);
         } else {
             return isCondAssign(op);
         }
@@ -1041,21 +1141,31 @@ class LanguageC : public Language<Base> {
      * @param var the operation node
      * @return
      */
-    virtual bool directlyAssignsVariable(const Node &var) const {
+    virtual bool directlyAssignsVariable(const Node& var) const {
         CGOpCode op = var.getOperationType();
-        return isCondAssign(op) || op == CGOpCode::Pri || op == CGOpCode::ArrayCreation ||
-               op == CGOpCode::SparseArrayCreation || op == CGOpCode::AtomicForward || op == CGOpCode::AtomicReverse ||
-               op == CGOpCode::DependentMultiAssign || op == CGOpCode::LoopStart || op == CGOpCode::LoopEnd ||
-               op == CGOpCode::IndexAssign || op == CGOpCode::StartIf || op == CGOpCode::ElseIf ||
-               op == CGOpCode::Else || op == CGOpCode::EndIf || op == CGOpCode::CondResult ||
-               op == CGOpCode::IndexDeclaration;
+        return isCondAssign(op) ||
+                op == CGOpCode::Pri ||
+                op == CGOpCode::ArrayCreation ||
+                op == CGOpCode::SparseArrayCreation ||
+                op == CGOpCode::AtomicForward ||
+                op == CGOpCode::AtomicReverse ||
+                op == CGOpCode::DependentMultiAssign ||
+                op == CGOpCode::LoopStart ||
+                op == CGOpCode::LoopEnd ||
+                op == CGOpCode::IndexAssign ||
+                op == CGOpCode::StartIf ||
+                op == CGOpCode::ElseIf ||
+                op == CGOpCode::Else ||
+                op == CGOpCode::EndIf ||
+                op == CGOpCode::CondResult ||
+                op == CGOpCode::IndexDeclaration;
     }
 
     bool requiresVariableArgument(enum CGOpCode op, size_t argIndex) const override {
         return op == CGOpCode::Sign || op == CGOpCode::CondResult || op == CGOpCode::Pri;
     }
 
-    inline const std::string &createVariableName(Node &var) {
+    inline const std::string& createVariableName(Node& var) {
         CGOpCode op = var.getOperationType();
         CPPADCG_ASSERT_UNKNOWN(getVariableID(var) > 0)
         CPPADCG_ASSERT_UNKNOWN(op != CGOpCode::AtomicForward)
@@ -1075,12 +1185,12 @@ class LanguageC : public Language<Base> {
 
             } else if (op == CGOpCode::LoopIndexedDep) {
                 size_t pos = var.getInfo()[0];
-                const IndexPattern *ip = _info->loopDependentIndexPatterns[pos];
+                const IndexPattern* ip = _info->loopDependentIndexPatterns[pos];
                 var.setName(_nameGen->generateIndexedDependent(var, getVariableID(var), *ip));
 
             } else if (op == CGOpCode::LoopIndexedIndep) {
                 size_t pos = var.getInfo()[1];
-                const IndexPattern *ip = _info->loopIndependentIndexPatterns[pos];
+                const IndexPattern* ip = _info->loopIndependentIndexPatterns[pos];
                 var.setName(_nameGen->generateIndexedIndependent(var, getVariableID(var), *ip));
 
             } else if (getVariableID(var) <= _independentSize) {
@@ -1096,16 +1206,14 @@ class LanguageC : public Language<Base> {
                 var.setName(_nameGen->generateDependent(index));
             } else if (op == CGOpCode::Pri) {
                 CPPADCG_ASSERT_KNOWN(var.getArguments().size() == 1, "Invalid number of arguments for print operation")
-                Node *tmpVar = var.getArguments()[0].getOperation();
+                Node* tmpVar = var.getArguments()[0].getOperation();
                 CPPADCG_ASSERT_KNOWN(tmpVar != nullptr, "Invalid argument for print operation")
                 return createVariableName(*tmpVar);
 
             } else if (op == CGOpCode::LoopIndexedTmp || op == CGOpCode::Tmp) {
-                CPPADCG_ASSERT_KNOWN(var.getArguments().size() >= 1,
-                                     "Invalid number of arguments for loop indexed temporary operation")
-                Node *tmpVar = var.getArguments()[0].getOperation();
-                CPPADCG_ASSERT_KNOWN(tmpVar != nullptr && tmpVar->getOperationType() == CGOpCode::TmpDcl,
-                                     "Invalid arguments for loop indexed temporary operation")
+                CPPADCG_ASSERT_KNOWN(var.getArguments().size() >= 1, "Invalid number of arguments for loop indexed temporary operation")
+                Node* tmpVar = var.getArguments()[0].getOperation();
+                CPPADCG_ASSERT_KNOWN(tmpVar != nullptr && tmpVar->getOperationType() == CGOpCode::TmpDcl, "Invalid arguments for loop indexed temporary operation")
                 return createVariableName(*tmpVar);
 
             } else {
@@ -1114,18 +1222,21 @@ class LanguageC : public Language<Base> {
             }
         }
 
+
         return *var.getName();
     }
 
-    bool requiresVariableDependencies() const override { return false; }
+    bool requiresVariableDependencies() const override {
+        return false;
+    }
 
-    virtual void pushIndependentVariableName(Node &op) {
+    virtual void pushIndependentVariableName(Node& op) {
         CPPADCG_ASSERT_KNOWN(op.getArguments().size() == 0, "Invalid number of arguments for independent variable")
 
         _streamStack << _nameGen->generateIndependent(op, getVariableID(op));
     }
 
-    virtual unsigned push(const Arg &arg) {
+    virtual unsigned push(const Arg& arg) {
         if (arg.getOperation() != nullptr) {
             // expression
             return pushExpression(*arg.getOperation());
@@ -1136,7 +1247,7 @@ class LanguageC : public Language<Base> {
         }
     }
 
-    virtual unsigned pushExpression(Node &op) {
+    virtual unsigned pushExpression(Node& op) {
         if (getVariableID(op) > 0) {
             // use variable name
             _streamStack << createVariableName(op);
@@ -1148,12 +1259,13 @@ class LanguageC : public Language<Base> {
         }
     }
 
-    virtual unsigned pushExpressionNoVarCheck2(Node &node) {
-        Node *n;
+    virtual unsigned pushExpressionNoVarCheck2(Node& node) {
+        Node* n;
 
         unsigned lines = pushExpressionNoVarCheck(node);
 
         while (true) {
+
             _streamStack.flush();
             if (!_streamStack.empty()) {
                 n = &_streamStack.startNewOperationNode();
@@ -1161,7 +1273,8 @@ class LanguageC : public Language<Base> {
                 n = nullptr;
             }
 
-            if (n == nullptr) break;
+            if (n == nullptr)
+                break;
 
             unsigned lines2 = pushExpressionNoVarCheck(*n);
 
@@ -1171,7 +1284,7 @@ class LanguageC : public Language<Base> {
         return lines;
     }
 
-    virtual unsigned pushExpressionNoVarCheck(Node &node) {
+    virtual unsigned pushExpressionNoVarCheck(Node& node) {
         CGOpCode op = node.getOperationType();
         switch (op) {
             case CGOpCode::ArrayCreation:
@@ -1209,10 +1322,10 @@ class LanguageC : public Language<Base> {
 #endif
                 pushUnaryFunction(node);
                 break;
-            case CGOpCode::AtomicForward:  // atomicFunction.forward(q, p, vx, vy, tx, ty)
+            case CGOpCode::AtomicForward: // atomicFunction.forward(q, p, vx, vy, tx, ty)
                 pushAtomicForwardOp(node);
                 break;
-            case CGOpCode::AtomicReverse:  // atomicFunction.reverse(p, tx, ty, px, py)
+            case CGOpCode::AtomicReverse: // atomicFunction.reverse(p, tx, ty, px, py)
                 pushAtomicReverseOp(node);
                 break;
             case CGOpCode::Add:
@@ -1259,12 +1372,12 @@ class LanguageC : public Language<Base> {
                 return pushDependentMultiAssign(node);
 
             case CGOpCode::Index:
-                return 0;  // nothing to do
+                return 0; // nothing to do
             case CGOpCode::IndexAssign:
                 pushIndexAssign(node);
                 break;
             case CGOpCode::IndexDeclaration:
-                return 0;  // already done
+                return 0; // already done
 
             case CGOpCode::LoopStart:
                 pushLoopStart(node);
@@ -1314,13 +1427,13 @@ class LanguageC : public Language<Base> {
         return 1;
     }
 
-    virtual unsigned pushAssignOp(Node &node) {
+    virtual unsigned pushAssignOp(Node& node) {
         CPPADCG_ASSERT_KNOWN(node.getArguments().size() == 1, "Invalid number of arguments for assign operation")
 
         return push(node.getArguments()[0]);
     }
 
-    virtual void pushUnaryFunction(Node &op) {
+    virtual void pushUnaryFunction(Node& op) {
         CPPADCG_ASSERT_KNOWN(op.getArguments().size() == 1, "Invalid number of arguments for unary function")
 
         switch (op.getOperationType()) {
@@ -1392,24 +1505,24 @@ class LanguageC : public Language<Base> {
         _streamStack << ")";
     }
 
-    virtual void pushPowFunction(Node &op) {
+    virtual void pushPowFunction(Node& op) {
         CPPADCG_ASSERT_KNOWN(op.getArguments().size() == 2, "Invalid number of arguments for pow() function")
 
-        _streamStack << powFuncName() << "(";
+        _streamStack <<powFuncName() << "(";
         push(op.getArguments()[0]);
         _streamStack << ", ";
         push(op.getArguments()[1]);
         _streamStack << ")";
     }
 
-    virtual void pushSignFunction(Node &op) {
+    virtual void pushSignFunction(Node& op) {
         CPPADCG_ASSERT_KNOWN(op.getArguments().size() == 1, "Invalid number of arguments for sign() function")
         CPPADCG_ASSERT_UNKNOWN(op.getArguments()[0].getOperation() != nullptr)
         CPPADCG_ASSERT_UNKNOWN(getVariableID(*op.getArguments()[0].getOperation()) > 0)
 
-        Node &arg = *op.getArguments()[0].getOperation();
+        Node& arg = *op.getArguments()[0].getOperation();
 
-        const std::string &argName = createVariableName(arg);
+        const std::string& argName = createVariableName(arg);
 
         _streamStack << "(" << argName << " " << _C_COMP_OP_GT << " ";
         pushParameter(Base(0.0));
@@ -1424,18 +1537,18 @@ class LanguageC : public Language<Base> {
         _streamStack << "))";
     }
 
-    virtual unsigned pushOperationAlias(Node &op) {
+    virtual unsigned pushOperationAlias(Node& op) {
         CPPADCG_ASSERT_KNOWN(op.getArguments().size() == 1, "Invalid number of arguments for alias")
         return push(op.getArguments()[0]);
     }
 
-    virtual void pushOperationAdd(Node &op) {
+    virtual void pushOperationAdd(Node& op) {
         CPPADCG_ASSERT_KNOWN(op.getArguments().size() == 2, "Invalid number of arguments for addition")
 
-        const Arg &left = op.getArguments()[0];
-        const Arg &right = op.getArguments()[1];
+        const Arg& left = op.getArguments()[0];
+        const Arg& right = op.getArguments()[1];
 
-        if (right.getParameter() == nullptr || (*right.getParameter() >= 0)) {
+        if(right.getParameter() == nullptr || (*right.getParameter() >= 0)) {
             push(left);
             _streamStack << " + ";
             push(right);
@@ -1443,17 +1556,17 @@ class LanguageC : public Language<Base> {
             // right has a negative parameter so we would get v0 + -v1
             push(left);
             _streamStack << " - ";
-            pushParameter(-*right.getParameter());  // make it positive
+            pushParameter(-*right.getParameter()); // make it positive
         }
     }
 
-    virtual void pushOperationMinus(Node &op) {
+    virtual void pushOperationMinus(Node& op) {
         CPPADCG_ASSERT_KNOWN(op.getArguments().size() == 2, "Invalid number of arguments for subtraction")
 
-        const Arg &left = op.getArguments()[0];
-        const Arg &right = op.getArguments()[1];
+        const Arg& left = op.getArguments()[0];
+        const Arg& right = op.getArguments()[1];
 
-        if (right.getParameter() == nullptr || (*right.getParameter() >= 0)) {
+        if(right.getParameter() == nullptr || (*right.getParameter() >= 0)) {
             bool encloseRight = encloseInParenthesesMul(right.getOperation());
 
             push(left);
@@ -1469,26 +1582,29 @@ class LanguageC : public Language<Base> {
             // right has a negative parameter so we would get v0 - -v1
             push(left);
             _streamStack << " + ";
-            pushParameter(-*right.getParameter());  // make it positive
+            pushParameter(-*right.getParameter()); // make it positive
         }
     }
 
-    inline bool encloseInParenthesesDiv(const Node *node) const {
+    inline bool encloseInParenthesesDiv(const Node* node) const {
         while (node != nullptr) {
-            if (getVariableID(*node) != 0) return false;
+            if (getVariableID(*node) != 0)
+                return false;
             if (node->getOperationType() == CGOpCode::Alias)
                 node = node->getArguments()[0].getOperation();
             else
                 break;
         }
-        return node != nullptr && getVariableID(*node) == 0 && !isFunction(node->getOperationType());
+        return node != nullptr &&
+                getVariableID(*node) == 0 &&
+                !isFunction(node->getOperationType());
     }
 
-    virtual void pushOperationDiv(Node &op) {
+    virtual void pushOperationDiv(Node& op) {
         CPPADCG_ASSERT_KNOWN(op.getArguments().size() == 2, "Invalid number of arguments for division")
 
-        const Arg &left = op.getArguments()[0];
-        const Arg &right = op.getArguments()[1];
+        const Arg& left = op.getArguments()[0];
+        const Arg& right = op.getArguments()[1];
 
         bool encloseLeft = encloseInParenthesesDiv(left.getOperation());
         bool encloseRight = encloseInParenthesesDiv(right.getOperation());
@@ -1510,7 +1626,7 @@ class LanguageC : public Language<Base> {
         }
     }
 
-    inline bool encloseInParenthesesMul(const Node *node) const {
+    inline bool encloseInParenthesesMul(const Node* node) const {
         while (node != nullptr) {
             if (getVariableID(*node) != 0)
                 return false;
@@ -1519,15 +1635,18 @@ class LanguageC : public Language<Base> {
             else
                 break;
         }
-        return node != nullptr && getVariableID(*node) == 0 && node->getOperationType() != CGOpCode::Div &&
-               node->getOperationType() != CGOpCode::Mul && !isFunction(node->getOperationType());
+        return node != nullptr &&
+                getVariableID(*node) == 0 &&
+                node->getOperationType() != CGOpCode::Div &&
+                node->getOperationType() != CGOpCode::Mul &&
+                !isFunction(node->getOperationType());
     }
 
-    virtual void pushOperationMul(Node &op) {
+    virtual void pushOperationMul(Node& op) {
         CPPADCG_ASSERT_KNOWN(op.getArguments().size() == 2, "Invalid number of arguments for multiplication")
 
-        const Arg &left = op.getArguments()[0];
-        const Arg &right = op.getArguments()[1];
+        const Arg& left = op.getArguments()[0];
+        const Arg& right = op.getArguments()[1];
 
         bool encloseLeft = encloseInParenthesesMul(left.getOperation());
         bool encloseRight = encloseInParenthesesMul(right.getOperation());
@@ -1549,10 +1668,10 @@ class LanguageC : public Language<Base> {
         }
     }
 
-    virtual void pushOperationUnaryMinus(Node &op) {
+    virtual void pushOperationUnaryMinus(Node& op) {
         CPPADCG_ASSERT_KNOWN(op.getArguments().size() == 1, "Invalid number of arguments for unary minus")
 
-        const Arg &arg = op.getArguments()[0];
+        const Arg& arg = op.getArguments()[0];
 
         bool enclose = encloseInParenthesesMul(arg.getOperation());
 
@@ -1560,7 +1679,7 @@ class LanguageC : public Language<Base> {
         if (enclose) {
             _streamStack << "(";
         } else {
-            _streamStack << " ";  // there may be several - together -> space required
+            _streamStack << " "; // there may be several - together -> space required
         }
         push(arg);
         if (enclose) {
@@ -1568,11 +1687,11 @@ class LanguageC : public Language<Base> {
         }
     }
 
-    virtual void pushPrintOperation(const Node &node) {
+    virtual void pushPrintOperation(const Node& node) {
         CPPADCG_ASSERT_KNOWN(node.getOperationType() == CGOpCode::Pri, "Invalid node type")
         CPPADCG_ASSERT_KNOWN(node.getArguments().size() >= 1, "Invalid number of arguments for print operation")
 
-        const auto &pnode = static_cast<const PrintOperationNode<Base> &>(node);
+        const auto& pnode = static_cast<const PrintOperationNode<Base>&> (node);
         std::string before = pnode.getBeforeString();
         replaceString(before, "\n", "\\n");
         replaceString(before, "\"", "\\\"");
@@ -1580,8 +1699,8 @@ class LanguageC : public Language<Base> {
         replaceString(after, "\n", "\\n");
         replaceString(after, "\"", "\\\"");
 
-        _streamStack << _indentation << "fprintf(stderr, \"" << before << getPrintfBaseFormat() << after << "\"";
-        const std::vector<Arg> &args = pnode.getArguments();
+        _streamStack <<_indentation << "fprintf(stderr, \"" << before << getPrintfBaseFormat() << after << "\"";
+        const std::vector<Arg>& args = pnode.getArguments();
         for (size_t a = 0; a < args.size(); a++) {
             _streamStack << ", ";
             push(args[a]);
@@ -1589,46 +1708,45 @@ class LanguageC : public Language<Base> {
         _streamStack << ");\n";
     }
 
-    virtual void pushConditionalAssignment(Node &node) {
+    virtual void pushConditionalAssignment(Node& node) {
         CPPADCG_ASSERT_UNKNOWN(getVariableID(node) > 0)
 
-        const std::vector<Arg> &args = node.getArguments();
+        const std::vector<Arg>& args = node.getArguments();
         const Arg &left = args[0];
         const Arg &right = args[1];
         const Arg &trueCase = args[2];
         const Arg &falseCase = args[3];
 
         bool isDep = isDependent(node);
-        const std::string &varName = createVariableName(node);
+        const std::string& varName = createVariableName(node);
 
-        if ((trueCase.getParameter() != nullptr && falseCase.getParameter() != nullptr &&
-             *trueCase.getParameter() == *falseCase.getParameter()) ||
-            (trueCase.getOperation() != nullptr && falseCase.getOperation() != nullptr &&
-             trueCase.getOperation() == falseCase.getOperation())) {
+        if ((trueCase.getParameter() != nullptr && falseCase.getParameter() != nullptr && *trueCase.getParameter() == *falseCase.getParameter()) ||
+                (trueCase.getOperation() != nullptr && falseCase.getOperation() != nullptr && trueCase.getOperation() == falseCase.getOperation())) {
             // true and false cases are the same
             pushAssignmentStart(node, varName, isDep);
             push(trueCase);
             pushAssignmentEnd(node);
         } else {
-            _streamStack << _indentation << "if( ";
+            _streamStack <<_indentation << "if( ";
             push(left);
             _streamStack << " " << getComparison(node.getOperationType()) << " ";
             push(right);
             _streamStack << " ) {\n";
-            _streamStack << _spaces;
+            _streamStack <<_spaces;
             pushAssignmentStart(node, varName, isDep);
             push(trueCase);
             pushAssignmentEnd(node);
-            _streamStack << _indentation << "} else {\n";
-            _streamStack << _spaces;
+            _streamStack <<_indentation << "} else {\n";
+            _streamStack <<_spaces;
             pushAssignmentStart(node, varName, isDep);
             push(falseCase);
             pushAssignmentEnd(node);
-            _streamStack << _indentation << "}\n";
+            _streamStack <<_indentation << "}\n";
         }
     }
 
-    inline bool isSameArgument(const Arg &newArg, const Arg *oldArg) {
+    inline bool isSameArgument(const Arg& newArg,
+                               const Arg* oldArg) {
         if (oldArg != nullptr) {
             if (oldArg->getParameter() != nullptr) {
                 if (newArg.getParameter() != nullptr) {
@@ -1641,37 +1759,41 @@ class LanguageC : public Language<Base> {
         return false;
     }
 
-    virtual void pushArrayCreationOp(Node &op);
+    virtual void pushArrayCreationOp(Node& op);
 
-    virtual void pushSparseArrayCreationOp(Node &op);
+    virtual void pushSparseArrayCreationOp(Node& op);
 
-    inline void printArrayStructInit(const std::string &dataArrayName, size_t pos, const std::vector<Node *> &arrays,
+    inline void printArrayStructInit(const std::string& dataArrayName,
+                                     size_t pos,
+                                     const std::vector<Node*>& arrays,
                                      size_t k);
 
-    inline void printArrayStructInit(const std::string &dataArrayName, Node &array);
+    inline void printArrayStructInit(const std::string& dataArrayName,
+                                     Node& array);
 
-    inline void markArrayChanged(Node &ty);
+    inline void markArrayChanged(Node& ty);
 
-    inline size_t printArrayCreationUsingLoop(size_t startPos, Node &array, size_t startj,
-                                              std::vector<const Arg *> &tmpArrayValues);
+    inline size_t printArrayCreationUsingLoop(size_t startPos,
+                                              Node& array,
+                                              size_t startj,
+                                              std::vector<const Arg*>& tmpArrayValues);
 
-    inline std::string getTempArrayName(const Node &op);
+    inline std::string getTempArrayName(const Node& op);
 
-    virtual void pushArrayElementOp(Node &op);
+    virtual void pushArrayElementOp(Node& op);
 
-    virtual void pushAtomicForwardOp(Node &atomicFor) {
-        CPPADCG_ASSERT_KNOWN(atomicFor.getInfo().size() == 3,
-                             "Invalid number of information elements for atomic forward operation")
+    virtual void pushAtomicForwardOp(Node& atomicFor) {
+        CPPADCG_ASSERT_KNOWN(atomicFor.getInfo().size() == 3, "Invalid number of information elements for atomic forward operation")
         int q = atomicFor.getInfo()[1];
         int p = atomicFor.getInfo()[2];
         size_t p1 = p + 1;
-        const std::vector<Arg> &opArgs = atomicFor.getArguments();
+        const std::vector<Arg>& opArgs = atomicFor.getArguments();
         CPPADCG_ASSERT_KNOWN(opArgs.size() == p1 * 2, "Invalid number of arguments for atomic forward operation")
 
         size_t id = atomicFor.getInfo()[0];
         size_t atomicIndex = _info->atomicFunctionId2Index.at(id);
 
-        std::vector<Node *> tx(p1), ty(p1);
+        std::vector<Node*> tx(p1), ty(p1);
         for (size_t k = 0; k < p1; k++) {
             tx[k] = opArgs[0 * p1 + k].getOperation();
             ty[k] = opArgs[1 * p1 + k].getOperation();
@@ -1684,15 +1806,17 @@ class LanguageC : public Language<Base> {
 
         // tx
         for (size_t k = 0; k < p1; k++) {
-            printArrayStructInit(_ATOMIC_TX, k, tx, k);  // also does indentation
+            printArrayStructInit(_ATOMIC_TX, k, tx, k); // also does indentation
         }
         // ty
-        printArrayStructInit(_ATOMIC_TY, *ty[p]);  // also does indentation
+        printArrayStructInit(_ATOMIC_TY, *ty[p]); // also does indentation
         _ss.str("");
 
-        _streamStack << _indentation << "atomicFun.forward(atomicFun.libModel, " << atomicIndex << ", " << q << ", "
-                     << p << ", " << _ATOMIC_TX << ", &" << _ATOMIC_TY << "); // "
-                     << _info->atomicFunctionId2Name.at(id) << "\n";
+        _streamStack << _indentation << "atomicFun.forward(atomicFun.libModel, "
+                     << atomicIndex << ", " << q << ", " << p << ", "
+                     << _ATOMIC_TX << ", &" << _ATOMIC_TY << "); // "
+                     << _info->atomicFunctionId2Name.at(id)
+                     << "\n";
 
         /**
          * the values of ty are now changed
@@ -1700,17 +1824,16 @@ class LanguageC : public Language<Base> {
         markArrayChanged(*ty[p]);
     }
 
-    virtual void pushAtomicReverseOp(Node &atomicRev) {
-        CPPADCG_ASSERT_KNOWN(atomicRev.getInfo().size() == 2,
-                             "Invalid number of information elements for atomic reverse operation")
+    virtual void pushAtomicReverseOp(Node& atomicRev) {
+        CPPADCG_ASSERT_KNOWN(atomicRev.getInfo().size() == 2, "Invalid number of information elements for atomic reverse operation")
         int p = atomicRev.getInfo()[1];
         size_t p1 = p + 1;
-        const std::vector<Arg> &opArgs = atomicRev.getArguments();
+        const std::vector<Arg>& opArgs = atomicRev.getArguments();
         CPPADCG_ASSERT_KNOWN(opArgs.size() == p1 * 4, "Invalid number of arguments for atomic reverse operation")
 
         size_t id = atomicRev.getInfo()[0];
         size_t atomicIndex = _info->atomicFunctionId2Index.at(id);
-        std::vector<Node *> tx(p1), px(p1), py(p1);
+        std::vector<Node*> tx(p1), px(p1), py(p1);
         for (size_t k = 0; k < p1; k++) {
             tx[k] = opArgs[0 * p1 + k].getOperation();
             px[k] = opArgs[2 * p1 + k].getOperation();
@@ -1727,19 +1850,21 @@ class LanguageC : public Language<Base> {
 
         // tx
         for (size_t k = 0; k < p1; k++) {
-            printArrayStructInit(_ATOMIC_TX, k, tx, k);  // also does indentation
+            printArrayStructInit(_ATOMIC_TX, k, tx, k); // also does indentation
         }
         // py
         for (size_t k = 0; k < p1; k++) {
-            printArrayStructInit(_ATOMIC_PY, k, py, k);  // also does indentation
+            printArrayStructInit(_ATOMIC_PY, k, py, k); // also does indentation
         }
         // px
-        printArrayStructInit(_ATOMIC_PX, *px[0]);  // also does indentation
+        printArrayStructInit(_ATOMIC_PX, *px[0]); // also does indentation
         _ss.str("");
 
-        _streamStack << _indentation << "atomicFun.reverse(atomicFun.libModel, " << atomicIndex << ", " << p << ", "
+        _streamStack << _indentation << "atomicFun.reverse(atomicFun.libModel, "
+                     << atomicIndex << ", " << p << ", "
                      << _ATOMIC_TX << ", &" << _ATOMIC_PX << ", " << _ATOMIC_PY << "); // "
-                     << _info->atomicFunctionId2Name.at(id) << "\n";
+                     << _info->atomicFunctionId2Name.at(id)
+                     << "\n";
 
         /**
          * the values of px are now changed
@@ -1747,14 +1872,14 @@ class LanguageC : public Language<Base> {
         markArrayChanged(*px[0]);
     }
 
-    virtual unsigned pushDependentMultiAssign(Node &node) {
+    virtual unsigned pushDependentMultiAssign(Node& node) {
         CPPADCG_ASSERT_KNOWN(node.getOperationType() == CGOpCode::DependentMultiAssign, "Invalid node type")
         CPPADCG_ASSERT_KNOWN(node.getArguments().size() > 0, "Invalid number of arguments")
 
-        const std::vector<Arg> &args = node.getArguments();
+        const std::vector<Arg>& args = node.getArguments();
         for (size_t a = 0; a < args.size(); a++) {
             bool useArg;
-            const Arg &arg = args[a];
+            const Arg& arg = args[a];
             if (arg.getParameter() != nullptr) {
                 useArg = true;
             } else {
@@ -1763,20 +1888,20 @@ class LanguageC : public Language<Base> {
             }
 
             if (useArg) {
-                pushAssignment(node, arg);  // ignore other arguments!
+                pushAssignment(node, arg); // ignore other arguments!
                 return 1;
             }
         }
         return 0;
     }
 
-    virtual void pushLoopStart(Node &node) {
+    virtual void pushLoopStart(Node& node) {
         CPPADCG_ASSERT_KNOWN(node.getOperationType() == CGOpCode::LoopStart, "Invalid node type")
 
-        auto &lnode = static_cast<LoopStartOperationNode<Base> &>(node);
+        auto& lnode = static_cast<LoopStartOperationNode<Base>&> (node);
         _currentLoops.push_back(&lnode);
 
-        const std::string &jj = *lnode.getIndex().getName();
+        const std::string& jj = *lnode.getIndex().getName();
         std::string iterationCount;
         if (lnode.getIterationCountNode() != nullptr) {
             iterationCount = *lnode.getIterationCountNode()->getIndex().getName();
@@ -1786,106 +1911,102 @@ class LanguageC : public Language<Base> {
             iterationCount = oss.str();
         }
 
-        _streamStack << _spaces << "for(" << jj << " = 0; " << jj << " < " << iterationCount << "; " << jj << "++) {\n";
+        _streamStack << _spaces << "for("
+                     << jj << " = 0; "
+                     << jj << " < " << iterationCount << "; "
+                     << jj << "++) {\n";
         _indentation += _spaces;
     }
 
-    virtual void pushLoopEnd(Node &node) {
+    virtual void pushLoopEnd(Node& node) {
         CPPADCG_ASSERT_KNOWN(node.getOperationType() == CGOpCode::LoopEnd, "Invalid node type")
 
         _indentation.resize(_indentation.size() - _spaces.size());
 
-        _streamStack << _indentation << "}\n";
+        _streamStack <<_indentation << "}\n";
 
         _currentLoops.pop_back();
     }
 
-    virtual size_t printLoopIndexDeps(const std::vector<Node *> &variableOrder, size_t pos);
 
-    virtual size_t printLoopIndexedDepsUsingLoop(const std::vector<Node *> &variableOrder, size_t starti);
+    virtual size_t printLoopIndexDeps(const std::vector<Node*>& variableOrder,
+                                      size_t pos);
 
-    virtual void pushLoopIndexedDep(Node &node);
+    virtual size_t printLoopIndexedDepsUsingLoop(const std::vector<Node*>& variableOrder,
+                                                 size_t starti);
 
-    virtual void pushLoopIndexedIndep(Node &node) {
+    virtual void pushLoopIndexedDep(Node& node);
+
+    virtual void pushLoopIndexedIndep(Node& node) {
         CPPADCG_ASSERT_KNOWN(node.getOperationType() == CGOpCode::LoopIndexedIndep, "Invalid node type")
-        CPPADCG_ASSERT_KNOWN(node.getInfo().size() == 1,
-                             "Invalid number of information elements for loop indexed independent operation")
+        CPPADCG_ASSERT_KNOWN(node.getInfo().size() == 1, "Invalid number of information elements for loop indexed independent operation")
 
         // CGLoopIndexedIndepOp
         size_t pos = node.getInfo()[1];
-        const IndexPattern *ip = _info->loopIndependentIndexPatterns[pos];
-        _streamStack << _nameGen->generateIndexedIndependent(node, getVariableID(node), *ip);
+        const IndexPattern* ip = _info->loopIndependentIndexPatterns[pos];
+        _streamStack <<_nameGen->generateIndexedIndependent(node, getVariableID(node), *ip);
     }
 
-    virtual void pushLoopIndexedTmp(Node &node) {
+    virtual void pushLoopIndexedTmp(Node& node) {
         CPPADCG_ASSERT_KNOWN(node.getOperationType() == CGOpCode::LoopIndexedTmp, "Invalid node type")
-        CPPADCG_ASSERT_KNOWN(node.getArguments().size() == 2,
-                             "Invalid number of arguments for loop indexed temporary operation")
-        Node *tmpVar = node.getArguments()[0].getOperation();
-        CPPADCG_ASSERT_KNOWN(tmpVar != nullptr && tmpVar->getOperationType() == CGOpCode::TmpDcl,
-                             "Invalid arguments for loop indexed temporary operation")
+        CPPADCG_ASSERT_KNOWN(node.getArguments().size() == 2, "Invalid number of arguments for loop indexed temporary operation")
+        Node* tmpVar = node.getArguments()[0].getOperation();
+        CPPADCG_ASSERT_KNOWN(tmpVar != nullptr && tmpVar->getOperationType() == CGOpCode::TmpDcl, "Invalid arguments for loop indexed temporary operation")
 
         push(node.getArguments()[1]);
     }
 
-    virtual void pushTmpVar(Node &node) {
+    virtual void pushTmpVar(Node& node) {
         CPPADCG_ASSERT_KNOWN(node.getOperationType() == CGOpCode::Tmp, "Invalid node type")
-        CPPADCG_ASSERT_KNOWN(node.getArguments().size() > 0,
-                             "Invalid number of arguments for temporary variable usage operation")
-        Node *tmpVar = node.getArguments()[0].getOperation();
-        CPPADCG_ASSERT_KNOWN(tmpVar != nullptr && tmpVar->getOperationType() == CGOpCode::TmpDcl,
-                             "Invalid arguments for loop indexed temporary operation")
+        CPPADCG_ASSERT_KNOWN(node.getArguments().size() > 0, "Invalid number of arguments for temporary variable usage operation")
+        Node* tmpVar = node.getArguments()[0].getOperation();
+        CPPADCG_ASSERT_KNOWN(tmpVar != nullptr && tmpVar->getOperationType() == CGOpCode::TmpDcl, "Invalid arguments for loop indexed temporary operation")
 
-        _streamStack << *tmpVar->getName();
+        _streamStack <<*tmpVar->getName();
     }
 
-    virtual void pushIndexAssign(Node &node) {
+    virtual void pushIndexAssign(Node& node) {
         CPPADCG_ASSERT_KNOWN(node.getOperationType() == CGOpCode::IndexAssign, "Invalid node type")
-        CPPADCG_ASSERT_KNOWN(node.getArguments().size() > 0,
-                             "Invalid number of arguments for an index assignment operation")
+        CPPADCG_ASSERT_KNOWN(node.getArguments().size() > 0, "Invalid number of arguments for an index assignment operation")
 
-        auto &inode = static_cast<IndexAssignOperationNode<Base> &>(node);
+        auto& inode = static_cast<IndexAssignOperationNode<Base>&> (node);
 
-        const IndexPattern &ip = inode.getIndexPattern();
-        _streamStack << _indentation << (*inode.getIndex().getName()) << " = "
-                     << indexPattern2String(ip, inode.getIndexPatternIndexes()) << ";\n";
+        const IndexPattern& ip = inode.getIndexPattern();
+        _streamStack <<_indentation << (*inode.getIndex().getName())
+                << " = " << indexPattern2String(ip, inode.getIndexPatternIndexes()) << ";\n";
     }
 
-    virtual void pushIndexCondExprOp(Node &node) {
+    virtual void pushIndexCondExprOp(Node& node) {
         CPPADCG_ASSERT_KNOWN(node.getOperationType() == CGOpCode::IndexCondExpr, "Invalid node type")
-        CPPADCG_ASSERT_KNOWN(node.getArguments().size() == 1,
-                             "Invalid number of arguments for an index condition expression operation")
-        CPPADCG_ASSERT_KNOWN(node.getArguments()[0].getOperation() != nullptr,
-                             "Invalid argument for an index condition expression operation")
-        CPPADCG_ASSERT_KNOWN(node.getArguments()[0].getOperation()->getOperationType() == CGOpCode::Index,
-                             "Invalid argument for an index condition expression operation")
+        CPPADCG_ASSERT_KNOWN(node.getArguments().size() == 1, "Invalid number of arguments for an index condition expression operation")
+        CPPADCG_ASSERT_KNOWN(node.getArguments()[0].getOperation() != nullptr, "Invalid argument for an index condition expression operation")
+        CPPADCG_ASSERT_KNOWN(node.getArguments()[0].getOperation()->getOperationType() == CGOpCode::Index, "Invalid argument for an index condition expression operation")
 
-        const std::vector<size_t> &info = node.getInfo();
+        const std::vector<size_t>& info = node.getInfo();
 
-        auto &iterationIndexOp = static_cast<IndexOperationNode<Base> &>(*node.getArguments()[0].getOperation());
-        const std::string &index = *iterationIndexOp.getIndex().getName();
+        auto& iterationIndexOp = static_cast<IndexOperationNode<Base>&> (*node.getArguments()[0].getOperation());
+        const std::string& index = *iterationIndexOp.getIndex().getName();
 
         printIndexCondExpr(_code, info, index);
     }
 
-    virtual void pushStartIf(Node &node) {
+    virtual void pushStartIf(Node& node) {
         /**
          * the first argument is the condition, following arguments are
          * just extra dependencies that must be defined outside the if
          */
         CPPADCG_ASSERT_KNOWN(node.getOperationType() == CGOpCode::StartIf, "Invalid node type")
         CPPADCG_ASSERT_KNOWN(node.getArguments().size() >= 1, "Invalid number of arguments for an 'if start' operation")
-        CPPADCG_ASSERT_KNOWN(node.getArguments()[0].getOperation() != nullptr,
-                             "Invalid argument for an 'if start' operation")
+        CPPADCG_ASSERT_KNOWN(node.getArguments()[0].getOperation() != nullptr, "Invalid argument for an 'if start' operation")
 
-        _streamStack << _indentation << "if(";
+        _streamStack <<_indentation << "if(";
         pushIndexCondExprOp(*node.getArguments()[0].getOperation());
         _streamStack << ") {\n";
 
         _indentation += _spaces;
     }
 
-    virtual void pushElseIf(Node &node) {
+    virtual void pushElseIf(Node& node) {
         /**
          * the first argument is the condition, the second argument is the
          * if start node, the following arguments are assignments in the
@@ -1893,21 +2014,19 @@ class LanguageC : public Language<Base> {
          */
         CPPADCG_ASSERT_KNOWN(node.getOperationType() == CGOpCode::ElseIf, "Invalid node type")
         CPPADCG_ASSERT_KNOWN(node.getArguments().size() >= 2, "Invalid number of arguments for an 'else if' operation")
-        CPPADCG_ASSERT_KNOWN(node.getArguments()[0].getOperation() != nullptr,
-                             "Invalid argument for an 'else if' operation")
-        CPPADCG_ASSERT_KNOWN(node.getArguments()[1].getOperation() != nullptr,
-                             "Invalid argument for an 'else if' operation")
+        CPPADCG_ASSERT_KNOWN(node.getArguments()[0].getOperation() != nullptr, "Invalid argument for an 'else if' operation")
+        CPPADCG_ASSERT_KNOWN(node.getArguments()[1].getOperation() != nullptr, "Invalid argument for an 'else if' operation")
 
         _indentation.resize(_indentation.size() - _spaces.size());
 
-        _streamStack << _indentation << "} else if(";
+        _streamStack <<_indentation << "} else if(";
         pushIndexCondExprOp(*node.getArguments()[1].getOperation());
         _streamStack << ") {\n";
 
         _indentation += _spaces;
     }
 
-    virtual void pushElse(Node &node) {
+    virtual void pushElse(Node& node) {
         /**
          * the first argument is the  if start node, the following arguments
          * are assignments in the previous if branch
@@ -1917,40 +2036,37 @@ class LanguageC : public Language<Base> {
 
         _indentation.resize(_indentation.size() - _spaces.size());
 
-        _streamStack << _indentation << "} else {\n";
+        _streamStack <<_indentation << "} else {\n";
 
         _indentation += _spaces;
     }
 
-    virtual void pushEndIf(Node &node) {
+    virtual void pushEndIf(Node& node) {
         CPPADCG_ASSERT_KNOWN(node.getOperationType() == CGOpCode::EndIf, "Invalid node type for an 'end if' operation")
 
         _indentation.resize(_indentation.size() - _spaces.size());
 
-        _streamStack << _indentation << "}\n";
+        _streamStack <<_indentation << "}\n";
     }
 
-    virtual void pushCondResult(Node &node) {
+    virtual void pushCondResult(Node& node) {
         CPPADCG_ASSERT_KNOWN(node.getOperationType() == CGOpCode::CondResult, "Invalid node type")
-        CPPADCG_ASSERT_KNOWN(node.getArguments().size() == 2,
-                             "Invalid number of arguments for an assignment inside an if/else operation")
-        CPPADCG_ASSERT_KNOWN(node.getArguments()[0].getOperation() != nullptr,
-                             "Invalid argument for an an assignment inside an if/else operation")
-        CPPADCG_ASSERT_KNOWN(node.getArguments()[1].getOperation() != nullptr,
-                             "Invalid argument for an an assignment inside an if/else operation")
+        CPPADCG_ASSERT_KNOWN(node.getArguments().size() == 2, "Invalid number of arguments for an assignment inside an if/else operation")
+        CPPADCG_ASSERT_KNOWN(node.getArguments()[0].getOperation() != nullptr, "Invalid argument for an an assignment inside an if/else operation")
+        CPPADCG_ASSERT_KNOWN(node.getArguments()[1].getOperation() != nullptr, "Invalid argument for an an assignment inside an if/else operation")
 
         // just follow the argument
-        Node &nodeArg = *node.getArguments()[1].getOperation();
+        Node& nodeArg = *node.getArguments()[1].getOperation();
         printAssignment(nodeArg);
     }
 
-    virtual void pushUserCustom(Node &node) {
+    virtual void pushUserCustom(Node& node) {
         CPPADCG_ASSERT_KNOWN(node.getOperationType() == CGOpCode::UserCustom, "Invalid node type")
 
         throw CGException("Unable to generate C source code for user custom operation nodes.");
     }
 
-    inline bool isDependent(const Node &arg) const {
+    inline bool isDependent(const Node& arg) const {
         if (arg.getOperationType() == CGOpCode::LoopIndexedDep) {
             return true;
         }
@@ -1958,12 +2074,16 @@ class LanguageC : public Language<Base> {
         return id > _independentSize && id < _minTemporaryVarID;
     }
 
-    virtual void printParameter(const Base &value) { writeParameter(value, _code); }
+    virtual void printParameter(const Base& value) {
+        writeParameter(value, _code);
+    }
 
-    virtual void pushParameter(const Base &value) { writeParameter(value, _streamStack); }
+    virtual void pushParameter(const Base& value) {
+        writeParameter(value, _streamStack);
+    }
 
-    template <class Output>
-    void writeParameter(const Base &value, Output &output) {
+    template<class Output>
+    void writeParameter(const Base& value, Output& output) {
         // make sure all digits of floating point values are printed
         std::ostringstream os;
         os << std::setprecision(_parameterPrecision) << value;
@@ -1980,7 +2100,7 @@ class LanguageC : public Language<Base> {
         }
     }
 
-    virtual const std::string &getComparison(enum CGOpCode op) const {
+    virtual const std::string& getComparison(enum CGOpCode op) const {
         switch (op) {
             case CGOpCode::ComLt:
                 return _C_COMP_OP_LT;
@@ -2004,15 +2124,17 @@ class LanguageC : public Language<Base> {
                 CPPAD_ASSERT_UNKNOWN(0)
                 break;
         }
-        throw CGException("Invalid comparison operator code");  // should never get here
+        throw CGException("Invalid comparison operator code"); // should never get here
     }
 
-    inline const std::string &getPrintfBaseFormat() {
-        static const std::string format;  // empty string
+    inline const std::string& getPrintfBaseFormat() {
+        static const std::string format; // empty string
         return format;
     }
 
-    static bool isFunction(enum CGOpCode op) { return isUnaryFunction(op) || op == CGOpCode::Pow; }
+    static bool isFunction(enum CGOpCode op) {
+        return isUnaryFunction(op) || op == CGOpCode::Pow;
+    }
 
     static bool isUnaryFunction(enum CGOpCode op) {
         switch (op) {
@@ -2056,10 +2178,10 @@ class LanguageC : public Language<Base> {
                 return false;
         }
     }
+private:
 
-   private:
     class AtomicFuncArray {
-       public:
+    public:
         std::string data;
         unsigned long size;
         bool sparse;
@@ -2068,73 +2190,67 @@ class LanguageC : public Language<Base> {
         unsigned short scope;
     };
 };
-template <class Base>
-const std::string LanguageC<Base>::U_INDEX_TYPE = "unsigned long";  // NOLINT(cert-err58-cpp)
+template<class Base>
+const std::string LanguageC<Base>::U_INDEX_TYPE = "unsigned long"; // NOLINT(cert-err58-cpp)
 
-template <class Base>
-const std::string LanguageC<Base>::_C_COMP_OP_LT = "<";  // NOLINT(cert-err58-cpp)
-template <class Base>
-const std::string LanguageC<Base>::_C_COMP_OP_LE = "<=";  // NOLINT(cert-err58-cpp)
-template <class Base>
-const std::string LanguageC<Base>::_C_COMP_OP_EQ = "==";  // NOLINT(cert-err58-cpp)
-template <class Base>
-const std::string LanguageC<Base>::_C_COMP_OP_GE = ">=";  // NOLINT(cert-err58-cpp)
-template <class Base>
-const std::string LanguageC<Base>::_C_COMP_OP_GT = ">";  // NOLINT(cert-err58-cpp)
-template <class Base>
-const std::string LanguageC<Base>::_C_COMP_OP_NE = "!=";  // NOLINT(cert-err58-cpp)
+template<class Base>
+const std::string LanguageC<Base>::_C_COMP_OP_LT = "<"; // NOLINT(cert-err58-cpp)
+template<class Base>
+const std::string LanguageC<Base>::_C_COMP_OP_LE = "<="; // NOLINT(cert-err58-cpp)
+template<class Base>
+const std::string LanguageC<Base>::_C_COMP_OP_EQ = "=="; // NOLINT(cert-err58-cpp)
+template<class Base>
+const std::string LanguageC<Base>::_C_COMP_OP_GE = ">="; // NOLINT(cert-err58-cpp)
+template<class Base>
+const std::string LanguageC<Base>::_C_COMP_OP_GT = ">"; // NOLINT(cert-err58-cpp)
+template<class Base>
+const std::string LanguageC<Base>::_C_COMP_OP_NE = "!="; // NOLINT(cert-err58-cpp)
 
-template <class Base>
-const std::string LanguageC<Base>::_C_STATIC_INDEX_ARRAY = "index";  // NOLINT(cert-err58-cpp)
+template<class Base>
+const std::string LanguageC<Base>::_C_STATIC_INDEX_ARRAY = "index"; // NOLINT(cert-err58-cpp)
 
-template <class Base>
-const std::string LanguageC<Base>::_C_SPARSE_INDEX_ARRAY = "idx";  // NOLINT(cert-err58-cpp)
+template<class Base>
+const std::string LanguageC<Base>::_C_SPARSE_INDEX_ARRAY = "idx"; // NOLINT(cert-err58-cpp)
 
-template <class Base>
-const std::string LanguageC<Base>::_ATOMIC_TX = "atx";  // NOLINT(cert-err58-cpp)
+template<class Base>
+const std::string LanguageC<Base>::_ATOMIC_TX = "atx"; // NOLINT(cert-err58-cpp)
 
-template <class Base>
-const std::string LanguageC<Base>::_ATOMIC_TY = "aty";  // NOLINT(cert-err58-cpp)
+template<class Base>
+const std::string LanguageC<Base>::_ATOMIC_TY = "aty"; // NOLINT(cert-err58-cpp)
 
-template <class Base>
-const std::string LanguageC<Base>::_ATOMIC_PX = "apx";  // NOLINT(cert-err58-cpp)
+template<class Base>
+const std::string LanguageC<Base>::_ATOMIC_PX = "apx"; // NOLINT(cert-err58-cpp)
 
-template <class Base>
-const std::string LanguageC<Base>::_ATOMIC_PY = "apy";  // NOLINT(cert-err58-cpp)
+template<class Base>
+const std::string LanguageC<Base>::_ATOMIC_PY = "apy"; // NOLINT(cert-err58-cpp)
 
-template <class Base>
-const std::string LanguageC<Base>::ATOMICFUN_STRUCT_DEFINITION =  // NOLINT(cert-err58-cpp)
-    "typedef struct Array {\n"
-    "    void* data;\n"
-    "    " +
-    U_INDEX_TYPE +
-    " size;\n"
-    "    int sparse;\n"
-    "    const " +
-    U_INDEX_TYPE +
-    "* idx;\n"
-    "    " +
-    U_INDEX_TYPE +
-    " nnz;\n"
-    "} Array;\n"
-    "\n"
-    "struct LangCAtomicFun {\n"
-    "    void* libModel;\n"
-    "    int (*forward)(void* libModel,\n"
-    "                   int atomicIndex,\n"
-    "                   int q,\n"
-    "                   int p,\n"
-    "                   const Array tx[],\n"
-    "                   Array* ty);\n"
-    "    int (*reverse)(void* libModel,\n"
-    "                   int atomicIndex,\n"
-    "                   int p,\n"
-    "                   const Array tx[],\n"
-    "                   Array* px,\n"
-    "                   const Array py[]);\n"
-    "};";
+template<class Base>
+const std::string LanguageC<Base>::ATOMICFUN_STRUCT_DEFINITION = // NOLINT(cert-err58-cpp)
+"typedef struct Array {\n"
+"    void* data;\n"
+"    " + U_INDEX_TYPE + " size;\n"
+"    int sparse;\n"
+"    const " + U_INDEX_TYPE + "* idx;\n"
+"    " + U_INDEX_TYPE + " nnz;\n"
+"} Array;\n"
+"\n"
+"struct LangCAtomicFun {\n"
+"    void* libModel;\n"
+"    int (*forward)(void* libModel,\n"
+"                   int atomicIndex,\n"
+"                   int q,\n"
+"                   int p,\n"
+"                   const Array tx[],\n"
+"                   Array* ty);\n"
+"    int (*reverse)(void* libModel,\n"
+"                   int atomicIndex,\n"
+"                   int p,\n"
+"                   const Array tx[],\n"
+"                   Array* px,\n"
+"                   const Array py[]);\n"
+"};";
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef CPPAD_UTILITY_TIME_TEST_HPP
-#define CPPAD_UTILITY_TIME_TEST_HPP
+# ifndef CPPAD_UTILITY_TIME_TEST_HPP
+# define CPPAD_UTILITY_TIME_TEST_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -136,16 +136,15 @@ $end
 -----------------------------------------------------------------------
 */
 
-#include <algorithm>
-#include <cmath>
-#include <cstddef>
+# include <algorithm>
+# include <cstddef>
+# include <cmath>
+# include <cppad/utility/elapsed_seconds.hpp>
+# include <cppad/local/define.hpp>
 
-#include <cppad/local/define.hpp>
-#include <cppad/utility/elapsed_seconds.hpp>
+# define CPPAD_EXTRA_RUN_BEFORE_TIMING 0
 
-#define CPPAD_EXTRA_RUN_BEFORE_TIMING 0
-
-namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
+namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 /*!
 \file time_test.hpp
 \brief Function that preforms one timing test (for speed of execution).
@@ -168,18 +167,19 @@ is the minimum amount of time that test should take to preform
 the repetitions of the operation being timed.
 */
 template <class Test>
-double time_test(Test test, double time_min) {
-#if CPPAD_EXTRA_RUN_BEFORE_TIMING
+double time_test(Test test, double time_min )
+{
+# if CPPAD_EXTRA_RUN_BEFORE_TIMING
     test(1);
-#endif
+# endif
     size_t repeat = 0;
-    double s0 = elapsed_seconds();
-    double s1 = s0;
-    while (s1 - s0 < time_min) {
-        repeat = std::max(size_t(1), 2 * repeat);
-        s0 = elapsed_seconds();
+    double s0     = elapsed_seconds();
+    double s1     = s0;
+    while( s1 - s0 < time_min )
+    {   repeat = std::max(size_t(1), 2 * repeat);
+        s0     = elapsed_seconds();
         test(repeat);
-        s1 = elapsed_seconds();
+        s1     = elapsed_seconds();
     }
     double time = (s1 - s0) / double(repeat);
     return time;
@@ -207,25 +207,26 @@ the repetitions of the operation being timed.
 will be used for the value of size in the call to test.
 */
 template <class Test>
-double time_test(Test test, double time_min, size_t test_size) {
-#if CPPAD_EXTRA_RUN_BEFORE_TIMING
+double time_test(Test test, double time_min, size_t test_size)
+{
+# if CPPAD_EXTRA_RUN_BEFORE_TIMING
     test(test_size, 1);
-#endif
+# endif
     size_t repeat = 0;
-    double s0 = elapsed_seconds();
-    double s1 = s0;
-    while (s1 - s0 < time_min) {
-        repeat = std::max(size_t(1), 2 * repeat);
-        s0 = elapsed_seconds();
+    double s0     = elapsed_seconds();
+    double s1     = s0;
+    while( s1 - s0 < time_min )
+    {   repeat = std::max(size_t(1), 2 * repeat);
+        s0     = elapsed_seconds();
         test(test_size, repeat);
-        s1 = elapsed_seconds();
+        s1     = elapsed_seconds();
     }
     double time = (s1 - s0) / double(repeat);
     return time;
 }
 
-}  // namespace CppAD
+} // END_CPPAD_NAMESPACE
 
-#undef CPPAD_EXTRA_RUN_BEFORE_TIMING
+# undef CPPAD_EXTRA_RUN_BEFORE_TIMING
 // END PROGRAM
-#endif
+# endif

@@ -18,14 +18,15 @@
 namespace CppAD {
 namespace cg {
 
-template <class Base>
-void ModelCSourceGen<Base>::generateSparseJacobianWithLoopsSourceFromForRev(
-    const std::map<size_t, CompressedVectorInfo> &jacInfo, size_t maxCompressedSize,
-    const std::string &localFunctionTypeName, const std::string &suffix, const std::string &keyName,
-    const std::map<size_t, std::set<size_t> > &nonLoopElements,
-    const std::map<LoopModel<Base> *, std::map<size_t, std::map<size_t, std::set<size_t> > > > &loopGroups,
-    void (*generateLocalFunctionName)(std::ostringstream &cache, const std::string &modelName,
-                                      const LoopModel<Base> &loop, size_t g)) {
+template<class Base>
+void ModelCSourceGen<Base>::generateSparseJacobianWithLoopsSourceFromForRev(const std::map<size_t, CompressedVectorInfo>& jacInfo,
+                                                                            size_t maxCompressedSize,
+                                                                            const std::string& localFunctionTypeName,
+                                                                            const std::string& suffix,
+                                                                            const std::string& keyName,
+                                                                            const std::map<size_t, std::set<size_t> >& nonLoopElements,
+                                                                            const std::map<LoopModel<Base>*, std::map<size_t, std::map<size_t, std::set<size_t> > > >& loopGroups,
+                                                                            void (*generateLocalFunctionName)(std::ostringstream& cache, const std::string& modelName, const LoopModel<Base>& loop, size_t g)) {
     using namespace std;
     using namespace CppAD::cg::loops;
 
@@ -42,15 +43,22 @@ void ModelCSourceGen<Base>::generateSparseJacobianWithLoopsSourceFromForRev(
     string nlSuffix = "noloop_" + suffix;
 
     _cache.str("");
-    _cache << "#include <stdlib.h>\n" << LanguageC<Base>::ATOMICFUN_STRUCT_DEFINITION << "\n\n";
+    _cache << "#include <stdlib.h>\n"
+            << LanguageC<Base>::ATOMICFUN_STRUCT_DEFINITION << "\n\n";
 
     generateFunctionDeclarationSource(_cache, localFunction, nlSuffix, nonLoopElements, argsDcl);
     generateFunctionDeclarationSourceLoopForRev(_cache, langC, _name, keyName, loopGroups, generateLocalFunctionName);
 
     _cache << "\n";
-    printForRevUsageFunction(_cache, _baseTypeName, _name, model_function, 2, localFunction, suffix, keyName, "it",
-                             "jac", loopGroups, nonLoopElements, jacInfo, generateLocalFunctionName,
-                             _jacSparsity.rows.size(), maxCompressedSize);
+    printForRevUsageFunction(_cache, _baseTypeName, _name,
+            model_function, 2,
+            localFunction, suffix,
+            keyName, "it", "jac",
+            loopGroups,
+            nonLoopElements,
+            jacInfo,
+            generateLocalFunctionName,
+            _jacSparsity.rows.size(), maxCompressedSize);
 
     finishedJob();
 
@@ -58,7 +66,7 @@ void ModelCSourceGen<Base>::generateSparseJacobianWithLoopsSourceFromForRev(
     _cache.str("");
 }
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

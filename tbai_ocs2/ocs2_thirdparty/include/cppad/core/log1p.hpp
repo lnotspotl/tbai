@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_LOG1P_HPP
-#define CPPAD_CORE_LOG1P_HPP
+# ifndef CPPAD_CORE_LOG1P_HPP
+# define CPPAD_CORE_LOG1P_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -58,36 +58,33 @@ contains an example and test of this function.
 $end
 -------------------------------------------------------------------------------
 */
-#include <cppad/configure.hpp>
-#if !CPPAD_USE_CPLUSPLUS_2011
+# include <cppad/configure.hpp>
+# if ! CPPAD_USE_CPLUSPLUS_2011
 
 // BEGIN CppAD namespace
 namespace CppAD {
 
 template <class Type>
-Type log1p_template(const Type &x) {
-    return CppAD::log(Type(1) + x);
+Type log1p_template(const Type &x)
+{   return CppAD::log(Type(1) + x);
 }
 
-inline float log1p(const float &x) {
-    return log1p_template(x);
-}
+inline float log1p(const float &x)
+{   return log1p_template(x); }
 
-inline double log1p(const double &x) {
-    return log1p_template(x);
-}
+inline double log1p(const double &x)
+{   return log1p_template(x); }
 
 template <class Base>
-AD<Base> log1p(const AD<Base> &x) {
-    return log1p_template(x);
-}
+AD<Base> log1p(const AD<Base> &x)
+{   return log1p_template(x); }
 
 template <class Base>
-AD<Base> log1p(const VecAD_reference<Base> &x) {
-    return log1p_template(x.ADBase());
-}
+AD<Base> log1p(const VecAD_reference<Base> &x)
+{   return log1p_template( x.ADBase() ); }
 
-}  // namespace CppAD
 
-#endif  // CPPAD_USE_CPLUSPLUS_2011
-#endif  // CPPAD_LOG1P_INCLUDED
+} // END CppAD namespace
+
+# endif // CPPAD_USE_CPLUSPLUS_2011
+# endif // CPPAD_LOG1P_INCLUDED

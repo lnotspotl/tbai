@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_ATAN2_HPP
-#define CPPAD_CORE_ATAN2_HPP
+# ifndef CPPAD_CORE_ATAN2_HPP
+# define CPPAD_CORE_ATAN2_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -79,21 +79,19 @@ $end
 -------------------------------------------------------------------------------
 */
 
-namespace CppAD {  // BEGIN CppAD namespace
+namespace CppAD { // BEGIN CppAD namespace
 
-inline float atan2(float x, float y) {
-    return std::atan2(x, y);
-}
+inline float atan2(float x, float y)
+{   return std::atan2(x, y); }
 
-inline double atan2(double x, double y) {
-    return std::atan2(x, y);
-}
+inline double atan2(double x, double y)
+{   return std::atan2(x, y); }
 
 // The code below is used as an example by the CondExp documentation.
 // BEGIN CondExp
 template <class Base>
-AD<Base> atan2(const AD<Base> &y, const AD<Base> &x) {
-    AD<Base> alpha;
+AD<Base> atan2 (const AD<Base> &y, const AD<Base> &x)
+{   AD<Base> alpha;
     AD<Base> beta;
     AD<Base> theta;
 
@@ -108,8 +106,8 @@ AD<Base> atan2(const AD<Base> &y, const AD<Base> &x) {
     //      theta = atan(ay / ax);
     // else theta = pi2 - atan(ax / ay);
     alpha = atan(ay / ax);
-    beta = pi2 - atan(ax / ay);
-    theta = CondExpGt(ax, ay, alpha, beta);  // use of CondExp
+    beta  = pi2 - atan(ax / ay);
+    theta = CondExpGt(ax, ay, alpha, beta);         // use of CondExp
 
     // if( x <= 0 )
     //     theta = pi - theta;
@@ -117,27 +115,25 @@ AD<Base> atan2(const AD<Base> &y, const AD<Base> &x) {
 
     // if( y <= 0 )
     //     theta = - theta;
-    theta = CondExpLe(y, zero, -theta, theta);  // use of CondExp
+    theta = CondExpLe(y, zero, -theta, theta);      // use of CondExp
 
     return theta;
 }
 // END CondExp
 
 template <class Base>
-AD<Base> atan2(const VecAD_reference<Base> &y, const AD<Base> &x) {
-    return atan2(y.ADBase(), x);
-}
+AD<Base> atan2 (const VecAD_reference<Base> &y, const AD<Base> &x)
+{   return atan2( y.ADBase() , x ); }
 
 template <class Base>
-AD<Base> atan2(const AD<Base> &y, const VecAD_reference<Base> &x) {
-    return atan2(y, x.ADBase());
-}
+AD<Base> atan2 (const AD<Base> &y, const VecAD_reference<Base> &x)
+{   return atan2( y , x.ADBase() ); }
 
 template <class Base>
-AD<Base> atan2(const VecAD_reference<Base> &y, const VecAD_reference<Base> &x) {
-    return atan2(y.ADBase(), x.ADBase());
-}
+AD<Base> atan2
+(const VecAD_reference<Base> &y, const VecAD_reference<Base> &x)
+{   return atan2( y.ADBase() , x.ADBase() ); }
 
-}  // namespace CppAD
+} // END CppAD namespace
 
-#endif
+# endif

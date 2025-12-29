@@ -1,5 +1,5 @@
-#ifndef CPPAD_IPOPT_SOLVE_HPP
-#define CPPAD_IPOPT_SOLVE_HPP
+# ifndef CPPAD_IPOPT_SOLVE_HPP
+# define CPPAD_IPOPT_SOLVE_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-16 Bradley M. Bell
 
@@ -402,9 +402,9 @@ demonstrates using Ipopt to solve for parameters in an ODE model.
 $end
 -------------------------------------------------------------------------------
 */
-#include <cppad/ipopt/solve_callback.hpp>
+# include <cppad/ipopt/solve_callback.hpp>
 
-namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
+namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 namespace ipopt {
 /*!
 \file solve.hpp
@@ -467,15 +467,27 @@ function that evaluates the objective and constraints using the syntax
 structure that holds the solution of the optimization.
 */
 template <class Dvector, class FG_eval>
-void solve(const std::string &options, const Dvector &xi, const Dvector &xl, const Dvector &xu, const Dvector &gl,
-           const Dvector &gu, FG_eval &fg_eval, ipopt::solve_result<Dvector> &solution) {
-    bool ok = true;
+void solve(
+    const std::string&                   options   ,
+    const Dvector&                       xi        ,
+    const Dvector&                       xl        ,
+    const Dvector&                       xu        ,
+    const Dvector&                       gl        ,
+    const Dvector&                       gu        ,
+    FG_eval&                             fg_eval   ,
+    ipopt::solve_result<Dvector>&        solution  )
+{   bool ok = true;
 
     typedef typename FG_eval::ADvector ADvector;
 
-    CPPAD_ASSERT_KNOWN(xi.size() == xl.size() && xi.size() == xu.size(),
-                       "ipopt::solve: size of xi, xl, and xu are not all equal.");
-    CPPAD_ASSERT_KNOWN(gl.size() == gu.size(), "ipopt::solve: size of gl and gu are not equal.");
+    CPPAD_ASSERT_KNOWN(
+        xi.size() == xl.size() && xi.size() == xu.size() ,
+        "ipopt::solve: size of xi, xl, and xu are not all equal."
+    );
+    CPPAD_ASSERT_KNOWN(
+        gl.size() == gu.size() ,
+        "ipopt::solve: size of gl and gu are not equal."
+    );
     size_t nx = xi.size();
     size_t ng = gl.size();
 
@@ -485,25 +497,35 @@ void solve(const std::string &options, const Dvector &xi, const Dvector &xl, con
 
     // process the options argument
     size_t begin_1, end_1, begin_2, end_2, begin_3, end_3;
-    begin_1 = 0;
-    bool retape = false;
-    bool sparse_forward = false;
-    bool sparse_reverse = false;
-    while (begin_1 < options.size()) {  // split this line into tokens
-        while (options[begin_1] == ' ') begin_1++;
-        end_1 = options.find_first_of(" \n", begin_1);
+    begin_1     = 0;
+    bool retape          = false;
+    bool sparse_forward  = false;
+    bool sparse_reverse  = false;
+    while( begin_1 < options.size() )
+    {   // split this line into tokens
+        while( options[begin_1] == ' ')
+            begin_1++;
+        end_1   = options.find_first_of(" \n", begin_1);
         begin_2 = end_1;
-        while (options[begin_2] == ' ') begin_2++;
-        end_2 = options.find_first_of(" \n", begin_2);
+        while( options[begin_2] == ' ')
+            begin_2++;
+        end_2   = options.find_first_of(" \n", begin_2);
         begin_3 = end_2;
-        while (options[begin_3] == ' ') begin_3++;
-        end_3 = options.find_first_of(" \n", begin_3);
+        while( options[begin_3] == ' ')
+            begin_3++;
+        end_3   = options.find_first_of(" \n", begin_3);
 
         // check for errors
-        CPPAD_ASSERT_KNOWN((end_1 != std::string::npos) & (end_2 != std::string::npos) & (end_3 != std::string::npos),
-                           "ipopt::solve: missing '\\n' at end of an option line");
-        CPPAD_ASSERT_KNOWN((end_1 > begin_1) & (end_2 > begin_2),
-                           "ipopt::solve: an option line does not have two tokens");
+        CPPAD_ASSERT_KNOWN(
+            (end_1 != std::string::npos)  &
+            (end_2 != std::string::npos)  &
+            (end_3 != std::string::npos)  ,
+            "ipopt::solve: missing '\\n' at end of an option line"
+        );
+        CPPAD_ASSERT_KNOWN(
+            (end_1 > begin_1) & (end_2 > begin_2) ,
+            "ipopt::solve: an option line does not have two tokens"
+        );
 
         // get first two tokens
         std::string tok_1 = options.substr(begin_1, end_1 - begin_1);
@@ -516,67 +538,100 @@ void solve(const std::string &options, const Dvector &xi, const Dvector &xl, con
         three_tok |= tok_1 == "String";
         three_tok |= tok_1 == "Numeric";
         three_tok |= tok_1 == "Integer";
-        if (three_tok) {
-            CPPAD_ASSERT_KNOWN((end_3 > begin_3),
-                               "ipopt::solve: a Sparse, String, Numeric, or Integer\n"
-                               "option line does not have three tokens.");
+        if( three_tok )
+        {   CPPAD_ASSERT_KNOWN(
+                (end_3 > begin_3) ,
+                "ipopt::solve: a Sparse, String, Numeric, or Integer\n"
+                "option line does not have three tokens."
+            );
             tok_3 = options.substr(begin_3, end_3 - begin_3);
         }
 
         // switch on option type
-        if (tok_1 == "Retape") {
-            CPPAD_ASSERT_KNOWN((tok_2 == "true") | (tok_2 == "false"),
-                               "ipopt::solve: Retape value is not true or false");
+        if( tok_1 == "Retape" )
+        {   CPPAD_ASSERT_KNOWN(
+                (tok_2 == "true") | (tok_2 == "false") ,
+                "ipopt::solve: Retape value is not true or false"
+            );
             retape = (tok_2 == "true");
-        } else if (tok_1 == "Sparse") {
-            CPPAD_ASSERT_KNOWN((tok_2 == "true") | (tok_2 == "false"),
-                               "ipopt::solve: Sparse value is not true or false");
-            CPPAD_ASSERT_KNOWN((tok_3 == "forward") | (tok_3 == "reverse"),
-                               "ipopt::solve: Sparse direction is not forward or reverse");
-            if (tok_2 == "false") {
-                sparse_forward = false;
+        }
+        else if( tok_1 == "Sparse" )
+        {   CPPAD_ASSERT_KNOWN(
+                (tok_2 == "true") | (tok_2 == "false") ,
+                "ipopt::solve: Sparse value is not true or false"
+            );
+            CPPAD_ASSERT_KNOWN(
+                (tok_3 == "forward") | (tok_3 == "reverse") ,
+                "ipopt::solve: Sparse direction is not forward or reverse"
+            );
+            if( tok_2 == "false" )
+            {   sparse_forward = false;
                 sparse_reverse = false;
-            } else {
-                sparse_forward = tok_3 == "forward";
+            }
+            else
+            {   sparse_forward = tok_3 == "forward";
                 sparse_reverse = tok_3 == "reverse";
             }
-        } else if (tok_1 == "String")
+        }
+        else if ( tok_1 == "String" )
             app->Options()->SetStringValue(tok_2.c_str(), tok_3.c_str());
-        else if (tok_1 == "Numeric") {
-            Ipopt::Number value = std::atof(tok_3.c_str());
+        else if ( tok_1 == "Numeric" )
+        {   Ipopt::Number value = std::atof( tok_3.c_str() );
             app->Options()->SetNumericValue(tok_2.c_str(), value);
-        } else if (tok_1 == "Integer") {
-            Ipopt::Index value = std::atoi(tok_3.c_str());
+        }
+        else if ( tok_1 == "Integer" )
+        {   Ipopt::Index value = std::atoi( tok_3.c_str() );
             app->Options()->SetIntegerValue(tok_2.c_str(), value);
-        } else
-            CPPAD_ASSERT_KNOWN(false,
-                               "ipopt::solve: First token is not one of\n"
-                               "Retape, Sparse, String, Numeric, Integer");
+        }
+        else
+            CPPAD_ASSERT_KNOWN(
+            false,
+            "ipopt::solve: First token is not one of\n"
+            "Retape, Sparse, String, Numeric, Integer"
+        );
 
         begin_1 = end_3;
-        while (options[begin_1] == ' ') begin_1++;
-        if (options[begin_1] != '\n')
-            CPPAD_ASSERT_KNOWN(false,
-                               "ipopt::solve: either more than three tokens "
-                               "or no '\\n' at end of a line");
+        while( options[begin_1] == ' ')
+            begin_1++;
+        if( options[begin_1] != '\n' ) CPPAD_ASSERT_KNOWN(
+            false,
+            "ipopt::solve: either more than three tokens "
+            "or no '\\n' at end of a line"
+        );
         begin_1++;
     }
-    CPPAD_ASSERT_KNOWN(!(retape & (sparse_forward | sparse_reverse)),
-                       "ipopt::solve: retape and sparse both true is not supported.");
+    CPPAD_ASSERT_KNOWN(
+        ! ( retape & (sparse_forward | sparse_reverse) ) ,
+        "ipopt::solve: retape and sparse both true is not supported."
+    );
 
     // Initialize the IpoptApplication and process the options
     Ipopt::ApplicationReturnStatus status = app->Initialize();
-    ok &= status == Ipopt::Solve_Succeeded;
-    if (!ok) {
-        solution.status = solve_result<Dvector>::unknown;
+    ok    &= status == Ipopt::Solve_Succeeded;
+    if( ! ok )
+    {   solution.status = solve_result<Dvector>::unknown;
         return;
     }
 
     // Create an interface from Ipopt to this specific problem.
     // Note the assumption here that ADvector is same as cppd_ipopt::ADvector
     size_t nf = 1;
-    Ipopt::SmartPtr<Ipopt::TNLP> cppad_nlp = new CppAD::ipopt::solve_callback<Dvector, ADvector, FG_eval>(
-        nf, nx, ng, xi, xl, xu, gl, gu, fg_eval, retape, sparse_forward, sparse_reverse, solution);
+    Ipopt::SmartPtr<Ipopt::TNLP> cppad_nlp =
+    new CppAD::ipopt::solve_callback<Dvector, ADvector, FG_eval>(
+        nf,
+        nx,
+        ng,
+        xi,
+        xl,
+        xu,
+        gl,
+        gu,
+        fg_eval,
+        retape,
+        sparse_forward,
+        sparse_reverse,
+        solution
+    );
 
     // Run the IpoptApplication
     app->OptimizeTNLP(cppad_nlp);
@@ -584,6 +639,6 @@ void solve(const std::string &options, const Dvector &xi, const Dvector &xl, con
     return;
 }
 
-}  // namespace ipopt
-}  // namespace CppAD
-#endif
+} // end ipopt namespace
+} // END_CPPAD_NAMESPACE
+# endif

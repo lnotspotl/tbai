@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_STANDARD_MATH_HPP
-#define CPPAD_CORE_STANDARD_MATH_HPP
+# ifndef CPPAD_CORE_STANDARD_MATH_HPP
+# define CPPAD_CORE_STANDARD_MATH_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -103,14 +103,14 @@ $tend
 
 $end
 */
-#include <cppad/core/abs.hpp>
-#include <cppad/core/acosh.hpp>
-#include <cppad/core/asinh.hpp>
-#include <cppad/core/atanh.hpp>
-#include <cppad/core/erf.hpp>
-#include <cppad/core/expm1.hpp>
-#include <cppad/core/log1p.hpp>
-#include <cppad/core/sign.hpp>
+# include <cppad/core/abs.hpp>
+# include <cppad/core/acosh.hpp>
+# include <cppad/core/asinh.hpp>
+# include <cppad/core/atanh.hpp>
+# include <cppad/core/erf.hpp>
+# include <cppad/core/expm1.hpp>
+# include <cppad/core/log1p.hpp>
+# include <cppad/core/sign.hpp>
 
 /*
 $begin binary_math$$
@@ -124,7 +124,7 @@ $childtable%include/cppad/core/atan2.hpp
 
 $end
 */
-#include <cppad/core/atan2.hpp>
-#include <cppad/core/pow.hpp>
+# include <cppad/core/atan2.hpp>
+# include <cppad/core/pow.hpp>
 
-#endif
+# endif

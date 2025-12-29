@@ -24,18 +24,20 @@ namespace cg {
  * A tool used to create static libraries from object files
  */
 class Archiver {
-   public:
+public:
     virtual bool isVerbose() const = 0;
 
     virtual void setVerbose(bool verbose) = 0;
 
-    virtual void create(const std::string &library, const std::set<std::string> &objectFiles,
-                        JobTimer *timer = nullptr) = 0;
+    virtual void create(const std::string& library,
+                        const std::set<std::string>& objectFiles,
+                        JobTimer* timer = nullptr) = 0;
 
-    inline virtual ~Archiver(){};
+    inline virtual ~Archiver() {
+    };
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

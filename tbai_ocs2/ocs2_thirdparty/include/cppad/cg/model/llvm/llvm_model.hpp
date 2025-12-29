@@ -24,15 +24,16 @@ namespace cg {
  *
  * @author Joao Leal
  */
-template <class Base>
+template<class Base>
 class LlvmModel : public FunctorGenericModel<Base> {
-   protected:
+protected:
     /// the dynamic library
-    LlvmModelLibrary<Base> *_dynLib;
+    LlvmModelLibrary<Base>* _dynLib;
 
-   public:
-    LlvmModel(const LlvmModel &) = delete;
-    LlvmModel &operator=(const LlvmModel &) = delete;
+public:
+
+    LlvmModel(const LlvmModel&) = delete;
+    LlvmModel& operator=(const LlvmModel&) = delete;
 
     virtual ~LlvmModel() {
         if (_dynLib != nullptr) {
@@ -40,20 +41,24 @@ class LlvmModel : public FunctorGenericModel<Base> {
         }
     }
 
-   protected:
+protected:
+
     /**
      * Creates a new model
      *
      * @param name The model name
      */
-    LlvmModel(LlvmModelLibrary<Base> *dynLib, const std::string &name)
-        : FunctorGenericModel<Base>(name), _dynLib(dynLib) {
+    LlvmModel(LlvmModelLibrary<Base>* dynLib,
+              const std::string& name) :
+        FunctorGenericModel<Base>(name),
+        _dynLib(dynLib) {
+
         CPPADCG_ASSERT_UNKNOWN(_dynLib != nullptr);
 
         this->init();
     }
 
-    void *loadFunction(const std::string &functionName, bool required = true) override {
+    void* loadFunction(const std::string& functionName, bool required = true) override {
         return _dynLib->loadFunction(functionName, required);
     }
 
@@ -65,7 +70,7 @@ class LlvmModel : public FunctorGenericModel<Base> {
     friend class LlvmModelLibrary<Base>;
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

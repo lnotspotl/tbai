@@ -25,24 +25,27 @@ namespace cg {
  *
  * @author Joao Leal
  */
-template <class Base>
+template<class Base>
 class LangMathMLCustomVariableNameGenerator : public LangMathMLDefaultVariableNameGenerator<Base> {
-   protected:
+protected:
     using Super = LangMathMLDefaultVariableNameGenerator<Base>;
     // the custom names for the dependent variables
     const std::vector<std::string> depNames_;
     // the custom names for the independent variables
     const std::vector<std::string> indepNames_;
+public:
 
-   public:
-    LangMathMLCustomVariableNameGenerator(const std::vector<std::string> &depNames,
-                                          const std::vector<std::string> &indepNames, const std::string &depName = "y",
-                                          const std::string &indepName = "x", const std::string &tmpName = "v",
-                                          const std::string &tmpArrayName = "a",
-                                          const std::string &tmpSparseArrayName = "s")
-        : LangMathMLDefaultVariableNameGenerator<Base>(depName, indepName, tmpName, tmpArrayName, tmpSparseArrayName),
-          depNames_(depNames),
-          indepNames_(indepNames) {}
+    LangMathMLCustomVariableNameGenerator(const std::vector<std::string>& depNames,
+                                          const std::vector<std::string>& indepNames,
+                                          const std::string& depName = "y",
+                                          const std::string& indepName = "x",
+                                          const std::string& tmpName = "v",
+                                          const std::string& tmpArrayName = "a",
+                                          const std::string& tmpSparseArrayName = "s") :
+        LangMathMLDefaultVariableNameGenerator<Base>(depName, indepName, tmpName, tmpArrayName, tmpSparseArrayName),
+        depNames_(depNames),
+        indepNames_(indepNames) {
+    }
 
     inline virtual ~LangMathMLCustomVariableNameGenerator() = default;
 
@@ -54,7 +57,8 @@ class LangMathMLCustomVariableNameGenerator : public LangMathMLDefaultVariableNa
         }
     }
 
-    std::string generateIndependent(const OperationNode<Base> &independent, size_t id) override {
+    std::string generateIndependent(const OperationNode<Base>& independent,
+                                    size_t id) override {
         size_t index = id - 1;
         if (index < indepNames_.size() && !indepNames_[index].empty()) {
             return indepNames_[index];
@@ -63,30 +67,35 @@ class LangMathMLCustomVariableNameGenerator : public LangMathMLDefaultVariableNa
         }
     }
 
-    bool isConsecutiveInIndepArray(const OperationNode<Base> &indepFirst, size_t idFirst,
-                                   const OperationNode<Base> &indepSecond, size_t idSecond) override {
+    bool isConsecutiveInIndepArray(const OperationNode<Base>& indepFirst,
+                                   size_t idFirst,
+                                   const OperationNode<Base>& indepSecond,
+                                   size_t idSecond) override {
         size_t index1 = idFirst - 1;
         size_t index2 = idSecond - 1;
 
         if ((index1 > indepNames_.size() || indepNames_[index1].empty()) &&
-            (index2 > indepNames_.size() || indepNames_[index2].empty())) {
+                (index2 > indepNames_.size() || indepNames_[index2].empty())) {
             return index1 + 1 == index2;
         } else {
-            return false;  // individual names used (not elements of arrays)
+            return false; // individual names used (not elements of arrays)
         }
     }
 
-    bool isInSameIndependentArray(const OperationNode<Base> &indep1, size_t id1, const OperationNode<Base> &indep2,
+    bool isInSameIndependentArray(const OperationNode<Base>& indep1,
+                                  size_t id1,
+                                  const OperationNode<Base>& indep2,
                                   size_t id2) override {
         size_t index1 = id1 - 1;
         size_t index2 = id2 - 1;
 
         return (index1 > indepNames_.size() || indepNames_[index1].empty()) &&
-               (index2 > indepNames_.size() || indepNames_[index2].empty());
+                (index2 > indepNames_.size() || indepNames_[index2].empty());
     }
+
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

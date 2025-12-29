@@ -16,10 +16,10 @@
  */
 
 #if CPPAD_CG_SYSTEM_LINUX
-#include <sys/stat.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <unistd.h>
+#include <sys/stat.h>
 
 namespace CppAD {
 namespace cg {
@@ -35,14 +35,16 @@ namespace {
  * Utility class used to close automatically file descriptors
  */
 class FDHandler {
-   public:
+public:
     int fd;
     bool closed;
+public:
 
-   public:
-    inline FDHandler() : fd(0), closed(true) {}
+    inline FDHandler() : fd(0), closed(true) {
+    }
 
-    inline explicit FDHandler(int fd) : fd(fd), closed(false) {}
+    inline explicit FDHandler(int fd) : fd(fd), closed(false) {
+    }
 
     inline void close() {
         if (!closed) {
@@ -51,18 +53,20 @@ class FDHandler {
         }
     }
 
-    inline ~FDHandler() { close(); }
+    inline ~FDHandler() {
+        close();
+    }
 };
 
 /**
  * Utility class for pipes
  */
 class PipeHandler {
-   public:
+public:
     FDHandler read;
     FDHandler write;
+public:
 
-   public:
     inline void create() {
         int fd[2]; /** file descriptors used to communicate between processes*/
         if (pipe(fd) < 0) {
@@ -75,42 +79,43 @@ class PipeHandler {
     }
 };
 
-}  // namespace
+}
 
 #ifdef CPPAD_CG_SYSTEM_APPLE
-template <class T>
+template<class T>
 const std::string SystemInfo<T>::DYNAMIC_LIB_EXTENSION = ".dylib";
 #else
-template <class T>
+template<class T>
 const std::string SystemInfo<T>::DYNAMIC_LIB_EXTENSION = ".so";
 #endif
 
-template <class T>
+template<class T>
 const std::string SystemInfo<T>::STATIC_LIB_EXTENSION = ".a";
 
 inline std::string getWorkingDirectory() {
     char buffer[1024];
 
-    char *ret = getcwd(buffer, 1024);
+    char* ret = getcwd(buffer, 1024);
     if (ret == nullptr) {
-        const char *error = strerror(errno);
+        const char* error = strerror(errno);
         throw CGException("Failed to get current working directory: ", error);
     }
 
     return buffer;
 }
 
-inline void createFolder(const std::string &folder) {
+inline void createFolder(const std::string& folder) {
     int ret = mkdir(folder.c_str(), 0755);
     if (ret == -1) {
         if (errno != EEXIST) {
-            const char *error = strerror(errno);
+            const char* error = strerror(errno);
             throw CGException("Failed to create directory '", folder + "': ", error);
         }
     }
 }
 
-inline std::string createPath(const std::string &baseFolder, const std::string &file) {
+inline std::string createPath(const std::string& baseFolder,
+                              const std::string& file) {
     if (!baseFolder.empty() && baseFolder.back() == '/') {
         return baseFolder + file;
     } else {
@@ -118,11 +123,11 @@ inline std::string createPath(const std::string &baseFolder, const std::string &
     }
 }
 
-inline std::string escapePath(const std::string &path) {
+inline std::string escapePath(const std::string& path) {
     return std::string("\"") + path + "\"";
 }
 
-inline std::string filenameFromPath(const std::string &path) {
+inline std::string filenameFromPath(const std::string& path) {
     size_t pos = path.rfind('/');
     if (pos != std::string::npos) {
         if (pos == path.size() - 1) {
@@ -135,7 +140,7 @@ inline std::string filenameFromPath(const std::string &path) {
     }
 }
 
-inline std::string directoryFromPath(const std::string &path) {
+inline std::string directoryFromPath(const std::string& path) {
     size_t found = path.find_last_of('/');
     if (found != std::string::npos) {
         return path.substr(0, found + 1);
@@ -143,13 +148,14 @@ inline std::string directoryFromPath(const std::string &path) {
     return "./";
 }
 
-inline bool isAbsolutePath(const std::string &path) {
-    if (path.empty()) return false;
+inline bool isAbsolutePath(const std::string& path) {
+    if (path.empty())
+        return false;
 
     return path[0] == '/';
 }
 
-inline bool isDirectory(const std::string &path) {
+inline bool isDirectory(const std::string& path) {
     struct stat info;
 
     if (stat(path.c_str(), &info) != 0) {
@@ -161,7 +167,7 @@ inline bool isDirectory(const std::string &path) {
     }
 }
 
-inline bool isFile(const std::string &path) {
+inline bool isFile(const std::string& path) {
     struct stat sts;
     errno = 0;
     if (stat(path.c_str(), &sts) == 0 && errno == 0) {
@@ -173,25 +179,27 @@ inline bool isFile(const std::string &path) {
     return false;
 }
 
-inline void callExecutable(const std::string &executable, const std::vector<std::string> &args,
-                           std::string *stdOutErrMessage, const std::string *stdInMessage) {
+inline void callExecutable(const std::string& executable,
+                           const std::vector<std::string>& args,
+                           std::string* stdOutErrMessage,
+                           const std::string* stdInMessage) {
     std::string execName = filenameFromPath(executable);
 
-    PipeHandler pipeMsg;  // file descriptors used to communicate between processes
+    PipeHandler pipeMsg; // file descriptors used to communicate between processes
     pipeMsg.create();
 
-    PipeHandler pipeStdOutErr;  // file descriptors used to communicate between processes
-    if (stdOutErrMessage != nullptr) {
+    PipeHandler pipeStdOutErr; // file descriptors used to communicate between processes
+    if(stdOutErrMessage != nullptr) {
         pipeStdOutErr.create();
     }
 
     PipeHandler pipeSrc;
     if (stdInMessage != nullptr) {
-        // Create pipe for piping source to the compiler
+        //Create pipe for piping source to the compiler
         pipeSrc.create();
     }
 
-    // Fork the compiler, pipe source to it, wait for the compiler to exit
+    //Fork the compiler, pipe source to it, wait for the compiler to exit
     pid_t pid = fork();
     if (pid < 0) {
         throw CGException("Failed to fork process");
@@ -204,7 +212,7 @@ inline void callExecutable(const std::string &executable, const std::vector<std:
         pipeMsg.read.close();
 
         if (stdInMessage != nullptr) {
-            pipeSrc.write.close();  // close write end of pipe
+            pipeSrc.write.close(); // close write end of pipe
             // Send pipe input to stdin
             close(STDIN_FILENO);
             if (dup2(pipeSrc.read.fd, STDIN_FILENO) == -1) {
@@ -213,8 +221,8 @@ inline void callExecutable(const std::string &executable, const std::vector<std:
             }
         }
 
-        if (stdOutErrMessage != nullptr) {
-            pipeStdOutErr.read.close();  // close read end of pipe
+        if(stdOutErrMessage != nullptr) {
+            pipeStdOutErr.read.close(); // close read end of pipe
 
             // redirect stdout
             if (dup2(pipeStdOutErr.write.fd, STDOUT_FILENO) == -1) {
@@ -229,9 +237,9 @@ inline void callExecutable(const std::string &executable, const std::vector<std:
             }
         }
 
-        auto toCharArray = [](const std::string &args) {
+        auto toCharArray = [](const std::string & args) {
             const size_t s = args.size() + 1;
-            char *args2 = new char[s];
+            char* args2 = new char[s];
             for (size_t c = 0; c < s - 1; c++) {
                 args2[c] = args.at(c);
             }
@@ -239,30 +247,30 @@ inline void callExecutable(const std::string &executable, const std::vector<std:
             return args2;
         };
 
-        std::vector<char *> args2(args.size() + 2);
+        std::vector<char*> args2(args.size() + 2);
         args2[0] = toCharArray(execName);
         for (size_t i = 0; i < args.size(); i++) {
             args2[i + 1] = toCharArray(args[i]);
         }
-        args2.back() = (char *)nullptr;  // END
+        args2.back() = (char *) nullptr; // END             
 
         int eCode = execv(executable.c_str(), &args2[0]);
 
         for (size_t i = 0; i < args.size(); i++) {
-            delete[] args2[i];
+            delete [] args2[i];
         }
 
-        if (stdOutErrMessage != nullptr) {
+        if(stdOutErrMessage != nullptr) {
             pipeStdOutErr.write.close();
         }
 
         if (eCode < 0) {
             char buf[512];
 #ifndef CPPAD_CG_SYSTEM_APPLE
-            std::string error = executable + ": " + strerror_r(errno, buf, 511);  // thread safe
+            std::string error = executable + ": " + strerror_r(errno, buf, 511); // thread safe
 #else
             std::string error = executable + ": ";
-            strerror_r(errno, buf, 511);  // thread safe
+            strerror_r(errno, buf, 511); // thread safe
             error += std::string(buf);
 #endif
             ssize_t size = error.size() + 1;
@@ -280,7 +288,7 @@ inline void callExecutable(const std::string &executable, const std::vector<std:
      * Parent process
      **************************************************************************/
     pipeMsg.write.close();
-    if (stdOutErrMessage != nullptr) {
+    if(stdOutErrMessage != nullptr) {
         pipeStdOutErr.write.close();
     }
 
@@ -300,13 +308,14 @@ inline void callExecutable(const std::string &executable, const std::vector<std:
     if (stdInMessage != nullptr) {
         // close read end of pipe
         pipeSrc.read.close();
-        // Pipe source to the executable
+        //Pipe source to the executable
         ssize_t writeFlag = write(pipeSrc.write.fd, stdInMessage->c_str(), stdInMessage->size());
-        if (writeFlag == -1) writeError = readCErrorMsg() + " ";
+        if (writeFlag == -1)
+            writeError = readCErrorMsg() + " ";
         pipeSrc.write.close();
     }
 
-    // Wait for the executable to exit
+    //Wait for the executable to exit
     int status;
     // Read message from the child
     std::ostringstream messageErr;
@@ -315,15 +324,15 @@ inline void callExecutable(const std::string &executable, const std::vector<std:
     char buffer[128];
     do {
         ssize_t n;
-        if (stdOutErrMessage != nullptr) {
-            while ((n = read(pipeStdOutErr.read.fd, buffer, sizeof(buffer))) > 0) {
+        if(stdOutErrMessage != nullptr) {
+            while ((n = read(pipeStdOutErr.read.fd, buffer, sizeof (buffer))) > 0) {
                 messageStdOutErr.write(buffer, n);
                 size += n;
                 if (size > 1e4) break;
             }
         }
 
-        while ((n = read(pipeMsg.read.fd, buffer, sizeof(buffer))) > 0) {
+        while ((n = read(pipeMsg.read.fd, buffer, sizeof (buffer))) > 0) {
             messageErr.write(buffer, n);
             size += n;
             if (size > 1e4) break;
@@ -335,17 +344,15 @@ inline void callExecutable(const std::string &executable, const std::vector<std:
     } while (!WIFEXITED(status) && !WIFSIGNALED(status));
 
     pipeMsg.read.close();
-    if (stdOutErrMessage != nullptr) {
+    if(stdOutErrMessage != nullptr) {
         pipeStdOutErr.read.close();
     }
 
     if (!writeError.empty()) {
         std::ostringstream s;
         s << "Failed to write to pipe";
-        if (size > 0)
-            s << ": " << messageErr.str();
-        else
-            s << ": " << writeError;
+        if (size > 0) s << ": " << messageErr.str();
+        else s << ": " << writeError;
         throw CGException(s.str());
     }
 
@@ -368,10 +375,10 @@ inline void callExecutable(const std::string &executable, const std::vector<std:
     }
 }
 
-}  // namespace system
+} // END system namespace
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif
 #endif

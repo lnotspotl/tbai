@@ -23,17 +23,15 @@ namespace cg {
  */
 template <class Base>
 class IterEquationGroup {
-   public:
+public:
     using CGB = CppAD::cg::CG<Base>;
     using Arg = Argument<Base>;
     using pairss = std::pair<size_t, size_t>;
-
-   private:
+private:
     static const std::vector<std::set<pairss> > EMPTYVECTORSETSS;
     static const std::vector<std::set<size_t> > EMPTYVECTORSETS;
     static const std::map<size_t, std::set<size_t> > EMPTYMAPSETS;
-
-   public:
+public:
     /// iteration group index/ID
     size_t index;
     /// equations indexes in tape of the loop model
@@ -41,9 +39,8 @@ class IterEquationGroup {
     /// iterations which only have these equations defined
     std::set<size_t> iterations;
     ///
-    LoopModel<Base> *model;
-
-   private:
+    LoopModel<Base>* model;
+private:
     /**
      * Hessian sparsity pattern of the tape
      */
@@ -74,26 +71,27 @@ class IterEquationGroup {
      * [{k1, orig J2}] -> [tape J2 -> [{iteration }]]
      */
     std::map<pairss, std::map<size_t, std::set<size_t> > > hessOrig2TempTapeJ22Iter_;
+public:
 
-   public:
-    inline IterEquationGroup()
-        : index((std::numeric_limits<size_t>::max)()),  // not really required
-          model(nullptr),
-          hessSparsity_(false) {}
+    inline IterEquationGroup() :
+        index((std::numeric_limits<size_t>::max)()), // not really required
+        model(nullptr),
+        hessSparsity_(false) {
+    }
 
     inline void evalHessianSparsity() {
         if (hessSparsity_) {
-            return;  // already evaluated
+            return; // already evaluated
         }
 
         CPPADCG_ASSERT_UNKNOWN(model != nullptr);
         size_t iterationCount = model->getIterationCount();
 
-        const std::vector<std::vector<LoopPosition> > &indexedIndepIndexes = model->getIndexedIndepIndexes();
-        const std::vector<LoopPosition> &nonIndexedIndepIndexes = model->getNonIndexedIndepIndexes();
-        const std::vector<LoopPosition> &temporaryIndependents = model->getTemporaryIndependents();
+        const std::vector<std::vector<LoopPosition> >& indexedIndepIndexes = model->getIndexedIndepIndexes();
+        const std::vector<LoopPosition>& nonIndexedIndepIndexes = model->getNonIndexedIndepIndexes();
+        const std::vector<LoopPosition>& temporaryIndependents = model->getTemporaryIndependents();
 
-        ADFun<CGB> &fun = model->getTape();
+        ADFun<CGB>& fun = model->getTape();
 
         hessTapeSparsity_ = hessianSparsitySet<std::vector<std::set<size_t> >, CGB>(fun, tapeI);
 
@@ -109,15 +107,15 @@ class IterEquationGroup {
              * indexed tapeJ1
              */
             for (size_t tapeJ1 = 0; tapeJ1 < nIndexed; tapeJ1++) {
-                const std::set<size_t> &hessRow = hessTapeSparsity_[tapeJ1];
+                const std::set<size_t>& hessRow = hessTapeSparsity_[tapeJ1];
                 size_t j1 = indexedIndepIndexes[tapeJ1][iter].original;
 
-                std::set<size_t>::const_iterator itTape2;
+                std::set<size_t> ::const_iterator itTape2;
                 for (itTape2 = hessRow.begin(); itTape2 != hessRow.end() && *itTape2 < nIndexed; ++itTape2) {
                     size_t j2 = indexedIndepIndexes[*itTape2][iter].original;
                     pairss orig(j1, j2);
                     pairss tapeTape(tapeJ1, *itTape2);
-                    std::vector<std::set<pairss> > &iterations = hessOrig2Iter2TapeJ1TapeJ2_[orig];
+                    std::vector<std::set<pairss> >& iterations = hessOrig2Iter2TapeJ1TapeJ2_[orig];
                     iterations.resize(iterationCount);
                     iterations[iter].insert(tapeTape);
                 }
@@ -125,7 +123,7 @@ class IterEquationGroup {
                 for (; itTape2 != hessRow.end() && *itTape2 < nIndexed + nNonIndexed; ++itTape2) {
                     size_t j2 = nonIndexedIndepIndexes[*itTape2 - nIndexed].original;
                     pairss orig(j1, j2);
-                    std::vector<std::set<size_t> > &iterations = hessOrig2Iter2TapeJ1OrigJ2_[orig];
+                    std::vector<std::set<size_t> >& iterations = hessOrig2Iter2TapeJ1OrigJ2_[orig];
                     iterations.resize(iterationCount);
                     iterations[iter].insert(tapeJ1);
                 }
@@ -135,14 +133,14 @@ class IterEquationGroup {
              * non-indexed tapeJ1
              */
             for (size_t tapeJ1 = nIndexed; tapeJ1 < nIndexed + nNonIndexed; tapeJ1++) {
-                const std::set<size_t> &hessRow = hessTapeSparsity_[tapeJ1];
+                const std::set<size_t>& hessRow = hessTapeSparsity_[tapeJ1];
                 size_t j1 = nonIndexedIndepIndexes[tapeJ1 - nIndexed].original;
 
-                std::set<size_t>::const_iterator itTape2;
+                std::set<size_t> ::const_iterator itTape2;
                 for (itTape2 = hessRow.begin(); itTape2 != hessRow.end() && *itTape2 < nIndexed; ++itTape2) {
                     size_t j2 = indexedIndepIndexes[*itTape2][iter].original;
                     pairss orig(j1, j2);
-                    std::vector<std::set<size_t> > &iterations = hessOrig2Iter2OrigJ1TapeJ2_[orig];
+                    std::vector<std::set<size_t> >& iterations = hessOrig2Iter2OrigJ1TapeJ2_[orig];
                     iterations.resize(iterationCount);
                     iterations[iter].insert(*itTape2);
                 }
@@ -158,23 +156,27 @@ class IterEquationGroup {
              * temporaries tapeJ1
              */
             for (size_t tapeJ1 = nIndexed + nNonIndexed; tapeJ1 < nIndexed + nNonIndexed + nTemp; tapeJ1++) {
-                const std::set<size_t> &hessRow = hessTapeSparsity_[tapeJ1];
+                const std::set<size_t>& hessRow = hessTapeSparsity_[tapeJ1];
                 size_t k1 = temporaryIndependents[tapeJ1 - nIndexed - nNonIndexed].original;
 
-                std::set<size_t>::const_iterator itTape2;
+                std::set<size_t> ::const_iterator itTape2;
                 for (itTape2 = hessRow.begin(); itTape2 != hessRow.end() && *itTape2 < nIndexed; ++itTape2) {
                     size_t j2 = indexedIndepIndexes[*itTape2][iter].original;
                     pairss pos(k1, j2);
-                    std::map<size_t, std::set<size_t> > &var2iters = hessOrig2TempTapeJ22Iter_[pos];
+                    std::map<size_t, std::set<size_t> >& var2iters = hessOrig2TempTapeJ22Iter_[pos];
                     var2iters[*itTape2].insert(iter);
                 }
+
             }
         }
 
         hessSparsity_ = true;
+
     }
 
-    inline const std::vector<std::set<size_t> > &getHessianSparsity() const { return hessTapeSparsity_; }
+    inline const std::vector<std::set<size_t> >& getHessianSparsity() const {
+        return hessTapeSparsity_;
+    }
 
     /**
      *
@@ -183,7 +185,7 @@ class IterEquationGroup {
      * @return maps each iteration to the pair of tape indexes present in
      *         the Hessian
      */
-    inline const std::vector<std::set<pairss> > &getHessianIndexedIndexedTapeIndexes(size_t origJ1,
+    inline const std::vector<std::set<pairss> >& getHessianIndexedIndexedTapeIndexes(size_t origJ1,
                                                                                      size_t origJ2) const {
         pairss orig(origJ1, origJ2);
 
@@ -196,11 +198,11 @@ class IterEquationGroup {
         }
     }
 
-    inline const std::vector<std::set<size_t> > &getHessianIndexedNonIndexedTapeIndexes(size_t origJ1,
+    inline const std::vector<std::set<size_t> >& getHessianIndexedNonIndexedTapeIndexes(size_t origJ1,
                                                                                         size_t origJ2) const {
         pairss orig(origJ1, origJ2);
 
-        std::map<pairss, std::vector<std::set<size_t> > >::const_iterator it;
+        std::map<pairss, std::vector<std::set<size_t> > > ::const_iterator it;
         it = hessOrig2Iter2TapeJ1OrigJ2_.find(orig);
         if (it != hessOrig2Iter2TapeJ1OrigJ2_.end()) {
             return it->second;
@@ -209,7 +211,7 @@ class IterEquationGroup {
         }
     }
 
-    inline const std::vector<std::set<size_t> > &getHessianNonIndexedIndexedTapeIndexes(size_t origJ1,
+    inline const std::vector<std::set<size_t> >& getHessianNonIndexedIndexedTapeIndexes(size_t origJ1,
                                                                                         size_t origJ2) const {
         pairss orig(origJ1, origJ2);
 
@@ -222,11 +224,12 @@ class IterEquationGroup {
         }
     }
 
-    inline const std::set<std::pair<size_t, size_t> > &getHessianNonIndexedNonIndexedIndexes() const {
+    inline const std::set<std::pair<size_t, size_t> >& getHessianNonIndexedNonIndexedIndexes() const {
         return hessOrigJ1OrigJ2_;
     }
 
-    inline const std::map<size_t, std::set<size_t> > &getHessianTempIndexedTapeIndexes(size_t k1, size_t origJ2) const {
+    inline const std::map<size_t, std::set<size_t> >& getHessianTempIndexedTapeIndexes(size_t k1,
+                                                                                       size_t origJ2) const {
         pairss pos(k1, origJ2);
 
         std::map<pairss, std::map<size_t, std::set<size_t> > >::const_iterator it;
@@ -237,18 +240,19 @@ class IterEquationGroup {
             return EMPTYMAPSETS;
         }
     }
+
 };
 
-template <class Base>
+template<class Base>
 const std::vector<std::set<std::pair<size_t, size_t> > > IterEquationGroup<Base>::EMPTYVECTORSETSS;
 
-template <class Base>
+template<class Base>
 const std::vector<std::set<size_t> > IterEquationGroup<Base>::EMPTYVECTORSETS;
 
-template <class Base>
+template<class Base>
 const std::map<size_t, std::set<size_t> > IterEquationGroup<Base>::EMPTYMAPSETS;
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

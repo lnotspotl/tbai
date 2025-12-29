@@ -1,5 +1,5 @@
-#ifndef CPPAD_LOCAL_SUBGRAPH_ENTIRE_CALL_HPP
-#define CPPAD_LOCAL_SUBGRAPH_ENTIRE_CALL_HPP
+# ifndef CPPAD_LOCAL_SUBGRAPH_ENTIRE_CALL_HPP
+# define CPPAD_LOCAL_SUBGRAPH_ENTIRE_CALL_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -12,12 +12,10 @@ in the Eclipse Public License, Version 2.0 are satisfied:
       GNU General Public License, Version 2.0 or later.
 ---------------------------------------------------------------------------- */
 
-#include <cppad/local/pod_vector.hpp>
+# include <cppad/local/pod_vector.hpp>
 
 // BEGIN_CPPAD_LOCAL_SUBGRAPH_NAMESPACE
-namespace CppAD {
-namespace local {
-namespace subgraph {
+namespace CppAD { namespace local { namespace subgraph {
 /*!
 \file entire_call.hpp
 include entire function call in a subgraph
@@ -39,36 +37,40 @@ first one in the corresponding atomic function call.
 The other call operators are included in the subgraph.
 */
 template <class Addr>
-void entire_call(const play::const_random_iterator<Addr> &random_itr, pod_vector<addr_t> &subgraph) {
+void entire_call(
+    const play::const_random_iterator<Addr>& random_itr ,
+    pod_vector<addr_t>&                      subgraph   )
+{
     // add extra operators corresponding to rest of atomic function calls
     size_t n_sub = subgraph.size();
-    for (size_t k = 0; k < n_sub; ++k) {
-        size_t i_op = size_t(subgraph[k]);
+    for(size_t k = 0; k < n_sub; ++k)
+    {   size_t i_op = size_t( subgraph[k] );
         //
-        if (random_itr.get_op(i_op) == AFunOp) {  // This is the first AFunOp of this atomic function call
-            while (random_itr.get_op(++i_op) != AFunOp) {
-                switch (random_itr.get_op(i_op)) {
+        if( random_itr.get_op(i_op) == AFunOp )
+        {   // This is the first AFunOp of this atomic function call
+            while( random_itr.get_op(++i_op) != AFunOp )
+            {   switch(random_itr.get_op(i_op))
+                {
                     case FunavOp:
                     case FunrvOp:
                     case FunrpOp:
                     case FunapOp:
-                        subgraph.push_back(addr_t(i_op));
-                        break;
+                    subgraph.push_back( addr_t(i_op) );
+                    break;
 
                     default:
-                        // cannot find second AFunOp in this call
-                        CPPAD_ASSERT_UNKNOWN(false);
-                        break;
+                    // cannot find second AFunOp in this call
+                    CPPAD_ASSERT_UNKNOWN(false);
+                    break;
                 }
             }
             // THis is the second AFunOp of this atomic function call
-            subgraph.push_back(addr_t(i_op));
+            subgraph.push_back( addr_t(i_op) );
         }
     }
+
 }
 
-}  // namespace subgraph
-}  // namespace local
-}  // namespace CppAD
+} } } // END_CPPAD_LOCAL_SUBGRAPH_NAMESPACE
 
-#endif
+# endif

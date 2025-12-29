@@ -21,47 +21,48 @@ namespace cg {
 /*******************************************************************************
  *                 Operations with AD (resolves ambiguity)
  ******************************************************************************/
-template <class Base>
-inline AD<CG<Base> > operator+(const CG<Base> &left, const AD<CG<Base> > &right) {
+template<class Base>
+inline AD<CG<Base> > operator+(const CG<Base>& left, const AD<CG<Base> >& right) {
     return CppAD::operator+(left, right);
 }
 
-template <class Base>
-inline AD<CG<Base> > operator+(const AD<CG<Base> > &left, const CG<Base> &right) {
+template<class Base>
+inline AD<CG<Base> > operator+(const AD<CG<Base> >& left, const CG<Base>& right) {
     return CppAD::operator+(left, right);
 }
 
-template <class Base>
-inline AD<CG<Base> > operator-(const CG<Base> &left, const AD<CG<Base> > &right) {
+template<class Base>
+inline AD<CG<Base> > operator-(const CG<Base>& left, const AD<CG<Base> >& right) {
     return CppAD::operator-(left, right);
 }
 
-template <class Base>
-inline AD<CG<Base> > operator-(const AD<CG<Base> > &left, const CG<Base> &right) {
+template<class Base>
+inline AD<CG<Base> > operator-(const AD<CG<Base> >& left, const CG<Base>& right) {
     return CppAD::operator-(left, right);
 }
 
-template <class Base>
-inline AD<CG<Base> > operator/(const CG<Base> &left, const AD<CG<Base> > &right) {
+template<class Base>
+inline AD<CG<Base> > operator/(const CG<Base>& left, const AD<CG<Base> >& right) {
     return CppAD::operator/(left, right);
 }
 
-template <class Base>
-inline AD<CG<Base> > operator/(const AD<CG<Base> > &left, const CG<Base> &right) {
+template<class Base>
+inline AD<CG<Base> > operator/(const AD<CG<Base> >& left, const CG<Base>& right) {
     return CppAD::operator/(left, right);
 }
 
-template <class Base>
-inline AD<CG<Base> > operator*(const CG<Base> &left, const AD<CG<Base> > &right) {
+template<class Base>
+inline AD<CG<Base> > operator*(const CG<Base>& left, const AD<CG<Base> >& right) {
     return CppAD::operator*(left, right);
 }
 
-template <class Base>
-inline AD<CG<Base> > operator*(const AD<CG<Base> > &left, const CG<Base> &right) {
+template<class Base>
+inline AD<CG<Base> > operator*(const AD<CG<Base> >& left, const CG<Base>& right) {
     return CppAD::operator*(left, right);
 }
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif
+

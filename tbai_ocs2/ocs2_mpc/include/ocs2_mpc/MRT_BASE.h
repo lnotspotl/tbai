@@ -85,21 +85,6 @@ class MRT_BASE {
   virtual void setCurrentObservation(const SystemObservation& observation) = 0;
 
   /**
-   * @brief setTargetTrajectories sets the target trajectories for reference tracking
-   * @param targetTrajectories: the desired target trajectories
-   */
-  virtual void setTargetTrajectories(const TargetTrajectories& targetTrajectories) = 0;
-
-  /**
-   * @brief setModeSchedule sets the mode schedule for hybrid systems
-   * @param modeSchedule: the desired mode schedule
-   */
-  virtual void setModeSchedule(const ModeSchedule& modeSchedule) = 0;
-
-
-  virtual void spinMRT() {}
-
-  /**
    * Gets a reference to the command data corresponding to the current policy.
    * @warning access to the returned reference is not threadsafe. Read access and calls to updatePolicy() must be synced by the user.
    *

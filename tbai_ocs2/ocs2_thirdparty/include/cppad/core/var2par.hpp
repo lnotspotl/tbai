@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_VAR2PAR_HPP
-#define CPPAD_CORE_VAR2PAR_HPP
+# ifndef CPPAD_CORE_VAR2PAR_HPP
+# define CPPAD_CORE_VAR2PAR_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -68,17 +68,21 @@ $end
 namespace CppAD {
 
 template <class Base>
-CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION AD<Base> Var2Par(const AD<Base> &x) {
-    AD<Base> y(x.value_);
+CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION
+AD<Base> Var2Par(const AD<Base> &x)
+{   AD<Base> y(x.value_);
     return y;
 }
 
+
 template <class Base>
-CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION AD<Base> Var2Par(const VecAD_reference<Base> &x) {
-    AD<Base> y(x.ADBase());
+CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION
+AD<Base> Var2Par(const VecAD_reference<Base> &x)
+{   AD<Base> y(x.ADBase());
     y.id_ = 0;
 }
 
-}  // namespace CppAD
 
-#endif
+} // END CppAD namespace
+
+# endif

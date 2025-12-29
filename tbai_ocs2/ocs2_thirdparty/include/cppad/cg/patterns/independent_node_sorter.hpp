@@ -19,16 +19,18 @@ namespace CppAD {
 namespace cg {
 
 /**
- * Class used to sort independent variable nodes in ascending order
+ * Class used to sort independent variable nodes in ascending order 
  * according to their index (saved in the info vector of the nodes)
  */
-template <class Base>
+template<class Base>
 class IndependentNodeSorter {
-   public:
+public:
+
     /**
      * @return true if the first node goes before the second node
      */
-    bool operator()(const OperationNode<Base> *node1, const OperationNode<Base> *node2) const {
+    bool operator()(const OperationNode<Base>* node1,
+                    const OperationNode<Base>* node2) const {
         CPPADCG_ASSERT_UNKNOWN(node1 == nullptr || node1->getInfo().size() == 1);
         CPPADCG_ASSERT_UNKNOWN(node2 == nullptr || node2->getInfo().size() == 1);
         CPPADCG_ASSERT_UNKNOWN(node1 == nullptr || node1->getOperationType() == CGOpCode::Inv);
@@ -48,12 +50,13 @@ class IndependentNodeSorter {
         size_t index2 = node2->getInfo()[0];
         if (index1 < index2)
             return true;
-        else  // if (index1 >= index2)
+        else //if (index1 >= index2)
             return false;
     }
+
 };
 
-}  // namespace cg
-}  // namespace CppAD
+} // END cg namespace
+} // END CppAD namespace
 
 #endif

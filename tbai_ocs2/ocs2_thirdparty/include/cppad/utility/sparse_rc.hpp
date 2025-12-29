@@ -1,5 +1,5 @@
-#ifndef CPPAD_UTILITY_SPARSE_RC_HPP
-#define CPPAD_UTILITY_SPARSE_RC_HPP
+# ifndef CPPAD_UTILITY_SPARSE_RC_HPP
+# define CPPAD_UTILITY_SPARSE_RC_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -201,17 +201,16 @@ $end
 \file sparse_rc.hpp
 A Matrix sparsity pattern class.
 */
-#include <cstddef>  // for size_t
+# include <cstddef> // for size_t
+# include <cppad/core/cppad_assert.hpp>  // for CPPAD_ASSERT
+# include <cppad/utility/index_sort.hpp> // for row and column major ordering
 
-#include <cppad/core/cppad_assert.hpp>   // for CPPAD_ASSERT
-#include <cppad/utility/index_sort.hpp>  // for row and column major ordering
-
-namespace CppAD {  // BEGIN CPPAD_NAMESPACE
+namespace CppAD { // BEGIN CPPAD_NAMESPACE
 
 /// sparsity pattern for a matrix with indices of type size_t
 template <class SizeVector>
 class sparse_rc {
-   private:
+private:
     /// number of rows in the sparsity pattern
     size_t nr_;
     /// number of columns in the sparsity pattern
@@ -222,24 +221,32 @@ class sparse_rc {
     SizeVector row_;
     /// col_[k] is the column index for the k-th possibly non-zero entry
     SizeVector col_;
-
-   public:
+public:
     /// default constructor
     /// Eigen vector is ambiguous for row_(0), col_(0) so use default ctor
-    sparse_rc(void) : nr_(0), nc_(0), nnz_(0) {}
+    sparse_rc(void)
+    : nr_(0), nc_(0), nnz_(0)
+    { }
     /// sizing constructor
     /// Eigen vector is ambiguous for row_(0), col_(0) so use default ctor
-    sparse_rc(size_t nr, size_t nc, size_t nnz) : nr_(nr), nc_(nc), nnz_(nnz) {
-        row_.resize(nnz);
+    sparse_rc(size_t nr, size_t nc, size_t nnz)
+    : nr_(nr), nc_(nc), nnz_(nnz)
+    {   row_.resize(nnz);
         col_.resize(nnz);
     }
     /// copy constructor
-    sparse_rc(const sparse_rc &other)
-        : nr_(other.nr_), nc_(other.nc_), nnz_(other.nnz_), row_(other.row_), col_(other.col_) {}
+    sparse_rc(const sparse_rc& other)
+    :
+    nr_(other.nr_)   ,
+    nc_(other.nc_)   ,
+    nnz_(other.nnz_) ,
+    row_(other.row_) ,
+    col_(other.col_)
+    { }
     /// assignment
-    void operator=(const sparse_rc &pattern) {
-        nr_ = pattern.nr_;
-        nc_ = pattern.nc_;
+    void operator=(const sparse_rc& pattern)
+    {   nr_  = pattern.nr_;
+        nc_  = pattern.nc_;
         nnz_ = pattern.nnz_;
         // simple vector assignment requires vectors to have same size
         row_.resize(nnz_);
@@ -248,72 +255,94 @@ class sparse_rc {
         col_ = pattern.col_;
     }
     /// resize
-    void resize(size_t nr, size_t nc, size_t nnz) {
-        nr_ = nr;
+    void resize(size_t nr, size_t nc, size_t nnz)
+    {   nr_ = nr;
         nc_ = nc;
         nnz_ = nnz;
         row_.resize(nnz);
         col_.resize(nnz);
     }
     /// set row and column for a possibly non-zero element
-    void set(size_t k, size_t r, size_t c) {
-        CPPAD_ASSERT_KNOWN(k < nnz_, "The index k is not less than nnz in sparse_rc::set");
-        CPPAD_ASSERT_KNOWN(r < nr_, "The index r is not less than nr in sparse_rc::set");
-        CPPAD_ASSERT_KNOWN(c < nc_, "The index c is to not less than nc in sparse_rc::set");
+    void set(size_t k, size_t r, size_t c)
+    {   CPPAD_ASSERT_KNOWN(
+            k < nnz_,
+            "The index k is not less than nnz in sparse_rc::set"
+        );
+        CPPAD_ASSERT_KNOWN(
+            r < nr_,
+            "The index r is not less than nr in sparse_rc::set"
+        );
+        CPPAD_ASSERT_KNOWN(
+            c < nc_,
+            "The index c is to not less than nc in sparse_rc::set"
+        );
         row_[k] = r;
         col_[k] = c;
         //
     }
     /// number of rows in matrix
-    size_t nr(void) const { return nr_; }
+    size_t nr(void) const
+    {   return nr_; }
     /// number of columns in matrix
-    size_t nc(void) const { return nc_; }
+    size_t nc(void) const
+    {   return nc_; }
     /// number of possibly non-zero elements in matrix
-    size_t nnz(void) const { return nnz_; }
+    size_t nnz(void) const
+    {   return nnz_; }
     /// row indices
-    const SizeVector &row(void) const { return row_; }
+    const SizeVector& row(void) const
+    {   return row_; }
     /// column indices
-    const SizeVector &col(void) const { return col_; }
+    const SizeVector& col(void) const
+    {   return col_; }
     /// row-major order
-    SizeVector row_major(void) const {
-        SizeVector keys(nnz_), row_major(nnz_);
-        for (size_t k = 0; k < nnz_; k++) {
-            CPPAD_ASSERT_UNKNOWN(row_[k] < nr_);
+    SizeVector row_major(void) const
+    {   SizeVector keys(nnz_), row_major(nnz_);
+        for(size_t k = 0; k < nnz_; k++)
+        {   CPPAD_ASSERT_UNKNOWN( row_[k] < nr_ );
             keys[k] = row_[k] * nc_ + col_[k];
         }
         index_sort(keys, row_major);
-#ifndef NDEBUG
-        for (size_t ell = 0; ell + 1 < nnz_; ell++) {
-            size_t k = row_major[ell];
-            size_t kp = row_major[ell + 1];
-            CPPAD_ASSERT_KNOWN(row_[k] != row_[kp] || col_[k] != col_[kp],
-                               "sparse_rc: row_major: duplicate entry in this pattern");
-            CPPAD_ASSERT_UNKNOWN(row_[k] < row_[kp] || (row_[k] == row_[kp] && col_[k] < col_[kp]));
+# ifndef NDEBUG
+        for(size_t ell = 0; ell + 1 < nnz_; ell++)
+        {   size_t k  = row_major[ ell ];
+            size_t kp = row_major[ ell + 1 ];
+            CPPAD_ASSERT_KNOWN(
+                row_[k] != row_[kp] || col_[k] != col_[kp],
+                "sparse_rc: row_major: duplicate entry in this pattern"
+            );
+            CPPAD_ASSERT_UNKNOWN(
+                row_[k]<row_[kp] || (row_[k]==row_[kp] && col_[k]<col_[kp])
+            );
         }
-#endif
+# endif
         return row_major;
     }
     /// column-major indices
-    SizeVector col_major(void) const {
-        SizeVector keys(nnz_), col_major(nnz_);
-        for (size_t k = 0; k < nnz_; k++) {
-            CPPAD_ASSERT_UNKNOWN(col_[k] < nc_);
+    SizeVector col_major(void) const
+    {   SizeVector keys(nnz_), col_major(nnz_);
+        for(size_t k = 0; k < nnz_; k++)
+        {   CPPAD_ASSERT_UNKNOWN( col_[k] < nc_ );
             keys[k] = col_[k] * nr_ + row_[k];
         }
         index_sort(keys, col_major);
-#ifndef NDEBUG
-        for (size_t ell = 0; ell + 1 < nnz_; ell++) {
-            size_t k = col_major[ell];
-            size_t kp = col_major[ell + 1];
-            CPPAD_ASSERT_KNOWN(col_[k] != col_[kp] || row_[k] != row_[kp],
-                               "sparse_rc: col_major: duplicate entry in this pattern");
-            CPPAD_ASSERT_UNKNOWN(col_[k] < col_[kp] || (col_[k] == col_[kp] && row_[k] < row_[kp]));
+# ifndef NDEBUG
+        for(size_t ell = 0; ell + 1 < nnz_; ell++)
+        {   size_t k  = col_major[ ell ];
+            size_t kp = col_major[ ell + 1 ];
+            CPPAD_ASSERT_KNOWN(
+                col_[k] != col_[kp] || row_[k] != row_[kp],
+                "sparse_rc: col_major: duplicate entry in this pattern"
+            );
+            CPPAD_ASSERT_UNKNOWN(
+                col_[k]<col_[kp] || (col_[k]==col_[kp] && row_[k]<row_[kp])
+            );
         }
-#endif
+# endif
         return col_major;
     }
 };
 
-}  // namespace CppAD
+} // END_CPPAD_NAMESPACE
 
-#endif
+# endif

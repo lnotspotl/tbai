@@ -1,5 +1,5 @@
 #ifndef CPPAD_CG_NAN_HPP
-#define CPPAD_CG_NAN_HPP
+#define	CPPAD_CG_NAN_HPP
 /* --------------------------------------------------------------------------
  *  CppADCodeGen: C++ Algorithmic Differentiation with Source Code Generation:
  *    Copyright (C) 2013 Ciengis
@@ -25,11 +25,11 @@ inline bool isnan(const cg::CG<Base> &s) {
         return false;
     } else {
         // a parameter
-        const Base &v = s.getValue();
+        const Base& v = s.getValue();
         return (v != v);
     }
 }
 
-}  // namespace CppAD
+} // END CppAD namespace
 
 #endif

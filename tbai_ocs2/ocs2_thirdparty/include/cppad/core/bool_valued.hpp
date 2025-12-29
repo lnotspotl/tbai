@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_BOOL_VALUED_HPP
-#define CPPAD_CORE_BOOL_VALUED_HPP
+# ifndef CPPAD_CORE_BOOL_VALUED_HPP
+# define CPPAD_CORE_BOOL_VALUED_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -40,10 +40,10 @@ $tend
 $end
 */
 
-#include <cppad/core/bool_fun.hpp>
-#include <cppad/core/compare.hpp>
-#include <cppad/core/con_dyn_var.hpp>
-#include <cppad/core/equal_op_seq.hpp>
-#include <cppad/core/near_equal_ext.hpp>
+# include <cppad/core/compare.hpp>
+# include <cppad/core/near_equal_ext.hpp>
+# include <cppad/core/bool_fun.hpp>
+# include <cppad/core/con_dyn_var.hpp>
+# include <cppad/core/equal_op_seq.hpp>
 
-#endif
+# endif

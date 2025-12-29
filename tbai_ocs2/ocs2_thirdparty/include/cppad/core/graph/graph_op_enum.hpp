@@ -1,5 +1,5 @@
-#ifndef CPPAD_CORE_GRAPH_GRAPH_OP_ENUM_HPP
-#define CPPAD_CORE_GRAPH_GRAPH_OP_ENUM_HPP
+# ifndef CPPAD_CORE_GRAPH_GRAPH_OP_ENUM_HPP
+# define CPPAD_CORE_GRAPH_GRAPH_OP_ENUM_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-19 Bradley M. Bell
 
@@ -12,12 +12,12 @@ CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-19 Bradley M. Bell
         GNU General Public License, Version 2.0 or later.
 -------------------------------------------------------------------------- */
 
-#include <cstddef>
-#include <map>
-#include <string>
+# include <cstddef>
+# include <string>
+# include <map>
 
-#include <cppad/configure.hpp>
-#include <cppad/utility/vector.hpp>
+# include <cppad/utility/vector.hpp>
+# include <cppad/configure.hpp>
 
 /*
 $begin graph_op_enum$$
@@ -147,47 +147,46 @@ $childtable%
 $end
 */
 // BEGIN_SORT_THIS_LINE_PLUS_2
-namespace CppAD {
-namespace graph {
-enum graph_op_enum {
-    abs_graph_op,      // unary
-    acos_graph_op,     // unary
-    acosh_graph_op,    // unary
-    add_graph_op,      // binary
-    asin_graph_op,     // unary
-    asinh_graph_op,    // unary
-    atan_graph_op,     // unary
-    atanh_graph_op,    // unary
-    atom_graph_op,     // atomic function
-    cexp_eq_graph_op,  // conditional expression ==
-    cexp_le_graph_op,  // conditional expression <=
-    cexp_lt_graph_op,  // conditional expression <
-    comp_eq_graph_op,  // comparison  ==
-    comp_le_graph_op,  // comparison  <=
-    comp_lt_graph_op,  // comparison  <
-    comp_ne_graph_op,  // comparison  !=
-    cos_graph_op,      // unary
-    cosh_graph_op,     // unary
-    div_graph_op,      // binary
-    erf_graph_op,      // unary
-    erfc_graph_op,     // unary
-    exp_graph_op,      // unary
-    expm1_graph_op,    // unary
-    log1p_graph_op,    // unary
-    log_graph_op,      // unary
-    mul_graph_op,      // binary
-    sign_graph_op,     // unary
-    sin_graph_op,      // unary
-    sinh_graph_op,     // unary
-    sqrt_graph_op,     // unary
-    sub_graph_op,      // binary
-    sum_graph_op,      // summation
-    tan_graph_op,      // unary
-    tanh_graph_op,     // unary
-    n_graph_op         // number of operators defined so far
-};
-}
-}  // namespace CppAD
+namespace CppAD { namespace graph {
+    enum graph_op_enum {
+        abs_graph_op,      // unary
+        acos_graph_op,     // unary
+        acosh_graph_op,    // unary
+        add_graph_op,      // binary
+        asin_graph_op,     // unary
+        asinh_graph_op,    // unary
+        atan_graph_op,     // unary
+        atanh_graph_op,    // unary
+        atom_graph_op,     // atomic function
+        cexp_eq_graph_op,  // conditional expression ==
+        cexp_le_graph_op,  // conditional expression <=
+        cexp_lt_graph_op,  // conditional expression <
+        comp_eq_graph_op,  // comparison  ==
+        comp_le_graph_op,  // comparison  <=
+        comp_lt_graph_op,  // comparison  <
+        comp_ne_graph_op,  // comparison  !=
+        cos_graph_op,      // unary
+        cosh_graph_op,     // unary
+        div_graph_op,      // binary
+        erf_graph_op,      // unary
+        erfc_graph_op,     // unary
+        exp_graph_op,      // unary
+        expm1_graph_op,    // unary
+        log1p_graph_op,    // unary
+        log_graph_op,      // unary
+        mul_graph_op,      // binary
+        sign_graph_op,     // unary
+        sin_graph_op,      // unary
+        sinh_graph_op,     // unary
+        sqrt_graph_op,     // unary
+        sub_graph_op,      // binary
+        sum_graph_op,      // summation
+        tan_graph_op,      // unary
+        tanh_graph_op,     // unary
+        n_graph_op         // number of operators defined so far
+    };
+} }
 // END_SORT_THIS_LINE_MINUS_3
 
-#endif
+
+# endif
