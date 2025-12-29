@@ -2,7 +2,8 @@
 // Created by rgrandia on 17.02.20.
 //
 
-#include "tbai_mpc/quadruped_mpc/anymal_interface/Interface.h"
+#include "tbai_mpc/quadruped_mpc/quadruped_interfaces/Interfaces.h"
+#include "tbai_mpc/quadruped_mpc/quadruped_models/AnymalModels.h"
 #include "tbai_mpc/quadruped_mpc/QuadrupedPointfootInterface.h"
 
 namespace anymal {

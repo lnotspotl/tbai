@@ -72,7 +72,7 @@ add_library(tbai_mpc
     src/quadruped_mpc/quadruped_models/QuadrupedPinocchioMapping.cpp
 
     # concrete interfaces
-    src/quadruped_mpc/anymal_interface/Interface.cpp
+    src/quadruped_mpc/quadruped_interfaces/Interfaces.cpp
 
     # terrain
     src/quadruped_mpc/terrain/PlaneFitting.cpp

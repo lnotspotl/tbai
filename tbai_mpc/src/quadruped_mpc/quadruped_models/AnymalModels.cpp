@@ -13,39 +13,7 @@
 #include <tbai_mpc/quadruped_mpc/quadruped_models/Go2InverseKinematics.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_models/QuadrupedKinematics.h>
 
-#include <tbai_mpc/quadruped_mpc/quadruped_models/package_path.h>
-
 namespace anymal {
-
-std::string toString(AnymalModel model) {
-  static const std::unordered_map<AnymalModel, std::string> map{{AnymalModel::Camel, "camel"}};
-  return map.at(model);
-}
-
-AnymalModel stringToAnymalModel(const std::string& name) {
-  static const std::unordered_map<std::string, AnymalModel> map{{"camel", AnymalModel::Camel}};
-  return map.at(name);
-}
-
-std::string getUrdfPath(AnymalModel model) {
-  switch (model) {
-    case AnymalModel::Camel:
-      return getPath() + "/urdf/anymal_camel_rsl.urdf";
-    default:
-      throw std::runtime_error("[AnymalModels] no default urdf available");
-  }
-}
-
-std::string getUrdfString(AnymalModel model) {
-  const auto path = getUrdfPath(model);
-  std::ifstream stream(path.c_str());
-  if (!stream) {
-    throw std::runtime_error("File " + path + " does not exist");
-  }
-
-  std::string xml_str((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
-  return xml_str;
-}
 
 std::unique_ptr<switched_model::InverseKinematicsModelBase> getAnymalInverseKinematics(const FrameDeclaration& frameDeclaration,
                                                                                        const std::string& urdf) {

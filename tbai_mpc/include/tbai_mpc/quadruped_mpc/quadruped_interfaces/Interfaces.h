@@ -5,8 +5,6 @@
 #pragma once
 
 #include "tbai_mpc/quadruped_mpc/QuadrupedInterface.h"
-
-#include "tbai_mpc/quadruped_mpc/quadruped_models/AnymalModels.h"
 #include "tbai_mpc/quadruped_mpc/quadruped_models/FrameDeclaration.h"
 
 namespace anymal {
