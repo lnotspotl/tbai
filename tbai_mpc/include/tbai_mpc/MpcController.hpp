@@ -30,7 +30,6 @@ class MpcController : public tbai::Controller {
    public:
     /**
      * Constructor
-     * @param robotName: Robot name
      * @param stateSubscriberPtr: State subscriber for getting robot state
      * @param velocityGeneratorPtr: Reference velocity generator
      */

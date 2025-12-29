@@ -21,8 +21,10 @@ std::vector<tbai::MotorCommand> SqpWbc::getMotorCommands(scalar_t currentTime, c
     updateDesiredState(desiredState, desiredInput);
 
     // QP constraints
-    Task constraints =
-        createDynamicsTask() + createStanceFootNoMotionTask() + createContactForceTask() + createTorqueLimitTask();
+    Task constraints = createDynamicsTask() + createContactForceTask() + createTorqueLimitTask();
+    if (stanceAsConstraint_) {
+        constraints = constraints + createStanceFootNoMotionTask();  // additional constraints for stance
+    }
 
     // QP cost function
     Task weightedTasks =

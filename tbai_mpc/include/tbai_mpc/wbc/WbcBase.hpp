@@ -101,6 +101,9 @@ class WbcBase {
     switched_model::contact_flag_t contactFlags_;
     size_t nContacts_;
 
+    /* whether stance should be enforeced as a constraint  or as a cost (false is more robust (e.g. slips)) */
+    bool stanceAsConstraint_ = false;
+
    private:
     void loadSettings(const std::string &configFile, const std::string &configPrefix);
     void generateFrictionConeMatrix(const scalar_t mu);

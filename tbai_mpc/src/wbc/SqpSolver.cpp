@@ -29,7 +29,7 @@ vector_t SqpSolver::solveSqp(const Task &weightedTasks, const Task &constraints,
     options.setToMPC();
     options.printLevel = qpOASES::PL_LOW;
     qp_problem.setOptions(options);
-    int nWsr = 20;
+    int nWsr = 30;
     qpOASES::returnValue qp_status =
         qp_problem.init(H.data(), g.data(), A.data(), nullptr, nullptr, lbA.data(), ubA.data(), nWsr);
 

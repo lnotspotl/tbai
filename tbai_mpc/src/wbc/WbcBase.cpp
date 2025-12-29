@@ -241,13 +241,14 @@ Task WbcBase::createSwingFootAccelerationTask(const vector_t &stateCurrent, cons
     auto footVelocitiesMeasured = kinematicsPtr_->feetVelocitiesInOriginFrame(
         basePoseCurrent, baseVelocityCurrent, jointPositionsCurrent, jointVelocitiesCurrent);
 
-    const size_t Arows = 3 * (switched_model::NUM_CONTACT_POINTS - nContacts_);
+    const size_t Arows = 3 * (stanceAsConstraint_ ? switched_model::NUM_CONTACT_POINTS - nContacts_
+                                                  : switched_model::NUM_CONTACT_POINTS);
     matrix_t A = matrix_t::Zero(Arows, nDecisionVariables_);
     vector_t b = vector_t::Zero(Arows);
 
     size_t j = 0;
     for (size_t i = 0; i < switched_model::NUM_CONTACT_POINTS; ++i) {
-        if (!contactFlags_[i]) {
+        if (!contactFlags_[i] || !stanceAsConstraint_) {
             const vector_t &posDesired = footPositionsDesired[i];
             const vector_t &velDesired = footVelocitiesDesired[i];
             const vector_t &posMeasured = footPositionsMeasured[i];
@@ -423,6 +424,9 @@ void WbcBase::loadSettings(const std::string &configFile, const std::string &con
 
     // torque limit
     loadCppDataType<scalar_t>(configFile, configPrefix + "torqueLimit", torqueLimit_);
+
+    // stance
+    loadCppDataType<bool>(configFile, configPrefix + "stanceAsConstraint", stanceAsConstraint_);
 }
 
 }  // namespace mpc
