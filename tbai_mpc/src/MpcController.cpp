@@ -68,9 +68,10 @@ void MpcController::initialize(const std::string& urdfString, const std::string&
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 std::unique_ptr<ocs2::MPC_BASE> MpcController::createMpcInterface() {
-    auto sqpSettings = ocs2::sqp::Settings();
-    auto mpcSettings = ocs2::mpc::Settings();
-    return getSqpMpc(*quadrupedInterfacePtr_, mpcSettings, sqpSettings);
+    throw std::runtime_error("createMpcInterface not implemented");
+    // auto sqpSettings = ocs2::sqp::Settings();
+    // auto mpcSettings = ocs2::mpc::Settings();
+    // return getSqpMpc(*quadrupedInterfacePtr_, mpcSettings, sqpSettings);
 }
 
 
