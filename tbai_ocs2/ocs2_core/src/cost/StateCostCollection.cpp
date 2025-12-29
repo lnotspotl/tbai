@@ -34,63 +34,66 @@ namespace ocs2 {
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-StateCostCollection::StateCostCollection(const StateCostCollection& other) : Collection<StateCost>(other) {}
+StateCostCollection::StateCostCollection(const StateCostCollection &other) : Collection<StateCost>(other) {}
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-StateCostCollection* StateCostCollection::clone() const {
-  return new StateCostCollection(*this);
+StateCostCollection *StateCostCollection::clone() const {
+    return new StateCostCollection(*this);
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-scalar_t StateCostCollection::getValue(scalar_t time, const vector_t& state, const TargetTrajectories& targetTrajectories,
-                                       const PreComputation& preComp) const {
-  scalar_t cost = 0.0;
+scalar_t StateCostCollection::getValue(scalar_t time, const vector_t &state,
+                                       const TargetTrajectories &targetTrajectories,
+                                       const PreComputation &preComp) const {
+    scalar_t cost = 0.0;
 
-  // accumulate cost terms
-  for (const auto& costTerm : this->terms_) {
-    if (costTerm->isActive(time)) {
-      cost += costTerm->getValue(time, state, targetTrajectories, preComp);
+    // accumulate cost terms
+    for (const auto &costTerm : this->terms_) {
+        if (costTerm->isActive(time)) {
+            cost += costTerm->getValue(time, state, targetTrajectories, preComp);
+        }
     }
-  }
 
-  return cost;
+    return cost;
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-ScalarFunctionQuadraticApproximation StateCostCollection::getQuadraticApproximation(scalar_t time, const vector_t& state,
-                                                                                    const TargetTrajectories& targetTrajectories,
-                                                                                    const PreComputation& preComp) const {
-  const auto firstActive =
-      std::find_if(terms_.begin(), terms_.end(), [time](const std::unique_ptr<StateCost>& costTerm) { return costTerm->isActive(time); });
+ScalarFunctionQuadraticApproximation StateCostCollection::getQuadraticApproximation(
+    scalar_t time, const vector_t &state, const TargetTrajectories &targetTrajectories,
+    const PreComputation &preComp) const {
+    const auto firstActive =
+        std::find_if(terms_.begin(), terms_.end(),
+                     [time](const std::unique_ptr<StateCost> &costTerm) { return costTerm->isActive(time); });
 
-  // No active terms (or terms is empty).
-  if (firstActive == terms_.end()) {
-    return ScalarFunctionQuadraticApproximation::Zero(state.rows());
-  }
-
-  // Initialize with first active term, accumulate potentially other active terms.
-  auto cost = (*firstActive)->getQuadraticApproximation(time, state, targetTrajectories, preComp);
-  std::for_each(std::next(firstActive), terms_.end(), [&](const std::unique_ptr<StateCost>& costTerm) {
-    if (costTerm->isActive(time)) {
-      const auto costTermApproximation = costTerm->getQuadraticApproximation(time, state, targetTrajectories, preComp);
-      cost.f += costTermApproximation.f;
-      cost.dfdx += costTermApproximation.dfdx;
-      cost.dfdxx += costTermApproximation.dfdxx;
+    // No active terms (or terms is empty).
+    if (firstActive == terms_.end()) {
+        return ScalarFunctionQuadraticApproximation::Zero(state.rows());
     }
-  });
 
-  // Make sure that input derivatives are empty
-  cost.dfdu = vector_t();
-  cost.dfduu = matrix_t();
-  cost.dfdux = matrix_t();
+    // Initialize with first active term, accumulate potentially other active terms.
+    auto cost = (*firstActive)->getQuadraticApproximation(time, state, targetTrajectories, preComp);
+    std::for_each(std::next(firstActive), terms_.end(), [&](const std::unique_ptr<StateCost> &costTerm) {
+        if (costTerm->isActive(time)) {
+            const auto costTermApproximation =
+                costTerm->getQuadraticApproximation(time, state, targetTrajectories, preComp);
+            cost.f += costTermApproximation.f;
+            cost.dfdx += costTermApproximation.dfdx;
+            cost.dfdxx += costTermApproximation.dfdxx;
+        }
+    });
 
-  return cost;
+    // Make sure that input derivatives are empty
+    cost.dfdu = vector_t();
+    cost.dfduu = matrix_t();
+    cost.dfdux = matrix_t();
+
+    return cost;
 }
 
 }  // namespace ocs2

@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_BASE_HASH_HPP
-# define CPPAD_CORE_BASE_HASH_HPP
+#ifndef CPPAD_CORE_BASE_HASH_HPP
+#define CPPAD_CORE_BASE_HASH_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -79,6 +79,6 @@ $end
 the codes retruned by hash_code are between zero and CPPAD_HASH_TABLE_SIZE
 minus one.
 */
-# define CPPAD_HASH_TABLE_SIZE 10000
+#define CPPAD_HASH_TABLE_SIZE 10000
 
-# endif
+#endif

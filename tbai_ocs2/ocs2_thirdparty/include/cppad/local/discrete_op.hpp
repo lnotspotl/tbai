@@ -1,5 +1,5 @@
-# ifndef CPPAD_LOCAL_DISCRETE_OP_HPP
-# define CPPAD_LOCAL_DISCRETE_OP_HPP
+#ifndef CPPAD_LOCAL_DISCRETE_OP_HPP
+#define CPPAD_LOCAL_DISCRETE_OP_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -12,13 +12,12 @@ in the Eclipse Public License, Version 2.0 are satisfied:
       GNU General Public License, Version 2.0 or later.
 ---------------------------------------------------------------------------- */
 
-
-namespace CppAD { namespace local { // BEGIN_CPPAD_LOCAL_NAMESPACE
+namespace CppAD {
+namespace local {  // BEGIN_CPPAD_LOCAL_NAMESPACE
 /*!
 \file discrete_op.hpp
 Forward mode for z = f(x) where f is piecewise constant.
 */
-
 
 /*!
 forward mode Taylor coefficient for result of op = DisOp.
@@ -87,35 +86,26 @@ is the k-th order Taylor coefficient corresponding to z
 \li 0 < r
 */
 template <class Base>
-void forward_dis_op(
-    size_t        p           ,
-    size_t        q           ,
-    size_t        r           ,
-    size_t        i_z         ,
-    const addr_t* arg         ,
-    size_t        cap_order   ,
-    Base*         taylor      )
-{
+void forward_dis_op(size_t p, size_t q, size_t r, size_t i_z, const addr_t *arg, size_t cap_order, Base *taylor) {
     // check assumptions
-    CPPAD_ASSERT_UNKNOWN( NumArg(DisOp) == 2 );
-    CPPAD_ASSERT_UNKNOWN( NumRes(DisOp) == 1 );
-    CPPAD_ASSERT_UNKNOWN( q < cap_order );
-    CPPAD_ASSERT_UNKNOWN( 0 < r );
+    CPPAD_ASSERT_UNKNOWN(NumArg(DisOp) == 2);
+    CPPAD_ASSERT_UNKNOWN(NumRes(DisOp) == 1);
+    CPPAD_ASSERT_UNKNOWN(q < cap_order);
+    CPPAD_ASSERT_UNKNOWN(0 < r);
 
     // Taylor coefficients corresponding to argument and result
-    size_t num_taylor_per_var = (cap_order-1) * r + 1;
-    Base* x = taylor + size_t(arg[1]) * num_taylor_per_var;
-    Base* z = taylor +    i_z * num_taylor_per_var;
+    size_t num_taylor_per_var = (cap_order - 1) * r + 1;
+    Base *x = taylor + size_t(arg[1]) * num_taylor_per_var;
+    Base *z = taylor + i_z * num_taylor_per_var;
 
-    if( p == 0 )
-    {   z[0]  = discrete<Base>::eval(size_t(arg[0]), x[0]);
+    if (p == 0) {
+        z[0] = discrete<Base>::eval(size_t(arg[0]), x[0]);
         p++;
     }
-    for(size_t ell = 0; ell < r; ell++)
-        for(size_t k = p; k <= q; k++)
-            z[ (k-1) * r + 1 + ell ] = Base(0.0);
+    for (size_t ell = 0; ell < r; ell++)
+        for (size_t k = p; k <= q; k++) z[(k - 1) * r + 1 + ell] = Base(0.0);
 }
 
-
-} } // END_CPPAD_LOCAL_NAMESPACE
-# endif
+}  // namespace local
+}  // namespace CppAD
+#endif

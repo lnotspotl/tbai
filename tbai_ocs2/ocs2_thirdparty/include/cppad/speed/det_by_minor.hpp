@@ -1,5 +1,5 @@
-# ifndef CPPAD_SPEED_DET_BY_MINOR_HPP
-# define CPPAD_SPEED_DET_BY_MINOR_HPP
+#ifndef CPPAD_SPEED_DET_BY_MINOR_HPP
+#define CPPAD_SPEED_DET_BY_MINOR_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -119,16 +119,17 @@ $end
 ---------------------------------------------------------------------------
 */
 // BEGIN C++
-# include <cppad/speed/det_of_minor.hpp>
-# include <vector>
+#include <vector>
+
+#include <cppad/speed/det_of_minor.hpp>
 
 // BEGIN CppAD namespace
 namespace CppAD {
 
 template <class Scalar>
 class det_by_minor {
-private:
-    size_t              m_;
+   private:
+    size_t m_;
 
     // made mutable because modified and then restored
     mutable std::vector<size_t> r_;
@@ -136,30 +137,28 @@ private:
 
     // make mutable because its value does not matter
     mutable std::vector<Scalar> a_;
-public:
-    det_by_minor(size_t m) : m_(m) , r_(m + 1) , c_(m + 1), a_(m * m)
-    {
+
+   public:
+    det_by_minor(size_t m) : m_(m), r_(m + 1), c_(m + 1), a_(m * m) {
         size_t i;
 
         // values for r and c that correspond to entire matrix
-        for(i = 0; i < m; i++)
-        {   r_[i] = i+1;
-            c_[i] = i+1;
+        for (i = 0; i < m; i++) {
+            r_[i] = i + 1;
+            c_[i] = i + 1;
         }
         r_[m] = 0;
         c_[m] = 0;
     }
 
     template <class Vector>
-    Scalar operator()(const Vector &x) const
-    {   size_t i = m_ * m_;
-        while(i--)
-            a_[i] = x[i];
+    Scalar operator()(const Vector &x) const {
+        size_t i = m_ * m_;
+        while (i--) a_[i] = x[i];
         return det_of_minor(a_, m_, m_, r_, c_);
     }
-
 };
 
-} // END CppAD namespace
+}  // namespace CppAD
 // END C++
-# endif
+#endif

@@ -18,30 +18,26 @@
 namespace CppAD {
 namespace cg {
 
-template<class Base>
+template <class Base>
 class ScopePathElement {
-public:
+   public:
     using ScopeIDType = typename CodeHandler<Base>::ScopeIDType;
-public:
+
+   public:
     // the color/index associated with the scope
     ScopeIDType color;
     // the node that marks the beginning of this scope
-    OperationNode<Base>* beginning;
+    OperationNode<Base> *beginning;
     // the node that marks the end of this scope
-    OperationNode<Base>* end;
-public:
+    OperationNode<Base> *end;
 
-    inline ScopePathElement(ScopeIDType color = 0,
-                            OperationNode<Base>* nEnd = nullptr,
-                            OperationNode<Base>* nBegin = nullptr) :
-        color(color),
-        beginning(nBegin),
-        end(nEnd) {
-    }
-
+   public:
+    inline ScopePathElement(ScopeIDType color = 0, OperationNode<Base> *nEnd = nullptr,
+                            OperationNode<Base> *nBegin = nullptr)
+        : color(color), beginning(nBegin), end(nEnd) {}
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

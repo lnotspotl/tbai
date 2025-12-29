@@ -27,10 +27,10 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************/
 
-#include <gtest/gtest.h>
 #include <iostream>
 
 #include "ocs2_frank_wolfe/GradientDescent.h"
+#include <gtest/gtest.h>
 
 using namespace ocs2;
 
@@ -38,92 +38,93 @@ using namespace ocs2;
  * refer to: https://en.wikipedia.org/wiki/Test_functions_for_optimization
  */
 class MatyasCost final : public NLP_Cost {
- public:
-  MatyasCost() = default;
-  ~MatyasCost() = default;
+   public:
+    MatyasCost() = default;
+    ~MatyasCost() = default;
 
-  size_t setCurrentParameter(const vector_t& x) override {
-    x_ = x;
-    return 0;
-  }
+    size_t setCurrentParameter(const vector_t &x) override {
+        x_ = x;
+        return 0;
+    }
 
-  bool getCost(size_t id, scalar_t& f) override {
-    f = 0.26 * (pow(x_(0), 2) + pow(x_(1), 2)) - 0.48 * x_(0) * x_(1);
-    return true;
-  }
+    bool getCost(size_t id, scalar_t &f) override {
+        f = 0.26 * (pow(x_(0), 2) + pow(x_(1), 2)) - 0.48 * x_(0) * x_(1);
+        return true;
+    }
 
-  void getCostDerivative(size_t id, vector_t& g) override {
-    g.resize(2);
-    g(0) = 0.26 * 2.0 * x_(0) - 0.48 * x_(1);
-    g(1) = 0.26 * 2.0 * x_(1) - 0.48 * x_(0);
-  }
+    void getCostDerivative(size_t id, vector_t &g) override {
+        g.resize(2);
+        g(0) = 0.26 * 2.0 * x_(0) - 0.48 * x_(1);
+        g(1) = 0.26 * 2.0 * x_(1) - 0.48 * x_(0);
+    }
 
-  void getCostSecondDerivative(size_t id, matrix_t& H) override { H.setIdentity(2, 2); }
+    void getCostSecondDerivative(size_t id, matrix_t &H) override { H.setIdentity(2, 2); }
 
-  void clearCache() override {}
+    void clearCache() override {}
 
- private:
-  vector_t x_;
+   private:
+    vector_t x_;
 };
 
 class MatyasConstraints final : public NLP_Constraints {
- public:
-  MatyasConstraints(vector_t minX, vector_t maxX) {
-    size_t numParameters = maxX.size();
+   public:
+    MatyasConstraints(vector_t minX, vector_t maxX) {
+        size_t numParameters = maxX.size();
 
-    Cm_.resize(2 * numParameters, numParameters);
-    Dv_.resize(2 * numParameters);
+        Cm_.resize(2 * numParameters, numParameters);
+        Dv_.resize(2 * numParameters);
 
-    Cm_.topRows(numParameters) = -Eigen::MatrixXd::Identity(numParameters, numParameters);
-    Cm_.bottomRows(numParameters) = Eigen::MatrixXd::Identity(numParameters, numParameters);
+        Cm_.topRows(numParameters) = -Eigen::MatrixXd::Identity(numParameters, numParameters);
+        Cm_.bottomRows(numParameters) = Eigen::MatrixXd::Identity(numParameters, numParameters);
 
-    Dv_.head(numParameters) = maxX;
-    Dv_.tail(numParameters) = -minX;
-  }
+        Dv_.head(numParameters) = maxX;
+        Dv_.tail(numParameters) = -minX;
+    }
 
-  ~MatyasConstraints() = default;
+    ~MatyasConstraints() = default;
 
-  void setCurrentParameter(const vector_t& x) override { x_ = x; }
+    void setCurrentParameter(const vector_t &x) override { x_ = x; }
 
-  void getLinearInequalityConstraint(vector_t& h) override { h = Cm_ * x_ + Dv_; }
+    void getLinearInequalityConstraint(vector_t &h) override { h = Cm_ * x_ + Dv_; }
 
-  void getLinearInequalityConstraintDerivative(matrix_t& dhdx) override { dhdx = Cm_; }
+    void getLinearInequalityConstraintDerivative(matrix_t &dhdx) override { dhdx = Cm_; }
 
- private:
-  vector_t x_;
-  matrix_t Cm_;
-  vector_t Dv_;
+   private:
+    vector_t x_;
+    matrix_t Cm_;
+    vector_t Dv_;
 };
 
 TEST(MatyasTest, MatyasTest) {
-  NLP_Settings nlpSettings;
-  nlpSettings.displayInfo_ = true;
-  nlpSettings.maxIterations_ = 500;
-  nlpSettings.minRelCost_ = 1e-6;
-  nlpSettings.maxLearningRate_ = 1.0;
-  nlpSettings.minLearningRate_ = 1e-4;
-  nlpSettings.useAscendingLineSearchNLP_ = false;
+    NLP_Settings nlpSettings;
+    nlpSettings.displayInfo_ = true;
+    nlpSettings.maxIterations_ = 500;
+    nlpSettings.minRelCost_ = 1e-6;
+    nlpSettings.maxLearningRate_ = 1.0;
+    nlpSettings.minLearningRate_ = 1e-4;
+    nlpSettings.useAscendingLineSearchNLP_ = false;
 
-  GradientDescent nlpSolver(nlpSettings);
-  std::unique_ptr<MatyasCost> costPtr(new MatyasCost);
+    GradientDescent nlpSolver(nlpSettings);
+    std::unique_ptr<MatyasCost> costPtr(new MatyasCost);
 
-  vector_t maxX = Eigen::Vector2d(10.0, 10.0);
-  vector_t minX = Eigen::Vector2d(-10.0, -10.0);
-  std::unique_ptr<MatyasConstraints> constraintsPtr(new MatyasConstraints(minX, maxX));
+    vector_t maxX = Eigen::Vector2d(10.0, 10.0);
+    vector_t minX = Eigen::Vector2d(-10.0, -10.0);
+    std::unique_ptr<MatyasConstraints> constraintsPtr(new MatyasConstraints(minX, maxX));
 
-  Eigen::Vector2d initParameters = 0.5 * (maxX + minX) + 0.5 * (maxX - minX).cwiseProduct(Eigen::Vector2d::Random());
-  nlpSolver.run(initParameters, 0.01 * Eigen::Vector2d::Ones(), costPtr.get(), constraintsPtr.get());
+    Eigen::Vector2d initParameters = 0.5 * (maxX + minX) + 0.5 * (maxX - minX).cwiseProduct(Eigen::Vector2d::Random());
+    nlpSolver.run(initParameters, 0.01 * Eigen::Vector2d::Ones(), costPtr.get(), constraintsPtr.get());
 
-  double cost;
-  nlpSolver.getCost(cost);
-  vector_t parameters;
-  nlpSolver.getParameters(parameters);
+    double cost;
+    nlpSolver.getCost(cost);
+    vector_t parameters;
+    nlpSolver.getParameters(parameters);
 
-  std::cout << "cost: " << cost << std::endl;
-  std::cout << "parameters: " << parameters.transpose() << std::endl;
+    std::cout << "cost: " << cost << std::endl;
+    std::cout << "parameters: " << parameters.transpose() << std::endl;
 
-  const double optimalCost = 0.0;
-  const Eigen::Vector2d optimalParameters = Eigen::Vector2d::Ones();
+    const double optimalCost = 0.0;
+    const Eigen::Vector2d optimalParameters = Eigen::Vector2d::Ones();
 
-  ASSERT_NEAR(cost, optimalCost, 10 * nlpSettings.minRelCost_) << "MESSAGE: Frank_Wolfe failed in the Quadratic test!";
+    ASSERT_NEAR(cost, optimalCost, 10 * nlpSettings.minRelCost_)
+        << "MESSAGE: Frank_Wolfe failed in the Quadratic test!";
 }

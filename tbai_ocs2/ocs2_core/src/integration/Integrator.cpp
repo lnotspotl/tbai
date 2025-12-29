@@ -40,36 +40,36 @@ namespace integrator_type {
 /******************************************************************************************************/
 /******************************************************************************************************/
 std::string toString(IntegratorType integratorType) {
-  static const std::unordered_map<IntegratorType, std::string> integratorMap = {
-      {IntegratorType::EULER, "EULER"},
-      {IntegratorType::ODE45, "ODE45"},
-      {IntegratorType::ODE45_OCS2, "ODE45_OCS2"},
-      {IntegratorType::ADAMS_BASHFORTH, "ADAMS_BASHFORTH"},
-      {IntegratorType::BULIRSCH_STOER, "BULIRSCH_STOER"},
-      {IntegratorType::MODIFIED_MIDPOINT, "MODIFIED_MIDPOINT"},
-      {IntegratorType::RK4, "RK4"},
-      {IntegratorType::RK5_VARIABLE, "RK5_VARIABLE"},
-      {IntegratorType::ADAMS_BASHFORTH_MOULTON, "ADAMS_BASHFORTH_MOULTON"}};
+    static const std::unordered_map<IntegratorType, std::string> integratorMap = {
+        {IntegratorType::EULER, "EULER"},
+        {IntegratorType::ODE45, "ODE45"},
+        {IntegratorType::ODE45_OCS2, "ODE45_OCS2"},
+        {IntegratorType::ADAMS_BASHFORTH, "ADAMS_BASHFORTH"},
+        {IntegratorType::BULIRSCH_STOER, "BULIRSCH_STOER"},
+        {IntegratorType::MODIFIED_MIDPOINT, "MODIFIED_MIDPOINT"},
+        {IntegratorType::RK4, "RK4"},
+        {IntegratorType::RK5_VARIABLE, "RK5_VARIABLE"},
+        {IntegratorType::ADAMS_BASHFORTH_MOULTON, "ADAMS_BASHFORTH_MOULTON"}};
 
-  return integratorMap.at(integratorType);
+    return integratorMap.at(integratorType);
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-IntegratorType fromString(const std::string& name) {
-  static const std::unordered_map<std::string, IntegratorType> integratorMap = {
-      {"EULER", IntegratorType::EULER},
-      {"ODE45", IntegratorType::ODE45},
-      {"ODE45_OCS2", IntegratorType::ODE45_OCS2},
-      {"ADAMS_BASHFORTH", IntegratorType::ADAMS_BASHFORTH},
-      {"BULIRSCH_STOER", IntegratorType::BULIRSCH_STOER},
-      {"MODIFIED_MIDPOINT", IntegratorType::MODIFIED_MIDPOINT},
-      {"RK4", IntegratorType::RK4},
-      {"RK5_VARIABLE", IntegratorType::RK5_VARIABLE},
-      {"ADAMS_BASHFORTH_MOULTON", IntegratorType::ADAMS_BASHFORTH_MOULTON}};
+IntegratorType fromString(const std::string &name) {
+    static const std::unordered_map<std::string, IntegratorType> integratorMap = {
+        {"EULER", IntegratorType::EULER},
+        {"ODE45", IntegratorType::ODE45},
+        {"ODE45_OCS2", IntegratorType::ODE45_OCS2},
+        {"ADAMS_BASHFORTH", IntegratorType::ADAMS_BASHFORTH},
+        {"BULIRSCH_STOER", IntegratorType::BULIRSCH_STOER},
+        {"MODIFIED_MIDPOINT", IntegratorType::MODIFIED_MIDPOINT},
+        {"RK4", IntegratorType::RK4},
+        {"RK5_VARIABLE", IntegratorType::RK5_VARIABLE},
+        {"ADAMS_BASHFORTH_MOULTON", IntegratorType::ADAMS_BASHFORTH_MOULTON}};
 
-  return integratorMap.at(name);
+    return integratorMap.at(name);
 }
 
 }  // namespace integrator_type
@@ -77,31 +77,33 @@ IntegratorType fromString(const std::string& name) {
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-std::unique_ptr<IntegratorBase> newIntegrator(IntegratorType integratorType, const std::shared_ptr<SystemEventHandler>& eventHandlerPtr) {
-  switch (integratorType) {
-    case (IntegratorType::EULER):
-      return std::make_unique<IntegratorEuler>(eventHandlerPtr);
-    case (IntegratorType::ODE45):
-      return std::make_unique<ODE45>(eventHandlerPtr);
-    case (IntegratorType::ODE45_OCS2):
-      return std::make_unique<RungeKuttaDormandPrince5>(eventHandlerPtr);
-    case (IntegratorType::ADAMS_BASHFORTH):
-      return std::make_unique<IntegratorAdamsBashforth<1>>(eventHandlerPtr);
-    case (IntegratorType::BULIRSCH_STOER):
-      return std::make_unique<IntegratorBulirschStoer>(eventHandlerPtr);
-    case (IntegratorType::MODIFIED_MIDPOINT):
-      return std::make_unique<IntegratorModifiedMidpoint>(eventHandlerPtr);
-    case (IntegratorType::RK4):
-      return std::make_unique<IntegratorRK4>(eventHandlerPtr);
-    case (IntegratorType::RK5_VARIABLE):
-      return std::make_unique<IntegratorRK5Variable>(eventHandlerPtr);
+std::unique_ptr<IntegratorBase> newIntegrator(IntegratorType integratorType,
+                                              const std::shared_ptr<SystemEventHandler> &eventHandlerPtr) {
+    switch (integratorType) {
+        case (IntegratorType::EULER):
+            return std::make_unique<IntegratorEuler>(eventHandlerPtr);
+        case (IntegratorType::ODE45):
+            return std::make_unique<ODE45>(eventHandlerPtr);
+        case (IntegratorType::ODE45_OCS2):
+            return std::make_unique<RungeKuttaDormandPrince5>(eventHandlerPtr);
+        case (IntegratorType::ADAMS_BASHFORTH):
+            return std::make_unique<IntegratorAdamsBashforth<1>>(eventHandlerPtr);
+        case (IntegratorType::BULIRSCH_STOER):
+            return std::make_unique<IntegratorBulirschStoer>(eventHandlerPtr);
+        case (IntegratorType::MODIFIED_MIDPOINT):
+            return std::make_unique<IntegratorModifiedMidpoint>(eventHandlerPtr);
+        case (IntegratorType::RK4):
+            return std::make_unique<IntegratorRK4>(eventHandlerPtr);
+        case (IntegratorType::RK5_VARIABLE):
+            return std::make_unique<IntegratorRK5Variable>(eventHandlerPtr);
 #if (BOOST_VERSION / 100000 == 1 && BOOST_VERSION / 100 % 1000 > 55)
-    case (IntegratorType::ADAMS_BASHFORTH_MOULTON):
-      return std::make_unique<IntegratorAdamsBashforthMoulton<1>>(eventHandlerPtr);
+        case (IntegratorType::ADAMS_BASHFORTH_MOULTON):
+            return std::make_unique<IntegratorAdamsBashforthMoulton<1>>(eventHandlerPtr);
 #endif
-    default:
-      throw std::runtime_error("Integrator of type " + integrator_type::toString(integratorType) + " not supported.");
-  }
+        default:
+            throw std::runtime_error("Integrator of type " + integrator_type::toString(integratorType) +
+                                     " not supported.");
+    }
 }
 
 }  // namespace ocs2

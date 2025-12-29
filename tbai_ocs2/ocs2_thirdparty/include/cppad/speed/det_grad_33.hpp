@@ -1,5 +1,5 @@
-# ifndef CPPAD_SPEED_DET_GRAD_33_HPP
-# define CPPAD_SPEED_DET_GRAD_33_HPP
+#ifndef CPPAD_SPEED_DET_GRAD_33_HPP
+#define CPPAD_SPEED_DET_GRAD_33_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -94,34 +94,34 @@ $end
 ------------------------------------------------------------------------------
 */
 // BEGIN C++
-# include <limits>
-# include <cppad/utility/near_equal.hpp>
+#include <limits>
+
+#include <cppad/utility/near_equal.hpp>
 namespace CppAD {
 template <class Vector>
-    bool det_grad_33(const Vector &x, const Vector &g)
-    {   bool ok = true;
-        typedef typename Vector::value_type Float;
-        Float eps = 10. * Float( std::numeric_limits<double>::epsilon() );
+bool det_grad_33(const Vector &x, const Vector &g) {
+    bool ok = true;
+    typedef typename Vector::value_type Float;
+    Float eps = 10. * Float(std::numeric_limits<double>::epsilon());
 
-        // use expansion by minors to compute the derivative by hand
-        double check[9];
-        check[0] = + ( x[4] * x[8] - x[5] * x[7] );
-        check[1] = - ( x[3] * x[8] - x[5] * x[6] );
-        check[2] = + ( x[3] * x[7] - x[4] * x[6] );
-        //
-        check[3] = - ( x[1] * x[8] - x[2] * x[7] );
-        check[4] = + ( x[0] * x[8] - x[2] * x[6] );
-        check[5] = - ( x[0] * x[7] - x[1] * x[6] );
-        //
-        check[6] = + ( x[1] * x[5] - x[2] * x[4] );
-        check[7] = - ( x[0] * x[5] - x[2] * x[3] );
-        check[8] = + ( x[0] * x[4] - x[1] * x[3] );
-        //
-        for(size_t i = 0; i < 3 * 3; i++)
-            ok &= CppAD::NearEqual(check[i], g[i], eps, eps);
+    // use expansion by minors to compute the derivative by hand
+    double check[9];
+    check[0] = +(x[4] * x[8] - x[5] * x[7]);
+    check[1] = -(x[3] * x[8] - x[5] * x[6]);
+    check[2] = +(x[3] * x[7] - x[4] * x[6]);
+    //
+    check[3] = -(x[1] * x[8] - x[2] * x[7]);
+    check[4] = +(x[0] * x[8] - x[2] * x[6]);
+    check[5] = -(x[0] * x[7] - x[1] * x[6]);
+    //
+    check[6] = +(x[1] * x[5] - x[2] * x[4]);
+    check[7] = -(x[0] * x[5] - x[2] * x[3]);
+    check[8] = +(x[0] * x[4] - x[1] * x[3]);
+    //
+    for (size_t i = 0; i < 3 * 3; i++) ok &= CppAD::NearEqual(check[i], g[i], eps, eps);
 
-        return ok;
-    }
+    return ok;
 }
+}  // namespace CppAD
 // END C++
-# endif
+#endif

@@ -27,24 +27,23 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************/
 
-#include <gtest/gtest.h>
-
 #include "ocs2_sqp/SqpLogging.h"
+#include <gtest/gtest.h>
 
 using namespace ocs2;
 
 TEST(test_logging, wrap_around) {
-  const int Ntest = 3;
-  sqp::Logger<int> logger(Ntest);
+    const int Ntest = 3;
+    sqp::Logger<int> logger(Ntest);
 
-  std::stringstream stream;
+    std::stringstream stream;
 
-  for (int i = 0; i < (2 * Ntest + 1); ++i) {
-    logger.write(stream);
+    for (int i = 0; i < (2 * Ntest + 1); ++i) {
+        logger.write(stream);
 
-    logger.currentEntry() = i;
-    logger.advance();
-  }
+        logger.currentEntry() = i;
+        logger.advance();
+    }
 
-  ASSERT_EQ(stream.str(), std::string("0") + "01" + "012" + "123" + "234" + "345");
+    ASSERT_EQ(stream.str(), std::string("0") + "01" + "012" + "123" + "234" + "345");
 }

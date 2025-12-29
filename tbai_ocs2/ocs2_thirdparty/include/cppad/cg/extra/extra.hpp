@@ -15,9 +15,8 @@
  * Author: Joao Leal
  */
 
-#include <cppad/cppad.hpp>
-
 #include <cppad/cg/extra/sparse_forjac_hessian.hpp>
 #include <cppad/cg/extra/sparsity.hpp>
+#include <cppad/cppad.hpp>
 
 #endif

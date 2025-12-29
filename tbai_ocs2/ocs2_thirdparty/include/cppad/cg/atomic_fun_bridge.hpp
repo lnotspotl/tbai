@@ -29,17 +29,18 @@ namespace cg {
  */
 template <class Base>
 class CGAtomicFunBridge : public CGAbstractAtomicFun<Base> {
-public:
+   public:
     using CGB = CppAD::cg::CG<Base>;
     using ADCGD = CppAD::AD<CGB>;
-protected:
-    ADFun<CGB>& fun_;
+
+   protected:
+    ADFun<CGB> &fun_;
     bool cacheSparsities_;
     CustomPosition custom_jac_;
     CustomPosition custom_hess_;
     std::map<size_t, CppAD::vector<std::set<size_t> > > hess_;
-public:
 
+   public:
     /**
      * Creates a new atomic function wrapper.
      *
@@ -52,60 +53,51 @@ public:
      * @param cacheSparsities Whether or not to cache information related
      *                        with sparsity evaluation.
      */
-    CGAtomicFunBridge(const std::string& name,
-                      CppAD::ADFun<CGB>& fun,
-                      bool standAlone = false,
-                      bool cacheSparsities = true) :
-        CGAbstractAtomicFun<Base>(name, standAlone),
-        fun_(fun),
-        cacheSparsities_(cacheSparsities) {
+    CGAtomicFunBridge(const std::string &name, CppAD::ADFun<CGB> &fun, bool standAlone = false,
+                      bool cacheSparsities = true)
+        : CGAbstractAtomicFun<Base>(name, standAlone), fun_(fun), cacheSparsities_(cacheSparsities) {
         this->option(CppAD::atomic_base<CGB>::set_sparsity_enum);
     }
 
-    CGAtomicFunBridge(const CGAtomicFunBridge& orig) = delete;
-    CGAtomicFunBridge& operator=(const CGAtomicFunBridge& rhs) = delete;
+    CGAtomicFunBridge(const CGAtomicFunBridge &orig) = delete;
+    CGAtomicFunBridge &operator=(const CGAtomicFunBridge &rhs) = delete;
 
     virtual ~CGAtomicFunBridge() = default;
 
     template <class ADVector>
-    void operator()(const ADVector& ax, ADVector& ay, size_t id = 0) {
+    void operator()(const ADVector &ax, ADVector &ay, size_t id = 0) {
         this->CGAbstractAtomicFun<Base>::operator()(ax, ay, id);
     }
 
-    template<class VectorSize>
-    inline void setCustomSparseJacobianElements(const VectorSize& row,
-                                                const VectorSize& col) {
+    template <class VectorSize>
+    inline void setCustomSparseJacobianElements(const VectorSize &row, const VectorSize &col) {
         custom_jac_ = CustomPosition(fun_.Range(), fun_.Domain(), row, col);
     }
 
-    template<class VectorSet>
-    inline void setCustomSparseJacobianElements(const VectorSet& elements) {
+    template <class VectorSet>
+    inline void setCustomSparseJacobianElements(const VectorSet &elements) {
         custom_jac_ = CustomPosition(fun_.Range(), fun_.Domain(), elements);
     }
 
-    template<class VectorSize>
-    inline void setCustomSparseHessianElements(const VectorSize& row,
-                                               const VectorSize& col) {
+    template <class VectorSize>
+    inline void setCustomSparseHessianElements(const VectorSize &row, const VectorSize &col) {
         size_t n = fun_.Domain();
         custom_hess_ = CustomPosition(n, n, row, col);
     }
 
-    template<class VectorSet>
-    inline void setCustomSparseHessianElements(const VectorSet& elements) {
+    template <class VectorSet>
+    inline void setCustomSparseHessianElements(const VectorSet &elements) {
         size_t n = fun_.Domain();
         custom_hess_ = CustomPosition(n, n, elements);
     }
 
-    bool for_sparse_jac(size_t q,
-                        const CppAD::vector<std::set<size_t> >& r,
-                        CppAD::vector<std::set<size_t> >& s,
-                        const CppAD::vector<CGB>& x) override {
+    bool for_sparse_jac(size_t q, const CppAD::vector<std::set<size_t> > &r, CppAD::vector<std::set<size_t> > &s,
+                        const CppAD::vector<CGB> &x) override {
         return for_sparse_jac(q, r, s);
     }
 
-    bool for_sparse_jac(size_t q,
-                        const CppAD::vector<std::set<size_t> >& r,
-                        CppAD::vector<std::set<size_t> >& s) override {
+    bool for_sparse_jac(size_t q, const CppAD::vector<std::set<size_t> > &r,
+                        CppAD::vector<std::set<size_t> > &s) override {
         using CppAD::vector;
 
         if (cacheSparsities_ || custom_jac_.isFilterDefined()) {
@@ -128,16 +120,13 @@ public:
         return true;
     }
 
-    bool rev_sparse_jac(size_t q,
-                        const CppAD::vector<std::set<size_t> >& rt,
-                        CppAD::vector<std::set<size_t> >& st,
-                        const CppAD::vector<CGB>& x) override {
+    bool rev_sparse_jac(size_t q, const CppAD::vector<std::set<size_t> > &rt, CppAD::vector<std::set<size_t> > &st,
+                        const CppAD::vector<CGB> &x) override {
         return rev_sparse_jac(q, rt, st);
     }
 
-    bool rev_sparse_jac(size_t q,
-                        const CppAD::vector<std::set<size_t> >& rt,
-                        CppAD::vector<std::set<size_t> >& st) override {
+    bool rev_sparse_jac(size_t q, const CppAD::vector<std::set<size_t> > &rt,
+                        CppAD::vector<std::set<size_t> > &st) override {
         using CppAD::vector;
 
         if (cacheSparsities_ || custom_jac_.isFilterDefined()) {
@@ -158,24 +147,15 @@ public:
         return true;
     }
 
-    bool rev_sparse_hes(const CppAD::vector<bool>& vx,
-                        const CppAD::vector<bool>& s,
-                        CppAD::vector<bool>& t,
-                        size_t q,
-                        const CppAD::vector<std::set<size_t> >& r,
-                        const CppAD::vector<std::set<size_t> >& u,
-                        CppAD::vector<std::set<size_t> >& v,
-                        const CppAD::vector<CGB>& x) override {
+    bool rev_sparse_hes(const CppAD::vector<bool> &vx, const CppAD::vector<bool> &s, CppAD::vector<bool> &t, size_t q,
+                        const CppAD::vector<std::set<size_t> > &r, const CppAD::vector<std::set<size_t> > &u,
+                        CppAD::vector<std::set<size_t> > &v, const CppAD::vector<CGB> &x) override {
         return rev_sparse_hes(vx, s, t, q, r, u, v);
     }
 
-    bool rev_sparse_hes(const CppAD::vector<bool>& vx,
-                        const CppAD::vector<bool>& s,
-                        CppAD::vector<bool>& t,
-                        size_t q,
-                        const CppAD::vector<std::set<size_t> >& r,
-                        const CppAD::vector<std::set<size_t> >& u,
-                        CppAD::vector<std::set<size_t> >& v) override {
+    bool rev_sparse_hes(const CppAD::vector<bool> &vx, const CppAD::vector<bool> &s, CppAD::vector<bool> &t, size_t q,
+                        const CppAD::vector<std::set<size_t> > &r, const CppAD::vector<std::set<size_t> > &u,
+                        CppAD::vector<std::set<size_t> > &v) override {
         using CppAD::vector;
 
         if (cacheSparsities_ || custom_jac_.isFilterDefined() || custom_hess_.isFilterDefined()) {
@@ -189,7 +169,7 @@ public:
             if (!custom_jac_.isFullDefined()) {
                 custom_jac_.setFullElements(jacobianSparsitySet<std::vector<std::set<size_t> > >(fun_));
             }
-            const std::vector<std::set<size_t> >& jacSparsity = custom_jac_.getFullElements();
+            const std::vector<std::set<size_t> > &jacSparsity = custom_jac_.getFullElements();
 
             /**
              *  V(x)  =  f'^T(x) U(x)  +  Sum(  s(x)i  f''(x)  R(x)   )
@@ -208,18 +188,19 @@ public:
 
             if (allSelected) {
                 if (!custom_hess_.isFullDefined()) {
-                    custom_hess_.setFullElements(hessianSparsitySet<std::vector<std::set<size_t> > >(fun_)); // f''(x)
+                    custom_hess_.setFullElements(hessianSparsitySet<std::vector<std::set<size_t> > >(fun_));  // f''(x)
                 }
-                const std::vector<std::set<size_t> >& sF2 = custom_hess_.getFullElements();
-                CppAD::cg::multMatrixTransMatrixSparsity(sF2, r, v, n, n, q); // f''^T * R
+                const std::vector<std::set<size_t> > &sF2 = custom_hess_.getFullElements();
+                CppAD::cg::multMatrixTransMatrixSparsity(sF2, r, v, n, n, q);  // f''^T * R
             } else {
                 vector<std::set<size_t> > sparsitySF2R(n);
                 for (size_t i = 0; i < m; i++) {
                     if (s[i]) {
                         const auto itH = hess_.find(i);
-                        const vector<std::set<size_t> >* spari;
+                        const vector<std::set<size_t> > *spari;
                         if (itH == hess_.end()) {
-                            vector<std::set<size_t> >& hi = hess_[i] = hessianSparsitySet<vector<std::set<size_t> > >(fun_, i); // f''_i(x)
+                            vector<std::set<size_t> > &hi = hess_[i] =
+                                hessianSparsitySet<vector<std::set<size_t> > >(fun_, i);  // f''_i(x)
                             spari = &hi;
                             custom_hess_.filter(hi);
                         } else {
@@ -228,7 +209,7 @@ public:
                         CppAD::cg::addMatrixSparsity(*spari, sparsitySF2R);
                     }
                 }
-                CppAD::cg::multMatrixTransMatrixSparsity(sparsitySF2R, r, v, n, n, q); // f''^T * R
+                CppAD::cg::multMatrixTransMatrixSparsity(sparsitySF2R, r, v, n, n, q);  // f''^T * R
             }
 
             /**
@@ -251,8 +232,7 @@ public:
             // set version of s
             vector<std::set<size_t> > set_s(1);
             for (size_t i = 0; i < m; i++) {
-                if (s[i])
-                    set_s[0].insert(i);
+                if (s[i]) set_s[0].insert(i);
             }
 
             fun_.ForSparseJac(q, r);
@@ -271,18 +251,13 @@ public:
         return true;
     }
 
-protected:
-
-    void zeroOrderDependency(const CppAD::vector<bool>& vx,
-                             CppAD::vector<bool>& vy,
-                             const CppAD::vector<CGB>& x) override {
+   protected:
+    void zeroOrderDependency(const CppAD::vector<bool> &vx, CppAD::vector<bool> &vy,
+                             const CppAD::vector<CGB> &x) override {
         CppAD::cg::zeroOrderDependency(fun_, vx, vy);
     }
 
-    bool atomicForward(size_t q,
-                       size_t p,
-                       const CppAD::vector<Base>& tx,
-                       CppAD::vector<Base>& ty) override {
+    bool atomicForward(size_t q, size_t p, const CppAD::vector<Base> &tx, CppAD::vector<Base> &ty) override {
         using CppAD::vector;
 
         vector<CGB> txcg(tx.size());
@@ -296,11 +271,8 @@ protected:
         return true;
     }
 
-    bool atomicReverse(size_t p,
-                       const CppAD::vector<Base>& tx,
-                       const CppAD::vector<Base>& ty,
-                       CppAD::vector<Base>& px,
-                       const CppAD::vector<Base>& py) override {
+    bool atomicReverse(size_t p, const CppAD::vector<Base> &tx, const CppAD::vector<Base> &ty, CppAD::vector<Base> &px,
+                       const CppAD::vector<Base> &py) override {
         using CppAD::vector;
 
         vector<CGB> txcg(tx.size());
@@ -318,10 +290,8 @@ protected:
         return true;
     }
 
-private:
-
-    static void toCG(const CppAD::vector<Base>& from,
-                     CppAD::vector<CGB>& to) {
+   private:
+    static void toCG(const CppAD::vector<Base> &from, CppAD::vector<CGB> &to) {
         CPPAD_ASSERT_UNKNOWN(from.size() == to.size())
 
         for (size_t i = 0; i < from.size(); i++) {
@@ -329,8 +299,7 @@ private:
         }
     }
 
-    static void fromCG(const CppAD::vector<CGB>& from,
-                       CppAD::vector<Base>& to) {
+    static void fromCG(const CppAD::vector<CGB> &from, CppAD::vector<Base> &to) {
         CPPAD_ASSERT_UNKNOWN(from.size() == to.size())
 
         for (size_t i = 0; i < from.size(); i++) {
@@ -338,10 +307,9 @@ private:
             to[i] = from[i].getValue();
         }
     }
-
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

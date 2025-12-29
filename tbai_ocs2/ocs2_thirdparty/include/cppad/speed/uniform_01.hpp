@@ -1,5 +1,5 @@
-# ifndef CPPAD_SPEED_UNIFORM_01_HPP
-# define CPPAD_SPEED_UNIFORM_01_HPP
+#ifndef CPPAD_SPEED_UNIFORM_01_HPP
+#define CPPAD_SPEED_UNIFORM_01_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -86,18 +86,18 @@ $end
 ------------------------------------------------------------------------------
 */
 // BEGIN C++
-# include <cstdlib>
+#include <cstdlib>
 
 namespace CppAD {
-    inline void uniform_01(size_t seed)
-    {   std::srand( (unsigned int) seed); }
-
-    template <class Vector>
-    void uniform_01(size_t n, Vector &x)
-    {   static double factor = 1. / double(RAND_MAX);
-        while(n--)
-            x[n] = std::rand() * factor;
-    }
+inline void uniform_01(size_t seed) {
+    std::srand((unsigned int)seed);
 }
+
+template <class Vector>
+void uniform_01(size_t n, Vector &x) {
+    static double factor = 1. / double(RAND_MAX);
+    while (n--) x[n] = std::rand() * factor;
+}
+}  // namespace CppAD
 // END C++
-# endif
+#endif

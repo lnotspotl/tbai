@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_ASINH_HPP
-# define CPPAD_CORE_ASINH_HPP
+#ifndef CPPAD_CORE_ASINH_HPP
+#define CPPAD_CORE_ASINH_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -63,33 +63,36 @@ contains an example and test of this function.
 $end
 -------------------------------------------------------------------------------
 */
-# include <cppad/configure.hpp>
-# if ! CPPAD_USE_CPLUSPLUS_2011
+#include <cppad/configure.hpp>
+#if !CPPAD_USE_CPLUSPLUS_2011
 
 // BEGIN CppAD namespace
 namespace CppAD {
 
 template <class Type>
-Type asinh_template(const Type &x)
-{   return CppAD::log( x + CppAD::sqrt( Type(1) + x * x ) );
+Type asinh_template(const Type &x) {
+    return CppAD::log(x + CppAD::sqrt(Type(1) + x * x));
 }
 
-inline float asinh(const float &x)
-{   return asinh_template(x); }
+inline float asinh(const float &x) {
+    return asinh_template(x);
+}
 
-inline double asinh(const double &x)
-{   return asinh_template(x); }
-
-template <class Base>
-AD<Base> asinh(const AD<Base> &x)
-{   return asinh_template(x); }
+inline double asinh(const double &x) {
+    return asinh_template(x);
+}
 
 template <class Base>
-AD<Base> asinh(const VecAD_reference<Base> &x)
-{   return asinh_template( x.ADBase() ); }
+AD<Base> asinh(const AD<Base> &x) {
+    return asinh_template(x);
+}
 
+template <class Base>
+AD<Base> asinh(const VecAD_reference<Base> &x) {
+    return asinh_template(x.ADBase());
+}
 
-} // END CppAD namespace
+}  // namespace CppAD
 
-# endif // CPPAD_USE_CPLUSPLUS_2011
-# endif // CPPAD_ASINH_INCLUDED
+#endif  // CPPAD_USE_CPLUSPLUS_2011
+#endif  // CPPAD_ASINH_INCLUDED

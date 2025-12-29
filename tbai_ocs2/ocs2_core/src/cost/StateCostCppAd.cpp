@@ -34,62 +34,63 @@ namespace ocs2 {
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-void StateCostCppAd::initialize(size_t stateDim, size_t parameterDim, const std::string& modelName, const std::string& modelFolder,
-                                bool recompileLibraries, bool verbose) {
-  auto costAd = [=](const ad_vector_t& x, const ad_vector_t& p, ad_vector_t& y) {
-    assert(x.rows() == 1 + stateDim);
-    const ad_scalar_t time = x(0);
-    const ad_vector_t state = x.tail(stateDim);
-    y = ad_vector_t(1);
-    y(0) = this->costFunction(time, state, p);
-  };
-  adInterfacePtr_.reset(new ocs2::CppAdInterface(costAd, 1 + stateDim, parameterDim, modelName, modelFolder));
+void StateCostCppAd::initialize(size_t stateDim, size_t parameterDim, const std::string &modelName,
+                                const std::string &modelFolder, bool recompileLibraries, bool verbose) {
+    auto costAd = [=](const ad_vector_t &x, const ad_vector_t &p, ad_vector_t &y) {
+        assert(x.rows() == 1 + stateDim);
+        const ad_scalar_t time = x(0);
+        const ad_vector_t state = x.tail(stateDim);
+        y = ad_vector_t(1);
+        y(0) = this->costFunction(time, state, p);
+    };
+    adInterfacePtr_.reset(new ocs2::CppAdInterface(costAd, 1 + stateDim, parameterDim, modelName, modelFolder));
 
-  if (recompileLibraries) {
-    adInterfacePtr_->createModels(ocs2::CppAdInterface::ApproximationOrder::Second, verbose);
-  } else {
-    adInterfacePtr_->loadModelsIfAvailable(ocs2::CppAdInterface::ApproximationOrder::Second, verbose);
-  }
+    if (recompileLibraries) {
+        adInterfacePtr_->createModels(ocs2::CppAdInterface::ApproximationOrder::Second, verbose);
+    } else {
+        adInterfacePtr_->loadModelsIfAvailable(ocs2::CppAdInterface::ApproximationOrder::Second, verbose);
+    }
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-StateCostCppAd::StateCostCppAd(const StateCostCppAd& rhs)
+StateCostCppAd::StateCostCppAd(const StateCostCppAd &rhs)
     : StateCost(rhs), adInterfacePtr_(new ocs2::CppAdInterface(*rhs.adInterfacePtr_)) {}
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-scalar_t StateCostCppAd::getValue(scalar_t time, const vector_t& state, const TargetTrajectories& targetTrajectories,
-                                  const PreComputation& preComputation) const {
-  vector_t tapedTimeState(1 + state.rows());
-  tapedTimeState << time, state;
-  return adInterfacePtr_->getFunctionValue(tapedTimeState, getParameters(time, targetTrajectories, preComputation))(0);
+scalar_t StateCostCppAd::getValue(scalar_t time, const vector_t &state, const TargetTrajectories &targetTrajectories,
+                                  const PreComputation &preComputation) const {
+    vector_t tapedTimeState(1 + state.rows());
+    tapedTimeState << time, state;
+    return adInterfacePtr_->getFunctionValue(tapedTimeState,
+                                             getParameters(time, targetTrajectories, preComputation))(0);
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-ScalarFunctionQuadraticApproximation StateCostCppAd::getQuadraticApproximation(scalar_t time, const vector_t& state,
-                                                                               const TargetTrajectories& targetTrajectories,
-                                                                               const PreComputation& preComputation) const {
-  ScalarFunctionQuadraticApproximation cost;
+ScalarFunctionQuadraticApproximation StateCostCppAd::getQuadraticApproximation(
+    scalar_t time, const vector_t &state, const TargetTrajectories &targetTrajectories,
+    const PreComputation &preComputation) const {
+    ScalarFunctionQuadraticApproximation cost;
 
-  const size_t stateDim = state.rows();
-  const vector_t params = getParameters(time, targetTrajectories, preComputation);
-  vector_t tapedTimeState(1 + stateDim);
-  tapedTimeState << time, state;
+    const size_t stateDim = state.rows();
+    const vector_t params = getParameters(time, targetTrajectories, preComputation);
+    vector_t tapedTimeState(1 + stateDim);
+    tapedTimeState << time, state;
 
-  cost.f = adInterfacePtr_->getFunctionValue(tapedTimeState, params)(0);
+    cost.f = adInterfacePtr_->getFunctionValue(tapedTimeState, params)(0);
 
-  const matrix_t J = adInterfacePtr_->getJacobian(tapedTimeState, params);
-  cost.dfdx = J.rightCols(stateDim).transpose();
+    const matrix_t J = adInterfacePtr_->getJacobian(tapedTimeState, params);
+    cost.dfdx = J.rightCols(stateDim).transpose();
 
-  const matrix_t H = adInterfacePtr_->getHessian(0, tapedTimeState, params);
-  cost.dfdxx = H.bottomRightCorner(stateDim, stateDim);
+    const matrix_t H = adInterfacePtr_->getHessian(0, tapedTimeState, params);
+    cost.dfdxx = H.bottomRightCorner(stateDim, stateDim);
 
-  return cost;
+    return cost;
 }
 
 }  // namespace ocs2

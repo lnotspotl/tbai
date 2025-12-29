@@ -22,31 +22,23 @@ namespace cg {
 
 namespace _private {
 
-template<class Base>
+template <class Base>
 class LangStreamOperation {
-private:
-    OperationNode<Base>* _node;
+   private:
+    OperationNode<Base> *_node;
     std::string _text;
-public:
-    inline LangStreamOperation(OperationNode<Base>& node) :
-            _node(&node) {
-    }
 
-    inline LangStreamOperation(std::string text) :
-            _node(nullptr),
-            _text(std::move(text)) {
-    }
+   public:
+    inline LangStreamOperation(OperationNode<Base> &node) : _node(&node) {}
 
-    OperationNode<Base>* getNode() const {
-        return _node;
-    }
+    inline LangStreamOperation(std::string text) : _node(nullptr), _text(std::move(text)) {}
 
-    const std::string& getText() const {
-        return _text;
-    }
+    OperationNode<Base> *getNode() const { return _node; }
+
+    const std::string &getText() const { return _text; }
 };
 
-}
+}  // namespace _private
 
 /**
  * A cache for sending source code to an output stream which waits until the source for operation nodes
@@ -54,21 +46,17 @@ public:
  *
  * @tparam Base
  */
-template<class Base>
+template <class Base>
 class LangStreamStack {
-private:
-    std::ostream& _out;
+   private:
+    std::ostream &_out;
     std::forward_list<_private::LangStreamOperation<Base> > _cache;
     typename std::forward_list<_private::LangStreamOperation<Base> >::iterator _it;
-public:
-    inline LangStreamStack(std::ostream& out) :
-            _out(out),
-            _it(_cache.before_begin()) {
-    }
 
-    inline bool empty() const {
-        return _cache.empty();
-    }
+   public:
+    inline LangStreamStack(std::ostream &out) : _out(out), _it(_cache.before_begin()) {}
+
+    inline bool empty() const { return _cache.empty(); }
 
     inline void clear() {
         _cache.clear();
@@ -76,8 +64,7 @@ public:
     }
 
     inline void flush() {
-        if (empty())
-            return;
+        if (empty()) return;
 
         while (!_cache.empty() && _cache.begin()->getNode() == nullptr) {
             _out << _cache.begin()->getText();
@@ -86,17 +73,18 @@ public:
         _it = _cache.before_begin();
     }
 
-    inline OperationNode<Base>& startNewOperationNode() {
+    inline OperationNode<Base> &startNewOperationNode() {
         CPPAD_ASSERT_KNOWN(!_cache.empty(), "Cannot extract an operation node from an empty list")
-        CPPAD_ASSERT_KNOWN(_cache.begin()->getNode() != nullptr, "The first element in the list is not an OperationNode")
-        OperationNode<Base>* node = _cache.begin()->getNode();
+        CPPAD_ASSERT_KNOWN(_cache.begin()->getNode() != nullptr,
+                           "The first element in the list is not an OperationNode")
+        OperationNode<Base> *node = _cache.begin()->getNode();
         _cache.erase_after(_cache.before_begin());
         _it = _cache.before_begin();
 
         return *node;
     }
 
-    friend inline LangStreamStack<Base>& operator<<(LangStreamStack<Base>& lss, std::string text) {
+    friend inline LangStreamStack<Base> &operator<<(LangStreamStack<Base> &lss, std::string text) {
         if (lss._it == lss._cache.before_begin()) {
             lss._out << text;
         } else {
@@ -105,42 +93,42 @@ public:
         return lss;
     }
 
-    friend inline LangStreamStack<Base>& operator<<(LangStreamStack<Base>& lss, int i) {
+    friend inline LangStreamStack<Base> &operator<<(LangStreamStack<Base> &lss, int i) {
         return (lss << std::to_string(i));
     }
 
-    friend inline LangStreamStack<Base>& operator<<(LangStreamStack<Base>& lss, long int i) {
+    friend inline LangStreamStack<Base> &operator<<(LangStreamStack<Base> &lss, long int i) {
         return (lss << std::to_string(i));
     }
 
-    friend inline LangStreamStack<Base>& operator<<(LangStreamStack<Base>& lss, long long int i) {
+    friend inline LangStreamStack<Base> &operator<<(LangStreamStack<Base> &lss, long long int i) {
         return (lss << std::to_string(i));
     }
 
-    friend inline LangStreamStack<Base>& operator<<(LangStreamStack<Base>& lss, unsigned int i) {
+    friend inline LangStreamStack<Base> &operator<<(LangStreamStack<Base> &lss, unsigned int i) {
         return (lss << std::to_string(i));
     }
 
-    friend inline LangStreamStack<Base>& operator<<(LangStreamStack<Base>& lss, long unsigned int i) {
+    friend inline LangStreamStack<Base> &operator<<(LangStreamStack<Base> &lss, long unsigned int i) {
         return (lss << std::to_string(i));
     }
 
-    friend inline LangStreamStack<Base>& operator<<(LangStreamStack<Base>& lss, long long unsigned int i) {
+    friend inline LangStreamStack<Base> &operator<<(LangStreamStack<Base> &lss, long long unsigned int i) {
         return (lss << std::to_string(i));
     }
 
-    friend inline LangStreamStack<Base>& operator<<(LangStreamStack<Base>& lss, char text) {
+    friend inline LangStreamStack<Base> &operator<<(LangStreamStack<Base> &lss, char text) {
         return (lss << std::string(1, text));
     }
 
-    friend inline LangStreamStack<Base>& operator<<(LangStreamStack<Base>& lss, OperationNode<Base>& node) {
+    friend inline LangStreamStack<Base> &operator<<(LangStreamStack<Base> &lss, OperationNode<Base> &node) {
         lss._it = lss._cache.emplace_after(lss._it, node);
 
         return lss;
     }
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

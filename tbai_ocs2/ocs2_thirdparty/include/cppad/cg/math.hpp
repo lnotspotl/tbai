@@ -18,16 +18,15 @@
 namespace CppAD {
 
 #define CPPAD_CG_CREATE_OPERATION(OpName, OpCode)                              \
-    template<class Base>                                                       \
-    inline cg::CG<Base> OpName(const cg::CG<Base>& var) {                      \
+    template <class Base>                                                      \
+    inline cg::CG<Base> OpName(const cg::CG<Base> &var) {                      \
         using namespace CppAD::cg;                                             \
         if (var.isParameter()) {                                               \
-            return CG<Base> (OpName(var.getValue()));                          \
+            return CG<Base>(OpName(var.getValue()));                           \
         } else {                                                               \
-            CodeHandler<Base>& h = *var.getOperationNode()->getCodeHandler();  \
+            CodeHandler<Base> &h = *var.getOperationNode()->getCodeHandler();  \
             CG<Base> result(*h.makeNode(CGOpCode::OpCode, var.argument()));    \
-            if(var.isValueDefined())                                           \
-                result.setValue(OpName(var.getValue()));                       \
+            if (var.isValueDefined()) result.setValue(OpName(var.getValue())); \
             return result;                                                     \
         }                                                                      \
     }
@@ -62,36 +61,35 @@ inline cg::CG<Base> log10(const cg::CG<Base> &x) {
     return CppAD::log(x) / CppAD::log(Base(10));
 }
 
-namespace cg  {
-  
-  using CppAD::abs;
-  using CppAD::fabs;
-  using CppAD::acos;
-  using CppAD::asin;
-  using CppAD::atan;
-  using CppAD::cos;
-  using CppAD::cosh;
-  using CppAD::exp;
-  using CppAD::log;
-  using CppAD::sin;
-  using CppAD::sinh;
-  using CppAD::asin;
-  using CppAD::sqrt;
-  using CppAD::tan;
-  using CppAD::tanh;
-  
-#if CPPAD_USE_CPLUSPLUS_2011
-  using CppAD::erf;
-  using CppAD::asinh;
-  using CppAD::acosh;
-  using CppAD::atanh;
-  using CppAD::expm1;
-  using CppAD::log1p;
-#endif
-  
-  using CppAD::log10;
+namespace cg {
 
-} // END cg namespace
-} // END CppAD namespace
+using CppAD::abs;
+using CppAD::acos;
+using CppAD::asin;
+using CppAD::atan;
+using CppAD::cos;
+using CppAD::cosh;
+using CppAD::exp;
+using CppAD::fabs;
+using CppAD::log;
+using CppAD::sin;
+using CppAD::sinh;
+using CppAD::sqrt;
+using CppAD::tan;
+using CppAD::tanh;
+
+#if CPPAD_USE_CPLUSPLUS_2011
+using CppAD::acosh;
+using CppAD::asinh;
+using CppAD::atanh;
+using CppAD::erf;
+using CppAD::expm1;
+using CppAD::log1p;
+#endif
+
+using CppAD::log10;
+
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

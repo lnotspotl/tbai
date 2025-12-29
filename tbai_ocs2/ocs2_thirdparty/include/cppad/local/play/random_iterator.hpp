@@ -1,5 +1,5 @@
-# ifndef CPPAD_LOCAL_PLAY_RANDOM_ITERATOR_HPP
-# define CPPAD_LOCAL_PLAY_RANDOM_ITERATOR_HPP
+#ifndef CPPAD_LOCAL_PLAY_RANDOM_ITERATOR_HPP
+#define CPPAD_LOCAL_PLAY_RANDOM_ITERATOR_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -13,7 +13,9 @@ in the Eclipse Public License, Version 2.0 are satisfied:
 ---------------------------------------------------------------------------- */
 
 // BEGIN_CPPAD_LOCAL_PLAY_NAMESPACE
-namespace CppAD { namespace local { namespace play {
+namespace CppAD {
+namespace local {
+namespace play {
 
 /*!
 \file random_iterator.hpp
@@ -28,40 +30,38 @@ arg_vec, op2arg_vec, op2var_vec, var2op_vec.
 */
 template <class Addr>
 class const_random_iterator {
-private:
+   private:
     /// vector of operators on the tape
-    const pod_vector<opcode_t>* op_vec_;
+    const pod_vector<opcode_t> *op_vec_;
 
     /// vector of arguments for all the operators
     /// (note that this is same type as used in recorder; i.e., addr_t)
-    const pod_vector<addr_t>* arg_vec_;
+    const pod_vector<addr_t> *arg_vec_;
 
     /// mapping from operator index to index of first argument in arg_vec_
-    const pod_vector<Addr>* op2arg_vec_;
+    const pod_vector<Addr> *op2arg_vec_;
 
     /// mapping from operator index to index of primary (last) result
-    const pod_vector<Addr>* op2var_vec_;
+    const pod_vector<Addr> *op2var_vec_;
 
     /// mapping from primary variable index to operator index
     /// (only specified for primary variables)
-    const pod_vector<Addr>* var2op_vec_;
+    const pod_vector<Addr> *var2op_vec_;
 
-public:
+   public:
     /// default constructor
-    const_random_iterator(void) :
-    op_vec_(CPPAD_NULL)     ,
-    arg_vec_(CPPAD_NULL)    ,
-    op2arg_vec_(CPPAD_NULL) ,
-    op2var_vec_(CPPAD_NULL) ,
-    var2op_vec_(CPPAD_NULL)
-    { }
+    const_random_iterator(void)
+        : op_vec_(CPPAD_NULL),
+          arg_vec_(CPPAD_NULL),
+          op2arg_vec_(CPPAD_NULL),
+          op2var_vec_(CPPAD_NULL),
+          var2op_vec_(CPPAD_NULL) {}
     /// default assignment operator
-    void operator=(const const_random_iterator& rhs)
-    {
-        op_vec_          = rhs.op_vec_;
-        op2arg_vec_      = rhs.op2arg_vec_;
-        op2var_vec_      = rhs.op2var_vec_;
-        var2op_vec_      = rhs.var2op_vec_;
+    void operator=(const const_random_iterator &rhs) {
+        op_vec_ = rhs.op_vec_;
+        op2arg_vec_ = rhs.op2arg_vec_;
+        op2var_vec_ = rhs.op2var_vec_;
+        var2op_vec_ = rhs.var2op_vec_;
         return;
     }
     /*!
@@ -71,19 +71,16 @@ public:
     This variable is not needed and can be null if the var2op member
     function is not used.
     */
-    const_random_iterator(
-        const pod_vector<opcode_t>&           op_vec     , ///< op_vec_
-        const pod_vector<addr_t>&             arg_vec    , ///< arg_vec_
-        const pod_vector<Addr>*               op2arg_vec , ///< op2ar_vec_
-        const pod_vector<Addr>*               op2var_vec , ///< op2var_vec_
-        const pod_vector<Addr>*               var2op_vec ) ///< var2op_vec_
-    :
-    op_vec_          ( &op_vec    )   ,
-    arg_vec_         ( &arg_vec   )   ,
-    op2arg_vec_      ( op2arg_vec )   ,
-    op2var_vec_      ( op2var_vec )   ,
-    var2op_vec_      ( var2op_vec )
-    { }
+    const_random_iterator(const pod_vector<opcode_t> &op_vec,  ///< op_vec_
+                          const pod_vector<addr_t> &arg_vec,   ///< arg_vec_
+                          const pod_vector<Addr> *op2arg_vec,  ///< op2ar_vec_
+                          const pod_vector<Addr> *op2var_vec,  ///< op2var_vec_
+                          const pod_vector<Addr> *var2op_vec)  ///< var2op_vec_
+        : op_vec_(&op_vec),
+          arg_vec_(&arg_vec),
+          op2arg_vec_(op2arg_vec),
+          op2var_vec_(op2var_vec),
+          var2op_vec_(var2op_vec) {}
     /*!
     \brief
     fetch the information corresponding to an operator
@@ -102,13 +99,9 @@ public:
     If there is no primary variable for this operator, i_var not sepcified
     and could have any value.
     */
-    void op_info(
-        size_t         op_index   ,
-        OpCode&        op         ,
-        const addr_t*& op_arg     ,
-        size_t&        var_index  ) const
-    {   op        = OpCode( (*op_vec_)[op_index] );
-        op_arg    = (*op2arg_vec_)[op_index] + arg_vec_->data();
+    void op_info(size_t op_index, OpCode &op, const addr_t *&op_arg, size_t &var_index) const {
+        op = OpCode((*op_vec_)[op_index]);
+        op_arg = (*op2arg_vec_)[op_index] + arg_vec_->data();
         var_index = (*op2var_vec_)[op_index];
         return;
     }
@@ -122,31 +115,28 @@ public:
     \return
     is the index of the operator corresponding to this primary variable.
     */
-    size_t var2op(size_t var_index) const
-    {   // check that var2op_vec was not null in constructor
-        CPPAD_ASSERT_UNKNOWN( var2op_vec_ != CPPAD_NULL );
+    size_t var2op(size_t var_index) const {  // check that var2op_vec was not null in constructor
+        CPPAD_ASSERT_UNKNOWN(var2op_vec_ != CPPAD_NULL);
         //
         // operator index
-        size_t op_index = size_t( (*var2op_vec_)[var_index] );
+        size_t op_index = size_t((*var2op_vec_)[var_index]);
         //
         // check that var_index is a primary variable index (see random_setup)
-        CPPAD_ASSERT_UNKNOWN( op_index < op_vec_->size() );
+        CPPAD_ASSERT_UNKNOWN(op_index < op_vec_->size());
         //
         return op_index;
     }
     /// get operator corresponding to operator index
-    OpCode get_op(size_t op_index) const
-    {   return OpCode( (*op_vec_)[op_index] );
-    }
+    OpCode get_op(size_t op_index) const { return OpCode((*op_vec_)[op_index]); }
     /// number of operators
-    size_t num_op(void) const
-    {   return op_vec_->size(); }
+    size_t num_op(void) const { return op_vec_->size(); }
     //
     /// number of variables
-    size_t num_var(void) const
-    {   return var2op_vec_->size(); }
+    size_t num_var(void) const { return var2op_vec_->size(); }
 };
 
-} } } // BEGIN_CPPAD_LOCAL_PLAY_NAMESPACE
+}  // namespace play
+}  // namespace local
+}  // namespace CppAD
 
-# endif
+#endif

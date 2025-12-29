@@ -34,15 +34,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace ocs2;
 
 TEST(TestFixtureLoopShapingSoftConstraint, testStateInputApproximation) {
-  for (const auto config : configNames) {
-    TestFixtureLoopShapingSoftConstraint test(config);
-    test.testStateInputApproximation();
-  }
+    for (const auto config : configNames) {
+        TestFixtureLoopShapingSoftConstraint test(config);
+        test.testStateInputApproximation();
+    }
 }
 
 TEST(TestFixtureLoopShapingSoftConstraint, testStateApproximation) {
-  for (const auto config : configNames) {
-    TestFixtureLoopShapingSoftConstraint test(config);
-    test.testStateApproximation();
-  }
+    for (const auto config : configNames) {
+        TestFixtureLoopShapingSoftConstraint test(config);
+        test.testStateApproximation();
+    }
 }

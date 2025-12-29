@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_BASE_FLOAT_HPP
-# define CPPAD_CORE_BASE_FLOAT_HPP
+#ifndef CPPAD_CORE_BASE_FLOAT_HPP
+#define CPPAD_CORE_BASE_FLOAT_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -11,8 +11,9 @@ Secondary License when the conditions for such availability set forth
 in the Eclipse Public License, Version 2.0 are satisfied:
       GNU General Public License, Version 2.0 or later.
 ---------------------------------------------------------------------------- */
-# include <cppad/configure.hpp>
-# include <limits>
+#include <limits>
+
+#include <cppad/configure.hpp>
 
 /*
 $begin base_float.hpp$$
@@ -59,22 +60,18 @@ $cref/ordered type/base_cond_exp/CondExpTemplate/Ordered Type/$$.
 Hence its $code CondExpOp$$ function is defined by
 $srccode%cpp% */
 namespace CppAD {
-    inline float CondExpOp(
-        enum CompareOp     cop          ,
-        const float&       left         ,
-        const float&       right        ,
-        const float&       exp_if_true  ,
-        const float&       exp_if_false )
-    {   return CondExpTemplate(cop, left, right, exp_if_true, exp_if_false);
-    }
+inline float CondExpOp(enum CompareOp cop, const float &left, const float &right, const float &exp_if_true,
+                       const float &exp_if_false) {
+    return CondExpTemplate(cop, left, right, exp_if_true, exp_if_false);
 }
+}  // namespace CppAD
 /* %$$
 
 $head CondExpRel$$
 The $cref/CPPAD_COND_EXP_REL/base_cond_exp/CondExpRel/$$ macro invocation
 $srccode%cpp% */
 namespace CppAD {
-    CPPAD_COND_EXP_REL(float)
+CPPAD_COND_EXP_REL(float)
 }
 /* %$$
 uses $code CondExpOp$$ above to
@@ -86,38 +83,44 @@ $head EqualOpSeq$$
 The type $code float$$ is simple (in this respect) and so we define
 $srccode%cpp% */
 namespace CppAD {
-    inline bool EqualOpSeq(const float& x, const float& y)
-    {   return x == y; }
+inline bool EqualOpSeq(const float &x, const float &y) {
+    return x == y;
 }
+}  // namespace CppAD
 /* %$$
 
 $head Identical$$
 The type $code float$$ is simple (in this respect) and so we define
 $srccode%cpp% */
 namespace CppAD {
-    inline bool IdenticalCon(const float& x)
-    {   return true; }
-    inline bool IdenticalZero(const float& x)
-    {   return (x == 0.f); }
-    inline bool IdenticalOne(const float& x)
-    {   return (x == 1.f); }
-    inline bool IdenticalEqualCon(const float& x, const float& y)
-    {   return (x == y); }
+inline bool IdenticalCon(const float &x) {
+    return true;
 }
+inline bool IdenticalZero(const float &x) {
+    return (x == 0.f);
+}
+inline bool IdenticalOne(const float &x) {
+    return (x == 1.f);
+}
+inline bool IdenticalEqualCon(const float &x, const float &y) {
+    return (x == y);
+}
+}  // namespace CppAD
 /* %$$
 
 $head Integer$$
 $srccode%cpp% */
 namespace CppAD {
-    inline int Integer(const float& x)
-    {   return static_cast<int>(x); }
+inline int Integer(const float &x) {
+    return static_cast<int>(x);
 }
+}  // namespace CppAD
 /* %$$
 
 $head azmul$$
 $srccode%cpp% */
 namespace CppAD {
-    CPPAD_AZMUL( float )
+CPPAD_AZMUL(float)
 }
 /* %$$
 
@@ -125,17 +128,22 @@ $head Ordered$$
 The $code float$$ type supports ordered comparisons
 $srccode%cpp% */
 namespace CppAD {
-    inline bool GreaterThanZero(const float& x)
-    {   return x > 0.f; }
-    inline bool GreaterThanOrZero(const float& x)
-    {   return x >= 0.f; }
-    inline bool LessThanZero(const float& x)
-    {   return x < 0.f; }
-    inline bool LessThanOrZero(const float& x)
-    {   return x <= 0.f; }
-    inline bool abs_geq(const float& x, const float& y)
-    {   return std::fabs(x) >= std::fabs(y); }
+inline bool GreaterThanZero(const float &x) {
+    return x > 0.f;
 }
+inline bool GreaterThanOrZero(const float &x) {
+    return x >= 0.f;
+}
+inline bool LessThanZero(const float &x) {
+    return x < 0.f;
+}
+inline bool LessThanOrZero(const float &x) {
+    return x <= 0.f;
+}
+inline bool abs_geq(const float &x, const float &y) {
+    return std::fabs(x) >= std::fabs(y);
+}
+}  // namespace CppAD
 /* %$$
 
 $head Unary Standard Math$$
@@ -147,38 +155,39 @@ Note this also defines the $cref/double/base_double.hpp/Unary Standard Math/$$
 versions of these functions.
 $srccode%cpp% */
 namespace CppAD {
-    using std::acos;
-    using std::asin;
-    using std::atan;
-    using std::cos;
-    using std::cosh;
-    using std::exp;
-    using std::fabs;
-    using std::log;
-    using std::log10;
-    using std::sin;
-    using std::sinh;
-    using std::sqrt;
-    using std::tan;
-    using std::tanh;
-# if CPPAD_USE_CPLUSPLUS_2011
-    using std::erf;
-    using std::asinh;
-    using std::acosh;
-    using std::atanh;
-    using std::expm1;
-    using std::log1p;
-# endif
-}
+using std::acos;
+using std::asin;
+using std::atan;
+using std::cos;
+using std::cosh;
+using std::exp;
+using std::fabs;
+using std::log;
+using std::log10;
+using std::sin;
+using std::sinh;
+using std::sqrt;
+using std::tan;
+using std::tanh;
+#if CPPAD_USE_CPLUSPLUS_2011
+using std::acosh;
+using std::asinh;
+using std::atanh;
+using std::erf;
+using std::expm1;
+using std::log1p;
+#endif
+}  // namespace CppAD
 
 /* %$$
 The absolute value function is special because its $code std$$ name is
 $code fabs$$
 $srccode%cpp% */
 namespace CppAD {
-    inline float abs(const float& x)
-    {   return std::fabs(x); }
+inline float abs(const float &x) {
+    return std::fabs(x);
 }
+}  // namespace CppAD
 /* %$$
 
 $head sign$$
@@ -186,14 +195,12 @@ The following defines the $code CppAD::sign$$ function that
 is required to use $code AD<float>$$:
 $srccode%cpp% */
 namespace CppAD {
-    inline float sign(const float& x)
-    {   if( x > 0.f )
-            return 1.f;
-        if( x == 0.f )
-            return 0.f;
-        return -1.f;
-    }
+inline float sign(const float &x) {
+    if (x > 0.f) return 1.f;
+    if (x == 0.f) return 0.f;
+    return -1.f;
 }
+}  // namespace CppAD
 /* %$$
 $head pow$$
 The following defines a $code CppAD::pow$$ function that
@@ -203,7 +210,7 @@ this has the exact same signature as $code std::pow$$,
 so use it instead of defining another function.
 $srccode%cpp% */
 namespace CppAD {
-    using std::pow;
+using std::pow;
 }
 /* %$$
 
@@ -212,7 +219,7 @@ The following defines the CppAD $cref numeric_limits$$
 for the type $code float$$:
 $srccode%cpp% */
 namespace CppAD {
-    CPPAD_NUMERIC_LIMITS(float, float)
+CPPAD_NUMERIC_LIMITS(float, float)
 }
 /* %$$
 
@@ -226,5 +233,4 @@ it is necessary to define $code to_string$$ for a $icode Base$$ type.
 $end
 */
 
-
-# endif
+#endif

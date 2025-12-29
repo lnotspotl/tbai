@@ -1,5 +1,5 @@
-# ifndef CPPAD_UTILITY_TEST_BOOLOFVOID_HPP
-# define CPPAD_UTILITY_TEST_BOOLOFVOID_HPP
+#ifndef CPPAD_UTILITY_TEST_BOOLOFVOID_HPP
+#define CPPAD_UTILITY_TEST_BOOLOFVOID_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -87,78 +87,67 @@ $code example/ipopt_solve.cpp$$.
 $end
 */
 
-# include <cppad/core/cppad_assert.hpp>
-# include <string>
+#include <string>
 
-namespace CppAD { // BEGIN_CPPAD_NAMESPACE
+#include <cppad/core/cppad_assert.hpp>
+
+namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
 
 /// One class object is used to run a group of tests
 class test_boolofvoid {
-private:
+   private:
     /// name for the group of test this object will run
     const std::string group_;
     /// number of characters used to display the name for each indiviual test
     /// (must be larger than the number of characters in name for each test)
-    const size_t      width_;
+    const size_t width_;
     /// number of tests that have passed
-    size_t            n_ok_;
+    size_t n_ok_;
     /// number of tests that have failed
-    size_t            n_error_;
+    size_t n_error_;
 
-public:
+   public:
     /// ctor
-    test_boolofvoid(const std::string& group, size_t width) :
-    group_(group) ,
-    width_(width) ,
-    n_ok_(0)      ,
-    n_error_(0)
-    {   std::cout << "Begin test group " << group_ << std::endl; }
+    test_boolofvoid(const std::string &group, size_t width) : group_(group), width_(width), n_ok_(0), n_error_(0) {
+        std::cout << "Begin test group " << group_ << std::endl;
+    }
     /// destructor
-    ~test_boolofvoid(void)
-    {   std::cout << "End test group " << group_ << std::endl; }
+    ~test_boolofvoid(void) { std::cout << "End test group " << group_ << std::endl; }
     /// run one test
-    bool operator()(bool test(void), const std::string& name)
-    {   CPPAD_ASSERT_KNOWN(
-            name.size() < width_ ,
-            "test_boolofvoid: name does not have less characters than width"
-        );
-        std::cout.width( int(width_) );
-        std::cout.setf( std::ios_base::left );
+    bool operator()(bool test(void), const std::string &name) {
+        CPPAD_ASSERT_KNOWN(name.size() < width_, "test_boolofvoid: name does not have less characters than width");
+        std::cout.width(int(width_));
+        std::cout.setf(std::ios_base::left);
         std::cout << name;
         //
         bool ok = test();
-        if( ok )
-        {   std::cout << "OK" << std::endl;
+        if (ok) {
+            std::cout << "OK" << std::endl;
             n_ok_++;
-        }
-        else
-        {   std::cout << "Error" << std::endl;
+        } else {
+            std::cout << "Error" << std::endl;
             n_error_++;
         }
         return ok;
     }
     /// nuber of tests that passed
-    size_t n_ok(void) const
-    {   return n_ok_; }
+    size_t n_ok(void) const { return n_ok_; }
     /// nuber of tests that failed
-    size_t n_error(void) const
-    {   return n_error_; }
+    size_t n_error(void) const { return n_error_; }
     /// summary
-    bool summary(bool memory_ok )
-    {
-        std::cout.width( int(width_) );
-        std::cout.setf( std::ios_base::left );
+    bool summary(bool memory_ok) {
+        std::cout.width(int(width_));
+        std::cout.setf(std::ios_base::left);
         std::cout << "memory_leak";
         //
-        if( memory_ok  )
-        {   std::cout << "OK" << std::endl;
+        if (memory_ok) {
+            std::cout << "OK" << std::endl;
             n_ok_++;
-        }
-        else
-        {   std::cout << "Error" << std::endl;
+        } else {
+            std::cout << "Error" << std::endl;
             n_error_++;
         }
-        if( n_error_ == 0 )
+        if (n_error_ == 0)
             std::cout << "All " << n_ok_ << " tests passed." << std::endl;
         else
             std::cout << n_error_ << " tests failed." << std::endl;
@@ -167,6 +156,6 @@ public:
     }
 };
 
-} // END_CPPAD_NAMESPACE
+}  // namespace CppAD
 
-# endif
+#endif

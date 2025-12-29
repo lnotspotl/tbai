@@ -27,12 +27,9 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************/
 
-#include <gtest/gtest.h>
-
 #include "ocs2_ipm/IpmSolver.h"
-
+#include <gtest/gtest.h>
 #include <ocs2_core/initialization/DefaultInitializer.h>
-
 #include <ocs2_oc/synchronized_module/ReferenceManager.h>
 #include <ocs2_oc/test/testProblemsGeneration.h>
 
@@ -40,122 +37,122 @@ namespace ocs2 {
 namespace {
 
 std::pair<PrimalSolution, std::vector<PerformanceIndex>> solveWithFeedbackSetting(
-    bool feedback, bool emptyConstraint, const VectorFunctionLinearApproximation& dynamicsMatrices,
-    const ScalarFunctionQuadraticApproximation& costMatrices) {
-  int n = dynamicsMatrices.dfdu.rows();
-  int m = dynamicsMatrices.dfdu.cols();
+    bool feedback, bool emptyConstraint, const VectorFunctionLinearApproximation &dynamicsMatrices,
+    const ScalarFunctionQuadraticApproximation &costMatrices) {
+    int n = dynamicsMatrices.dfdu.rows();
+    int m = dynamicsMatrices.dfdu.cols();
 
-  ocs2::OptimalControlProblem problem;
+    ocs2::OptimalControlProblem problem;
 
-  // System
-  problem.dynamicsPtr = getOcs2Dynamics(dynamicsMatrices);
+    // System
+    problem.dynamicsPtr = getOcs2Dynamics(dynamicsMatrices);
 
-  // Cost
-  problem.costPtr->add("intermediateCost", ocs2::getOcs2Cost(costMatrices));
-  problem.finalCostPtr->add("finalCost", ocs2::getOcs2StateCost(costMatrices));
+    // Cost
+    problem.costPtr->add("intermediateCost", ocs2::getOcs2Cost(costMatrices));
+    problem.finalCostPtr->add("finalCost", ocs2::getOcs2StateCost(costMatrices));
 
-  // Reference Managaer
-  ocs2::TargetTrajectories targetTrajectories({0.0}, {ocs2::vector_t::Ones(n)}, {ocs2::vector_t::Ones(m)});
-  auto referenceManagerPtr = std::make_shared<ReferenceManager>(targetTrajectories);
+    // Reference Managaer
+    ocs2::TargetTrajectories targetTrajectories({0.0}, {ocs2::vector_t::Ones(n)}, {ocs2::vector_t::Ones(m)});
+    auto referenceManagerPtr = std::make_shared<ReferenceManager>(targetTrajectories);
 
-  problem.targetTrajectoriesPtr = &referenceManagerPtr->getTargetTrajectories();
+    problem.targetTrajectoriesPtr = &referenceManagerPtr->getTargetTrajectories();
 
-  if (emptyConstraint) {
-    problem.equalityConstraintPtr->add("intermediateCost", ocs2::getOcs2Constraints(getRandomConstraints(n, m, 0)));
-  }
+    if (emptyConstraint) {
+        problem.equalityConstraintPtr->add("intermediateCost", ocs2::getOcs2Constraints(getRandomConstraints(n, m, 0)));
+    }
 
-  ocs2::DefaultInitializer zeroInitializer(m);
+    ocs2::DefaultInitializer zeroInitializer(m);
 
-  // Solver settings
-  ocs2::ipm::Settings settings;
-  settings.dt = 0.05;
-  settings.ipmIteration = 10;
-  settings.useFeedbackPolicy = feedback;
-  settings.printSolverStatistics = true;
-  settings.printSolverStatus = true;
-  settings.printLinesearch = true;
-  settings.nThreads = 100;
+    // Solver settings
+    ocs2::ipm::Settings settings;
+    settings.dt = 0.05;
+    settings.ipmIteration = 10;
+    settings.useFeedbackPolicy = feedback;
+    settings.printSolverStatistics = true;
+    settings.printSolverStatus = true;
+    settings.printLinesearch = true;
+    settings.nThreads = 100;
 
-  // Additional problem definitions
-  const ocs2::scalar_t startTime = 0.0;
-  const ocs2::scalar_t finalTime = 1.0;
-  const ocs2::vector_t initState = ocs2::vector_t::Ones(n);
+    // Additional problem definitions
+    const ocs2::scalar_t startTime = 0.0;
+    const ocs2::scalar_t finalTime = 1.0;
+    const ocs2::vector_t initState = ocs2::vector_t::Ones(n);
 
-  // Construct solver
-  ocs2::IpmSolver solver(settings, problem, zeroInitializer);
-  solver.setReferenceManager(referenceManagerPtr);
+    // Construct solver
+    ocs2::IpmSolver solver(settings, problem, zeroInitializer);
+    solver.setReferenceManager(referenceManagerPtr);
 
-  // Solve
-  solver.run(startTime, initState, finalTime);
-  return {solver.primalSolution(finalTime), solver.getIterationsLog()};
+    // Solve
+    solver.run(startTime, initState, finalTime);
+    return {solver.primalSolution(finalTime), solver.getIterationsLog()};
 }
 
 }  // namespace
 }  // namespace ocs2
 
 TEST(test_unconstrained, withFeedback) {
-  int n = 3;
-  int m = 2;
-  const double tol = 1e-9;
-  const auto dynamics = ocs2::getRandomDynamics(n, m);
-  const auto costs = ocs2::getRandomCost(n, m);
-  const auto solWithEmptyConstraint = ocs2::solveWithFeedbackSetting(true, true, dynamics, costs);
-  const auto solWithNullConstraint = ocs2::solveWithFeedbackSetting(true, false, dynamics, costs);
+    int n = 3;
+    int m = 2;
+    const double tol = 1e-9;
+    const auto dynamics = ocs2::getRandomDynamics(n, m);
+    const auto costs = ocs2::getRandomCost(n, m);
+    const auto solWithEmptyConstraint = ocs2::solveWithFeedbackSetting(true, true, dynamics, costs);
+    const auto solWithNullConstraint = ocs2::solveWithFeedbackSetting(true, false, dynamics, costs);
 
-  /*
-   * Assert performance
-   * - Contains 2 performance indices, 1 for the initialization, 1 for the iteration.
-   * - Linear dynamics should be satisfied after the step.
-   */
-  ASSERT_LE(solWithEmptyConstraint.second.size(), 2);
-  ASSERT_LE(solWithNullConstraint.second.size(), 2);
-  ASSERT_LT(solWithEmptyConstraint.second.back().dynamicsViolationSSE, tol);
-  ASSERT_LT(solWithNullConstraint.second.back().dynamicsViolationSSE, tol);
+    /*
+     * Assert performance
+     * - Contains 2 performance indices, 1 for the initialization, 1 for the iteration.
+     * - Linear dynamics should be satisfied after the step.
+     */
+    ASSERT_LE(solWithEmptyConstraint.second.size(), 2);
+    ASSERT_LE(solWithNullConstraint.second.size(), 2);
+    ASSERT_LT(solWithEmptyConstraint.second.back().dynamicsViolationSSE, tol);
+    ASSERT_LT(solWithNullConstraint.second.back().dynamicsViolationSSE, tol);
 
-  // Compare
-  const auto& withEmptyConstraint = solWithEmptyConstraint.first;
-  const auto& withNullConstraint = solWithNullConstraint.first;
-  for (int i = 0; i < withEmptyConstraint.timeTrajectory_.size(); i++) {
-    ASSERT_DOUBLE_EQ(withEmptyConstraint.timeTrajectory_[i], withNullConstraint.timeTrajectory_[i]);
-    ASSERT_TRUE(withEmptyConstraint.stateTrajectory_[i].isApprox(withNullConstraint.stateTrajectory_[i], tol));
-    ASSERT_TRUE(withEmptyConstraint.inputTrajectory_[i].isApprox(withNullConstraint.inputTrajectory_[i], tol));
-    const auto t = withEmptyConstraint.timeTrajectory_[i];
-    const auto& x = withEmptyConstraint.stateTrajectory_[i];
-    ASSERT_TRUE(
-        withEmptyConstraint.controllerPtr_->computeInput(t, x).isApprox(withNullConstraint.controllerPtr_->computeInput(t, x), tol));
-  }
+    // Compare
+    const auto &withEmptyConstraint = solWithEmptyConstraint.first;
+    const auto &withNullConstraint = solWithNullConstraint.first;
+    for (int i = 0; i < withEmptyConstraint.timeTrajectory_.size(); i++) {
+        ASSERT_DOUBLE_EQ(withEmptyConstraint.timeTrajectory_[i], withNullConstraint.timeTrajectory_[i]);
+        ASSERT_TRUE(withEmptyConstraint.stateTrajectory_[i].isApprox(withNullConstraint.stateTrajectory_[i], tol));
+        ASSERT_TRUE(withEmptyConstraint.inputTrajectory_[i].isApprox(withNullConstraint.inputTrajectory_[i], tol));
+        const auto t = withEmptyConstraint.timeTrajectory_[i];
+        const auto &x = withEmptyConstraint.stateTrajectory_[i];
+        ASSERT_TRUE(withEmptyConstraint.controllerPtr_->computeInput(t, x).isApprox(
+            withNullConstraint.controllerPtr_->computeInput(t, x), tol));
+    }
 }
 
 TEST(test_unconstrained, noFeedback) {
-  int n = 3;
-  int m = 2;
-  const double tol = 1e-9;
-  const auto dynamics = ocs2::getRandomDynamics(n, m);
-  const auto costs = ocs2::getRandomCost(n, m);
-  const auto solWithEmptyConstraint = ocs2::solveWithFeedbackSetting(false, true, dynamics, costs);
-  const auto solWithNullConstraint = ocs2::solveWithFeedbackSetting(false, false, dynamics, costs);
+    int n = 3;
+    int m = 2;
+    const double tol = 1e-9;
+    const auto dynamics = ocs2::getRandomDynamics(n, m);
+    const auto costs = ocs2::getRandomCost(n, m);
+    const auto solWithEmptyConstraint = ocs2::solveWithFeedbackSetting(false, true, dynamics, costs);
+    const auto solWithNullConstraint = ocs2::solveWithFeedbackSetting(false, false, dynamics, costs);
 
-  /*
-   * Assert performance
-   * - Contains 2 performance indices, 1 for the initialization, 1 for the iteration.
-   * - Linear dynamics should be satisfied after the step.
-   */
-  ASSERT_LE(solWithEmptyConstraint.second.size(), 2);
-  ASSERT_LE(solWithNullConstraint.second.size(), 2);
-  ASSERT_LT(solWithEmptyConstraint.second.back().dynamicsViolationSSE, tol);
-  ASSERT_LT(solWithNullConstraint.second.back().dynamicsViolationSSE, tol);
+    /*
+     * Assert performance
+     * - Contains 2 performance indices, 1 for the initialization, 1 for the iteration.
+     * - Linear dynamics should be satisfied after the step.
+     */
+    ASSERT_LE(solWithEmptyConstraint.second.size(), 2);
+    ASSERT_LE(solWithNullConstraint.second.size(), 2);
+    ASSERT_LT(solWithEmptyConstraint.second.back().dynamicsViolationSSE, tol);
+    ASSERT_LT(solWithNullConstraint.second.back().dynamicsViolationSSE, tol);
 
-  // Compare
-  const auto& withEmptyConstraint = solWithEmptyConstraint.first;
-  const auto& withNullConstraint = solWithNullConstraint.first;
-  for (int i = 0; i < withEmptyConstraint.timeTrajectory_.size(); i++) {
-    ASSERT_DOUBLE_EQ(withEmptyConstraint.timeTrajectory_[i], withNullConstraint.timeTrajectory_[i]);
-    ASSERT_TRUE(withEmptyConstraint.stateTrajectory_[i].isApprox(withNullConstraint.stateTrajectory_[i], tol));
-    ASSERT_TRUE(withEmptyConstraint.inputTrajectory_[i].isApprox(withNullConstraint.inputTrajectory_[i], tol));
+    // Compare
+    const auto &withEmptyConstraint = solWithEmptyConstraint.first;
+    const auto &withNullConstraint = solWithNullConstraint.first;
+    for (int i = 0; i < withEmptyConstraint.timeTrajectory_.size(); i++) {
+        ASSERT_DOUBLE_EQ(withEmptyConstraint.timeTrajectory_[i], withNullConstraint.timeTrajectory_[i]);
+        ASSERT_TRUE(withEmptyConstraint.stateTrajectory_[i].isApprox(withNullConstraint.stateTrajectory_[i], tol));
+        ASSERT_TRUE(withEmptyConstraint.inputTrajectory_[i].isApprox(withNullConstraint.inputTrajectory_[i], tol));
 
-    const auto t = withEmptyConstraint.timeTrajectory_[i];
-    const auto& x = withEmptyConstraint.stateTrajectory_[i];
-    ASSERT_TRUE(
-        withEmptyConstraint.controllerPtr_->computeInput(t, x).isApprox(withNullConstraint.controllerPtr_->computeInput(t, x), tol));
-  }
+        const auto t = withEmptyConstraint.timeTrajectory_[i];
+        const auto &x = withEmptyConstraint.stateTrajectory_[i];
+        ASSERT_TRUE(withEmptyConstraint.controllerPtr_->computeInput(t, x).isApprox(
+            withNullConstraint.controllerPtr_->computeInput(t, x), tol));
+    }
 }

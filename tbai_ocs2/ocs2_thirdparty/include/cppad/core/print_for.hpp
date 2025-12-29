@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_PRINT_FOR_HPP
-# define CPPAD_CORE_PRINT_FOR_HPP
+#ifndef CPPAD_CORE_PRINT_FOR_HPP
+#define CPPAD_CORE_PRINT_FOR_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -130,90 +130,76 @@ $end
 ------------------------------------------------------------------------------
 */
 
-# include <cstring>
+#include <cstring>
 
 namespace CppAD {
-    template <class Base>
-    void PrintFor(const AD<Base>& pos,
-        const char *before, const AD<Base>& var, const char* after)
-    {   CPPAD_ASSERT_NARG_NRES(local::PriOp, 5, 0);
+template <class Base>
+void PrintFor(const AD<Base> &pos, const char *before, const AD<Base> &var, const char *after) {
+    CPPAD_ASSERT_NARG_NRES(local::PriOp, 5, 0);
 
-        // check for case where we are not recording operations
-        local::ADTape<Base>* tape = AD<Base>::tape_ptr();
-        if( tape == CPPAD_NULL )
-            return;
+    // check for case where we are not recording operations
+    local::ADTape<Base> *tape = AD<Base>::tape_ptr();
+    if (tape == CPPAD_NULL) return;
 
-        CPPAD_ASSERT_KNOWN(
-            std::strlen(before) <= 1000 ,
-            "PrintFor: length of before is greater than 1000 characters"
-        );
-        CPPAD_ASSERT_KNOWN(
-            std::strlen(after) <= 1000 ,
-            "PrintFor: length of after is greater than 1000 characters"
-        );
-        addr_t arg0, arg1, arg2, arg3, arg4;
+    CPPAD_ASSERT_KNOWN(std::strlen(before) <= 1000, "PrintFor: length of before is greater than 1000 characters");
+    CPPAD_ASSERT_KNOWN(std::strlen(after) <= 1000, "PrintFor: length of after is greater than 1000 characters");
+    addr_t arg0, arg1, arg2, arg3, arg4;
 
-        // arg[0] = base 2 representation of the value [Var(pos), Var(var)]
-        arg0 = 0;
+    // arg[0] = base 2 representation of the value [Var(pos), Var(var)]
+    arg0 = 0;
 
-        // arg[1] = address for pos
-        if( Parameter(pos) )
-            arg1  = tape->Rec_.put_con_par(pos.value_);
-        else
-        {   arg0 += 1;
-            arg1  = pos.taddr_;
-        }
-
-        // arg[2] = address of before
-        arg2 = tape->Rec_.PutTxt(before);
-
-        // arg[3] = address for var
-        if( Parameter(var) )
-            arg3  = tape->Rec_.put_con_par(var.value_);
-        else
-        {   arg0 += 2;
-            arg3  = var.taddr_;
-        }
-
-        // arg[4] = address of after
-        arg4 = tape->Rec_.PutTxt(after);
-
-        // put the operator in the tape
-        tape->Rec_.PutArg(arg0, arg1, arg2, arg3, arg4);
-        tape->Rec_.PutOp(local::PriOp);
+    // arg[1] = address for pos
+    if (Parameter(pos))
+        arg1 = tape->Rec_.put_con_par(pos.value_);
+    else {
+        arg0 += 1;
+        arg1 = pos.taddr_;
     }
-    // Fold all other cases into the case above
-    template <class Base>
-    void PrintFor(const char* before, const AD<Base>& var)
-    {   PrintFor(AD<Base>(0), before, var, "" ); }
-    //
-    template <class Base>
-    void PrintFor(const char* before, const VecAD_reference<Base>& var)
-    {   PrintFor(AD<Base>(0), before, var.ADBase(), "" ); }
-    //
-    template <class Base>
-    void PrintFor(
-        const VecAD_reference<Base>& pos    ,
-        const char                  *before ,
-        const VecAD_reference<Base>& var    ,
-        const char                  *after  )
-    {   PrintFor(pos.ADBase(), before, var.ADBase(), after); }
-    //
-    template <class Base>
-    void PrintFor(
-        const VecAD_reference<Base>& pos    ,
-        const char                  *before ,
-        const AD<Base>&              var    ,
-        const char                  *after  )
-    {   PrintFor(pos.ADBase(), before, var, after); }
-    //
-    template <class Base>
-    void PrintFor(
-        const AD<Base>&              pos    ,
-        const char                  *before ,
-        const VecAD_reference<Base>& var    ,
-        const char                  *after  )
-    {   PrintFor(pos, before, var.ADBase(), after); }
-}
 
-# endif
+    // arg[2] = address of before
+    arg2 = tape->Rec_.PutTxt(before);
+
+    // arg[3] = address for var
+    if (Parameter(var))
+        arg3 = tape->Rec_.put_con_par(var.value_);
+    else {
+        arg0 += 2;
+        arg3 = var.taddr_;
+    }
+
+    // arg[4] = address of after
+    arg4 = tape->Rec_.PutTxt(after);
+
+    // put the operator in the tape
+    tape->Rec_.PutArg(arg0, arg1, arg2, arg3, arg4);
+    tape->Rec_.PutOp(local::PriOp);
+}
+// Fold all other cases into the case above
+template <class Base>
+void PrintFor(const char *before, const AD<Base> &var) {
+    PrintFor(AD<Base>(0), before, var, "");
+}
+//
+template <class Base>
+void PrintFor(const char *before, const VecAD_reference<Base> &var) {
+    PrintFor(AD<Base>(0), before, var.ADBase(), "");
+}
+//
+template <class Base>
+void PrintFor(const VecAD_reference<Base> &pos, const char *before, const VecAD_reference<Base> &var,
+              const char *after) {
+    PrintFor(pos.ADBase(), before, var.ADBase(), after);
+}
+//
+template <class Base>
+void PrintFor(const VecAD_reference<Base> &pos, const char *before, const AD<Base> &var, const char *after) {
+    PrintFor(pos.ADBase(), before, var, after);
+}
+//
+template <class Base>
+void PrintFor(const AD<Base> &pos, const char *before, const VecAD_reference<Base> &var, const char *after) {
+    PrintFor(pos, before, var.ADBase(), after);
+}
+}  // namespace CppAD
+
+#endif

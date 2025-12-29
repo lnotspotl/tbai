@@ -53,5 +53,5 @@ vector_t SqpSolver::solveSqp(const Task &weightedTasks, const Task &constraints,
     return solution;
 }
 
-}  // namespace wbc
+}  // namespace mpc
 }  // namespace tbai

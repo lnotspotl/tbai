@@ -31,19 +31,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace ocs2 {
 
-PrimalSolution loopshapingToSystemPrimalSolution(const PrimalSolution& primalSolution, const LoopshapingDefinition& loopshapingDefinition) {
-  PrimalSolution systemPrimalSolution;
-  systemPrimalSolution.controllerPtr_ = nullptr;
-  systemPrimalSolution.timeTrajectory_ = primalSolution.timeTrajectory_;
-  systemPrimalSolution.modeSchedule_ = primalSolution.modeSchedule_;
-  systemPrimalSolution.stateTrajectory_.reserve(primalSolution.stateTrajectory_.size());
-  systemPrimalSolution.inputTrajectory_.reserve(primalSolution.inputTrajectory_.size());
-  for (size_t k = 0; k < primalSolution.stateTrajectory_.size(); ++k) {
-    systemPrimalSolution.stateTrajectory_.push_back(loopshapingDefinition.getSystemState(primalSolution.stateTrajectory_[k]));
-    systemPrimalSolution.inputTrajectory_.push_back(
-        loopshapingDefinition.getSystemInput(primalSolution.stateTrajectory_[k], primalSolution.inputTrajectory_[k]));
-  }
-  return systemPrimalSolution;
+PrimalSolution loopshapingToSystemPrimalSolution(const PrimalSolution &primalSolution,
+                                                 const LoopshapingDefinition &loopshapingDefinition) {
+    PrimalSolution systemPrimalSolution;
+    systemPrimalSolution.controllerPtr_ = nullptr;
+    systemPrimalSolution.timeTrajectory_ = primalSolution.timeTrajectory_;
+    systemPrimalSolution.modeSchedule_ = primalSolution.modeSchedule_;
+    systemPrimalSolution.stateTrajectory_.reserve(primalSolution.stateTrajectory_.size());
+    systemPrimalSolution.inputTrajectory_.reserve(primalSolution.inputTrajectory_.size());
+    for (size_t k = 0; k < primalSolution.stateTrajectory_.size(); ++k) {
+        systemPrimalSolution.stateTrajectory_.push_back(
+            loopshapingDefinition.getSystemState(primalSolution.stateTrajectory_[k]));
+        systemPrimalSolution.inputTrajectory_.push_back(loopshapingDefinition.getSystemInput(
+            primalSolution.stateTrajectory_[k], primalSolution.inputTrajectory_[k]));
+    }
+    return systemPrimalSolution;
 }
 
 }  // namespace ocs2

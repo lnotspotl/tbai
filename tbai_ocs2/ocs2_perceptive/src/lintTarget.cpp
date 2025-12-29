@@ -29,14 +29,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <ocs2_perceptive/distance_transform/ComputeDistanceTransform.h>
 #include <ocs2_perceptive/distance_transform/DistanceTransformInterface.h>
-
 #include <ocs2_perceptive/end_effector/EndEffectorDistanceConstraint.h>
 #include <ocs2_perceptive/end_effector/EndEffectorDistanceConstraintCppAd.h>
-
 #include <ocs2_perceptive/interpolation/BilinearInterpolation.h>
 #include <ocs2_perceptive/interpolation/TrilinearInterpolation.h>
 
 // dummy target for clang toolchain
 int main() {
-  return 0;
+    return 0;
 }

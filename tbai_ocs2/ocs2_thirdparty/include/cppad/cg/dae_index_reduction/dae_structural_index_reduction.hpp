@@ -15,8 +15,8 @@
  * Author: Joao Leal
  */
 
-#include <cppad/cg/dae_index_reduction/dae_index_reduction.hpp>
 #include <cppad/cg/dae_index_reduction/bipartite_graph.hpp>
+#include <cppad/cg/dae_index_reduction/dae_index_reduction.hpp>
 
 namespace CppAD {
 namespace cg {
@@ -25,16 +25,17 @@ namespace cg {
  * Base class for algorithms that perform automatic
  * structural index reduction of implicit DAEs using graphs.
  */
-template<class Base>
+template <class Base>
 class DaeStructuralIndexReduction : public DaeIndexReduction<Base> {
-protected:
+   protected:
     using CGBase = CppAD::cg::CG<Base>;
     using ADCG = CppAD::AD<CGBase>;
-protected:
+
+   protected:
     //
     BipartiteGraph<Base> graph_;
-public:
 
+   public:
     /**
      * Creates a new algorithm for structural index reduction of DAE systems.
      *
@@ -43,41 +44,29 @@ public:
      *                as in the tape)
      * @param eqName Equation names (it can be an empty vector)
      */
-    DaeStructuralIndexReduction(ADFun<CG<Base>>& fun,
-                                const std::vector<DaeVarInfo>& varInfo,
-                                const std::vector<std::string>& eqName) :
-            DaeIndexReduction<Base>(fun),
-            graph_(fun, varInfo, eqName, *this) {
-    }
+    DaeStructuralIndexReduction(ADFun<CG<Base>> &fun, const std::vector<DaeVarInfo> &varInfo,
+                                const std::vector<std::string> &eqName)
+        : DaeIndexReduction<Base>(fun), graph_(fun, varInfo, eqName, *this) {}
 
-    inline virtual ~DaeStructuralIndexReduction() {
-    }
+    inline virtual ~DaeStructuralIndexReduction() {}
 
-    inline BipartiteGraph<Base>& getGraph() {
-        return graph_;
-    }
+    inline BipartiteGraph<Base> &getGraph() { return graph_; }
 
-    inline const BipartiteGraph<Base>& getGraph() const {
-        return graph_;
-    }
+    inline const BipartiteGraph<Base> &getGraph() const { return graph_; }
 
     /**
      * Defines whether or not original names saved by using
      * CppAD::PrintFor(0, "", val, name)
      * should be kept by also adding PrintFor operations in the reduced model.
      */
-    inline void setPreserveNames(bool p) {
-        graph_.setPreserveNames(p);
-    }
+    inline void setPreserveNames(bool p) { graph_.setPreserveNames(p); }
 
     /**
      * Whether or not original names saved by using
      * CppAD::PrintFor(0, "", val, name)
      * should be kept by also adding PrintFor operations in the reduced model.
      */
-    inline bool isPreserveNames() const {
-        return graph_.isPreserveNames();
-    }
+    inline bool isPreserveNames() const { return graph_.isPreserveNames(); }
 
     /**
      * Provides the structural index which is typically a good approximation of
@@ -87,13 +76,10 @@ public:
      * @return the DAE structural index.
      * @throws CGException
      */
-    inline size_t getStructuralIndex() const {
-        return graph_.getStructuralIndex();
-    }
+    inline size_t getStructuralIndex() const { return graph_.getStructuralIndex(); }
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
-#endif	
-
+#endif

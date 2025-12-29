@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_IDENTICAL_HPP
-# define CPPAD_CORE_IDENTICAL_HPP
+#ifndef CPPAD_CORE_IDENTICAL_HPP
+#define CPPAD_CORE_IDENTICAL_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -12,9 +12,9 @@ in the Eclipse Public License, Version 2.0 are satisfied:
       GNU General Public License, Version 2.0 or later.
 ---------------------------------------------------------------------------- */
 
-# include <cppad/local/define.hpp>
+#include <cppad/local/define.hpp>
 
-namespace CppAD { // BEGIN_CPPAD_NAMESPACE
+namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
 /*!
 \file identical.hpp
 Check if certain properties is true for any possible AD tape play back.
@@ -40,8 +40,9 @@ values that we are checking for identically a pamameter.
 returns true iff x is identically a parameter.
 */
 template <class Base>
-bool IdenticalCon(const AD<Base> &x)
-{   return Constant(x) & IdenticalCon(x.value_); }
+bool IdenticalCon(const AD<Base> &x) {
+    return Constant(x) & IdenticalCon(x.value_);
+}
 // Zero ==============================================================
 /*!
 Determine if an AD<Base> is equal to zero,
@@ -55,8 +56,9 @@ returns true if and only if
  x is equals zero and is identically a parameter \ref CppAD::IdenticalCon.
 */
 template <class Base>
-bool IdenticalZero(const AD<Base> &x)
-{   return Constant(x) & IdenticalZero(x.value_); }
+bool IdenticalZero(const AD<Base> &x) {
+    return Constant(x) & IdenticalZero(x.value_);
+}
 // One ==============================================================
 /*!
 Determine if an AD<Base> is equal to one,
@@ -70,8 +72,9 @@ returns true if and only if
  x is equals one and is identically a parameter \ref CppAD::IdenticalCon.
 */
 template <class Base>
-bool IdenticalOne(const AD<Base> &x)
-{   return Constant(x) & IdenticalOne(x.value_); }
+bool IdenticalOne(const AD<Base> &x) {
+    return Constant(x) & IdenticalOne(x.value_);
+}
 // Equal ===================================================================
 /*!
 Determine if two AD<Base> objects are equal,
@@ -88,13 +91,12 @@ returns true if and only if
 the arguments are equal and both identically parameters \ref CppAD::IdenticalCon.
 */
 template <class Base>
-bool IdenticalEqualCon
-(const AD<Base> &x, const AD<Base> &y)
-{   bool constant;
-    constant  = Constant(x) & Constant(y);
-    return constant  & IdenticalEqualCon(x.value_, y.value_);
+bool IdenticalEqualCon(const AD<Base> &x, const AD<Base> &y) {
+    bool constant;
+    constant = Constant(x) & Constant(y);
+    return constant & IdenticalEqualCon(x.value_, y.value_);
 }
 // ==========================================================================
 
-} // END_CPPAD_NAMESPACE
-# endif
+}  // namespace CppAD
+#endif

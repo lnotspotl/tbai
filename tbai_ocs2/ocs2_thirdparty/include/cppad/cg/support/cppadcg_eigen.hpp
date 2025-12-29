@@ -15,8 +15,8 @@
  * Author: Joao Leal
  */
 
-# include <cppad/cg.hpp>
-# include <Eigen/Dense>
+#include <Eigen/Dense>
+#include <cppad/cg.hpp>
 
 /**
  * Enable Use of Eigen Linear Algebra Package with CppADCodeGen
@@ -28,12 +28,12 @@ namespace Eigen {
  * This is required so that the type CG<Base> works properly with eigen.
  * See Eigen/src/Core/NumTraits.h
  */
-template<typename Base>
+template <typename Base>
 struct NumTraits<CppAD::cg::CG<Base> > {
     // the real part of an CG<Base> value
-    using Real = CppAD::cg::CG<Base> ;
+    using Real = CppAD::cg::CG<Base>;
     // type for CG<Base> operations producing non-integer values
-    using NonInteger = CppAD::cg::CG<Base> ;
+    using NonInteger = CppAD::cg::CG<Base>;
     // type for nested value inside an CG<Base> expression tree
     using Nested = CppAD::cg::CG<Base>;
     // type for numeric literals such as "2" or "0.5"
@@ -41,26 +41,24 @@ struct NumTraits<CppAD::cg::CG<Base> > {
 
     enum {
         // does not support complex Base types
-        IsComplex             = 0 ,
+        IsComplex = 0,
         // does not support integer Base types
-        IsInteger             = 0 ,
+        IsInteger = 0,
         // only support signed Base types
-        IsSigned              = 1 ,
+        IsSigned = 1,
         // must initialize an CG<Base> object
-        RequireInitialization = 1 ,
+        RequireInitialization = 1,
         // computational cost of the corresponding operations
-        ReadCost              = 1 ,
-        AddCost               = 2 ,
-        MulCost               = 2
+        ReadCost = 1,
+        AddCost = 2,
+        MulCost = 2
     };
 
     /**
      * machine epsilon with type of real part of x
      * (use assumption that Base is not complex)
      */
-    static CppAD::cg::CG<Base>  epsilon() {
-        return CppAD::numeric_limits<CppAD::cg::CG<Base> >::epsilon();
-    }
+    static CppAD::cg::CG<Base> epsilon() { return CppAD::numeric_limits<CppAD::cg::CG<Base> >::epsilon(); }
 
     /**
      * relaxed version of machine epsilon for comparison of different
@@ -73,24 +71,17 @@ struct NumTraits<CppAD::cg::CG<Base> > {
     /**
      * minimum normalized positive value
      */
-    static CppAD::cg::CG<Base> lowest() {
-        return CppAD::numeric_limits<CppAD::cg::CG<Base> >::min();
-    }
+    static CppAD::cg::CG<Base> lowest() { return CppAD::numeric_limits<CppAD::cg::CG<Base> >::min(); }
 
     /**
      * maximum finite value
      */
-    static CppAD::cg::CG<Base> highest() {
-        return CppAD::numeric_limits<CppAD::cg::CG<Base> >::max();
-    }
+    static CppAD::cg::CG<Base> highest() { return CppAD::numeric_limits<CppAD::cg::CG<Base> >::max(); }
 
     /**
      * the number of decimal digits that can be represented without change
      */
-    static int digits10() {
-        return CppAD::numeric_limits<CppAD::cg::CG<Base> >::digits10;
-    }
-
+    static int digits10() { return CppAD::numeric_limits<CppAD::cg::CG<Base> >::digits10; }
 };
 
 /**
@@ -112,102 +103,90 @@ struct NumTraits<CppAD::AD<CppAD::cg::CG<Base> > > {
 
     enum {
         // does not support complex Base types
-        IsComplex             = 0 ,
+        IsComplex = 0,
         // does not support integer Base types
-        IsInteger             = 0 ,
+        IsInteger = 0,
         // only support signed Base types
-        IsSigned              = 1 ,
+        IsSigned = 1,
         // must initialize an AD<CGBase> object
-        RequireInitialization = 1 ,
+        RequireInitialization = 1,
         // computational cost of the corresponding operations
-        ReadCost              = 1 ,
-        AddCost               = 2 ,
-        MulCost               = 2
+        ReadCost = 1,
+        AddCost = 2,
+        MulCost = 2
     };
 
     /**
      * machine epsilon with type of real part of x
      * (use assumption that Base is not complex)
      */
-    static CppAD::AD<CGBase>  epsilon() {
-        return CppAD::numeric_limits<CppAD::AD<CGBase> >::epsilon();
-    }
+    static CppAD::AD<CGBase> epsilon() { return CppAD::numeric_limits<CppAD::AD<CGBase> >::epsilon(); }
 
     /**
      * relaxed version of machine epsilon for comparison of different
      * operations that should result in the same value*
      */
-    static CppAD::AD<CGBase> dummy_precision() {
-        return 100. * CppAD::numeric_limits<CppAD::AD<CGBase> >::epsilon();
-    }
+    static CppAD::AD<CGBase> dummy_precision() { return 100. * CppAD::numeric_limits<CppAD::AD<CGBase> >::epsilon(); }
 
     /**
      * minimum normalized positive value
      */
-    static CppAD::AD<CGBase> lowest() {
-        return CppAD::numeric_limits<CppAD::AD<CGBase> >::min();
-    }
+    static CppAD::AD<CGBase> lowest() { return CppAD::numeric_limits<CppAD::AD<CGBase> >::min(); }
 
     /**
      * maximum finite value
      */
-    static CppAD::AD<CGBase> highest() {
-        return CppAD::numeric_limits<CppAD::AD<CGBase> >::max();
-    }
+    static CppAD::AD<CGBase> highest() { return CppAD::numeric_limits<CppAD::AD<CGBase> >::max(); }
 
     /**
      * the number of decimal digits that can be represented without change
      */
-    static int digits10() {
-        return CppAD::numeric_limits<CGBase>::digits10;
-    }
-
+    static int digits10() { return CppAD::numeric_limits<CGBase>::digits10; }
 };
 
-#if EIGEN_VERSION_AT_LEAST(3,2,93)
+#if EIGEN_VERSION_AT_LEAST(3, 2, 93)
 
 /**
  * Determines that the given binary operation of two numeric types involving
  * an AD<CG<Base> > is allowed and what the scalar return type is
  */
-template<typename Base, typename BinOp>
+template <typename Base, typename BinOp>
 struct ScalarBinaryOpTraits<CppAD::AD<CppAD::cg::CG<Base> >, Base, BinOp> {
     using ReturnType = CppAD::AD<CppAD::cg::CG<Base> >;
 };
 
-template<typename Base, typename BinOp>
+template <typename Base, typename BinOp>
 struct ScalarBinaryOpTraits<Base, CppAD::AD<CppAD::cg::CG<Base> >, BinOp> {
     using ReturnType = CppAD::AD<CppAD::cg::CG<Base> >;
 };
 
-template<typename Base, typename BinOp>
+template <typename Base, typename BinOp>
 struct ScalarBinaryOpTraits<CppAD::AD<CppAD::cg::CG<Base> >, CppAD::cg::CG<Base>, BinOp> {
     using ReturnType = CppAD::AD<CppAD::cg::CG<Base> >;
 };
 
-template<typename Base, typename BinOp>
+template <typename Base, typename BinOp>
 struct ScalarBinaryOpTraits<CppAD::cg::CG<Base>, CppAD::AD<CppAD::cg::CG<Base> >, BinOp> {
     using ReturnType = CppAD::AD<CppAD::cg::CG<Base> >;
 };
-
 
 /**
  * Determines that the given binary operation of two numeric types involving
  * an CG<Base> is allowed and what the scalar return type is
  */
-template<typename Base, typename BinOp>
+template <typename Base, typename BinOp>
 struct ScalarBinaryOpTraits<CppAD::cg::CG<Base>, Base, BinOp> {
     using ReturnType = CppAD::cg::CG<Base>;
 };
 
-template<typename Base, typename BinOp>
+template <typename Base, typename BinOp>
 struct ScalarBinaryOpTraits<Base, CppAD::cg::CG<Base>, BinOp> {
     using ReturnType = CppAD::cg::CG<Base>;
 };
 
-#endif // #ifdef EIGEN_VERSION_AT_LEAST(3,2,93)
+#endif  // #ifdef EIGEN_VERSION_AT_LEAST(3,2,93)
 
-} // namespace Eigen
+}  // namespace Eigen
 
 namespace CppAD {
 namespace cg {
@@ -218,23 +197,23 @@ namespace cg {
 
 // functions that return references
 template <class Base>
-const CppAD::AD<CppAD::cg::CG<Base> >& conj(const CppAD::AD<CppAD::cg::CG<Base> >& x) {
+const CppAD::AD<CppAD::cg::CG<Base> > &conj(const CppAD::AD<CppAD::cg::CG<Base> > &x) {
     return x;
 }
 
 template <class Base>
-const CppAD::AD<CppAD::cg::CG<Base> >& real(const CppAD::AD<CppAD::cg::CG<Base> >& x) {
+const CppAD::AD<CppAD::cg::CG<Base> > &real(const CppAD::AD<CppAD::cg::CG<Base> > &x) {
     return x;
 }
 
 // functions that return values (note abs is defined by cppadcg.hpp)
 template <class Base>
-CppAD::AD<CppAD::cg::CG<Base> > imag(const CppAD::AD<CppAD::cg::CG<Base> >& x) {
+CppAD::AD<CppAD::cg::CG<Base> > imag(const CppAD::AD<CppAD::cg::CG<Base> > &x) {
     return CppAD::AD<CppAD::cg::CG<Base> >(0.);
 }
 
 template <class Base>
-CppAD::AD<CppAD::cg::CG<Base> > abs2(const CppAD::AD<CppAD::cg::CG<Base> >& x) {
+CppAD::AD<CppAD::cg::CG<Base> > abs2(const CppAD::AD<CppAD::cg::CG<Base> > &x) {
     return x * x;
 }
 
@@ -244,27 +223,27 @@ CppAD::AD<CppAD::cg::CG<Base> > abs2(const CppAD::AD<CppAD::cg::CG<Base> >& x) {
 
 // functions that return references
 template <class Base>
-const CppAD::cg::CG<Base>& conj(const CppAD::cg::CG<Base>& x) {
+const CppAD::cg::CG<Base> &conj(const CppAD::cg::CG<Base> &x) {
     return x;
 }
 
 template <class Base>
-const CppAD::cg::CG<Base>& real(const CppAD::cg::CG<Base>& x) {
+const CppAD::cg::CG<Base> &real(const CppAD::cg::CG<Base> &x) {
     return x;
 }
 
 // functions that return values (note abs is defined by cppadcg.hpp)
 template <class Base>
-CppAD::cg::CG<Base> imag(const CppAD::cg::CG<Base>& x) {
+CppAD::cg::CG<Base> imag(const CppAD::cg::CG<Base> &x) {
     return CppAD::cg::CG<Base>(0.);
 }
 
 template <class Base>
-CppAD::cg::CG<Base> abs2(const CppAD::cg::CG<Base>& x) {
+CppAD::cg::CG<Base> abs2(const CppAD::cg::CG<Base> &x) {
     return x * x;
 }
 
-}
-}
+}  // namespace cg
+}  // namespace CppAD
 
-# endif
+#endif

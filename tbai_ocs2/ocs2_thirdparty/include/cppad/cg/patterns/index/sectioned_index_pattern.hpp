@@ -23,49 +23,41 @@ namespace cg {
  * Several linear patterns
  */
 class SectionedIndexPattern : public IndexPattern {
-protected:
+   protected:
     /**
      * maps the start of the linear section (first x) to the linear pattern
      */
-    std::map<size_t, IndexPattern*> sections_;
-public:
+    std::map<size_t, IndexPattern *> sections_;
 
-    inline SectionedIndexPattern(const std::map<size_t, IndexPattern*>& sections) :
-        sections_(sections) {
-    }
+   public:
+    inline SectionedIndexPattern(const std::map<size_t, IndexPattern *> &sections) : sections_(sections) {}
 
-    inline const std::map<size_t, IndexPattern*>& getLinearSections() const {
-        return sections_;
-    }
+    inline const std::map<size_t, IndexPattern *> &getLinearSections() const { return sections_; }
 
-    inline IndexPatternType getType() const override {
-        return IndexPatternType::Sectioned;
-    }
+    inline IndexPatternType getType() const override { return IndexPatternType::Sectioned; }
 
-    inline void getSubIndexes(std::set<IndexPattern*>& indexes) const override {
-        for (const auto& it : sections_) {
+    inline void getSubIndexes(std::set<IndexPattern *> &indexes) const override {
+        for (const auto &it : sections_) {
             indexes.insert(it.second);
             it.second->getSubIndexes(indexes);
         }
     }
 
-    inline virtual ~SectionedIndexPattern() {
-        deleteIndexPatterns(sections_);
-    }
+    inline virtual ~SectionedIndexPattern() { deleteIndexPatterns(sections_); }
 
     /***********************************************************************
      *                        static methods
      **********************************************************************/
 
-    template<class VectorSizeT>
-    static inline std::map<size_t, IndexPattern*> detectLinearSections(const VectorSizeT& indexes,
-                                                                       size_t maxCount = 0) {
+    template <class VectorSizeT>
+    static inline std::map<size_t, IndexPattern *> detectLinearSections(const VectorSizeT &indexes,
+                                                                        size_t maxCount = 0) {
         CPPADCG_ASSERT_UNKNOWN(indexes.size() > 0);
 
         long dx = 1;
         long xOffset = 0;
 
-        LinearIndexPattern* prevPattern = nullptr;
+        LinearIndexPattern *prevPattern = nullptr;
         size_t prevXStart = 0;
 
         SmartMapValuePointer<size_t, IndexPattern> linearSections;
@@ -89,8 +81,8 @@ public:
                 }
             }
 
-            LinearIndexPattern* p = new LinearIndexPattern(xOffset, dy, dx, b);
-            if (dy == 0 && prevPattern != nullptr) { // constant
+            LinearIndexPattern *p = new LinearIndexPattern(xOffset, dy, dx, b);
+            if (dy == 0 && prevPattern != nullptr) {  // constant
                 // can we take the last element out of the previous section?
                 while (xStart > 0 && prevPattern->evaluate(xStart - 1) == b) {
                     // yes
@@ -111,20 +103,20 @@ public:
 
             if (linearSections.size() == maxCount && xStart != indexes.size()) {
                 // over the limit -> stop
-                return std::map<size_t, IndexPattern*>(); // empty
+                return std::map<size_t, IndexPattern *>();  // empty
             }
         }
 
         return linearSections.release();
     }
 
-    static inline std::map<size_t, IndexPattern*> detectLinearSections(const std::map<size_t, size_t>& x2y,
-                                                                       size_t maxCount = 0) {
+    static inline std::map<size_t, IndexPattern *> detectLinearSections(const std::map<size_t, size_t> &x2y,
+                                                                        size_t maxCount = 0) {
         using c_iter = std::map<size_t, size_t>::const_iterator;
 
         SmartMapValuePointer<size_t, IndexPattern> linearSections;
 
-        LinearIndexPattern* prevPattern = nullptr;
+        LinearIndexPattern *prevPattern = nullptr;
         c_iter prevStart = x2y.begin();
 
         c_iter pStart = x2y.begin();
@@ -168,16 +160,15 @@ public:
                 }
             }
 
-            LinearIndexPattern* p = new LinearIndexPattern(xOffset, dy, dx, b);
+            LinearIndexPattern *p = new LinearIndexPattern(xOffset, dy, dx, b);
             size_t xStart = pStart->first;
-            if (dy == 0 && prevPattern != nullptr) { // constant
+            if (dy == 0 && prevPattern != nullptr) {  // constant
                 // can we take the last element from the previous section?
 
                 while (pStart != x2y.begin()) {
                     c_iter prevBack = pStart;
-                    --prevBack; // the values at the end of the previous section
-                    if (prevPattern->evaluate(prevBack->first) != b)
-                        break; // no
+                    --prevBack;  // the values at the end of the previous section
+                    if (prevPattern->evaluate(prevBack->first) != b) break;  // no
 
                     // yes
                     --pStart;
@@ -200,24 +191,23 @@ public:
 
             if (linearSections.size() == maxCount && pStart != x2y.end()) {
                 // over the limit -> stop
-                return std::map<size_t, IndexPattern*>(); // empty
+                return std::map<size_t, IndexPattern *>();  // empty
             }
         }
 
         return linearSections.release();
     }
 
-private:
-
-    static inline void deleteIndexPatterns(std::map<size_t, IndexPattern*>& sections) {
-        for (const auto& it : sections) {
+   private:
+    static inline void deleteIndexPatterns(std::map<size_t, IndexPattern *> &sections) {
+        for (const auto &it : sections) {
             delete it.second;
         }
         sections.clear();
     }
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

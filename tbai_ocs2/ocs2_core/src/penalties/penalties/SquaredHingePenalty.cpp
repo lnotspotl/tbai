@@ -35,34 +35,34 @@ namespace ocs2 {
 /******************************************************************************************************/
 /******************************************************************************************************/
 scalar_t SquaredHingePenalty::getValue(scalar_t t, scalar_t h) const {
-  if (h < config_.delta) {
-    const scalar_t delta_h = h - config_.delta;
-    return config_.mu * 0.5 * delta_h * delta_h;
-  } else {
-    return 0;
-  }
+    if (h < config_.delta) {
+        const scalar_t delta_h = h - config_.delta;
+        return config_.mu * 0.5 * delta_h * delta_h;
+    } else {
+        return 0;
+    }
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
 scalar_t SquaredHingePenalty::getDerivative(scalar_t t, scalar_t h) const {
-  if (h < config_.delta) {
-    return config_.mu * (h - config_.delta);
-  } else {
-    return 0;
-  }
+    if (h < config_.delta) {
+        return config_.mu * (h - config_.delta);
+    } else {
+        return 0;
+    }
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
 scalar_t SquaredHingePenalty::getSecondDerivative(scalar_t t, scalar_t h) const {
-  if (h < config_.delta) {
-    return config_.mu;
-  } else {
-    return 0;
-  }
+    if (h < config_.delta) {
+        return config_.mu;
+    } else {
+        return 0;
+    }
 }
 
 }  // namespace ocs2

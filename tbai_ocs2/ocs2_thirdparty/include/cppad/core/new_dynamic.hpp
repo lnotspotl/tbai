@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_NEW_DYNAMIC_HPP
-# define CPPAD_CORE_NEW_DYNAMIC_HPP
+#ifndef CPPAD_CORE_NEW_DYNAMIC_HPP
+#define CPPAD_CORE_NEW_DYNAMIC_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -83,9 +83,9 @@ contains an example and test of this operation.
 
 $end
 */
-# include <cppad/local/sweep/dynamic.hpp>
+#include <cppad/local/sweep/dynamic.hpp>
 
-namespace CppAD { // BEGIN_CPPAD_NAMESPACE
+namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
 /*!
 \file new_dynamic.hpp
 User interface to ADFun dynamic_parameter member function.
@@ -99,34 +99,25 @@ is the vector of new values for the dynamic parameters.
 */
 template <class Base, class RecBase>
 template <class BaseVector>
-void ADFun<Base,RecBase>::new_dynamic(const BaseVector& dynamic)
-{   using local::pod_vector;
-    CPPAD_ASSERT_KNOWN(
-        size_t( dynamic.size() ) == play_.num_dynamic_ind() ,
-        "f.new_dynamic: dynamic.size() different from corresponding "
-        "call to Independent"
-    );
+void ADFun<Base, RecBase>::new_dynamic(const BaseVector &dynamic) {
+    using local::pod_vector;
+    CPPAD_ASSERT_KNOWN(size_t(dynamic.size()) == play_.num_dynamic_ind(),
+                       "f.new_dynamic: dynamic.size() different from corresponding "
+                       "call to Independent");
     // check BaseVector is Simple Vector class with Base elements
     CheckSimpleVector<Base, BaseVector>();
 
     // retrieve player information about the dynamic parameters
-    local::pod_vector_maybe<Base>&     all_par_vec( play_.all_par_vec() );
-    const pod_vector<bool>&            dyn_par_is ( play_.dyn_par_is()  );
-    const pod_vector<local::opcode_t>& dyn_par_op ( play_.dyn_par_op()  );
-    const pod_vector<addr_t>&          dyn_par_arg( play_.dyn_par_arg() );
-    const pod_vector<addr_t>&     dyn_ind2par_ind ( play_.dyn_ind2par_ind() );
+    local::pod_vector_maybe<Base> &all_par_vec(play_.all_par_vec());
+    const pod_vector<bool> &dyn_par_is(play_.dyn_par_is());
+    const pod_vector<local::opcode_t> &dyn_par_op(play_.dyn_par_op());
+    const pod_vector<addr_t> &dyn_par_arg(play_.dyn_par_arg());
+    const pod_vector<addr_t> &dyn_ind2par_ind(play_.dyn_ind2par_ind());
 
     // set the dependent dynamic parameters
     RecBase not_used_rec_base;
-    local::sweep::dynamic(
-        all_par_vec         ,
-        dynamic             ,
-        dyn_par_is          ,
-        dyn_ind2par_ind     ,
-        dyn_par_op          ,
-        dyn_par_arg         ,
-        not_used_rec_base
-    );
+    local::sweep::dynamic(all_par_vec, dynamic, dyn_par_is, dyn_ind2par_ind, dyn_par_op, dyn_par_arg,
+                          not_used_rec_base);
 
     // the existing Taylor coefficients are no longer valid
     num_order_taylor_ = 0;
@@ -134,6 +125,5 @@ void ADFun<Base,RecBase>::new_dynamic(const BaseVector& dynamic)
     return;
 }
 
-
-} // END_CPPAD_NAMESPACE
-# endif
+}  // namespace CppAD
+#endif

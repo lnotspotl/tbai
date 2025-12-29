@@ -26,35 +26,29 @@ namespace cg {
  */
 template <class Base>
 class CGAtomicGenericModel : public atomic_base<Base> {
-protected:
-    GenericModel<Base>& model_;
-public:
+   protected:
+    GenericModel<Base> &model_;
 
+   public:
     /**
      * Creates a new atomic function wrapper that is responsible for
      * calling the appropriate methods of the compiled model.
      *
      * @param model The compiled model.
      */
-    CGAtomicGenericModel(GenericModel<Base>& model) :
-        atomic_base<Base>(model.getName()),
-        model_(model) {
+    CGAtomicGenericModel(GenericModel<Base> &model) : atomic_base<Base>(model.getName()), model_(model) {
         this->option(CppAD::atomic_base<Base>::set_sparsity_enum);
     }
 
     virtual ~CGAtomicGenericModel() = default;
 
     template <class ADVector>
-    void operator()(const ADVector& ax, ADVector& ay, size_t id = 0) {
+    void operator()(const ADVector &ax, ADVector &ay, size_t id = 0) {
         this->atomic_base<Base>::operator()(ax, ay, id);
     }
 
-    bool forward(size_t q,
-                 size_t p,
-                 const CppAD::vector<bool>& vx,
-                 CppAD::vector<bool>& vy,
-                 const CppAD::vector<Base>& tx,
-                 CppAD::vector<Base>& ty) override {
+    bool forward(size_t q, size_t p, const CppAD::vector<bool> &vx, CppAD::vector<bool> &vy,
+                 const CppAD::vector<Base> &tx, CppAD::vector<Base> &ty) override {
         if (p == 0) {
             model_.ForwardZero(vx, vy, tx, ty);
             return true;
@@ -66,11 +60,8 @@ public:
         return false;
     }
 
-    bool reverse(size_t p,
-                 const CppAD::vector<Base>& tx,
-                 const CppAD::vector<Base>& ty,
-                 CppAD::vector<Base>& px,
-                 const CppAD::vector<Base>& py) override {
+    bool reverse(size_t p, const CppAD::vector<Base> &tx, const CppAD::vector<Base> &ty, CppAD::vector<Base> &px,
+                 const CppAD::vector<Base> &py) override {
         if (p == 0) {
             model_.ReverseOne(tx, ty, px, py);
             return true;
@@ -82,16 +73,13 @@ public:
         return false;
     }
 
-    bool for_sparse_jac(size_t q,
-                        const CppAD::vector<std::set<size_t> >& r,
-                        CppAD::vector<std::set<size_t> >& s,
-                        const CppAD::vector<Base>& x) override {
+    bool for_sparse_jac(size_t q, const CppAD::vector<std::set<size_t> > &r, CppAD::vector<std::set<size_t> > &s,
+                        const CppAD::vector<Base> &x) override {
         return for_sparse_jac(q, r, s);
     }
 
-    bool for_sparse_jac(size_t q,
-                        const CppAD::vector<std::set<size_t> >& r,
-                        CppAD::vector<std::set<size_t> >& s) override {
+    bool for_sparse_jac(size_t q, const CppAD::vector<std::set<size_t> > &r,
+                        CppAD::vector<std::set<size_t> > &s) override {
         size_t n = model_.Domain();
         size_t m = model_.Range();
         for (size_t i = 0; i < m; i++) {
@@ -106,16 +94,13 @@ public:
         return true;
     }
 
-    bool rev_sparse_jac(size_t q,
-                        const CppAD::vector<std::set<size_t> >& rT,
-                        CppAD::vector<std::set<size_t> >& sT,
-                        const CppAD::vector<Base>& x) override {
+    bool rev_sparse_jac(size_t q, const CppAD::vector<std::set<size_t> > &rT, CppAD::vector<std::set<size_t> > &sT,
+                        const CppAD::vector<Base> &x) override {
         return rev_sparse_jac(q, rT, sT);
     }
 
-    bool rev_sparse_jac(size_t q,
-                        const CppAD::vector<std::set<size_t> >& rT,
-                        CppAD::vector<std::set<size_t> >& sT) override {
+    bool rev_sparse_jac(size_t q, const CppAD::vector<std::set<size_t> > &rT,
+                        CppAD::vector<std::set<size_t> > &sT) override {
         size_t n = model_.Domain();
         size_t m = model_.Range();
         for (size_t i = 0; i < n; i++) {
@@ -130,24 +115,15 @@ public:
         return true;
     }
 
-    bool rev_sparse_hes(const CppAD::vector<bool>& vx,
-                        const CppAD::vector<bool>& s,
-                        CppAD::vector<bool>& t,
-                        size_t q,
-                        const CppAD::vector<std::set<size_t> >& r,
-                        const CppAD::vector<std::set<size_t> >& u,
-                        CppAD::vector<std::set<size_t> >& v,
-                        const CppAD::vector<Base>& x) override {
+    bool rev_sparse_hes(const CppAD::vector<bool> &vx, const CppAD::vector<bool> &s, CppAD::vector<bool> &t, size_t q,
+                        const CppAD::vector<std::set<size_t> > &r, const CppAD::vector<std::set<size_t> > &u,
+                        CppAD::vector<std::set<size_t> > &v, const CppAD::vector<Base> &x) override {
         return rev_sparse_hes(vx, s, t, q, r, u, v);
     }
 
-    bool rev_sparse_hes(const CppAD::vector<bool>& vx,
-                        const CppAD::vector<bool>& s,
-                        CppAD::vector<bool>& t,
-                        size_t q,
-                        const CppAD::vector<std::set<size_t> >& r,
-                        const CppAD::vector<std::set<size_t> >& u,
-                        CppAD::vector<std::set<size_t> >& v) override {
+    bool rev_sparse_hes(const CppAD::vector<bool> &vx, const CppAD::vector<bool> &s, CppAD::vector<bool> &t, size_t q,
+                        const CppAD::vector<std::set<size_t> > &r, const CppAD::vector<std::set<size_t> > &u,
+                        CppAD::vector<std::set<size_t> > &v) override {
         size_t n = model_.Domain();
         size_t m = model_.Range();
 
@@ -174,17 +150,17 @@ public:
 
         if (allSelected) {
             // TODO: use reverseTwo sparsity instead of the HessianSparsity (they can be different!!!)
-            std::vector<std::set<size_t> > sparsitySF2R = model_.HessianSparsitySet(); // f''(x)
+            std::vector<std::set<size_t> > sparsitySF2R = model_.HessianSparsitySet();  // f''(x)
             sparsitySF2R.resize(n);
-            CppAD::cg::multMatrixMatrixSparsity(sparsitySF2R, r, v, n, n, q); // f''(x) * R
+            CppAD::cg::multMatrixMatrixSparsity(sparsitySF2R, r, v, n, n, q);  // f''(x) * R
         } else {
             std::vector<std::set<size_t> > sparsitySF2R(n);
             for (size_t i = 0; i < m; i++) {
                 if (s[i]) {
-                    CppAD::cg::addMatrixSparsity(model_.HessianSparsitySet(i), sparsitySF2R); // f''_i(x)
+                    CppAD::cg::addMatrixSparsity(model_.HessianSparsitySet(i), sparsitySF2R);  // f''_i(x)
                 }
             }
-            CppAD::cg::multMatrixMatrixSparsity(sparsitySF2R, r, v, n, n, q); // f''(x) * R
+            CppAD::cg::multMatrixMatrixSparsity(sparsitySF2R, r, v, n, n, q);  // f''(x) * R
         }
 
         /**
@@ -200,10 +176,9 @@ public:
 
         return true;
     }
-
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

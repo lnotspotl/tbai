@@ -18,30 +18,22 @@
 namespace CppAD {
 namespace cg {
 
-template<class Base>
+template <class Base>
 class GenericModelExternalFunctionWrapper : public ExternalFunctionWrapper<Base> {
-private:
-    GenericModel<Base>* model_;
-public:
+   private:
+    GenericModel<Base> *model_;
 
-    inline GenericModelExternalFunctionWrapper(GenericModel<Base>& model) :
-        model_(&model) {
-    }
+   public:
+    inline GenericModelExternalFunctionWrapper(GenericModel<Base> &model) : model_(&model) {}
 
-    inline virtual ~GenericModelExternalFunctionWrapper() {
-    }
+    inline virtual ~GenericModelExternalFunctionWrapper() {}
 
-    virtual bool forward(FunctorGenericModel<Base>& libModel,
-                         int q,
-                         int p,
-                         const Array tx[],
-                         Array& ty) {
+    virtual bool forward(FunctorGenericModel<Base> &libModel, int q, int p, const Array tx[], Array &ty) {
         CPPADCG_ASSERT_KNOWN(!tx[0].sparse, "independent array must be dense");
-        ArrayView<const Base> x(static_cast<const Base*> (tx[0].data), tx[0].size);
+        ArrayView<const Base> x(static_cast<const Base *>(tx[0].data), tx[0].size);
 
         CPPADCG_ASSERT_KNOWN(!ty.sparse, "dependent array must be dense");
-        ArrayView<Base> y(static_cast<Base*> (ty.data), ty.size);
-
+        ArrayView<Base> y(static_cast<Base *>(ty.data), ty.size);
 
         if (p == 0) {
             model_->ForwardZero(x, y);
@@ -49,58 +41,46 @@ public:
 
         } else if (p == 1) {
             CPPADCG_ASSERT_KNOWN(tx[1].sparse, "independent Taylor array must be sparse");
-            Base* tx1 = static_cast<Base*> (tx[1].data);
+            Base *tx1 = static_cast<Base *>(tx[1].data);
 
-            model_->ForwardOne(x,
-                               tx[1].nnz, tx[1].idx, tx1,
-                               y);
+            model_->ForwardOne(x, tx[1].nnz, tx[1].idx, tx1, y);
             return true;
         }
 
         return false;
     }
 
-    virtual bool reverse(FunctorGenericModel<Base>& libModel,
-                         int p,
-                         const Array tx[],
-                         Array& px,
-                         const Array py[]) {
+    virtual bool reverse(FunctorGenericModel<Base> &libModel, int p, const Array tx[], Array &px, const Array py[]) {
         CPPADCG_ASSERT_KNOWN(!tx[0].sparse, "independent array must be dense");
-        ArrayView<const Base> x(static_cast<const Base*> (tx[0].data), tx[0].size);
+        ArrayView<const Base> x(static_cast<const Base *>(tx[0].data), tx[0].size);
 
         CPPADCG_ASSERT_KNOWN(!px.sparse, "independent partials array must be dense");
-        ArrayView<Base> pxb(static_cast<Base*> (px.data), px.size);
+        ArrayView<Base> pxb(static_cast<Base *>(px.data), px.size);
 
         if (p == 0) {
             CPPADCG_ASSERT_KNOWN(py[0].sparse, "dependent partials array must be sparse");
-            Base* pyb = static_cast<Base*> (py[0].data);
+            Base *pyb = static_cast<Base *>(py[0].data);
 
-            model_->ReverseOne(x,
-                               pxb,
-                               py[0].nnz, py[0].idx, pyb);
+            model_->ReverseOne(x, pxb, py[0].nnz, py[0].idx, pyb);
             return true;
 
         } else if (p == 1) {
             CPPADCG_ASSERT_KNOWN(tx[1].sparse, "independent array must be sparse");
-            const Base* tx1 = static_cast<const Base*> (tx[1].data);
+            const Base *tx1 = static_cast<const Base *>(tx[1].data);
             CPPADCG_ASSERT_KNOWN(py[0].sparse, "dependent partials array must be sparse");
             CPPADCG_ASSERT_KNOWN(py[0].nnz == 0, "first order dependent partials must be zero");
             CPPADCG_ASSERT_KNOWN(!py[1].sparse, "independent partials array must be dense");
-            ArrayView<const Base> py2(static_cast<Base*> (py[1].data), py[1].size);
+            ArrayView<const Base> py2(static_cast<Base *>(py[1].data), py[1].size);
 
-            model_->ReverseTwo(x,
-                               tx[1].nnz, tx[1].idx, tx1,
-                               pxb,
-                               py2);
+            model_->ReverseTwo(x, tx[1].nnz, tx[1].idx, tx1, pxb, py2);
             return true;
         }
 
         return false;
     }
-
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

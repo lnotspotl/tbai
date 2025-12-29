@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_ATOMIC_THREE_REV_DEPEND_HPP
-# define CPPAD_CORE_ATOMIC_THREE_REV_DEPEND_HPP
+#ifndef CPPAD_CORE_ATOMIC_THREE_REV_DEPEND_HPP
+#define CPPAD_CORE_ATOMIC_THREE_REV_DEPEND_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -90,7 +90,7 @@ $end
 -----------------------------------------------------------------------------
 */
 
-namespace CppAD { // BEGIN_CPPAD_NAMESPACE
+namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
 /*!
 \file atomic/three_rev_depend.hpp
 Third generation atomic type computation.
@@ -113,14 +113,13 @@ specifies which components of y affect values of interest.
 */
 // BEGIN_PROTOTYPE
 template <class Base>
-bool atomic_three<Base>::rev_depend(
-    const vector<Base>&         parameter_x ,
-    const vector<ad_type_enum>& type_x      ,
-    vector<bool>&               depend_x    ,
-    const vector<bool>&         depend_y    )
+bool atomic_three<Base>::rev_depend(const vector<Base> &parameter_x, const vector<ad_type_enum> &type_x,
+                                    vector<bool> &depend_x, const vector<bool> &depend_y)
 // END_PROTOTYPE
-{   return false; }
+{
+    return false;
+}
 
-} // END_CPPAD_NAMESPACE
+}  // namespace CppAD
 
-# endif
+#endif

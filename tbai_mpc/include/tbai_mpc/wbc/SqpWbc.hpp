@@ -3,11 +3,11 @@
 #include <string>
 #include <vector>
 
+#include <ocs2_core/Types.h>
+#include <tbai_core/control/Controllers.hpp>
+#include <tbai_mpc/quadruped_mpc/core/SwitchedModel.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_models/QuadrupedCom.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_models/QuadrupedKinematics.h>
-#include <ocs2_core/Types.h>
-#include <tbai_mpc/quadruped_mpc/core/SwitchedModel.h>
-#include <tbai_core/control/Controllers.hpp>
 #include <tbai_mpc/wbc/SqpSolver.hpp>
 #include <tbai_mpc/wbc/WbcBase.hpp>
 
@@ -49,5 +49,5 @@ class SqpWbc : public WbcBase {
     std::vector<std::string> jointNames_;
 };
 
-}  // namespace wbc
+}  // namespace mpc
 }  // namespace tbai

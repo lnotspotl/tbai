@@ -33,7 +33,7 @@ class MpcController : public tbai::Controller {
      * @param stateSubscriberPtr: State subscriber for getting robot state
      * @param velocityGeneratorPtr: Reference velocity generator
      */
-    MpcController(const std::shared_ptr<tbai::StateSubscriber>& stateSubscriberPtr,
+    MpcController(const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
                   std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> velocityGeneratorPtr);
 
     virtual ~MpcController() = default;
@@ -42,9 +42,9 @@ class MpcController : public tbai::Controller {
 
     std::string getName() const override { return "MpcController"; }
 
-    void changeController(const std::string& controllerType, scalar_t currentTime) override;
+    void changeController(const std::string &controllerType, scalar_t currentTime) override;
 
-    bool isSupported(const std::string& controllerType) override;
+    bool isSupported(const std::string &controllerType) override;
 
     void stopController() override { stopReferenceThread(); }
 
@@ -65,7 +65,6 @@ class MpcController : public tbai::Controller {
      */
     virtual std::unique_ptr<ocs2::MRT_BASE> createMrtInterface();
 
-    
     /**
      * Factory method to create the MPC interface.
      * Default implementation creates MPC_BASE (direct MPC).
@@ -85,9 +84,9 @@ class MpcController : public tbai::Controller {
      * @param trajdt: Reference trajectory timestep
      * @param trajKnots: Number of reference trajectory knots
      */
-    void initialize(const std::string& urdfString, const std::string& taskSettingsFile,
-                    const std::string& frameDeclarationFile, const std::string& controllerConfigFile,
-                    const std::string& targetCommandFile, scalar_t trajdt = 0.1, size_t trajKnots = 20);
+    void initialize(const std::string &urdfString, const std::string &taskSettingsFile,
+                    const std::string &frameDeclarationFile, const std::string &controllerConfigFile,
+                    const std::string &targetCommandFile, scalar_t trajdt = 0.1, size_t trajKnots = 20);
 
     void resetMpc();
     void setObservation();

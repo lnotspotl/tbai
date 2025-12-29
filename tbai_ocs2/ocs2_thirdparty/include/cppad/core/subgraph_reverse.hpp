@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_SUBGRAPH_REVERSE_HPP
-# define CPPAD_CORE_SUBGRAPH_REVERSE_HPP
+#ifndef CPPAD_CORE_SUBGRAPH_REVERSE_HPP
+#define CPPAD_CORE_SUBGRAPH_REVERSE_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -154,7 +154,7 @@ contains an example and test of this operation.
 
 $end
 */
-namespace CppAD { // BEGIN_CPPAD_NAMESPACE
+namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
 /*!
 \file subgraph_reverse.hpp
 Compute derivatvies using reverse mode and subgraphs.
@@ -162,8 +162,8 @@ Compute derivatvies using reverse mode and subgraphs.
 
 /// clear all subgraph information
 template <class Base, class RecBase>
-void ADFun<Base,RecBase>::clear_subgraph(void)
-{   play_.clear_random();
+void ADFun<Base, RecBase>::clear_subgraph(void) {
+    play_.clear_random();
     subgraph_info_.clear();
     subgraph_partial_.clear();
 }
@@ -191,51 +191,41 @@ This vector is initialized to have size Range() and its elements are false.
 
 template <class Base, class RecBase>
 template <class BoolVector>
-void ADFun<Base,RecBase>::subgraph_reverse( const BoolVector& select_domain )
-{   using local::pod_vector;
+void ADFun<Base, RecBase>::subgraph_reverse(const BoolVector &select_domain) {
+    using local::pod_vector;
     //
-    CPPAD_ASSERT_UNKNOWN(
-        dep_taddr_.size() == subgraph_info_.n_dep()
-    );
-    CPPAD_ASSERT_UNKNOWN(
-        size_t( select_domain.size() ) == subgraph_info_.n_ind()
-    );
+    CPPAD_ASSERT_UNKNOWN(dep_taddr_.size() == subgraph_info_.n_dep());
+    CPPAD_ASSERT_UNKNOWN(size_t(select_domain.size()) == subgraph_info_.n_ind());
 
     // map_user_op
-    if( subgraph_info_.map_user_op().size() == 0 )
+    if (subgraph_info_.map_user_op().size() == 0)
         subgraph_info_.set_map_user_op(&play_);
-    else
-    {   CPPAD_ASSERT_UNKNOWN( subgraph_info_.check_map_user_op(&play_) );
+    else {
+        CPPAD_ASSERT_UNKNOWN(subgraph_info_.check_map_user_op(&play_));
     }
-    CPPAD_ASSERT_UNKNOWN(
-        subgraph_info_.map_user_op().size() == play_.num_op_rec()
-    );
+    CPPAD_ASSERT_UNKNOWN(subgraph_info_.map_user_op().size() == play_.num_op_rec());
 
     // initialize for reverse mode subgraph computations
-    switch( play_.address_type() )
-    {
+    switch (play_.address_type()) {
         case local::play::unsigned_short_enum:
-        subgraph_info_.init_rev<unsigned short>(&play_, select_domain);
-        break;
+            subgraph_info_.init_rev<unsigned short>(&play_, select_domain);
+            break;
 
         case local::play::unsigned_int_enum:
-        subgraph_info_.init_rev<unsigned int>(&play_, select_domain);
-        break;
+            subgraph_info_.init_rev<unsigned int>(&play_, select_domain);
+            break;
 
         case local::play::size_t_enum:
-        subgraph_info_.init_rev<size_t>(&play_, select_domain);
-        break;
+            subgraph_info_.init_rev<size_t>(&play_, select_domain);
+            break;
 
         default:
-        CPPAD_ASSERT_UNKNOWN(false);
+            CPPAD_ASSERT_UNKNOWN(false);
     }
-    CPPAD_ASSERT_UNKNOWN(
-        subgraph_info_.in_subgraph().size() == play_.num_op_rec()
-    );
+    CPPAD_ASSERT_UNKNOWN(subgraph_info_.in_subgraph().size() == play_.num_op_rec());
 
     return;
 }
-
 
 /*!
 Use reverse mode to compute derivative of Taylor coefficients on a subgraph.
@@ -291,51 +281,32 @@ the ell-th dependent variable).
 */
 template <class Base, class RecBase>
 template <class Addr, class BaseVector, class SizeVector>
-void ADFun<Base,RecBase>::subgraph_reverse_helper(
-    size_t      q   ,
-    size_t      ell ,
-    SizeVector& col ,
-    BaseVector& dw  )
-{   using local::pod_vector;
+void ADFun<Base, RecBase>::subgraph_reverse_helper(size_t q, size_t ell, SizeVector &col, BaseVector &dw) {
+    using local::pod_vector;
     // used to identify the RecBase type in calls to sweeps
     RecBase not_used_rec_base;
     //
     // get a random iterator for this player
     play_.template setup_random<Addr>();
-    typename local::play::const_random_iterator<Addr> random_itr =
-        play_.template get_random<Addr>();
+    typename local::play::const_random_iterator<Addr> random_itr = play_.template get_random<Addr>();
 
     // check BaseVector is Simple Vector class with Base type elements
     CheckSimpleVector<Base, BaseVector>();
-    CPPAD_ASSERT_KNOWN(
-        q > 0,
-        "The second argument to Reverse must be greater than zero."
-    );
-    CPPAD_ASSERT_KNOWN(
-        num_order_taylor_ >= q,
-        "Less than q Taylor coefficients are currently stored"
-        " in this ADFun object."
-    );
-    CPPAD_ASSERT_KNOWN(
-        num_direction_taylor_ == 1,
-        "reverse mode for Forward(q, r, xq) with more than one direction"
-        "\n(r > 1) is not yet supported."
-    );
-    CPPAD_ASSERT_KNOWN(
-        ell < dep_taddr_.size(),
-        "dependent variable index in to large for this function"
-    );
-    CPPAD_ASSERT_KNOWN(
-        subgraph_info_.process_range()[ell] == false,
-        "This dependent variable index has already been processed\n"
-        "after the previous subgraph_reverse(select_domain)."
-    );
+    CPPAD_ASSERT_KNOWN(q > 0, "The second argument to Reverse must be greater than zero.");
+    CPPAD_ASSERT_KNOWN(num_order_taylor_ >= q,
+                       "Less than q Taylor coefficients are currently stored"
+                       " in this ADFun object.");
+    CPPAD_ASSERT_KNOWN(num_direction_taylor_ == 1,
+                       "reverse mode for Forward(q, r, xq) with more than one direction"
+                       "\n(r > 1) is not yet supported.");
+    CPPAD_ASSERT_KNOWN(ell < dep_taddr_.size(), "dependent variable index in to large for this function");
+    CPPAD_ASSERT_KNOWN(subgraph_info_.process_range()[ell] == false,
+                       "This dependent variable index has already been processed\n"
+                       "after the previous subgraph_reverse(select_domain).");
 
     // subgraph of operators connected to dependent variable ell
     pod_vector<addr_t> subgraph;
-    subgraph_info_.get_rev(
-        random_itr, dep_taddr_, addr_t(ell), subgraph
-    );
+    subgraph_info_.get_rev(random_itr, dep_taddr_, addr_t(ell), subgraph);
 
     // Add all the atomic function call operators
     // for calls that have first operator in the subgraph
@@ -344,12 +315,12 @@ void ADFun<Base,RecBase>::subgraph_reverse_helper(
     // First add the BeginOp and EndOp to the subgraph and then sort it
     // sort the subgraph
     addr_t i_op_begin_op = 0;
-    addr_t i_op_end_op   = addr_t( play_.num_op_rec() - 1);
+    addr_t i_op_end_op = addr_t(play_.num_op_rec() - 1);
     subgraph.push_back(i_op_begin_op);
     subgraph.push_back(i_op_end_op);
-    std::sort( subgraph.data(), subgraph.data() + subgraph.size() );
-    CPPAD_ASSERT_UNKNOWN( subgraph[0] == i_op_begin_op );
-    CPPAD_ASSERT_UNKNOWN( subgraph[subgraph.size()-1] == i_op_end_op );
+    std::sort(subgraph.data(), subgraph.data() + subgraph.size());
+    CPPAD_ASSERT_UNKNOWN(subgraph[0] == i_op_begin_op);
+    CPPAD_ASSERT_UNKNOWN(subgraph[subgraph.size() - 1] == i_op_end_op);
     /*
     // Use this printout for debugging
     std::cout << "{ ";
@@ -364,70 +335,48 @@ void ADFun<Base,RecBase>::subgraph_reverse_helper(
     // initialize subgraph_partial_ matrix to zero on subgraph
     Base zero(0);
     subgraph_partial_.resize(num_var_tape_ * q);
-    for(size_t k = 0; k < subgraph.size(); ++k)
-    {
-        size_t               i_op = size_t( subgraph[k] );
-        local::OpCode        op;
-        const addr_t*        arg;
-        size_t               i_var;
+    for (size_t k = 0; k < subgraph.size(); ++k) {
+        size_t i_op = size_t(subgraph[k]);
+        local::OpCode op;
+        const addr_t *arg;
+        size_t i_var;
         random_itr.op_info(i_op, op, arg, i_var);
-        if( NumRes(op) == 0 )
-        {   CPPAD_ASSERT_UNKNOWN(
-                op == local::AFunOp  ||
-                op == local::FunapOp ||
-                op == local::FunavOp ||
-                op == local::FunrpOp ||
-                op == local::EndOp
-            );
-        }
-        else if( op != local::BeginOp )
-        {   CPPAD_ASSERT_UNKNOWN( i_var >= NumRes(op) );
+        if (NumRes(op) == 0) {
+            CPPAD_ASSERT_UNKNOWN(op == local::AFunOp || op == local::FunapOp || op == local::FunavOp ||
+                                 op == local::FunrpOp || op == local::EndOp);
+        } else if (op != local::BeginOp) {
+            CPPAD_ASSERT_UNKNOWN(i_var >= NumRes(op));
             size_t j_var = i_var + 1 - NumRes(op);
-            for(size_t i = j_var; i <= i_var; ++i)
-            {   for(size_t j = 0; j < q; ++j)
-                    subgraph_partial_[i * q + j] = zero;
+            for (size_t i = j_var; i <= i_var; ++i) {
+                for (size_t j = 0; j < q; ++j) subgraph_partial_[i * q + j] = zero;
             }
         }
     }
 
     // set partial to one for component we are differentiating
-    subgraph_partial_[ dep_taddr_[ell] * q + q - 1] = Base(1);
+    subgraph_partial_[dep_taddr_[ell] * q + q - 1] = Base(1);
 
     // evaluate the derivatives
-    CPPAD_ASSERT_UNKNOWN( cskip_op_.size() == play_.num_op_rec() );
-    CPPAD_ASSERT_UNKNOWN( load_op_.size()  == play_.num_load_op_rec() );
+    CPPAD_ASSERT_UNKNOWN(cskip_op_.size() == play_.num_op_rec());
+    CPPAD_ASSERT_UNKNOWN(load_op_.size() == play_.num_load_op_rec());
     size_t n = Domain();
     //
-    local::play::const_subgraph_iterator<Addr> subgraph_itr =
-        play_.end_subgraph(random_itr, &subgraph);
+    local::play::const_subgraph_iterator<Addr> subgraph_itr = play_.end_subgraph(random_itr, &subgraph);
     //
-    local::sweep::reverse(
-        q - 1,
-        n,
-        num_var_tape_,
-        &play_,
-        cap_order_taylor_,
-        taylor_.data(),
-        q,
-        subgraph_partial_.data(),
-        cskip_op_.data(),
-        load_op_,
-        subgraph_itr,
-        not_used_rec_base
-    );
+    local::sweep::reverse(q - 1, n, num_var_tape_, &play_, cap_order_taylor_, taylor_.data(), q,
+                          subgraph_partial_.data(), cskip_op_.data(), load_op_, subgraph_itr, not_used_rec_base);
 
     // number of non-zero in return value
-    size_t col_size       = 0;
+    size_t col_size = 0;
     size_t subgraph_index = 0;
-    CPPAD_ASSERT_UNKNOWN( subgraph[subgraph_index] == 0 );
+    CPPAD_ASSERT_UNKNOWN(subgraph[subgraph_index] == 0);
     // Skip BeginOp
     ++subgraph_index;
-    while( subgraph_index < subgraph.size() )
-    {   // check for InvOp
-        if( subgraph[subgraph_index] > addr_t(n) )
+    while (subgraph_index < subgraph.size()) {  // check for InvOp
+        if (subgraph[subgraph_index] > addr_t(n))
             subgraph_index = subgraph.size();
-        else
-        {   ++col_size;
+        else {
+            ++col_size;
             ++subgraph_index;
         }
     }
@@ -435,23 +384,21 @@ void ADFun<Base,RecBase>::subgraph_reverse_helper(
 
     // return the derivative values
     dw.resize(n * q);
-    for(size_t c = 0; c < col_size; ++c)
-    {   size_t i_op = size_t( subgraph[c + 1] );
-        CPPAD_ASSERT_UNKNOWN( play_.GetOp(i_op) == local::InvOp );
+    for (size_t c = 0; c < col_size; ++c) {
+        size_t i_op = size_t(subgraph[c + 1]);
+        CPPAD_ASSERT_UNKNOWN(play_.GetOp(i_op) == local::InvOp);
         //
         size_t j = i_op - 1;
-        CPPAD_ASSERT_UNKNOWN( i_op == random_itr.var2op( ind_taddr_[j] ) );
+        CPPAD_ASSERT_UNKNOWN(i_op == random_itr.var2op(ind_taddr_[j]));
         //
         // return paritial for this independent variable
         col[c] = j;
-        for(size_t k = 0; k < q; k++)
-            dw[j * q + k ] = subgraph_partial_[ind_taddr_[j] * q + k];
+        for (size_t k = 0; k < q; k++) dw[j * q + k] = subgraph_partial_[ind_taddr_[j] * q + k];
     }
     //
-    CPPAD_ASSERT_KNOWN( ! ( hasnan(dw) && check_for_nan_ ) ,
-        "f.subgraph_reverse(dw, q, ell): dw has a nan,\n"
-        "but none of f's Taylor coefficents are nan."
-    );
+    CPPAD_ASSERT_KNOWN(!(hasnan(dw) && check_for_nan_),
+                       "f.subgraph_reverse(dw, q, ell): dw has a nan,\n"
+                       "but none of f's Taylor coefficents are nan.");
     //
     return;
 }
@@ -461,34 +408,29 @@ void ADFun<Base,RecBase>::subgraph_reverse_helper(
 */
 template <class Base, class RecBase>
 template <class BaseVector, class SizeVector>
-void ADFun<Base,RecBase>::subgraph_reverse(
-    size_t      q   ,
-    size_t      ell ,
-    SizeVector& col ,
-    BaseVector& dw  )
-{   using local::pod_vector;
+void ADFun<Base, RecBase>::subgraph_reverse(size_t q, size_t ell, SizeVector &col, BaseVector &dw) {
+    using local::pod_vector;
     //
     // call proper version of helper function
-    switch( play_.address_type() )
-    {
+    switch (play_.address_type()) {
         case local::play::unsigned_short_enum:
-        subgraph_reverse_helper<unsigned short>(q, ell, col, dw);
-        break;
+            subgraph_reverse_helper<unsigned short>(q, ell, col, dw);
+            break;
 
         case local::play::unsigned_int_enum:
-        subgraph_reverse_helper<unsigned int>(q, ell, col, dw);
-        break;
+            subgraph_reverse_helper<unsigned int>(q, ell, col, dw);
+            break;
 
         case local::play::size_t_enum:
-        subgraph_reverse_helper<size_t>(q, ell, col, dw);
-        break;
+            subgraph_reverse_helper<size_t>(q, ell, col, dw);
+            break;
 
         default:
-        CPPAD_ASSERT_UNKNOWN(false);
+            CPPAD_ASSERT_UNKNOWN(false);
     }
     //
     return;
 }
 
-} // END_CPPAD_NAMESPACE
-# endif
+}  // namespace CppAD
+#endif

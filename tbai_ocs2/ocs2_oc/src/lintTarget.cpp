@@ -85,5 +85,5 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // dummy target for clang toolchain
 int main() {
-  return 0;
+    return 0;
 }

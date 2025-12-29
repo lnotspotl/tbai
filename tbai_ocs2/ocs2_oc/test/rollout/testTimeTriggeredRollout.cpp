@@ -33,7 +33,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 
 #include <gtest/gtest.h>
-
 #include <ocs2_core/Types.h>
 #include <ocs2_core/control/LinearController.h>
 #include <ocs2_core/dynamics/LinearSystemDynamics.h>
@@ -42,46 +41,47 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace ocs2;
 
 TEST(time_rollout_test, time_rollout_test) {
-  constexpr size_t nx = 2;
-  constexpr size_t nu = 1;
-  const scalar_t initTime = 0.0;
-  const scalar_t finalTime = 10.0;
-  const vector_t initState = vector_t::Zero(nx);
+    constexpr size_t nx = 2;
+    constexpr size_t nu = 1;
+    const scalar_t initTime = 0.0;
+    const scalar_t finalTime = 10.0;
+    const vector_t initState = vector_t::Zero(nx);
 
-  // ModeSchedule
-  ModeSchedule modeSchedule({3.0, 4.0, 4.0}, {0, 1, 2, 3});
+    // ModeSchedule
+    ModeSchedule modeSchedule({3.0, 4.0, 4.0}, {0, 1, 2, 3});
 
-  const matrix_t A = (matrix_t(nx, nx) << -2.0, -1.0, 1.0, 0.0).finished();
-  const matrix_t B = (matrix_t(nx, nu) << 1.0, 0.0).finished();
-  LinearSystemDynamics systemDynamics(A, B);
+    const matrix_t A = (matrix_t(nx, nx) << -2.0, -1.0, 1.0, 0.0).finished();
+    const matrix_t B = (matrix_t(nx, nu) << 1.0, 0.0).finished();
+    LinearSystemDynamics systemDynamics(A, B);
 
-  // controller
-  const scalar_array_t cntTimeStamp{initTime, finalTime};
-  const vector_array_t uff(2, vector_t::Ones(nu));
-  const matrix_array_t k(2, matrix_t::Zero(nu, nx));
-  LinearController controller(cntTimeStamp, uff, k);
+    // controller
+    const scalar_array_t cntTimeStamp{initTime, finalTime};
+    const vector_array_t uff(2, vector_t::Ones(nu));
+    const matrix_array_t k(2, matrix_t::Zero(nu, nx));
+    LinearController controller(cntTimeStamp, uff, k);
 
-  // Rollout Settings
-  const auto rolloutSettings = [&] {
-    rollout::Settings settings;
-    settings.absTolODE = 1e-7;
-    settings.relTolODE = 1e-5;
-    settings.timeStep = 1e-3;
-    settings.maxNumStepsPerSecond = 10000;
-    return settings;
-  }();
+    // Rollout Settings
+    const auto rolloutSettings = [&] {
+        rollout::Settings settings;
+        settings.absTolODE = 1e-7;
+        settings.relTolODE = 1e-5;
+        settings.timeStep = 1e-3;
+        settings.maxNumStepsPerSecond = 10000;
+        return settings;
+    }();
 
-  // rollout class
-  auto rolloutPtr = std::make_unique<TimeTriggeredRollout>(systemDynamics, rolloutSettings);
+    // rollout class
+    auto rolloutPtr = std::make_unique<TimeTriggeredRollout>(systemDynamics, rolloutSettings);
 
-  scalar_array_t timeTrajectory;
-  size_array_t postEventIndices;
-  vector_array_t stateTrajectory;
-  vector_array_t inputTrajectory;
-  rolloutPtr->run(initTime, initState, finalTime, &controller, modeSchedule, timeTrajectory, postEventIndices, stateTrajectory, inputTrajectory);
+    scalar_array_t timeTrajectory;
+    size_array_t postEventIndices;
+    vector_array_t stateTrajectory;
+    vector_array_t inputTrajectory;
+    rolloutPtr->run(initTime, initState, finalTime, &controller, modeSchedule, timeTrajectory, postEventIndices,
+                    stateTrajectory, inputTrajectory);
 
-  // check sizes
-  const auto totalSize = timeTrajectory.size();
-  ASSERT_EQ(totalSize, stateTrajectory.size());
-  ASSERT_EQ(totalSize, inputTrajectory.size());
+    // check sizes
+    const auto totalSize = timeTrajectory.size();
+    ASSERT_EQ(totalSize, stateTrajectory.size());
+    ASSERT_EQ(totalSize, inputTrajectory.size());
 }

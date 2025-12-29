@@ -7,8 +7,8 @@
 #include <ocs2_mpc/SystemObservation.h>
 #include <tbai_mpc/quadruped_mpc/core/SwitchedModel.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_commands/ReferenceExtrapolation.h>
-#include <tbai_mpc/quadruped_mpc/terrain/TerrainPlane.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_models/QuadrupedKinematics.h>
+#include <tbai_mpc/quadruped_mpc/terrain/TerrainPlane.h>
 #include <tbai_mpc/reference/LocalTerrainEstimator.hpp>
 #include <tbai_reference/ReferenceVelocityGenerator.hpp>
 
@@ -34,11 +34,10 @@ class ReferenceTrajectoryGenerator {
      * @param trajdt: Time step for reference trajectory (default: 0.1)
      * @param trajKnots: Number of knots in reference trajectory (default: 20)
      */
-    ReferenceTrajectoryGenerator(const std::string& configFile,
+    ReferenceTrajectoryGenerator(const std::string &configFile,
                                  std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> velocityGeneratorPtr,
                                  std::shared_ptr<switched_model::KinematicsModelBase<ocs2::scalar_t>> kinematicsPtr,
-                                 ocs2::scalar_t trajdt = 0.1,
-                                 size_t trajKnots = 20);
+                                 ocs2::scalar_t trajdt = 0.1, size_t trajKnots = 20);
 
     virtual ~ReferenceTrajectoryGenerator() = default;
 
@@ -49,31 +48,31 @@ class ReferenceTrajectoryGenerator {
      * @return Generated target trajectories
      */
     virtual ocs2::TargetTrajectories generateReferenceTrajectory(ocs2::scalar_t currentTime,
-                                                                  const ocs2::SystemObservation& observation);
+                                                                 const ocs2::SystemObservation &observation);
 
     /**
      * Updates the observation and terrain estimate
      * @param observation: Current system observation
      */
-    void updateObservation(const ocs2::SystemObservation& observation);
+    void updateObservation(const ocs2::SystemObservation &observation);
 
     /**
      * Sets an external terrain plane (bypasses internal estimation)
      * @param plane: The terrain plane to use
      */
-    void setTerrainPlane(const switched_model::TerrainPlane& plane);
+    void setTerrainPlane(const switched_model::TerrainPlane &plane);
 
     /**
      * Gets the current terrain plane
      * @return The current terrain plane
      */
-    const switched_model::TerrainPlane& getTerrainPlane() const;
+    const switched_model::TerrainPlane &getTerrainPlane() const;
 
     /**
      * Gets the latest observation
      * @return The latest observation
      */
-    const ocs2::SystemObservation& getLatestObservation() const { return latestObservation_; }
+    const ocs2::SystemObservation &getLatestObservation() const { return latestObservation_; }
 
     /**
      * Checks if a valid observation has been received
@@ -91,15 +90,15 @@ class ReferenceTrajectoryGenerator {
     BaseReferenceCommand getBaseReferenceCommand(ocs2::scalar_t time) const;
     BaseReferenceState getBaseReferenceState() const;
 
-    void loadSettings(const std::string& configFile);
+    void loadSettings(const std::string &configFile);
 
     std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> velocityGeneratorPtr_;
     LocalTerrainEstimator terrainEstimator_;
 
     ocs2::vector_t defaultJointState_;
     ocs2::scalar_t comHeight_;
-    ocs2::scalar_t trajdt_;   // timestep
-    size_t trajKnots_;        // number of timesteps in reference horizon
+    ocs2::scalar_t trajdt_;  // timestep
+    size_t trajKnots_;       // number of timesteps in reference horizon
 
     ocs2::SystemObservation latestObservation_;
     bool initialized_ = false;

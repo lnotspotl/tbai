@@ -1,5 +1,5 @@
-# ifndef CPPAD_LOCAL_SPARSE_BINARY_OP_HPP
-# define CPPAD_LOCAL_SPARSE_BINARY_OP_HPP
+#ifndef CPPAD_LOCAL_SPARSE_BINARY_OP_HPP
+#define CPPAD_LOCAL_SPARSE_BINARY_OP_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -12,12 +12,12 @@ in the Eclipse Public License, Version 2.0 are satisfied:
       GNU General Public License, Version 2.0 or later.
 ---------------------------------------------------------------------------- */
 
-namespace CppAD { namespace local { // BEGIN_CPPAD_LOCAL_NAMESPACE
+namespace CppAD {
+namespace local {  // BEGIN_CPPAD_LOCAL_NAMESPACE
 /*!
 \file sparse_binary_op.hpp
 Forward and reverse mode sparsity patterns for binary operators.
 */
-
 
 /*!
 Forward mode Jacobian sparsity pattern for all binary operators.
@@ -77,14 +77,10 @@ depends on.
 */
 
 template <class Vector_set>
-void forward_sparse_jacobian_binary_op(
-    size_t            i_z           ,
-    const addr_t*     arg           ,
-    Vector_set&       sparsity      )
-{
+void forward_sparse_jacobian_binary_op(size_t i_z, const addr_t *arg, Vector_set &sparsity) {
     // check assumptions
-    CPPAD_ASSERT_UNKNOWN( size_t(arg[0]) < i_z );
-    CPPAD_ASSERT_UNKNOWN( size_t(arg[1]) < i_z );
+    CPPAD_ASSERT_UNKNOWN(size_t(arg[0]) < i_z);
+    CPPAD_ASSERT_UNKNOWN(size_t(arg[1]) < i_z);
 
     sparsity.binary_union(i_z, size_t(arg[0]), size_t(arg[1]), sparsity);
 
@@ -153,17 +149,13 @@ and on output it corresponds to H.
 \li arg[1] < i_z
 */
 template <class Vector_set>
-void reverse_sparse_jacobian_binary_op(
-    size_t              i_z           ,
-    const addr_t*       arg           ,
-    Vector_set&         sparsity      )
-{
+void reverse_sparse_jacobian_binary_op(size_t i_z, const addr_t *arg, Vector_set &sparsity) {
     // check assumptions
-    CPPAD_ASSERT_UNKNOWN( size_t(arg[0]) < i_z );
-    CPPAD_ASSERT_UNKNOWN( size_t(arg[1]) < i_z );
+    CPPAD_ASSERT_UNKNOWN(size_t(arg[0]) < i_z);
+    CPPAD_ASSERT_UNKNOWN(size_t(arg[1]) < i_z);
 
-    sparsity.binary_union( size_t(arg[0]), size_t(arg[0]), i_z, sparsity);
-    sparsity.binary_union( size_t(arg[1]), size_t(arg[1]), i_z, sparsity);
+    sparsity.binary_union(size_t(arg[0]), size_t(arg[0]), i_z, sparsity);
+    sparsity.binary_union(size_t(arg[1]), size_t(arg[1]), i_z, sparsity);
 
     return;
 }
@@ -180,28 +172,18 @@ where op is + or - and x, y are variables.
 \copydetails CppAD::local::reverse_sparse_hessian_binary_op
 */
 template <class Vector_set>
-void reverse_sparse_hessian_addsub_op(
-    size_t               i_z                ,
-    const addr_t*        arg                ,
-    bool*                jac_reverse        ,
-    const Vector_set&    for_jac_sparsity   ,
-    Vector_set&          rev_hes_sparsity   )
-{
+void reverse_sparse_hessian_addsub_op(size_t i_z, const addr_t *arg, bool *jac_reverse,
+                                      const Vector_set &for_jac_sparsity, Vector_set &rev_hes_sparsity) {
     // check assumptions
-    CPPAD_ASSERT_UNKNOWN( size_t(arg[0]) < i_z );
-    CPPAD_ASSERT_UNKNOWN( size_t(arg[1]) < i_z );
+    CPPAD_ASSERT_UNKNOWN(size_t(arg[0]) < i_z);
+    CPPAD_ASSERT_UNKNOWN(size_t(arg[1]) < i_z);
 
     // check for no effect
-    if( ! jac_reverse[i_z] )
-        return;
+    if (!jac_reverse[i_z]) return;
 
     // propagate hessian sparsity from i_z to arg[0] and arg[1]
-    rev_hes_sparsity.binary_union(
-        size_t(arg[0]), size_t(arg[0]), i_z, rev_hes_sparsity
-    );
-    rev_hes_sparsity.binary_union(
-        size_t(arg[1]), size_t(arg[1]), i_z, rev_hes_sparsity
-    );
+    rev_hes_sparsity.binary_union(size_t(arg[0]), size_t(arg[0]), i_z, rev_hes_sparsity);
+    rev_hes_sparsity.binary_union(size_t(arg[1]), size_t(arg[1]), i_z, rev_hes_sparsity);
 
     jac_reverse[arg[0]] = true;
     jac_reverse[arg[1]] = true;
@@ -221,36 +203,22 @@ where x and y are variables.
 \copydetails CppAD::local::reverse_sparse_hessian_binary_op
 */
 template <class Vector_set>
-void reverse_sparse_hessian_mul_op(
-    size_t               i_z                ,
-    const addr_t*        arg                ,
-    bool*                jac_reverse        ,
-    const Vector_set&    for_jac_sparsity   ,
-    Vector_set&          rev_hes_sparsity   )
-{
+void reverse_sparse_hessian_mul_op(size_t i_z, const addr_t *arg, bool *jac_reverse, const Vector_set &for_jac_sparsity,
+                                   Vector_set &rev_hes_sparsity) {
     // check assumptions
-    CPPAD_ASSERT_UNKNOWN( size_t(arg[0]) < i_z );
-    CPPAD_ASSERT_UNKNOWN( size_t(arg[1]) < i_z );
+    CPPAD_ASSERT_UNKNOWN(size_t(arg[0]) < i_z);
+    CPPAD_ASSERT_UNKNOWN(size_t(arg[1]) < i_z);
 
     // check for no effect
-    if( ! jac_reverse[i_z] )
-        return;
+    if (!jac_reverse[i_z]) return;
 
     // progagate hessian sparsity from i_z to arg[0] and arg[1]
-    rev_hes_sparsity.binary_union(
-        size_t(arg[0]), size_t(arg[0]), i_z, rev_hes_sparsity
-    );
-    rev_hes_sparsity.binary_union(
-        size_t(arg[1]), size_t(arg[1]), i_z, rev_hes_sparsity
-    );
+    rev_hes_sparsity.binary_union(size_t(arg[0]), size_t(arg[0]), i_z, rev_hes_sparsity);
+    rev_hes_sparsity.binary_union(size_t(arg[1]), size_t(arg[1]), i_z, rev_hes_sparsity);
 
     // new hessian sparsity terms between i_z and arg[0], arg[1]
-    rev_hes_sparsity.binary_union(
-        size_t(arg[0]), size_t(arg[0]), size_t(arg[1]), for_jac_sparsity
-    );
-    rev_hes_sparsity.binary_union(
-        size_t(arg[1]), size_t(arg[1]), size_t(arg[0]), for_jac_sparsity
-    );
+    rev_hes_sparsity.binary_union(size_t(arg[0]), size_t(arg[0]), size_t(arg[1]), for_jac_sparsity);
+    rev_hes_sparsity.binary_union(size_t(arg[1]), size_t(arg[1]), size_t(arg[0]), for_jac_sparsity);
 
     jac_reverse[arg[0]] = true;
     jac_reverse[arg[1]] = true;
@@ -269,39 +237,23 @@ where x and y are variables.
 \copydetails CppAD::local::reverse_sparse_hessian_binary_op
 */
 template <class Vector_set>
-void reverse_sparse_hessian_div_op(
-    size_t               i_z                ,
-    const addr_t*        arg                ,
-    bool*                jac_reverse        ,
-    const Vector_set&    for_jac_sparsity   ,
-    Vector_set&          rev_hes_sparsity   )
-{
+void reverse_sparse_hessian_div_op(size_t i_z, const addr_t *arg, bool *jac_reverse, const Vector_set &for_jac_sparsity,
+                                   Vector_set &rev_hes_sparsity) {
     // check assumptions
-    CPPAD_ASSERT_UNKNOWN( size_t(arg[0]) < i_z );
-    CPPAD_ASSERT_UNKNOWN( size_t(arg[1]) < i_z );
+    CPPAD_ASSERT_UNKNOWN(size_t(arg[0]) < i_z);
+    CPPAD_ASSERT_UNKNOWN(size_t(arg[1]) < i_z);
 
     // check for no effect
-    if( ! jac_reverse[i_z] )
-        return;
+    if (!jac_reverse[i_z]) return;
 
     // propagate hessian sparsity from i_z to arg[0] and arg[1]
-    rev_hes_sparsity.binary_union(
-        size_t(arg[0]), size_t(arg[0]), i_z, rev_hes_sparsity
-    );
-    rev_hes_sparsity.binary_union(
-        size_t(arg[1]), size_t(arg[1]), i_z, rev_hes_sparsity
-    );
+    rev_hes_sparsity.binary_union(size_t(arg[0]), size_t(arg[0]), i_z, rev_hes_sparsity);
+    rev_hes_sparsity.binary_union(size_t(arg[1]), size_t(arg[1]), i_z, rev_hes_sparsity);
 
     // new hessian sparsity terms between i_z and arg[0], arg[1]
-    rev_hes_sparsity.binary_union(
-            size_t(arg[0]), size_t(arg[0]), size_t(arg[1]), for_jac_sparsity
-    );
-    rev_hes_sparsity.binary_union(
-            size_t(arg[1]), size_t(arg[1]), size_t(arg[0]), for_jac_sparsity
-    );
-    rev_hes_sparsity.binary_union(
-            size_t(arg[1]), size_t(arg[1]), size_t(arg[1]), for_jac_sparsity
-    );
+    rev_hes_sparsity.binary_union(size_t(arg[0]), size_t(arg[0]), size_t(arg[1]), for_jac_sparsity);
+    rev_hes_sparsity.binary_union(size_t(arg[1]), size_t(arg[1]), size_t(arg[0]), for_jac_sparsity);
+    rev_hes_sparsity.binary_union(size_t(arg[1]), size_t(arg[1]), size_t(arg[1]), for_jac_sparsity);
 
     jac_reverse[arg[0]] = true;
     jac_reverse[arg[1]] = true;
@@ -320,42 +272,24 @@ where x and y are variables.
 \copydetails CppAD::local::reverse_sparse_hessian_binary_op
 */
 template <class Vector_set>
-void reverse_sparse_hessian_pow_op(
-    size_t               i_z                ,
-    const addr_t*        arg                ,
-    bool*                jac_reverse        ,
-    const Vector_set&    for_jac_sparsity   ,
-    Vector_set&          rev_hes_sparsity   )
-{
+void reverse_sparse_hessian_pow_op(size_t i_z, const addr_t *arg, bool *jac_reverse, const Vector_set &for_jac_sparsity,
+                                   Vector_set &rev_hes_sparsity) {
     // check assumptions
-    CPPAD_ASSERT_UNKNOWN( size_t(arg[0]) < i_z );
-    CPPAD_ASSERT_UNKNOWN( size_t(arg[1]) < i_z );
+    CPPAD_ASSERT_UNKNOWN(size_t(arg[0]) < i_z);
+    CPPAD_ASSERT_UNKNOWN(size_t(arg[1]) < i_z);
 
     // check for no effect
-    if( ! jac_reverse[i_z] )
-        return;
+    if (!jac_reverse[i_z]) return;
 
     // propigate hessian sparsity from i_z to arg[0] and arg[1]
-    rev_hes_sparsity.binary_union(
-        size_t(arg[0]), size_t(arg[0]), i_z, rev_hes_sparsity
-    );
-    rev_hes_sparsity.binary_union(
-        size_t(arg[1]), size_t(arg[1]), i_z, rev_hes_sparsity
-    );
+    rev_hes_sparsity.binary_union(size_t(arg[0]), size_t(arg[0]), i_z, rev_hes_sparsity);
+    rev_hes_sparsity.binary_union(size_t(arg[1]), size_t(arg[1]), i_z, rev_hes_sparsity);
 
     // new hessian sparsity terms between i_z and arg[0], arg[1]
-    rev_hes_sparsity.binary_union(
-        size_t(arg[0]), size_t(arg[0]), size_t(arg[0]), for_jac_sparsity
-    );
-    rev_hes_sparsity.binary_union(
-        size_t(arg[0]), size_t(arg[0]), size_t(arg[1]), for_jac_sparsity
-    );
-    rev_hes_sparsity.binary_union(
-        size_t(arg[1]), size_t(arg[1]), size_t(arg[0]), for_jac_sparsity
-    );
-    rev_hes_sparsity.binary_union(
-        size_t(arg[1]), size_t(arg[1]), size_t(arg[1]), for_jac_sparsity
-    );
+    rev_hes_sparsity.binary_union(size_t(arg[0]), size_t(arg[0]), size_t(arg[0]), for_jac_sparsity);
+    rev_hes_sparsity.binary_union(size_t(arg[0]), size_t(arg[0]), size_t(arg[1]), for_jac_sparsity);
+    rev_hes_sparsity.binary_union(size_t(arg[1]), size_t(arg[1]), size_t(arg[0]), for_jac_sparsity);
+    rev_hes_sparsity.binary_union(size_t(arg[1]), size_t(arg[1]), size_t(arg[1]), for_jac_sparsity);
 
     // I cannot think of a case where this is necessary, but it including
     // it makes it like the other cases.
@@ -387,17 +321,14 @@ Upon return it includes the Hessian sparsity for  w(x)
 */
 template <class Vector_set>
 void forward_sparse_hessian_mul_op(
-    const addr_t*       arg               ,
-    const Vector_set&   for_jac_sparsity  ,
-    Vector_set&         for_hes_sparsity  )
-{   // --------------------------------------------------
+    const addr_t *arg, const Vector_set &for_jac_sparsity,
+    Vector_set &for_hes_sparsity) {  // --------------------------------------------------
     // set of independent variables that v0 depends on
     typename Vector_set::const_iterator itr_0(for_jac_sparsity, size_t(arg[0]));
 
     // loop over dependent variables with non-zero partial
     size_t i_x = *itr_0;
-    while( i_x < for_jac_sparsity.end() )
-    {   // N(i_x) = N(i_x) union L(v1)
+    while (i_x < for_jac_sparsity.end()) {  // N(i_x) = N(i_x) union L(v1)
         for_hes_sparsity.binary_union(i_x, i_x, size_t(arg[1]), for_jac_sparsity);
         i_x = *(++itr_0);
     }
@@ -407,8 +338,7 @@ void forward_sparse_hessian_mul_op(
 
     // loop over dependent variables with non-zero partial
     i_x = *itr_1;
-    while( i_x < for_jac_sparsity.end() )
-    {   // N(i_x) = N(i_x) union L(v0)
+    while (i_x < for_jac_sparsity.end()) {  // N(i_x) = N(i_x) union L(v0)
         for_hes_sparsity.binary_union(i_x, i_x, size_t(arg[0]), for_jac_sparsity);
         i_x = *(++itr_1);
     }
@@ -437,17 +367,14 @@ Upon return it includes the Hessian sparsity for  w(x)
 */
 template <class Vector_set>
 void forward_sparse_hessian_div_op(
-    const addr_t*       arg               ,
-    const Vector_set&   for_jac_sparsity  ,
-    Vector_set&         for_hes_sparsity  )
-{   // --------------------------------------------------
+    const addr_t *arg, const Vector_set &for_jac_sparsity,
+    Vector_set &for_hes_sparsity) {  // --------------------------------------------------
     // set of independent variables that v0 depends on
     typename Vector_set::const_iterator itr_0(for_jac_sparsity, size_t(arg[0]));
 
     // loop over dependent variables with non-zero partial
     size_t i_x = *itr_0;
-    while( i_x < for_jac_sparsity.end() )
-    {   // N(i_x) = N(i_x) union L(v1)
+    while (i_x < for_jac_sparsity.end()) {  // N(i_x) = N(i_x) union L(v1)
         for_hes_sparsity.binary_union(i_x, i_x, size_t(arg[1]), for_jac_sparsity);
         i_x = *(++itr_0);
     }
@@ -457,8 +384,7 @@ void forward_sparse_hessian_div_op(
 
     // loop over dependent variables with non-zero partial
     i_x = *itr_1;
-    while( i_x < for_jac_sparsity.end() )
-    {   // N(i_x) = N(i_x) union L(v0)
+    while (i_x < for_jac_sparsity.end()) {  // N(i_x) = N(i_x) union L(v0)
         for_hes_sparsity.binary_union(i_x, i_x, size_t(arg[0]), for_jac_sparsity);
         // N(i_x) = N(i_x) union L(v1)
         for_hes_sparsity.binary_union(i_x, i_x, size_t(arg[1]), for_jac_sparsity);
@@ -489,17 +415,14 @@ Upon return it includes the Hessian sparsity for  w(x)
 */
 template <class Vector_set>
 void forward_sparse_hessian_pow_op(
-    const addr_t*       arg               ,
-    const Vector_set&   for_jac_sparsity  ,
-    Vector_set&         for_hes_sparsity  )
-{   // --------------------------------------------------
+    const addr_t *arg, const Vector_set &for_jac_sparsity,
+    Vector_set &for_hes_sparsity) {  // --------------------------------------------------
     // set of independent variables that v0 depends on
     typename Vector_set::const_iterator itr_0(for_jac_sparsity, size_t(arg[0]));
 
     // loop over dependent variables with non-zero partial
     size_t i_x = *itr_0;
-    while( i_x < for_jac_sparsity.end() )
-    {   // N(i_x) = N(i_x) union L(v0)
+    while (i_x < for_jac_sparsity.end()) {  // N(i_x) = N(i_x) union L(v0)
         for_hes_sparsity.binary_union(i_x, i_x, size_t(arg[0]), for_jac_sparsity);
         // N(i_x) = N(i_x) union L(v1)
         for_hes_sparsity.binary_union(i_x, i_x, size_t(arg[1]), for_jac_sparsity);
@@ -511,8 +434,7 @@ void forward_sparse_hessian_pow_op(
 
     // loop over dependent variables with non-zero partial
     i_x = *itr_1;
-    while( i_x < for_jac_sparsity.end() )
-    {   // N(i_x) = N(i_x) union L(v0)
+    while (i_x < for_jac_sparsity.end()) {  // N(i_x) = N(i_x) union L(v0)
         for_hes_sparsity.binary_union(i_x, i_x, size_t(arg[0]), for_jac_sparsity);
         // N(i_x) = N(i_x) union L(v1)
         for_hes_sparsity.binary_union(i_x, i_x, size_t(arg[1]), for_jac_sparsity);
@@ -521,5 +443,6 @@ void forward_sparse_hessian_pow_op(
     return;
 }
 // ---------------------------------------------------------------------------
-} } // END_CPPAD_LOCAL_NAMESPACE
-# endif
+}  // namespace local
+}  // namespace CppAD
+#endif

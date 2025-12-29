@@ -20,22 +20,22 @@ namespace cg {
 
 /**
  * Specialization of the C language function names for doubles
- * 
+ *
  * @author Joao Leal
  */
-template<>
-inline const std::string& LanguageC<double>::absFuncName() {
+template <>
+inline const std::string &LanguageC<double>::absFuncName() {
     static const std::string name("fabs");
     return name;
 }
 
-template<>
-inline const std::string& LanguageC<double>::getPrintfBaseFormat() {
+template <>
+inline const std::string &LanguageC<double>::getPrintfBaseFormat() {
     static const std::string format("%f");
     return format;
 }
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

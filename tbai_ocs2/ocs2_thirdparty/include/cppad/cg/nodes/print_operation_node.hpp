@@ -20,53 +20,38 @@ namespace cg {
 
 /**
  * An operation node which prints out a variable value or parameter.
- * 
+ *
  * This is a custom OperationNode class and therefore cannot be transformed
  * into any other node type (makeAlias() and setOperation() might not work).
- * 
+ *
  * @author Joao Leal
  */
-template<class Base>
+template <class Base>
 class PrintOperationNode : public OperationNode<Base> {
     friend class CodeHandler<Base>;
-protected:
+
+   protected:
     std::string before_;
     std::string after_;
-public:
 
-    inline const std::string& getBeforeString() const {
-        return before_;
-    }
+   public:
+    inline const std::string &getBeforeString() const { return before_; }
 
-    inline void setBeforeString(const std::string& before) {
-        before_ = before;
-    }
+    inline void setBeforeString(const std::string &before) { before_ = before; }
 
-    inline const std::string& getAfterString() const {
-        return after_;
-    }
+    inline const std::string &getAfterString() const { return after_; }
 
-    inline void setAfterString(const std::string& after) {
-        after_ = after;
-    }
+    inline void setAfterString(const std::string &after) { after_ = after; }
 
-    inline virtual ~PrintOperationNode() {
-    }
+    inline virtual ~PrintOperationNode() {}
 
-protected:
-
-    inline PrintOperationNode(CodeHandler<Base>* handler,
-                              const std::string& before,
-                              const Argument<Base>& arg,
-                              const std::string& after) :
-        OperationNode<Base>(handler, CGOpCode::Pri, arg),
-        before_(before),
-        after_(after) {
-    }
-
+   protected:
+    inline PrintOperationNode(CodeHandler<Base> *handler, const std::string &before, const Argument<Base> &arg,
+                              const std::string &after)
+        : OperationNode<Base>(handler, CGOpCode::Pri, arg), before_(before), after_(after) {}
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

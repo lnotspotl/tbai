@@ -1,4 +1,5 @@
 #include "tbai_mpc/wbc/Factory.hpp"
+
 #include <tbai_core/config/Config.hpp>
 
 namespace tbai {
@@ -29,5 +30,5 @@ std::shared_ptr<WbcBase> getWbcShared(const std::string &controllerConfigFile, c
         getWbcUnique(controllerConfigFile, urdfString, comModel, kinematics, jointNames).release());
 }
 
-}  // namespace wbc
+}  // namespace mpc
 }  // namespace tbai

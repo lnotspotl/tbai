@@ -40,78 +40,83 @@ namespace ocs2 {
 /******************************************************************************************************/
 ModeSchedule::ModeSchedule(std::vector<scalar_t> eventTimesInput, std::vector<size_t> modeSequenceInput)
     : eventTimes(std::move(eventTimesInput)), modeSequence(std::move(modeSequenceInput)) {
-  assert(!modeSequence.empty());
-  assert(eventTimes.size() + 1 == modeSequence.size());
+    assert(!modeSequence.empty());
+    assert(eventTimes.size() + 1 == modeSequence.size());
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
 size_t ModeSchedule::modeAtTime(scalar_t time) const {
-  const auto ind = lookup::findIndexInTimeArray(eventTimes, time);
-  return modeSequence[ind];
+    const auto ind = lookup::findIndexInTimeArray(eventTimes, time);
+    return modeSequence[ind];
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-void swap(ModeSchedule& lh, ModeSchedule& rh) {
-  lh.eventTimes.swap(rh.eventTimes);
-  lh.modeSequence.swap(rh.modeSequence);
+void swap(ModeSchedule &lh, ModeSchedule &rh) {
+    lh.eventTimes.swap(rh.eventTimes);
+    lh.modeSequence.swap(rh.modeSequence);
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-std::ostream& operator<<(std::ostream& stream, const ModeSchedule& modeSchedule) {
-  stream << "event times:   {" << toDelimitedString(modeSchedule.eventTimes) << "}\n";
-  stream << "mode sequence: {" << toDelimitedString(modeSchedule.modeSequence) << "}\n";
-  return stream;
+std::ostream &operator<<(std::ostream &stream, const ModeSchedule &modeSchedule) {
+    stream << "event times:   {" << toDelimitedString(modeSchedule.eventTimes) << "}\n";
+    stream << "mode sequence: {" << toDelimitedString(modeSchedule.modeSequence) << "}\n";
+    return stream;
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-size_t getNumberOfPrecedingEvents(const scalar_array_t& timeTrajectory, const size_array_t& postEventIndices, scalar_t eventTime) {
-  // the case of empty time trajectory and eventTime smaller or equal to the initial time
-  if (timeTrajectory.empty() || eventTime <= timeTrajectory.front()) {
-    return 0;
-  }
+size_t getNumberOfPrecedingEvents(const scalar_array_t &timeTrajectory, const size_array_t &postEventIndices,
+                                  scalar_t eventTime) {
+    // the case of empty time trajectory and eventTime smaller or equal to the initial time
+    if (timeTrajectory.empty() || eventTime <= timeTrajectory.front()) {
+        return 0;
+    }
 
-  const auto eventIndexItr = std::find_if(postEventIndices.cbegin(), postEventIndices.cend(), [&](size_t postEventInd) {
-    return numerics::almost_eq(eventTime, timeTrajectory[postEventInd - 1]);
-  });
+    const auto eventIndexItr = std::find_if(
+        postEventIndices.cbegin(), postEventIndices.cend(),
+        [&](size_t postEventInd) { return numerics::almost_eq(eventTime, timeTrajectory[postEventInd - 1]); });
 
-  // if the given time did not match any event time but it is smaller than the final time
-  if (eventIndexItr == postEventIndices.cend() && eventTime < timeTrajectory.back()) {
-    throw std::runtime_error(
-        "[getNumberOfPrecedingEvents] The requested time is within the time trajectory but it is not marked as an event!");
-  }
+    // if the given time did not match any event time but it is smaller than the final time
+    if (eventIndexItr == postEventIndices.cend() && eventTime < timeTrajectory.back()) {
+        throw std::runtime_error(
+            "[getNumberOfPrecedingEvents] The requested time is within the time trajectory but it is not marked as an "
+            "event!");
+    }
 
-  return std::distance(postEventIndices.cbegin(), eventIndexItr);
+    return std::distance(postEventIndices.cbegin(), eventIndexItr);
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-std::pair<scalar_t, scalar_t> findIntersectionToExtendableInterval(const scalar_array_t& timeTrajectory, const scalar_array_t& eventTimes,
-                                                                   const std::pair<scalar_t, scalar_t>& timePeriod) {
-  // no interpolation: a bit before initial time
-  const std::pair<scalar_t, scalar_t> emptyInterpolatableInterval{timePeriod.first, timePeriod.first - 1e-4};
+std::pair<scalar_t, scalar_t> findIntersectionToExtendableInterval(const scalar_array_t &timeTrajectory,
+                                                                   const scalar_array_t &eventTimes,
+                                                                   const std::pair<scalar_t, scalar_t> &timePeriod) {
+    // no interpolation: a bit before initial time
+    const std::pair<scalar_t, scalar_t> emptyInterpolatableInterval{timePeriod.first, timePeriod.first - 1e-4};
 
-  if (timeTrajectory.empty() || timePeriod.first > timePeriod.second) {
-    return emptyInterpolatableInterval;
+    if (timeTrajectory.empty() || timePeriod.first > timePeriod.second) {
+        return emptyInterpolatableInterval;
 
-  } else {
-    const auto pastEventItr =
-        std::find_if(eventTimes.crbegin(), eventTimes.crend(), [&](const scalar_t& te) { return te <= timeTrajectory.front(); });
-    const auto initialTime = (pastEventItr != eventTimes.crend()) ? std::max(*pastEventItr, timePeriod.first) : timePeriod.first;
+    } else {
+        const auto pastEventItr = std::find_if(eventTimes.crbegin(), eventTimes.crend(),
+                                               [&](const scalar_t &te) { return te <= timeTrajectory.front(); });
+        const auto initialTime =
+            (pastEventItr != eventTimes.crend()) ? std::max(*pastEventItr, timePeriod.first) : timePeriod.first;
 
-    const auto nextEventItr = std::lower_bound(eventTimes.cbegin(), eventTimes.cend(), timeTrajectory.back());
-    const auto finalTime = (nextEventItr != eventTimes.cend()) ? std::min(*nextEventItr, timePeriod.second) : timePeriod.second;
+        const auto nextEventItr = std::lower_bound(eventTimes.cbegin(), eventTimes.cend(), timeTrajectory.back());
+        const auto finalTime =
+            (nextEventItr != eventTimes.cend()) ? std::min(*nextEventItr, timePeriod.second) : timePeriod.second;
 
-    return (initialTime < finalTime) ? std::make_pair(initialTime, finalTime) : emptyInterpolatableInterval;
-  }
+        return (initialTime < finalTime) ? std::make_pair(initialTime, finalTime) : emptyInterpolatableInterval;
+    }
 }
 
 }  // namespace ocs2

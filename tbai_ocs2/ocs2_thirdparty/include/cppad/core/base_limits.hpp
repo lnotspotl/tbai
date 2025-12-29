@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_BASE_LIMITS_HPP
-# define CPPAD_CORE_BASE_LIMITS_HPP
+#ifndef CPPAD_CORE_BASE_LIMITS_HPP
+#define CPPAD_CORE_BASE_LIMITS_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -46,22 +46,26 @@ $codei%
 %$$
 where the macro is defined by
 $srccode%cpp% */
-# define CPPAD_NUMERIC_LIMITS(Other, Base) \
-template <> class numeric_limits<Base>\
-{\
-    public:\
-    static Base min(void) \
-    {   return static_cast<Base>( std::numeric_limits<Other>::min() ); }\
-    static Base max(void) \
-    {   return static_cast<Base>( std::numeric_limits<Other>::max() ); }\
-    static Base epsilon(void) \
-    {   return static_cast<Base>( std::numeric_limits<Other>::epsilon() ); }\
-    static Base quiet_NaN(void) \
-    {   return static_cast<Base>( std::numeric_limits<Other>::quiet_NaN() ); }\
-    static const int digits10 = std::numeric_limits<Other>::digits10;\
-};
+#define CPPAD_NUMERIC_LIMITS(Other, Base)                                      \
+    template <>                                                                \
+    class numeric_limits<Base> {                                               \
+       public:                                                                 \
+        static Base min(void) {                                                \
+            return static_cast<Base>(std::numeric_limits<Other>::min());       \
+        }                                                                      \
+        static Base max(void) {                                                \
+            return static_cast<Base>(std::numeric_limits<Other>::max());       \
+        }                                                                      \
+        static Base epsilon(void) {                                            \
+            return static_cast<Base>(std::numeric_limits<Other>::epsilon());   \
+        }                                                                      \
+        static Base quiet_NaN(void) {                                          \
+            return static_cast<Base>(std::numeric_limits<Other>::quiet_NaN()); \
+        }                                                                      \
+        static const int digits10 = std::numeric_limits<Other>::digits10;      \
+    };
 /* %$$
 $end
 */
 
-# endif
+#endif

@@ -20,12 +20,12 @@ namespace cg {
 
 /**
  * Abstract class used to load models
- * 
+ *
  * @author Joao Leal
  */
-template<class Base>
+template <class Base>
 class ModelLibrary {
-public:
+   public:
     /**
      * Provides the model names in the dynamic library.
      *
@@ -41,7 +41,7 @@ public:
      * @return The model object or nullptr if no model exists with the provided
      *         name.
      */
-    virtual std::unique_ptr<GenericModel<Base>> model(const std::string& modelName) = 0;
+    virtual std::unique_ptr<GenericModel<Base>> model(const std::string &modelName) = 0;
 
     /**
      * Defines whether or not to disable multithreaded model evaluations.
@@ -121,7 +121,6 @@ public:
      */
     virtual void setThreadPoolNumberOfTimeMeas(unsigned int n) = 0;
 
-
     /**
      * Provides the number of time measurements taken by each computational
      * task during multithreaded model evaluations. This is used to schedule
@@ -134,12 +133,10 @@ public:
      */
     virtual unsigned int getThreadPoolNumberOfTimeMeas() const = 0;
 
-    inline virtual ~ModelLibrary() {
-    }
-
+    inline virtual ~ModelLibrary() {}
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

@@ -53,4 +53,3 @@ int cppadcg_openmp_is_disabled();
 #endif)*=*";
 
 const size_t CPPADCG_OPENMP_H_FILE_SIZE = 1413;
-

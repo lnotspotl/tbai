@@ -34,64 +34,66 @@ namespace ocs2 {
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-void StateInputCostGaussNewtonAd::initialize(size_t stateDim, size_t inputDim, size_t parameterDim, const std::string& modelName,
-                                             const std::string& modelFolder, bool recompileLibraries, bool verbose) {
-  auto costVectorAd = [=](const ad_vector_t& x, const ad_vector_t& p, ad_vector_t& y) {
-    assert(x.rows() == 1 + stateDim + inputDim);
-    const ad_scalar_t time = x(0);
-    const ad_vector_t state = x.segment(1, stateDim);
-    const ad_vector_t input = x.tail(inputDim);
-    y = this->costVectorFunction(time, state, input, p);
-  };
-  adInterfacePtr_.reset(new ocs2::CppAdInterface(costVectorAd, 1 + stateDim + inputDim, parameterDim, modelName, modelFolder));
+void StateInputCostGaussNewtonAd::initialize(size_t stateDim, size_t inputDim, size_t parameterDim,
+                                             const std::string &modelName, const std::string &modelFolder,
+                                             bool recompileLibraries, bool verbose) {
+    auto costVectorAd = [=](const ad_vector_t &x, const ad_vector_t &p, ad_vector_t &y) {
+        assert(x.rows() == 1 + stateDim + inputDim);
+        const ad_scalar_t time = x(0);
+        const ad_vector_t state = x.segment(1, stateDim);
+        const ad_vector_t input = x.tail(inputDim);
+        y = this->costVectorFunction(time, state, input, p);
+    };
+    adInterfacePtr_.reset(
+        new ocs2::CppAdInterface(costVectorAd, 1 + stateDim + inputDim, parameterDim, modelName, modelFolder));
 
-  if (recompileLibraries) {
-    adInterfacePtr_->createModels(ocs2::CppAdInterface::ApproximationOrder::First, verbose);
-  } else {
-    adInterfacePtr_->loadModelsIfAvailable(ocs2::CppAdInterface::ApproximationOrder::First, verbose);
-  }
+    if (recompileLibraries) {
+        adInterfacePtr_->createModels(ocs2::CppAdInterface::ApproximationOrder::First, verbose);
+    } else {
+        adInterfacePtr_->loadModelsIfAvailable(ocs2::CppAdInterface::ApproximationOrder::First, verbose);
+    }
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-StateInputCostGaussNewtonAd::StateInputCostGaussNewtonAd(const StateInputCostGaussNewtonAd& rhs)
+StateInputCostGaussNewtonAd::StateInputCostGaussNewtonAd(const StateInputCostGaussNewtonAd &rhs)
     : StateInputCost(rhs), adInterfacePtr_(new ocs2::CppAdInterface(*rhs.adInterfacePtr_)) {}
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-scalar_t StateInputCostGaussNewtonAd::getValue(scalar_t time, const vector_t& state, const vector_t& input,
-                                               const TargetTrajectories& targetTrajectories, const PreComputation& preComputation) const {
-  vector_t timeStateInput(1 + state.rows() + input.rows());
-  timeStateInput << time, state, input;
-  const auto parameters = getParameters(time, targetTrajectories, preComputation);
-  const auto costVector = adInterfacePtr_->getFunctionValue(timeStateInput, parameters);
-  return 0.5 * costVector.squaredNorm();
+scalar_t StateInputCostGaussNewtonAd::getValue(scalar_t time, const vector_t &state, const vector_t &input,
+                                               const TargetTrajectories &targetTrajectories,
+                                               const PreComputation &preComputation) const {
+    vector_t timeStateInput(1 + state.rows() + input.rows());
+    timeStateInput << time, state, input;
+    const auto parameters = getParameters(time, targetTrajectories, preComputation);
+    const auto costVector = adInterfacePtr_->getFunctionValue(timeStateInput, parameters);
+    return 0.5 * costVector.squaredNorm();
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-ScalarFunctionQuadraticApproximation StateInputCostGaussNewtonAd::getQuadraticApproximation(scalar_t time, const vector_t& state,
-                                                                                            const vector_t& input,
-                                                                                            const TargetTrajectories& targetTrajectories,
-                                                                                            const PreComputation& preComputation) const {
-  const auto stateDim = state.rows();
-  const auto inputDim = input.rows();
-  vector_t timeStateInput(1 + stateDim + inputDim);
-  timeStateInput << time, state, input;
-  const auto parameters = getParameters(time, targetTrajectories, preComputation);
-  const auto gnApproximation = adInterfacePtr_->getGaussNewtonApproximation(timeStateInput, parameters);
+ScalarFunctionQuadraticApproximation StateInputCostGaussNewtonAd::getQuadraticApproximation(
+    scalar_t time, const vector_t &state, const vector_t &input, const TargetTrajectories &targetTrajectories,
+    const PreComputation &preComputation) const {
+    const auto stateDim = state.rows();
+    const auto inputDim = input.rows();
+    vector_t timeStateInput(1 + stateDim + inputDim);
+    timeStateInput << time, state, input;
+    const auto parameters = getParameters(time, targetTrajectories, preComputation);
+    const auto gnApproximation = adInterfacePtr_->getGaussNewtonApproximation(timeStateInput, parameters);
 
-  ScalarFunctionQuadraticApproximation L;
-  L.f = gnApproximation.f;
-  L.dfdx.noalias() = gnApproximation.dfdx.middleRows(1, stateDim);
-  L.dfdu.noalias() = gnApproximation.dfdx.bottomRows(inputDim);
-  L.dfdxx = gnApproximation.dfdxx.block(1, 1, stateDim, stateDim);
-  L.dfdux.noalias() = gnApproximation.dfdxx.block(1 + stateDim, 1, inputDim, stateDim);
-  L.dfduu.noalias() = gnApproximation.dfdxx.block(1 + stateDim, 1 + stateDim, inputDim, inputDim);
-  return L;
+    ScalarFunctionQuadraticApproximation L;
+    L.f = gnApproximation.f;
+    L.dfdx.noalias() = gnApproximation.dfdx.middleRows(1, stateDim);
+    L.dfdu.noalias() = gnApproximation.dfdx.bottomRows(inputDim);
+    L.dfdxx = gnApproximation.dfdxx.block(1, 1, stateDim, stateDim);
+    L.dfdux.noalias() = gnApproximation.dfdxx.block(1 + stateDim, 1, inputDim, stateDim);
+    L.dfduu.noalias() = gnApproximation.dfdxx.block(1 + stateDim, 1 + stateDim, inputDim, inputDim);
+    return L;
 }
 
 }  // namespace ocs2

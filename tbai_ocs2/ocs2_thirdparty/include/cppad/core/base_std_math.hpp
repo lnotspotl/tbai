@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_BASE_STD_MATH_HPP
-# define CPPAD_CORE_BASE_STD_MATH_HPP
+#ifndef CPPAD_CORE_BASE_STD_MATH_HPP
+#define CPPAD_CORE_BASE_STD_MATH_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-16 Bradley M. Bell
 
@@ -158,9 +158,9 @@ $end
 -------------------------------------------------------------------------------
 */
 
-# include <cmath>
+#include <cmath>
 
-namespace CppAD { // BEGIN_CPPAD_NAMESPACE
+namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
 
 /*!
 \file base_std_math.hpp
@@ -176,10 +176,11 @@ This macro defines the function
 where the argument x and return value y have type Type
 using the corresponding function <code>std::Fun</code>.
 */
-# define CPPAD_STANDARD_MATH_UNARY(Type, Fun) \
-    inline Type Fun(const Type& x)            \
-    {   return std::Fun(x); }
+#define CPPAD_STANDARD_MATH_UNARY(Type, Fun) \
+    inline Type Fun(const Type &x) {         \
+        return std::Fun(x);                  \
+    }
 
-} // END_CPPAD_NAMESPACE
+}  // namespace CppAD
 
-# endif
+#endif

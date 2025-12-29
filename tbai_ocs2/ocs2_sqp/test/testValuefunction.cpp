@@ -27,80 +27,77 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************/
 
-#include <gtest/gtest.h>
-
 #include "ocs2_sqp/SqpSolver.h"
-
+#include <gtest/gtest.h>
 #include <ocs2_core/initialization/DefaultInitializer.h>
-
 #include <ocs2_oc/oc_data/TimeDiscretization.h>
 #include <ocs2_oc/synchronized_module/ReferenceManager.h>
 #include <ocs2_oc/test/testProblemsGeneration.h>
 
 TEST(test_valuefunction, linear_quadratic_problem) {
-  constexpr int n = 3;
-  constexpr int m = 2;
-  constexpr int nc = 1;
-  constexpr int Nsample = 10;
-  constexpr ocs2::scalar_t tol = 1e-9;
-  const ocs2::scalar_t startTime = 0.0;
-  const ocs2::scalar_t eventTime = 1.0 / 3.0;
-  const ocs2::scalar_t finalTime = 1.0;
+    constexpr int n = 3;
+    constexpr int m = 2;
+    constexpr int nc = 1;
+    constexpr int Nsample = 10;
+    constexpr ocs2::scalar_t tol = 1e-9;
+    const ocs2::scalar_t startTime = 0.0;
+    const ocs2::scalar_t eventTime = 1.0 / 3.0;
+    const ocs2::scalar_t finalTime = 1.0;
 
-  ocs2::OptimalControlProblem problem;
+    ocs2::OptimalControlProblem problem;
 
-  // System
-  const auto dynamics = ocs2::getRandomDynamics(n, m);
-  const auto jumpMap = ocs2::matrix_t::Random(n, n);
-  problem.dynamicsPtr.reset(new ocs2::LinearSystemDynamics(dynamics.dfdx, dynamics.dfdu, jumpMap));
+    // System
+    const auto dynamics = ocs2::getRandomDynamics(n, m);
+    const auto jumpMap = ocs2::matrix_t::Random(n, n);
+    problem.dynamicsPtr.reset(new ocs2::LinearSystemDynamics(dynamics.dfdx, dynamics.dfdu, jumpMap));
 
-  // Cost
-  problem.costPtr->add("intermediateCost", ocs2::getOcs2Cost(ocs2::getRandomCost(n, m)));
-  problem.preJumpCostPtr->add("eventCost", ocs2::getOcs2StateCost(ocs2::getRandomCost(n, 0)));
-  problem.finalCostPtr->add("finalCost", ocs2::getOcs2StateCost(ocs2::getRandomCost(n, 0)));
+    // Cost
+    problem.costPtr->add("intermediateCost", ocs2::getOcs2Cost(ocs2::getRandomCost(n, m)));
+    problem.preJumpCostPtr->add("eventCost", ocs2::getOcs2StateCost(ocs2::getRandomCost(n, 0)));
+    problem.finalCostPtr->add("finalCost", ocs2::getOcs2StateCost(ocs2::getRandomCost(n, 0)));
 
-  // Reference Manager
-  const ocs2::ModeSchedule modeSchedule({eventTime}, {0, 1});
-  const ocs2::TargetTrajectories targetTrajectories({0.0}, {ocs2::vector_t::Random(n)}, {ocs2::vector_t::Random(m)});
-  auto referenceManagerPtr = std::make_shared<ocs2::ReferenceManager>(targetTrajectories, modeSchedule);
+    // Reference Manager
+    const ocs2::ModeSchedule modeSchedule({eventTime}, {0, 1});
+    const ocs2::TargetTrajectories targetTrajectories({0.0}, {ocs2::vector_t::Random(n)}, {ocs2::vector_t::Random(m)});
+    auto referenceManagerPtr = std::make_shared<ocs2::ReferenceManager>(targetTrajectories, modeSchedule);
 
-  problem.targetTrajectoriesPtr = &targetTrajectories;
+    problem.targetTrajectoriesPtr = &targetTrajectories;
 
-  // Constraint
-  problem.equalityConstraintPtr->add("constraint", ocs2::getOcs2Constraints(ocs2::getRandomConstraints(n, m, nc)));
+    // Constraint
+    problem.equalityConstraintPtr->add("constraint", ocs2::getOcs2Constraints(ocs2::getRandomConstraints(n, m, nc)));
 
-  ocs2::DefaultInitializer zeroInitializer(m);
+    ocs2::DefaultInitializer zeroInitializer(m);
 
-  // Solver settings
-  ocs2::sqp::Settings settings;
-  settings.dt = 0.05;
-  settings.sqpIteration = 1;
-  settings.projectStateInputEqualityConstraints = true;
-  settings.printSolverStatistics = false;
-  settings.printSolverStatus = false;
-  settings.printLinesearch = false;
-  settings.useFeedbackPolicy = true;
-  settings.createValueFunction = true;
+    // Solver settings
+    ocs2::sqp::Settings settings;
+    settings.dt = 0.05;
+    settings.sqpIteration = 1;
+    settings.projectStateInputEqualityConstraints = true;
+    settings.printSolverStatistics = false;
+    settings.printSolverStatus = false;
+    settings.printLinesearch = false;
+    settings.useFeedbackPolicy = true;
+    settings.createValueFunction = true;
 
-  // Set up solver
-  ocs2::SqpSolver solver(settings, problem, zeroInitializer);
-  solver.setReferenceManager(referenceManagerPtr);
+    // Set up solver
+    ocs2::SqpSolver solver(settings, problem, zeroInitializer);
+    solver.setReferenceManager(referenceManagerPtr);
 
-  // Get value function
-  const ocs2::vector_t zeroState = ocs2::vector_t::Random(n);
-  solver.reset();
-  solver.run(startTime, zeroState, finalTime);
-  const auto costToGo = solver.getValueFunction(startTime, zeroState);
-  const ocs2::scalar_t zeroCost = solver.getPerformanceIndeces().cost;
-
-  // Solve for random states and check consistency with value function
-  for (int i = 0; i < Nsample; ++i) {
-    const ocs2::vector_t sampleState = ocs2::vector_t::Random(n);
+    // Get value function
+    const ocs2::vector_t zeroState = ocs2::vector_t::Random(n);
     solver.reset();
-    solver.run(startTime, sampleState, finalTime);
-    const ocs2::scalar_t sampleCost = solver.getPerformanceIndeces().cost;
-    const ocs2::vector_t dx = sampleState - zeroState;
+    solver.run(startTime, zeroState, finalTime);
+    const auto costToGo = solver.getValueFunction(startTime, zeroState);
+    const ocs2::scalar_t zeroCost = solver.getPerformanceIndeces().cost;
 
-    EXPECT_NEAR(sampleCost, zeroCost + costToGo.dfdx.dot(dx) + 0.5 * dx.dot(costToGo.dfdxx * dx), tol);
-  }
+    // Solve for random states and check consistency with value function
+    for (int i = 0; i < Nsample; ++i) {
+        const ocs2::vector_t sampleState = ocs2::vector_t::Random(n);
+        solver.reset();
+        solver.run(startTime, sampleState, finalTime);
+        const ocs2::scalar_t sampleCost = solver.getPerformanceIndeces().cost;
+        const ocs2::vector_t dx = sampleState - zeroState;
+
+        EXPECT_NEAR(sampleCost, zeroCost + costToGo.dfdx.dot(dx) + 0.5 * dx.dot(costToGo.dfdxx * dx), tol);
+    }
 }

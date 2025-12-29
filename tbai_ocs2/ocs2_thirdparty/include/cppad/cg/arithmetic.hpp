@@ -18,14 +18,12 @@
 namespace CppAD {
 namespace cg {
 
-template<class Base>
-CodeHandler<Base>* getHandler(const CG<Base>& left,
-                              const CG<Base>& right) {
-
+template <class Base>
+CodeHandler<Base> *getHandler(const CG<Base> &left, const CG<Base> &right) {
     CPPADCG_ASSERT_UNKNOWN(!left.isParameter() || !right.isParameter());
 
-    CodeHandler<Base>* lh = left.getCodeHandler();
-    CodeHandler<Base>* rh = right.getCodeHandler();
+    CodeHandler<Base> *lh = left.getCodeHandler();
+    CodeHandler<Base> *rh = right.getCodeHandler();
 
     if (lh == nullptr) {
         return rh;
@@ -33,16 +31,17 @@ CodeHandler<Base>* getHandler(const CG<Base>& left,
         return lh;
     } else {
         if (lh != rh) {
-            throw CGException("Attempting to use several source code generation handlers in the same source code generation");
+            throw CGException(
+                "Attempting to use several source code generation handlers in the same source code generation");
         }
         return lh;
     }
 }
 
-template<class Base>
-inline CG<Base> operator+(const CG<Base>& left, const CG<Base>& right) {
+template <class Base>
+inline CG<Base> operator+(const CG<Base> &left, const CG<Base> &right) {
     if (left.isParameter() && right.isParameter()) {
-        return CG<Base> (left.getValue() + right.getValue());
+        return CG<Base>(left.getValue() + right.getValue());
 
     } else {
         if (left.isParameter()) {
@@ -55,9 +54,9 @@ inline CG<Base> operator+(const CG<Base>& left, const CG<Base>& right) {
             }
         }
 
-        CodeHandler<Base>* handler = getHandler(left, right);
+        CodeHandler<Base> *handler = getHandler(left, right);
 
-        CG<Base> result(*handler->makeNode(CGOpCode::Add,{left.argument(), right.argument()}));
+        CG<Base> result(*handler->makeNode(CGOpCode::Add, {left.argument(), right.argument()}));
         if (left.isValueDefined() && right.isValueDefined()) {
             result.setValue(left.getValue() + right.getValue());
         }
@@ -65,10 +64,10 @@ inline CG<Base> operator+(const CG<Base>& left, const CG<Base>& right) {
     }
 }
 
-template<class Base>
-inline CG<Base> operator-(const CG<Base>& left, const CG<Base>& right) {
+template <class Base>
+inline CG<Base> operator-(const CG<Base> &left, const CG<Base> &right) {
     if (left.isParameter() && right.isParameter()) {
-        return CG<Base> (left.getValue() - right.getValue());
+        return CG<Base>(left.getValue() - right.getValue());
 
     } else {
         if (right.isParameter()) {
@@ -77,9 +76,9 @@ inline CG<Base> operator-(const CG<Base>& left, const CG<Base>& right) {
             }
         }
 
-        CodeHandler<Base>* handler = getHandler(left, right);
+        CodeHandler<Base> *handler = getHandler(left, right);
 
-        CG<Base> result(*handler->makeNode(CGOpCode::Sub,{left.argument(), right.argument()}));
+        CG<Base> result(*handler->makeNode(CGOpCode::Sub, {left.argument(), right.argument()}));
         if (left.isValueDefined() && right.isValueDefined()) {
             result.setValue(left.getValue() - right.getValue());
         }
@@ -87,29 +86,29 @@ inline CG<Base> operator-(const CG<Base>& left, const CG<Base>& right) {
     }
 }
 
-template<class Base>
-inline CG<Base> operator*(const CG<Base>& left, const CG<Base>& right) {
+template <class Base>
+inline CG<Base> operator*(const CG<Base> &left, const CG<Base> &right) {
     if (left.isParameter() && right.isParameter()) {
-        return CG<Base> (left.getValue() * right.getValue());
+        return CG<Base>(left.getValue() * right.getValue());
 
     } else {
         if (left.isParameter()) {
             if (left.isIdenticalZero()) {
-                return CG<Base> (Base(0.0)); // does not consider the possibility of right being infinity
+                return CG<Base>(Base(0.0));  // does not consider the possibility of right being infinity
             } else if (left.isIdenticalOne()) {
                 return right;
             }
         } else if (right.isParameter()) {
             if (right.isIdenticalZero()) {
-                return CG<Base> (Base(0.0)); // does not consider the possibility of left being infinity
+                return CG<Base>(Base(0.0));  // does not consider the possibility of left being infinity
             } else if (right.isIdenticalOne()) {
                 return left;
             }
         }
 
-        CodeHandler<Base>* handler = getHandler(left, right);
+        CodeHandler<Base> *handler = getHandler(left, right);
 
-        CG<Base> result(*handler->makeNode(CGOpCode::Mul,{left.argument(), right.argument()}));
+        CG<Base> result(*handler->makeNode(CGOpCode::Mul, {left.argument(), right.argument()}));
         if (left.isValueDefined() && right.isValueDefined()) {
             result.setValue(left.getValue() * right.getValue());
         }
@@ -117,27 +116,27 @@ inline CG<Base> operator*(const CG<Base>& left, const CG<Base>& right) {
     }
 }
 
-template<class Base>
-inline CG<Base> operator/(const CG<Base>& left, const CG<Base>& right) {
+template <class Base>
+inline CG<Base> operator/(const CG<Base> &left, const CG<Base> &right) {
     if (left.isParameter() && right.isParameter()) {
-        return CG<Base> (left.getValue() / right.getValue());
+        return CG<Base>(left.getValue() / right.getValue());
 
     } else {
         if (left.isParameter()) {
             if (left.isIdenticalZero()) {
-                return CG<Base> (Base(0.0)); // does not consider the possibility of right being infinity or zero
+                return CG<Base>(Base(0.0));  // does not consider the possibility of right being infinity or zero
             }
         } else if (right.isParameter()) {
             if (right.isIdenticalOne()) {
                 return left;
             }
         } else if (left.getOperationNode() == right.getOperationNode()) {
-            return CG<Base>(Base(1.0)); // does not consider the possibility of left/right being infinity or zero
+            return CG<Base>(Base(1.0));  // does not consider the possibility of left/right being infinity or zero
         }
 
-        CodeHandler<Base>* handler = getHandler(left, right);
+        CodeHandler<Base> *handler = getHandler(left, right);
 
-        CG<Base> result(*handler->makeNode(CGOpCode::Div,{left.argument(), right.argument()}));
+        CG<Base> result(*handler->makeNode(CGOpCode::Div, {left.argument(), right.argument()}));
         if (left.isValueDefined() && right.isValueDefined()) {
             result.setValue(left.getValue() / right.getValue());
         }
@@ -145,43 +144,43 @@ inline CG<Base> operator/(const CG<Base>& left, const CG<Base>& right) {
     }
 }
 
-template<class Base>
-inline CG<Base> operator+(const Base& left, const CG<Base>& right) {
+template <class Base>
+inline CG<Base> operator+(const Base &left, const CG<Base> &right) {
     return CG<Base>(left) + right;
 }
 
-template<class Base>
-inline CG<Base> operator+(const CG<Base>& left, const Base& right) {
+template <class Base>
+inline CG<Base> operator+(const CG<Base> &left, const Base &right) {
     return left + CG<Base>(right);
 }
 
-template<class Base>
-inline CG<Base> operator-(const Base& left, const CG<Base>& right) {
+template <class Base>
+inline CG<Base> operator-(const Base &left, const CG<Base> &right) {
     return CG<Base>(left) - right;
 }
 
-template<class Base>
-inline CG<Base> operator-(const CG<Base>& left, const Base& right) {
+template <class Base>
+inline CG<Base> operator-(const CG<Base> &left, const Base &right) {
     return left - CG<Base>(right);
 }
 
-template<class Base>
-inline CG<Base> operator/(const Base& left, const CG<Base>& right) {
+template <class Base>
+inline CG<Base> operator/(const Base &left, const CG<Base> &right) {
     return CG<Base>(left) / right;
 }
 
-template<class Base>
-inline CG<Base> operator/(const CG<Base>& left, const Base& right) {
+template <class Base>
+inline CG<Base> operator/(const CG<Base> &left, const Base &right) {
     return left / CG<Base>(right);
 }
 
-template<class Base>
-inline CG<Base> operator*(const Base& left, const CG<Base>& right) {
+template <class Base>
+inline CG<Base> operator*(const Base &left, const CG<Base> &right) {
     return CG<Base>(left) * right;
 }
 
-template<class Base>
-inline CG<Base> operator*(const CG<Base>& left, const Base& right) {
+template <class Base>
+inline CG<Base> operator*(const CG<Base> &left, const Base &right) {
     return left * CG<Base>(right);
 }
 
@@ -189,64 +188,55 @@ inline CG<Base> operator*(const CG<Base>& left, const Base& right) {
  *                        Operations with other types
  ******************************************************************************/
 
-template<class Base, class T>
-inline
-typename std::enable_if<std::is_constructible<Base, const T&>::value, CG<Base> >::type
-operator+(const T& left, const CG<Base>& right) {
+template <class Base, class T>
+inline typename std::enable_if<std::is_constructible<Base, const T &>::value, CG<Base> >::type operator+(
+    const T &left, const CG<Base> &right) {
     return CG<Base>(Base(left)) + right;
 }
 
-template<class Base, class T>
-inline
-typename std::enable_if<std::is_constructible<Base, const T&>::value, CG<Base> >::type
-operator+(const CG<Base>& left, const T& right) {
+template <class Base, class T>
+inline typename std::enable_if<std::is_constructible<Base, const T &>::value, CG<Base> >::type operator+(
+    const CG<Base> &left, const T &right) {
     return left + CG<Base>(Base(right));
 }
 
-template<class Base, class T>
-inline
-typename std::enable_if<std::is_constructible<Base, const T&>::value, CG<Base> >::type
-operator-(const T& left, const CG<Base>& right) {
+template <class Base, class T>
+inline typename std::enable_if<std::is_constructible<Base, const T &>::value, CG<Base> >::type operator-(
+    const T &left, const CG<Base> &right) {
     return CG<Base>(Base(left)) - right;
 }
 
-template<class Base, class T>
-inline
-typename std::enable_if<std::is_constructible<Base, const T&>::value, CG<Base> >::type
-operator-(const CG<Base>& left, const T& right) {
+template <class Base, class T>
+inline typename std::enable_if<std::is_constructible<Base, const T &>::value, CG<Base> >::type operator-(
+    const CG<Base> &left, const T &right) {
     return left - CG<Base>(Base(right));
 }
 
-template<class Base, class T>
-inline
-typename std::enable_if<std::is_constructible<Base, const T&>::value, CG<Base> >::type
-operator/(const T& left, const CG<Base>& right) {
+template <class Base, class T>
+inline typename std::enable_if<std::is_constructible<Base, const T &>::value, CG<Base> >::type operator/(
+    const T &left, const CG<Base> &right) {
     return CG<Base>(Base(left)) / right;
 }
 
-template<class Base, class T>
-inline
-typename std::enable_if<std::is_constructible<Base, const T&>::value, CG<Base> >::type
-operator/(const CG<Base>& left, const T& right) {
+template <class Base, class T>
+inline typename std::enable_if<std::is_constructible<Base, const T &>::value, CG<Base> >::type operator/(
+    const CG<Base> &left, const T &right) {
     return left / CG<Base>(Base(right));
 }
 
-template<class Base, class T>
-inline
-typename std::enable_if<std::is_constructible<Base, const T&>::value, CG<Base> >::type
-operator*(const T& left, const CG<Base>& right) {
+template <class Base, class T>
+inline typename std::enable_if<std::is_constructible<Base, const T &>::value, CG<Base> >::type operator*(
+    const T &left, const CG<Base> &right) {
     return CG<Base>(Base(left)) * right;
 }
 
-template<class Base, class T>
-inline
-typename std::enable_if<std::is_constructible<Base, const T&>::value, CG<Base> >::type
-operator*(const CG<Base>& left, const T& right) {
+template <class Base, class T>
+inline typename std::enable_if<std::is_constructible<Base, const T &>::value, CG<Base> >::type operator*(
+    const CG<Base> &left, const T &right) {
     return left * CG<Base>(Base(right));
 }
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif
-

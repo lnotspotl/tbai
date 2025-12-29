@@ -1,5 +1,5 @@
-# ifndef CPPAD_LOCAL_OP_CODE_DYN_HPP
-# define CPPAD_LOCAL_OP_CODE_DYN_HPP
+#ifndef CPPAD_LOCAL_OP_CODE_DYN_HPP
+#define CPPAD_LOCAL_OP_CODE_DYN_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -12,7 +12,8 @@ in the Eclipse Public License, Version 2.0 are satisfied:
       GNU General Public License, Version 2.0 or later.
 ---------------------------------------------------------------------------- */
 
-namespace CppAD { namespace local { // BEGIN_CPPAD_LOCAL_NAMESPACE
+namespace CppAD {
+namespace local {  // BEGIN_CPPAD_LOCAL_NAMESPACE
 /*!
 \file op_code_dyn.hpp
 Defines the op_code_dyn enum type
@@ -23,15 +24,15 @@ Defines the op_code_dyn enum type
 /// The following dynamic parameter operators as in the OpCode enum type:
 /// EqppOp, NeppOp, LtppOp, LeppOp
 enum op_code_dyn {
-    abs_dyn,       // abs(parameter)
-    acos_dyn,      // acos(parameter)
-    acosh_dyn,     // acosh(parameter)
-    add_dyn,       // parameter + parameter
-    asin_dyn,      // asin(parameter)
-    asinh_dyn,     // asinh(parameter)
-    atan_dyn,      // atan(parameter)
-    atanh_dyn,     // atanh(parameter)
-    call_dyn,      // atomic function call
+    abs_dyn,    // abs(parameter)
+    acos_dyn,   // acos(parameter)
+    acosh_dyn,  // acosh(parameter)
+    add_dyn,    // parameter + parameter
+    asin_dyn,   // asin(parameter)
+    asinh_dyn,  // asinh(parameter)
+    atan_dyn,   // atan(parameter)
+    atanh_dyn,  // atanh(parameter)
+    call_dyn,   // atomic function call
     // arg[0]     = atom_index for this function; see call_atomic.
     // arg[1]     = n ia number of arguments to this atomic function
     // arg[2]     = m is  number of results for this atomic function
@@ -67,105 +68,70 @@ enum op_code_dyn {
 // 2DO: Following operators in OpCode need to be extended to parameter only:
 // CExpOp, AFunOp
 
-
 /// number of arguments for each dynamic parameter operator
-inline size_t num_arg_dyn(op_code_dyn op)
-{   CPPAD_ASSERT_FIRST_CALL_NOT_PARALLEL;
+inline size_t num_arg_dyn(op_code_dyn op) {
+    CPPAD_ASSERT_FIRST_CALL_NOT_PARALLEL;
 
     static const size_t num_arg_table[] = {
-        1, // abs_dyn
-        1, // acos_dyn
-        1, // acosh_dyn
-        2, // add_dyn
-        1, // asin_dyn
-        1, // asinh_dyn
-        1, // atan_dyn
-        1, // atanh_dyn
-        0, // call_dyn: this operator has a variable number of arguments
-        5, // cond_exp_dyn
-        1, // cos_dyn
-        1, // cosh_dyn
-        2, // dis_dyn
-        2, // div_dyn
-        1, // erf_dyn
-        1, // exp_dyn
-        1, // expm1_dyn
-        1, // fabs_dyn
-        0, // ind_dyn
-        1, // log_dyn
-        1, // log1p_dyn
-        2, // mul_dyn
-        2, // pow_dyn
-        0, // result_dyn
-        1, // sign_dyn
-        1, // sin_dyn
-        1, // sinh_dyn
-        1, // sqrt_dyn
-        2, // sub_dyn
-        1, // tan_dyn
-        1, // tanh_dyn
-        2, // zmul_dyn
-        0  // number_dyn (not used)
+        1,  // abs_dyn
+        1,  // acos_dyn
+        1,  // acosh_dyn
+        2,  // add_dyn
+        1,  // asin_dyn
+        1,  // asinh_dyn
+        1,  // atan_dyn
+        1,  // atanh_dyn
+        0,  // call_dyn: this operator has a variable number of arguments
+        5,  // cond_exp_dyn
+        1,  // cos_dyn
+        1,  // cosh_dyn
+        2,  // dis_dyn
+        2,  // div_dyn
+        1,  // erf_dyn
+        1,  // exp_dyn
+        1,  // expm1_dyn
+        1,  // fabs_dyn
+        0,  // ind_dyn
+        1,  // log_dyn
+        1,  // log1p_dyn
+        2,  // mul_dyn
+        2,  // pow_dyn
+        0,  // result_dyn
+        1,  // sign_dyn
+        1,  // sin_dyn
+        1,  // sinh_dyn
+        1,  // sqrt_dyn
+        2,  // sub_dyn
+        1,  // tan_dyn
+        1,  // tanh_dyn
+        2,  // zmul_dyn
+        0   // number_dyn (not used)
     };
     static bool first = true;
-    if( first )
-    {   CPPAD_ASSERT_UNKNOWN(
-        size_t(number_dyn)+1 == sizeof(num_arg_table)/sizeof(num_arg_table[0])
-        );
+    if (first) {
+        CPPAD_ASSERT_UNKNOWN(size_t(number_dyn) + 1 == sizeof(num_arg_table) / sizeof(num_arg_table[0]));
         first = false;
     }
     return num_arg_table[op];
 }
 
 /// name for each operator
-inline const char* op_name_dyn(op_code_dyn op)
-{   CPPAD_ASSERT_FIRST_CALL_NOT_PARALLEL;
+inline const char *op_name_dyn(op_code_dyn op) {
+    CPPAD_ASSERT_FIRST_CALL_NOT_PARALLEL;
 
-    static const char* op_name_table[] = {
-        "abs",
-        "acos",
-        "acosh",
-        "add",
-        "asin",
-        "asinh",
-        "atan",
-        "atanh",
-        "call",
-        "cond_exp",
-        "cos",
-        "cosh",
-        "dis",
-        "div",
-        "erf",
-        "exp",
-        "expm1",
-        "fabs",
-        "ind",
-        "log",
-        "log1p",
-        "mul",
-        "pow",
-        "result",
-        "sign",
-        "sin",
-        "sinh",
-        "sqrt",
-        "sub",
-        "tan",
-        "tanh",
-        "zmul",
-        "number"
-    };
+    static const char *op_name_table[] = {
+        "abs",  "acos",   "acosh", "add", "asin", "asinh", "atan", "atanh", "call", "cond_exp", "cos",
+        "cosh", "dis",    "div",   "erf", "exp",  "expm1", "fabs", "ind",   "log",  "log1p",    "mul",
+        "pow",  "result", "sign",  "sin", "sinh", "sqrt",  "sub",  "tan",   "tanh", "zmul",     "number"};
     static bool first = true;
-    if( first )
-    {   CPPAD_ASSERT_UNKNOWN(
-        size_t(number_dyn)+1 == sizeof(op_name_table)/sizeof(op_name_table[0])
-        );
+    if (first) {
+        CPPAD_ASSERT_UNKNOWN(size_t(number_dyn) + 1 == sizeof(op_name_table) / sizeof(op_name_table[0]));
         first = false;
     }
     return op_name_table[op];
 }
 
-} } // END_CPPAD_LOCAL_NAMESPACE
+}  // namespace local
+}  // namespace CppAD
 
-# endif
+#endif

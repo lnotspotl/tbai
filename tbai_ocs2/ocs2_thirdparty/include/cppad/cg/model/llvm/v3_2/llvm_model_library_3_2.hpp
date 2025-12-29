@@ -19,34 +19,29 @@
 namespace CppAD {
 namespace cg {
 
-template<class Base> class LlvmModel;
+template <class Base>
+class LlvmModel;
 
 /**
  * Class used to load JIT'ed models by LLVM 3.2
  *
  * @author Joao Leal
  */
-template<class Base>
+template <class Base>
 class LlvmModelLibrary3_2 : public LlvmModelLibrary<Base> {
-protected:
-    llvm::Module* _module;
+   protected:
+    llvm::Module *_module;
     std::unique_ptr<llvm::LLVMContext> _context;
     std::unique_ptr<llvm::ExecutionEngine> _executionEngine;
     std::unique_ptr<llvm::FunctionPassManager> _fpm;
-public:
 
-    LlvmModelLibrary3_2(llvm::Module* module,
-                        llvm::LLVMContext* context) :
-        _module(module),
-        _context(context) {
+   public:
+    LlvmModelLibrary3_2(llvm::Module *module, llvm::LLVMContext *context) : _module(module), _context(context) {
         using namespace llvm;
 
         // Create the JIT.  This takes ownership of the module.
         std::string errStr;
-        _executionEngine.reset(EngineBuilder(_module)
-                               .setErrorStr(&errStr)
-                               .setEngineKind(EngineKind::JIT)
-                               .create());
+        _executionEngine.reset(EngineBuilder(_module).setErrorStr(&errStr).setEngineKind(EngineKind::JIT).create());
         if (!_executionEngine.get()) {
             throw CGException("Could not create ExecutionEngine: ", errStr);
         }
@@ -63,12 +58,10 @@ public:
         this->validate();
     }
 
-    LlvmModelLibrary3_2(const LlvmModelLibrary3_2&) = delete;
-    LlvmModelLibrary3_2& operator=(const LlvmModelLibrary3_2&) = delete;
+    LlvmModelLibrary3_2(const LlvmModelLibrary3_2 &) = delete;
+    LlvmModelLibrary3_2 &operator=(const LlvmModelLibrary3_2 &) = delete;
 
-    inline virtual ~LlvmModelLibrary3_2() {
-        this->cleanUp();
-    }
+    inline virtual ~LlvmModelLibrary3_2() { this->cleanUp(); }
 
     /**
      * Set up the optimizer pipeline
@@ -96,11 +89,10 @@ public:
          */
     }
 
-    void* loadFunction(const std::string& functionName, bool required = true) override {
-        llvm::Function* func = _module->getFunction(functionName);
+    void *loadFunction(const std::string &functionName, bool required = true) override {
+        llvm::Function *func = _module->getFunction(functionName);
         if (func == nullptr) {
-            if (required)
-                throw CGException("Unable to find function '", functionName, "' in LLVM module");
+            if (required) throw CGException("Unable to find function '", functionName, "' in LLVM module");
             return nullptr;
         }
 
@@ -117,10 +109,9 @@ public:
     }
 
     friend class LlvmModel<Base>;
-
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

@@ -37,7 +37,8 @@ namespace ocs2 {
 /******************************************************************************************************/
 /******************************************************************************************************/
 /***************************************************************************************************** */
-TargetTrajectories::TargetTrajectories(size_t size) : timeTrajectory(size), stateTrajectory(size), inputTrajectory(size) {}
+TargetTrajectories::TargetTrajectories(size_t size)
+    : timeTrajectory(size), stateTrajectory(size), inputTrajectory(size) {}
 
 /******************************************************************************************************/
 /******************************************************************************************************/
@@ -47,73 +48,73 @@ TargetTrajectories::TargetTrajectories(scalar_array_t desiredTimeTrajectory, vec
     : timeTrajectory(std::move(desiredTimeTrajectory)),
       stateTrajectory(std::move(desiredStateTrajectory)),
       inputTrajectory(std::move(desiredInputTrajectory)) {
-  assert(stateTrajectory.size() == timeTrajectory.size());
-  if (!inputTrajectory.empty()) {
-    assert(inputTrajectory.size() == timeTrajectory.size());
-  }
+    assert(stateTrajectory.size() == timeTrajectory.size());
+    if (!inputTrajectory.empty()) {
+        assert(inputTrajectory.size() == timeTrajectory.size());
+    }
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /***************************************************************************************************** */
 void TargetTrajectories::clear() {
-  timeTrajectory.clear();
-  stateTrajectory.clear();
-  inputTrajectory.clear();
+    timeTrajectory.clear();
+    stateTrajectory.clear();
+    inputTrajectory.clear();
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /***************************************************************************************************** */
-bool TargetTrajectories::operator==(const TargetTrajectories& other) {
-  return this->timeTrajectory == other.timeTrajectory && this->stateTrajectory == other.stateTrajectory &&
-         this->inputTrajectory == other.inputTrajectory;
+bool TargetTrajectories::operator==(const TargetTrajectories &other) {
+    return this->timeTrajectory == other.timeTrajectory && this->stateTrajectory == other.stateTrajectory &&
+           this->inputTrajectory == other.inputTrajectory;
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /***************************************************************************************************** */
 vector_t TargetTrajectories::getDesiredState(scalar_t time) const {
-  if (this->empty()) {
-    throw std::runtime_error("[TargetTrajectories] TargetTrajectories is empty!");
-  } else {
-    return LinearInterpolation::interpolate(time, timeTrajectory, stateTrajectory);
-  }
+    if (this->empty()) {
+        throw std::runtime_error("[TargetTrajectories] TargetTrajectories is empty!");
+    } else {
+        return LinearInterpolation::interpolate(time, timeTrajectory, stateTrajectory);
+    }
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /***************************************************************************************************** */
 vector_t TargetTrajectories::getDesiredInput(scalar_t time) const {
-  if (this->empty()) {
-    throw std::runtime_error("[TargetTrajectories] TargetTrajectories is empty!");
-  } else if (inputTrajectory.empty()) {
-    throw std::runtime_error("[TargetTrajectories] TargetTrajectories does not have inputTrajectory!");
-  } else {
-    return LinearInterpolation::interpolate(time, timeTrajectory, inputTrajectory);
-  }
+    if (this->empty()) {
+        throw std::runtime_error("[TargetTrajectories] TargetTrajectories is empty!");
+    } else if (inputTrajectory.empty()) {
+        throw std::runtime_error("[TargetTrajectories] TargetTrajectories does not have inputTrajectory!");
+    } else {
+        return LinearInterpolation::interpolate(time, timeTrajectory, inputTrajectory);
+    }
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /***************************************************************************************************** */
-void swap(TargetTrajectories& lh, TargetTrajectories& rh) {
-  lh.timeTrajectory.swap(rh.timeTrajectory);
-  lh.stateTrajectory.swap(rh.stateTrajectory);
-  lh.inputTrajectory.swap(rh.inputTrajectory);
+void swap(TargetTrajectories &lh, TargetTrajectories &rh) {
+    lh.timeTrajectory.swap(rh.timeTrajectory);
+    lh.stateTrajectory.swap(rh.stateTrajectory);
+    lh.inputTrajectory.swap(rh.inputTrajectory);
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /***************************************************************************************************** */
-std::ostream& operator<<(std::ostream& out, const TargetTrajectories& targetTrajectories) {
-  for (size_t i = 0; i < targetTrajectories.size(); i++) {
-    out << "time: " << targetTrajectories.timeTrajectory[i] << "\n";
-    out << "state: [" << toDelimitedString(targetTrajectories.stateTrajectory[i]) << "]\n";
-    out << "input: [" << toDelimitedString(targetTrajectories.inputTrajectory[i]) << "]\n";
-  }  // end of i loop
+std::ostream &operator<<(std::ostream &out, const TargetTrajectories &targetTrajectories) {
+    for (size_t i = 0; i < targetTrajectories.size(); i++) {
+        out << "time: " << targetTrajectories.timeTrajectory[i] << "\n";
+        out << "state: [" << toDelimitedString(targetTrajectories.stateTrajectory[i]) << "]\n";
+        out << "input: [" << toDelimitedString(targetTrajectories.inputTrajectory[i]) << "]\n";
+    }  // end of i loop
 
-  return out;
+    return out;
 }
 
 }  // namespace ocs2

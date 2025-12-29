@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_SPARSE_HESSIAN_HPP
-# define CPPAD_CORE_SPARSE_HESSIAN_HPP
+#ifndef CPPAD_CORE_SPARSE_HESSIAN_HPP
+#define CPPAD_CORE_SPARSE_HESSIAN_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -317,11 +317,11 @@ It returns $code true$$, for success, and $code false$$ otherwise.
 $end
 -----------------------------------------------------------------------------
 */
-# include <cppad/local/std_set.hpp>
-# include <cppad/local/color_general.hpp>
-# include <cppad/local/color_symmetric.hpp>
+#include <cppad/local/color_general.hpp>
+#include <cppad/local/color_symmetric.hpp>
+#include <cppad/local/std_set.hpp>
 
-namespace CppAD { // BEGIN_CPPAD_NAMESPACE
+namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
 /*!
 \file sparse_hessian.hpp
 Sparse Hessian driver routine and helper functions.
@@ -332,30 +332,29 @@ class used by SparseHessian to hold information
 so it does not need to be recomputed.
 */
 class sparse_hessian_work {
-    public:
-        /// Coloring method: "cppad", or "colpack"
-        /// (this field is set by user)
-        std::string color_method;
-        /// row and column indicies for return values
-        /// (some may be reflected by star coloring algorithm)
-        CppAD::vector<size_t> row;
-        CppAD::vector<size_t> col;
-        /// indices that sort the user row and col arrays by color
-        CppAD::vector<size_t> order;
-        /// results of the coloring algorithm
-        CppAD::vector<size_t> color;
+   public:
+    /// Coloring method: "cppad", or "colpack"
+    /// (this field is set by user)
+    std::string color_method;
+    /// row and column indicies for return values
+    /// (some may be reflected by star coloring algorithm)
+    CppAD::vector<size_t> row;
+    CppAD::vector<size_t> col;
+    /// indices that sort the user row and col arrays by color
+    CppAD::vector<size_t> order;
+    /// results of the coloring algorithm
+    CppAD::vector<size_t> color;
 
-        /// constructor
-        sparse_hessian_work(void) : color_method("cppad.symmetric")
-        { }
-        /// inform CppAD that this information needs to be recomputed
-        void clear(void)
-        {   color_method = "cppad.symmetric";
-            row.clear();
-            col.clear();
-            order.clear();
-            color.clear();
-        }
+    /// constructor
+    sparse_hessian_work(void) : color_method("cppad.symmetric") {}
+    /// inform CppAD that this information needs to be recomputed
+    void clear(void) {
+        color_method = "cppad.symmetric";
+        row.clear();
+        col.clear();
+        order.clear();
+        color.clear();
+    }
 };
 // ===========================================================================
 /*!
@@ -415,22 +414,16 @@ return value.
 */
 template <class Base, class RecBase>
 template <class BaseVector, class SetVector, class SizeVector>
-size_t ADFun<Base,RecBase>::SparseHessianCompute(
-    const BaseVector&           x           ,
-    const BaseVector&           w           ,
-          SetVector&            sparsity    ,
-    const SizeVector&           user_row    ,
-    const SizeVector&           user_col    ,
-          BaseVector&           hes         ,
-          sparse_hessian_work&  work        )
-{
-    using   CppAD::vectorBool;
+size_t ADFun<Base, RecBase>::SparseHessianCompute(const BaseVector &x, const BaseVector &w, SetVector &sparsity,
+                                                  const SizeVector &user_row, const SizeVector &user_col,
+                                                  BaseVector &hes, sparse_hessian_work &work) {
+    using CppAD::vectorBool;
     size_t i, k, ell;
 
-    CppAD::vector<size_t>& row(work.row);
-    CppAD::vector<size_t>& col(work.col);
-    CppAD::vector<size_t>& color(work.color);
-    CppAD::vector<size_t>& order(work.order);
+    CppAD::vector<size_t> &row(work.row);
+    CppAD::vector<size_t> &col(work.col);
+    CppAD::vector<size_t> &color(work.color);
+    CppAD::vector<size_t> &order(work.order);
 
     size_t n = Domain();
 
@@ -443,89 +436,70 @@ size_t ADFun<Base,RecBase>::SparseHessianCompute(
 
     // number of components of Hessian that are required
     size_t K = hes.size();
-    CPPAD_ASSERT_UNKNOWN( size_t( user_row.size() ) == K );
-    CPPAD_ASSERT_UNKNOWN( size_t( user_col.size() ) == K );
+    CPPAD_ASSERT_UNKNOWN(size_t(user_row.size()) == K);
+    CPPAD_ASSERT_UNKNOWN(size_t(user_col.size()) == K);
 
-    CPPAD_ASSERT_UNKNOWN( size_t(x.size()) == n );
-    CPPAD_ASSERT_UNKNOWN( color.size() == 0 || color.size() == n );
-    CPPAD_ASSERT_UNKNOWN( row.size() == 0   || row.size() == K );
-    CPPAD_ASSERT_UNKNOWN( col.size() == 0   || col.size() == K );
-
+    CPPAD_ASSERT_UNKNOWN(size_t(x.size()) == n);
+    CPPAD_ASSERT_UNKNOWN(color.size() == 0 || color.size() == n);
+    CPPAD_ASSERT_UNKNOWN(row.size() == 0 || row.size() == K);
+    CPPAD_ASSERT_UNKNOWN(col.size() == 0 || col.size() == K);
 
     // Point at which we are evaluating the Hessian
     Forward(0, x);
 
     // check for case where nothing (except Forward above) to do
-    if( K == 0 )
-        return 0;
+    if (K == 0) return 0;
 
     // Rows of the Hessian (i below) correspond to the forward mode index
     // and columns (j below) correspond to the reverse mode index.
-    if( color.size() == 0 )
-    {
-        CPPAD_ASSERT_UNKNOWN( sparsity.n_set() ==  n );
-        CPPAD_ASSERT_UNKNOWN( sparsity.end() ==  n );
+    if (color.size() == 0) {
+        CPPAD_ASSERT_UNKNOWN(sparsity.n_set() == n);
+        CPPAD_ASSERT_UNKNOWN(sparsity.end() == n);
 
         // copy user rwo and col to work space
         row.resize(K);
         col.resize(K);
-        for(k = 0; k < K; k++)
-        {   row[k] = user_row[k];
+        for (k = 0; k < K; k++) {
+            row[k] = user_row[k];
             col[k] = user_col[k];
         }
 
         // execute coloring algorithm
         color.resize(n);
-        if( work.color_method == "cppad.general" )
+        if (work.color_method == "cppad.general")
             local::color_general_cppad(sparsity, row, col, color);
-        else if( work.color_method == "cppad.symmetric" )
+        else if (work.color_method == "cppad.symmetric")
             local::color_symmetric_cppad(sparsity, row, col, color);
-        else if( work.color_method == "colpack.general" )
-        {
-# if CPPAD_HAS_COLPACK
+        else if (work.color_method == "colpack.general") {
+#if CPPAD_HAS_COLPACK
             local::color_general_colpack(sparsity, row, col, color);
-# else
-            CPPAD_ASSERT_KNOWN(
-                false,
-                "SparseHessian: work.color_method = colpack.general "
-                "and colpack_prefix missing from cmake command line."
-            );
-# endif
-        }
-        else if(
-            work.color_method == "colpack.symmetric" ||
-            work.color_method == "colpack.star"
-        )
-        {
-# if CPPAD_HAS_COLPACK
+#else
+            CPPAD_ASSERT_KNOWN(false,
+                               "SparseHessian: work.color_method = colpack.general "
+                               "and colpack_prefix missing from cmake command line.");
+#endif
+        } else if (work.color_method == "colpack.symmetric" || work.color_method == "colpack.star") {
+#if CPPAD_HAS_COLPACK
             local::color_symmetric_colpack(sparsity, row, col, color);
-# else
-            CPPAD_ASSERT_KNOWN(
-                false,
-                "SparseHessian: work.color_method is "
-                "colpack.symmetric or colpack.star\n"
-                "and colpack_prefix missing from cmake command line."
-            );
-# endif
-        }
-        else
-        {   CPPAD_ASSERT_KNOWN(
-                false,
-                "SparseHessian: work.color_method is not valid."
-            );
+#else
+            CPPAD_ASSERT_KNOWN(false,
+                               "SparseHessian: work.color_method is "
+                               "colpack.symmetric or colpack.star\n"
+                               "and colpack_prefix missing from cmake command line.");
+#endif
+        } else {
+            CPPAD_ASSERT_KNOWN(false, "SparseHessian: work.color_method is not valid.");
         }
 
         // put sorting indices in color order
         SizeVector key(K);
         order.resize(K);
-        for(k = 0; k < K; k++)
-            key[k] = color[ row[k] ];
+        for (k = 0; k < K; k++) key[k] = color[row[k]];
         index_sort(key, order);
-
     }
     size_t n_color = 1;
-    for(ell = 0; ell < n; ell++) if( color[ell] < n )
-        n_color = std::max(n_color, color[ell] + 1);
+    for (ell = 0; ell < n; ell++)
+        if (color[ell] < n) n_color = std::max(n_color, color[ell] + 1);
 
     // direction vector for calls to forward (rows of the Hessian)
     BaseVector u(n);
@@ -534,54 +508,42 @@ size_t ADFun<Base,RecBase>::SparseHessianCompute(
     BaseVector ddw(2 * n);
 
     // initialize the return value
-    for(k = 0; k < K; k++)
-        hes[k] = zero;
+    for (k = 0; k < K; k++) hes[k] = zero;
 
-    // loop over colors
-# ifndef NDEBUG
-    const std::string& coloring = work.color_method;
-# endif
+        // loop over colors
+#ifndef NDEBUG
+    const std::string &coloring = work.color_method;
+#endif
     k = 0;
-    for(ell = 0; ell < n_color; ell++)
-    if( k == K )
-    {   // kludge because colpack returns colors that are not used
-        // (it does not know about the subset corresponding to row, col)
-        CPPAD_ASSERT_UNKNOWN(
-            coloring == "colpack.general" ||
-            coloring == "colpack.symmetic" ||
-            coloring == "colpack.star"
-        );
-    }
-    else if( color[ row[ order[k] ] ] != ell )
-    {   // kludge because colpack returns colors that are not used
-        // (it does not know about the subset corresponding to row, col)
-        CPPAD_ASSERT_UNKNOWN(
-            coloring == "colpack.general" ||
-            coloring == "colpack.symmetic" ||
-            coloring == "colpack.star"
-        );
-    }
-    else
-    {   CPPAD_ASSERT_UNKNOWN( color[ row[ order[k] ] ] == ell );
+    for (ell = 0; ell < n_color; ell++)
+        if (k == K) {  // kludge because colpack returns colors that are not used
+            // (it does not know about the subset corresponding to row, col)
+            CPPAD_ASSERT_UNKNOWN(coloring == "colpack.general" || coloring == "colpack.symmetic" ||
+                                 coloring == "colpack.star");
+        } else if (color[row[order[k]]] != ell) {  // kludge because colpack returns colors that are not used
+            // (it does not know about the subset corresponding to row, col)
+            CPPAD_ASSERT_UNKNOWN(coloring == "colpack.general" || coloring == "colpack.symmetic" ||
+                                 coloring == "colpack.star");
+        } else {
+            CPPAD_ASSERT_UNKNOWN(color[row[order[k]]] == ell);
 
-        // combine all rows with this color
-        for(i = 0; i < n; i++)
-        {   u[i] = zero;
-            if( color[i] == ell )
-                u[i] = one;
+            // combine all rows with this color
+            for (i = 0; i < n; i++) {
+                u[i] = zero;
+                if (color[i] == ell) u[i] = one;
+            }
+            // call forward mode for all these rows at once
+            Forward(1, u);
+
+            // evaluate derivative of w^T * F'(x) * u
+            ddw = Reverse(2, w);
+
+            // set the corresponding components of the result
+            while (k < K && color[row[order[k]]] == ell) {
+                hes[order[k]] = ddw[col[order[k]] * 2 + 1];
+                k++;
+            }
         }
-        // call forward mode for all these rows at once
-        Forward(1, u);
-
-        // evaluate derivative of w^T * F'(x) * u
-        ddw = Reverse(2, w);
-
-        // set the corresponding components of the result
-        while( k < K && color[ row[ order[k] ] ] == ell )
-        {   hes[ order[k] ] = ddw[ col[ order[k] ] * 2 + 1 ];
-            k++;
-        }
-    }
     return n_color;
 }
 // ===========================================================================
@@ -649,59 +611,36 @@ return value.
 */
 template <class Base, class RecBase>
 template <class BaseVector, class SetVector, class SizeVector>
-size_t ADFun<Base,RecBase>::SparseHessian(
-    const BaseVector&     x    ,
-    const BaseVector&     w    ,
-    const SetVector&      p    ,
-    const SizeVector&     row  ,
-    const SizeVector&     col  ,
-    BaseVector&           hes  ,
-    sparse_hessian_work&  work )
-{
-    size_t n    = Domain();
-    size_t K    = hes.size();
-# ifndef NDEBUG
+size_t ADFun<Base, RecBase>::SparseHessian(const BaseVector &x, const BaseVector &w, const SetVector &p,
+                                           const SizeVector &row, const SizeVector &col, BaseVector &hes,
+                                           sparse_hessian_work &work) {
+    size_t n = Domain();
+    size_t K = hes.size();
+#ifndef NDEBUG
     size_t k;
-    CPPAD_ASSERT_KNOWN(
-        size_t(x.size()) == n ,
-        "SparseHessian: size of x not equal domain dimension for f."
-    );
-    CPPAD_ASSERT_KNOWN(
-        size_t(row.size()) == K && size_t(col.size()) == K ,
-        "SparseHessian: either r or c does not have the same size as ehs."
-    );
-    CPPAD_ASSERT_KNOWN(
-        work.color.size() == 0 || work.color.size() == n,
-        "SparseHessian: invalid value in work."
-    );
-    for(k = 0; k < K; k++)
-    {   CPPAD_ASSERT_KNOWN(
-            row[k] < n,
-            "SparseHessian: invalid value in r."
-        );
-        CPPAD_ASSERT_KNOWN(
-            col[k] < n,
-            "SparseHessian: invalid value in c."
-        );
+    CPPAD_ASSERT_KNOWN(size_t(x.size()) == n, "SparseHessian: size of x not equal domain dimension for f.");
+    CPPAD_ASSERT_KNOWN(size_t(row.size()) == K && size_t(col.size()) == K,
+                       "SparseHessian: either r or c does not have the same size as ehs.");
+    CPPAD_ASSERT_KNOWN(work.color.size() == 0 || work.color.size() == n, "SparseHessian: invalid value in work.");
+    for (k = 0; k < K; k++) {
+        CPPAD_ASSERT_KNOWN(row[k] < n, "SparseHessian: invalid value in r.");
+        CPPAD_ASSERT_KNOWN(col[k] < n, "SparseHessian: invalid value in c.");
     }
-    if( work.color.size() != 0 )
-        for(size_t j = 0; j < n; j++) CPPAD_ASSERT_KNOWN(
-            work.color[j] <= n,
-            "SparseHessian: invalid value in work."
-    );
-# endif
+    if (work.color.size() != 0)
+        for (size_t j = 0; j < n; j++) CPPAD_ASSERT_KNOWN(work.color[j] <= n, "SparseHessian: invalid value in work.");
+#endif
     // check for case where there is nothing to compute
     size_t n_sweep = 0;
-    if( K == 0 )
-        return n_sweep;
+    if (K == 0) return n_sweep;
 
     typedef typename SetVector::value_type Set_type;
     typedef typename local::internal_sparsity<Set_type>::pattern_type Pattern_type;
     Pattern_type s;
-    if( work.color.size() == 0 )
-    {   bool transpose = false;
-        const char* error_msg = "SparseHessian: sparsity pattern"
-        " does not have proper row or column dimension";
+    if (work.color.size() == 0) {
+        bool transpose = false;
+        const char *error_msg =
+            "SparseHessian: sparsity pattern"
+            " does not have proper row or column dimension";
         sparsity_user2internal(s, p, n, n, transpose, error_msg);
     }
     n_sweep = SparseHessianCompute(x, w, s, row, col, hes, work);
@@ -746,43 +685,38 @@ at the point specified by x
 */
 template <class Base, class RecBase>
 template <class BaseVector, class SetVector>
-BaseVector ADFun<Base,RecBase>::SparseHessian(
-    const BaseVector& x, const BaseVector& w, const SetVector& p
-)
-{   size_t i, j, k;
+BaseVector ADFun<Base, RecBase>::SparseHessian(const BaseVector &x, const BaseVector &w, const SetVector &p) {
+    size_t i, j, k;
 
     size_t n = Domain();
     BaseVector hes(n * n);
 
-    CPPAD_ASSERT_KNOWN(
-        size_t(x.size()) == n,
-        "SparseHessian: size of x not equal domain size for f."
-    );
+    CPPAD_ASSERT_KNOWN(size_t(x.size()) == n, "SparseHessian: size of x not equal domain size for f.");
 
     typedef typename SetVector::value_type Set_type;
     typedef typename local::internal_sparsity<Set_type>::pattern_type Pattern_type;
 
     // initialize the return value as zero
     Base zero(0);
-    for(i = 0; i < n; i++)
-        for(j = 0; j < n; j++)
-            hes[i * n + j] = zero;
+    for (i = 0; i < n; i++)
+        for (j = 0; j < n; j++) hes[i * n + j] = zero;
 
     // arguments to SparseHessianCompute
-    Pattern_type          s;
+    Pattern_type s;
     CppAD::vector<size_t> row;
     CppAD::vector<size_t> col;
-    sparse_hessian_work   work;
+    sparse_hessian_work work;
     bool transpose = false;
-    const char* error_msg = "SparseHessian: sparsity pattern"
-    " does not have proper row or column dimension";
+    const char *error_msg =
+        "SparseHessian: sparsity pattern"
+        " does not have proper row or column dimension";
     sparsity_user2internal(s, p, n, n, transpose, error_msg);
     k = 0;
-    for(i = 0; i < n; i++)
-    {   typename Pattern_type::const_iterator itr(s, i);
+    for (i = 0; i < n; i++) {
+        typename Pattern_type::const_iterator itr(s, i);
         j = *itr;
-        while( j != s.end() )
-        {   row.push_back(i);
+        while (j != s.end()) {
+            row.push_back(i);
             col.push_back(j);
             k++;
             j = *(++itr);
@@ -795,8 +729,7 @@ BaseVector ADFun<Base,RecBase>::SparseHessian(
     SparseHessianCompute(x, w, s, row, col, H, work);
 
     // now set the non-zero return values
-    for(k = 0; k < K; k++)
-        hes[ row[k] * n + col[k] ] = H[k];
+    for (k = 0; k < K; k++) hes[row[k] * n + col[k]] = H[k];
 
     return hes;
 }
@@ -832,8 +765,8 @@ at the point specified by x
 */
 template <class Base, class RecBase>
 template <class BaseVector>
-BaseVector ADFun<Base,RecBase>::SparseHessian(const BaseVector &x, const BaseVector &w)
-{   size_t i, j, k;
+BaseVector ADFun<Base, RecBase>::SparseHessian(const BaseVector &x, const BaseVector &w) {
+    size_t i, j, k;
     typedef CppAD::vectorBool BoolVector;
 
     size_t m = Range();
@@ -841,21 +774,19 @@ BaseVector ADFun<Base,RecBase>::SparseHessian(const BaseVector &x, const BaseVec
 
     // determine the sparsity pattern p for Hessian of w^T F
     BoolVector r(n * n);
-    for(j = 0; j < n; j++)
-    {   for(k = 0; k < n; k++)
-            r[j * n + k] = false;
+    for (j = 0; j < n; j++) {
+        for (k = 0; k < n; k++) r[j * n + k] = false;
         r[j * n + j] = true;
     }
     ForSparseJac(n, r);
     //
     BoolVector s(m);
-    for(i = 0; i < m; i++)
-        s[i] = w[i] != 0;
+    for (i = 0; i < m; i++) s[i] = w[i] != 0;
     BoolVector p = RevSparseHes(n, s);
 
     // compute sparse Hessian
     return SparseHessian(x, w, p);
 }
 
-} // END_CPPAD_NAMESPACE
-# endif
+}  // namespace CppAD
+#endif

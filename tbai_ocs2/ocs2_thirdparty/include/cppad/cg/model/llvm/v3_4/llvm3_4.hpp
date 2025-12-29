@@ -18,7 +18,7 @@
 /**
  * LLVM requires the use of it own flags which can make it difficult to compile
  * libraries not using NDEBUG often required by LLVM.
- * The define LLVM_CPPFLAG_NDEBUG can be used to apply NDEBUG only to LLVM 
+ * The define LLVM_CPPFLAG_NDEBUG can be used to apply NDEBUG only to LLVM
  * headers.
  */
 #ifdef LLVM_WITH_NDEBUG
@@ -36,22 +36,22 @@
 
 #endif
 
+#include <llvm/ADT/OwningPtr.h>
 #include <llvm/Analysis/Passes.h>
 #include <llvm/Analysis/Verifier.h>
+#include <llvm/Bitcode/ReaderWriter.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/ExecutionEngine/JIT.h>
-#include <llvm/PassManager.h>
-#include <llvm/IR/Module.h>
 #include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/Linker.h>
 #include <llvm/Pass.h>
-#include <llvm/Transforms/IPO/PassManagerBuilder.h>
-#include <llvm/ADT/OwningPtr.h>
-#include <llvm/Bitcode/ReaderWriter.h>
+#include <llvm/PassManager.h>
 #include <llvm/Support/ManagedStatic.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Support/system_error.h>
-#include <llvm/Linker.h>
+#include <llvm/Transforms/IPO/PassManagerBuilder.h>
 
 #ifdef LLVM_WITH_NDEBUG
 
@@ -68,8 +68,8 @@
 #endif
 
 #include <cppad/cg/model/compiler/clang_compiler.hpp>
-#include <cppad/cg/model/llvm/llvm_model_library.hpp>
 #include <cppad/cg/model/llvm/llvm_model.hpp>
+#include <cppad/cg/model/llvm/llvm_model_library.hpp>
 #include <cppad/cg/model/llvm/v3_4/llvm_model_library_3_4.hpp>
 #include <cppad/cg/model/llvm/v3_4/llvm_model_library_processor.hpp>
 

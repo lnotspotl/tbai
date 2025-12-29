@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_ARITHMETIC_HPP
-# define CPPAD_CORE_ARITHMETIC_HPP
+#ifndef CPPAD_CORE_ARITHMETIC_HPP
+#define CPPAD_CORE_ARITHMETIC_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -34,9 +34,9 @@ $childtable%
 $end
 -------------------------------------------------------------------------------
 */
-# include <cppad/core/unary_plus.hpp>
-# include <cppad/core/unary_minus.hpp>
-# include <cppad/core/ad_binary.hpp>
-# include <cppad/core/compound_assign.hpp>
+#include <cppad/core/ad_binary.hpp>
+#include <cppad/core/compound_assign.hpp>
+#include <cppad/core/unary_minus.hpp>
+#include <cppad/core/unary_plus.hpp>
 
-# endif
+#endif

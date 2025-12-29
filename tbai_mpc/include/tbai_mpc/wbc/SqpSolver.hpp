@@ -15,5 +15,5 @@ class SqpSolver {
     vector_t solveSqp(const Task &weightedTasks, const Task &constraints, bool &isStable);
 };
 
-}  // namespace wbc
+}  // namespace mpc
 }  // namespace tbai

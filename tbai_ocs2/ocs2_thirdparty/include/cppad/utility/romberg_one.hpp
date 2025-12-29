@@ -1,5 +1,5 @@
-# ifndef CPPAD_UTILITY_ROMBERG_ONE_HPP
-# define CPPAD_UTILITY_ROMBERG_ONE_HPP
+#ifndef CPPAD_UTILITY_ROMBERG_ONE_HPP
+#define CPPAD_UTILITY_ROMBERG_ONE_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -140,73 +140,59 @@ $code cppad/romberg_one.hpp$$.
 $end
 */
 
-# include <cppad/utility/check_numeric_type.hpp>
-# include <cppad/core/cppad_assert.hpp>
-# include <cppad/utility/vector.hpp>
+#include <cppad/core/cppad_assert.hpp>
+#include <cppad/utility/check_numeric_type.hpp>
+#include <cppad/utility/vector.hpp>
 
-namespace CppAD { // BEGIN CppAD namespace
+namespace CppAD {  // BEGIN CppAD namespace
 
 template <class Fun, class Float>
-Float RombergOne(
-    Fun           &F ,
-    const Float   &a ,
-    const Float   &b ,
-    size_t         n ,
-    size_t         p ,
-    Float         &e )
-{
+Float RombergOne(Fun &F, const Float &a, const Float &b, size_t n, size_t p, Float &e) {
     size_t ipow2 = 1;
     size_t k, i;
     Float pow2, sum, x;
 
-    Float  zero  = Float(0);
-    Float  two   = Float(2);
+    Float zero = Float(0);
+    Float two = Float(2);
 
     // check specifications for a NumericType
     CheckNumericType<Float>();
 
-    CPPAD_ASSERT_KNOWN(
-        n >= 2,
-        "RombergOne: n must be greater than or equal 2"
-    );
+    CPPAD_ASSERT_KNOWN(n >= 2, "RombergOne: n must be greater than or equal 2");
     CppAD::vector<Float> r(n);
 
     //  set r[i] = trapazoidal rule with 2^i intervals in [a, b]
-    r[0]  = ( F(a) + F(b) ) * (b - a) / two;
-    for(i = 1; i < n; i++)
-    {   ipow2 *= 2;
+    r[0] = (F(a) + F(b)) * (b - a) / two;
+    for (i = 1; i < n; i++) {
+        ipow2 *= 2;
         // there must be a conversion from int to any numeric type
-        pow2   = Float(int(ipow2));
-        sum    = zero;
-        for(k = 1; k < ipow2; k += 2)
-        {   // start = a + (b-a)/pow2, increment = 2*(b-a)/pow2
-            x    = ( (pow2 - Float(double(k))) * a + double(k) * b ) / pow2;
-            sum  = sum + F(x);
+        pow2 = Float(int(ipow2));
+        sum = zero;
+        for (k = 1; k < ipow2; k += 2) {  // start = a + (b-a)/pow2, increment = 2*(b-a)/pow2
+            x = ((pow2 - Float(double(k))) * a + double(k) * b) / pow2;
+            sum = sum + F(x);
         }
         // combine function evaluations in sum with those in T[i-1]
-        r[i] = r[i-1] / two + sum * (b - a) / pow2;
+        r[i] = r[i - 1] / two + sum * (b - a) / pow2;
     }
 
     // now compute the higher order estimates
-    size_t ipow4    = 1;   // order of accuract for previous estimate
+    size_t ipow4 = 1;  // order of accuract for previous estimate
     Float pow4, pow4minus;
-    for(i = 0; i < p; i++)
-    {   // compute estimate accurate to O[ step^(2*(i+1)) ]
+    for (i = 0; i < p; i++) {  // compute estimate accurate to O[ step^(2*(i+1)) ]
         // put resutls in r[n-1], r[n-2], ... , r[n-i+1]
-        ipow4    *= 4;
-        pow4      = Float(int(ipow4));
-        pow4minus = Float(ipow4-1);
-        for(k = n-1; k > i; k--)
-            r[k] = ( pow4 * r[k] - r[k-1] ) / pow4minus;
+        ipow4 *= 4;
+        pow4 = Float(int(ipow4));
+        pow4minus = Float(ipow4 - 1);
+        for (k = n - 1; k > i; k--) r[k] = (pow4 * r[k] - r[k - 1]) / pow4minus;
     }
 
     // error estimate for r[n]
-    e = r[n-1] - r[n-2];
-    if( e < zero )
-        e = - e;
-    return r[n-1];
+    e = r[n - 1] - r[n - 2];
+    if (e < zero) e = -e;
+    return r[n - 1];
 }
 
-} // END CppAD namespace
+}  // namespace CppAD
 
-# endif
+#endif

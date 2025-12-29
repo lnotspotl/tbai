@@ -28,94 +28,94 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************/
 
 #include <ocs2_core/loopshaping/LoopshapingPreComputation.h>
-#include <ocs2_core/loopshaping/constraint/LoopshapingStateConstraint.h>
-
 #include <ocs2_core/loopshaping/constraint/LoopshapingConstraintEliminatePattern.h>
 #include <ocs2_core/loopshaping/constraint/LoopshapingConstraintOutputPattern.h>
+#include <ocs2_core/loopshaping/constraint/LoopshapingStateConstraint.h>
 
 namespace ocs2 {
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-vector_array_t LoopshapingStateConstraint::getValue(scalar_t t, const vector_t& x, const PreComputation& preComp) const {
-  if (this->empty()) {
-    return vector_array_t();
-  }
+vector_array_t LoopshapingStateConstraint::getValue(scalar_t t, const vector_t &x,
+                                                    const PreComputation &preComp) const {
+    if (this->empty()) {
+        return vector_array_t();
+    }
 
-  const LoopshapingPreComputation& preCompLS = cast<LoopshapingPreComputation>(preComp);
-  const auto& x_system = preCompLS.getSystemState();
-  const auto& preComp_system = preCompLS.getSystemPreComputation();
+    const LoopshapingPreComputation &preCompLS = cast<LoopshapingPreComputation>(preComp);
+    const auto &x_system = preCompLS.getSystemState();
+    const auto &preComp_system = preCompLS.getSystemPreComputation();
 
-  return StateConstraintCollection::getValue(t, x_system, preComp_system);
+    return StateConstraintCollection::getValue(t, x_system, preComp_system);
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-VectorFunctionLinearApproximation LoopshapingStateConstraint::getLinearApproximation(scalar_t t, const vector_t& x,
-                                                                                     const PreComputation& preComp) const {
-  if (this->empty()) {
-    return VectorFunctionLinearApproximation::Zero(0, x.rows());
-  }
+VectorFunctionLinearApproximation LoopshapingStateConstraint::getLinearApproximation(
+    scalar_t t, const vector_t &x, const PreComputation &preComp) const {
+    if (this->empty()) {
+        return VectorFunctionLinearApproximation::Zero(0, x.rows());
+    }
 
-  const LoopshapingPreComputation& preCompLS = cast<LoopshapingPreComputation>(preComp);
-  const auto& x_system = preCompLS.getSystemState();
-  const auto& preComp_system = preCompLS.getSystemPreComputation();
-  const auto stateDim = x.rows();
-  const auto sysStateDim = x_system.rows();
-  const auto filtStateDim = x.rows() - sysStateDim;
+    const LoopshapingPreComputation &preCompLS = cast<LoopshapingPreComputation>(preComp);
+    const auto &x_system = preCompLS.getSystemState();
+    const auto &preComp_system = preCompLS.getSystemPreComputation();
+    const auto stateDim = x.rows();
+    const auto sysStateDim = x_system.rows();
+    const auto filtStateDim = x.rows() - sysStateDim;
 
-  // Not const so we can move
-  auto c_system = StateConstraintCollection::getLinearApproximation(t, x_system, preComp_system);
-  const auto numConstraints = c_system.f.rows();
+    // Not const so we can move
+    auto c_system = StateConstraintCollection::getLinearApproximation(t, x_system, preComp_system);
+    const auto numConstraints = c_system.f.rows();
 
-  VectorFunctionLinearApproximation c;
+    VectorFunctionLinearApproximation c;
 
-  c.f = std::move(c_system.f);
+    c.f = std::move(c_system.f);
 
-  c.dfdx.resize(numConstraints, stateDim);
-  c.dfdx.leftCols(sysStateDim) = c_system.dfdx;
-  c.dfdx.rightCols(filtStateDim).setZero();
+    c.dfdx.resize(numConstraints, stateDim);
+    c.dfdx.leftCols(sysStateDim) = c_system.dfdx;
+    c.dfdx.rightCols(filtStateDim).setZero();
 
-  return c;
+    return c;
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-VectorFunctionQuadraticApproximation LoopshapingStateConstraint::getQuadraticApproximation(scalar_t t, const vector_t& x,
-                                                                                           const PreComputation& preComp) const {
-  if (this->empty()) {
-    return VectorFunctionQuadraticApproximation::Zero(0, x.rows());
-  }
+VectorFunctionQuadraticApproximation LoopshapingStateConstraint::getQuadraticApproximation(
+    scalar_t t, const vector_t &x, const PreComputation &preComp) const {
+    if (this->empty()) {
+        return VectorFunctionQuadraticApproximation::Zero(0, x.rows());
+    }
 
-  const LoopshapingPreComputation& preCompLS = cast<LoopshapingPreComputation>(preComp);
-  const auto& x_system = preCompLS.getSystemState();
-  const auto& preComp_system = preCompLS.getSystemPreComputation();
-  const auto stateDim = x.rows();
-  const auto sysStateDim = x_system.rows();
-  const auto filtStateDim = x.rows() - sysStateDim;
+    const LoopshapingPreComputation &preCompLS = cast<LoopshapingPreComputation>(preComp);
+    const auto &x_system = preCompLS.getSystemState();
+    const auto &preComp_system = preCompLS.getSystemPreComputation();
+    const auto stateDim = x.rows();
+    const auto sysStateDim = x_system.rows();
+    const auto filtStateDim = x.rows() - sysStateDim;
 
-  // Not const so we can move
-  const auto c_system = StateConstraintCollection::getQuadraticApproximation(t, x_system, preComp_system);
-  const auto numConstraints = c_system.f.rows();
+    // Not const so we can move
+    const auto c_system = StateConstraintCollection::getQuadraticApproximation(t, x_system, preComp_system);
+    const auto numConstraints = c_system.f.rows();
 
-  VectorFunctionQuadraticApproximation c;
+    VectorFunctionQuadraticApproximation c;
 
-  c.f = std::move(c_system.f);
+    c.f = std::move(c_system.f);
 
-  c.dfdx.resize(numConstraints, stateDim);
-  c.dfdx.leftCols(sysStateDim) = c_system.dfdx;
-  c.dfdx.rightCols(filtStateDim).setZero();
+    c.dfdx.resize(numConstraints, stateDim);
+    c.dfdx.leftCols(sysStateDim) = c_system.dfdx;
+    c.dfdx.rightCols(filtStateDim).setZero();
 
-  c.dfdxx.resize(numConstraints);
-  for (size_t i = 0; i < numConstraints; i++) {
-    c.dfdxx[i].setZero(stateDim, stateDim);
-    c.dfdxx[i].topLeftCorner(sysStateDim, sysStateDim) = c_system.dfdxx[i];
-  }
+    c.dfdxx.resize(numConstraints);
+    for (size_t i = 0; i < numConstraints; i++) {
+        c.dfdxx[i].setZero(stateDim, stateDim);
+        c.dfdxx[i].topLeftCorner(sysStateDim, sysStateDim) = c_system.dfdxx[i];
+    }
 
-  return c;
+    return c;
 }
 
 }  // namespace ocs2

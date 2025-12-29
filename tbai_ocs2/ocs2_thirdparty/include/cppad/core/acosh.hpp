@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_ACOSH_HPP
-# define CPPAD_CORE_ACOSH_HPP
+#ifndef CPPAD_CORE_ACOSH_HPP
+#define CPPAD_CORE_ACOSH_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -62,33 +62,36 @@ contains an example and test of this function.
 $end
 -------------------------------------------------------------------------------
 */
-# include <cppad/configure.hpp>
-# if ! CPPAD_USE_CPLUSPLUS_2011
+#include <cppad/configure.hpp>
+#if !CPPAD_USE_CPLUSPLUS_2011
 
 // BEGIN CppAD namespace
 namespace CppAD {
 
 template <class Type>
-Type acosh_template(const Type &x)
-{   return CppAD::log( x + CppAD::sqrt( x * x - Type(1) ) );
+Type acosh_template(const Type &x) {
+    return CppAD::log(x + CppAD::sqrt(x * x - Type(1)));
 }
 
-inline float acosh(const float &x)
-{   return acosh_template(x); }
+inline float acosh(const float &x) {
+    return acosh_template(x);
+}
 
-inline double acosh(const double &x)
-{   return acosh_template(x); }
-
-template <class Base>
-AD<Base> acosh(const AD<Base> &x)
-{   return acosh_template(x); }
+inline double acosh(const double &x) {
+    return acosh_template(x);
+}
 
 template <class Base>
-AD<Base> acosh(const VecAD_reference<Base> &x)
-{   return acosh_template( x.ADBase() ); }
+AD<Base> acosh(const AD<Base> &x) {
+    return acosh_template(x);
+}
 
+template <class Base>
+AD<Base> acosh(const VecAD_reference<Base> &x) {
+    return acosh_template(x.ADBase());
+}
 
-} // END CppAD namespace
+}  // namespace CppAD
 
-# endif // CPPAD_USE_CPLUSPLUS_2011
-# endif // CPPAD_ACOSH_INCLUDED
+#endif  // CPPAD_USE_CPLUSPLUS_2011
+#endif  // CPPAD_ACOSH_INCLUDED

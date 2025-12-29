@@ -39,24 +39,24 @@ namespace LoopshapingCost {
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-std::unique_ptr<StateCostCollection> create(const StateCostCollection& systemCost,
+std::unique_ptr<StateCostCollection> create(const StateCostCollection &systemCost,
                                             std::shared_ptr<LoopshapingDefinition> loopshapingDefinition) {
-  return std::make_unique<LoopshapingStateCost>(systemCost, std::move(loopshapingDefinition));
+    return std::make_unique<LoopshapingStateCost>(systemCost, std::move(loopshapingDefinition));
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-std::unique_ptr<StateInputCostCollection> create(const StateInputCostCollection& systemCost,
+std::unique_ptr<StateInputCostCollection> create(const StateInputCostCollection &systemCost,
                                                  std::shared_ptr<LoopshapingDefinition> loopshapingDefinition) {
-  switch (loopshapingDefinition->getType()) {
-    case LoopshapingType::outputpattern:
-      return std::make_unique<LoopshapingCostOutputPattern>(systemCost, std::move(loopshapingDefinition));
-    case LoopshapingType::eliminatepattern:
-      return std::make_unique<LoopshapingCostEliminatePattern>(systemCost, std::move(loopshapingDefinition));
-    default:
-      throw std::runtime_error("[LoopshapingStateInputCost::create] invalid loopshaping type");
-  }
+    switch (loopshapingDefinition->getType()) {
+        case LoopshapingType::outputpattern:
+            return std::make_unique<LoopshapingCostOutputPattern>(systemCost, std::move(loopshapingDefinition));
+        case LoopshapingType::eliminatepattern:
+            return std::make_unique<LoopshapingCostEliminatePattern>(systemCost, std::move(loopshapingDefinition));
+        default:
+            throw std::runtime_error("[LoopshapingStateInputCost::create] invalid loopshaping type");
+    }
 }
 
 }  // namespace LoopshapingCost

@@ -1,5 +1,5 @@
-# ifndef CPPAD_IPOPT_SOLVE_RESULT_HPP
-# define CPPAD_IPOPT_SOLVE_RESULT_HPP
+#ifndef CPPAD_IPOPT_SOLVE_RESULT_HPP
+#define CPPAD_IPOPT_SOLVE_RESULT_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-16 Bradley M. Bell
 
@@ -12,7 +12,7 @@ in the Eclipse Public License, Version 2.0 are satisfied:
       GNU General Public License, Version 2.0 or later.
 ---------------------------------------------------------------------------- */
 
-namespace CppAD { // BEGIN_CPPAD_NAMESPACE
+namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
 namespace ipopt {
 /*!
 \file solve_result.hpp
@@ -26,9 +26,8 @@ Class that contains information about solve problem result
 a simple vector with elements of type double
 */
 template <class Dvector>
-class solve_result
-{
-public:
+class solve_result {
+   public:
     /// possible values for the result status
     enum status_type {
         not_defined,
@@ -63,11 +62,10 @@ public:
     /// value of f(x)
     double obj_value;
     /// constructor initializes solution status as not yet defined
-    solve_result(void)
-    {   status = not_defined; }
+    solve_result(void) { status = not_defined; }
 };
 
-} // end namespace ipopt
-} // END_CPPAD_NAMESPACE
+}  // end namespace ipopt
+}  // namespace CppAD
 
-# endif
+#endif

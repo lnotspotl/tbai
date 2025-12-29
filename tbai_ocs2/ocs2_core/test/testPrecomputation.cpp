@@ -28,49 +28,49 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************/
 
 #include <gtest/gtest.h>
-
 #include <ocs2_core/ComputationRequest.h>
 #include <ocs2_core/PreComputation.h>
 
 using Request = ocs2::Request;
 
 TEST(testPrecomputation, convenientInterface) {
-  // Check that this compiles
-  ocs2::PreComputation preComputation;
-  preComputation.request(Request::Dynamics + Request::Approximation, 0.0, ocs2::vector_t(), ocs2::vector_t());
-  preComputation.requestPreJump(Request::Dynamics + Request::Approximation, 0.0, ocs2::vector_t());
-  preComputation.requestFinal(Request::Approximation, 0.0, ocs2::vector_t());
+    // Check that this compiles
+    ocs2::PreComputation preComputation;
+    preComputation.request(Request::Dynamics + Request::Approximation, 0.0, ocs2::vector_t(), ocs2::vector_t());
+    preComputation.requestPreJump(Request::Dynamics + Request::Approximation, 0.0, ocs2::vector_t());
+    preComputation.requestFinal(Request::Approximation, 0.0, ocs2::vector_t());
 }
 
 TEST(testPrecomputation, containts) {
-  constexpr auto request = Request::Dynamics + Request::Cost + Request::Constraint + Request::SoftConstraint + Request::Approximation;
-  ASSERT_TRUE(request.contains(Request::Dynamics));
-  ASSERT_TRUE(request.contains(Request::Cost));
-  ASSERT_TRUE(request.contains(Request::Constraint));
-  ASSERT_TRUE(request.contains(Request::SoftConstraint));
-  ASSERT_TRUE(request.contains(Request::Approximation));
+    constexpr auto request =
+        Request::Dynamics + Request::Cost + Request::Constraint + Request::SoftConstraint + Request::Approximation;
+    ASSERT_TRUE(request.contains(Request::Dynamics));
+    ASSERT_TRUE(request.contains(Request::Cost));
+    ASSERT_TRUE(request.contains(Request::Constraint));
+    ASSERT_TRUE(request.contains(Request::SoftConstraint));
+    ASSERT_TRUE(request.contains(Request::Approximation));
 
-  constexpr ocs2::RequestSet request2 = Request::Dynamics;
-  ASSERT_TRUE(request2.contains(Request::Dynamics));
-  ASSERT_FALSE(request2.contains(Request::Cost));
-  ASSERT_FALSE(request2.contains(Request::Constraint));
-  ASSERT_FALSE(request2.contains(Request::SoftConstraint));
-  ASSERT_FALSE(request2.contains(Request::Approximation));
+    constexpr ocs2::RequestSet request2 = Request::Dynamics;
+    ASSERT_TRUE(request2.contains(Request::Dynamics));
+    ASSERT_FALSE(request2.contains(Request::Cost));
+    ASSERT_FALSE(request2.contains(Request::Constraint));
+    ASSERT_FALSE(request2.contains(Request::SoftConstraint));
+    ASSERT_FALSE(request2.contains(Request::Approximation));
 
-  constexpr auto request3 = Request::Cost + Request::Constraint;
-  ASSERT_FALSE(request3.contains(Request::Dynamics));
-  ASSERT_TRUE(request3.contains(Request::Constraint));
-  ASSERT_TRUE(request3.contains(Request::Cost));
-  ASSERT_FALSE(request3.contains(Request::SoftConstraint));
-  ASSERT_FALSE(request3.contains(Request::Approximation));
+    constexpr auto request3 = Request::Cost + Request::Constraint;
+    ASSERT_FALSE(request3.contains(Request::Dynamics));
+    ASSERT_TRUE(request3.contains(Request::Constraint));
+    ASSERT_TRUE(request3.contains(Request::Cost));
+    ASSERT_FALSE(request3.contains(Request::SoftConstraint));
+    ASSERT_FALSE(request3.contains(Request::Approximation));
 }
 
 TEST(testPrecomputation, containtsAnyAll) {
-  constexpr auto request1 = Request::Dynamics + Request::Cost;
-  constexpr auto request2 = Request::Constraint + Request::Cost;
-  ASSERT_TRUE(request1.containsAny(request2));
-  ASSERT_FALSE(request1.containsAll(request2));
+    constexpr auto request1 = Request::Dynamics + Request::Cost;
+    constexpr auto request2 = Request::Constraint + Request::Cost;
+    ASSERT_TRUE(request1.containsAny(request2));
+    ASSERT_FALSE(request1.containsAll(request2));
 
-  constexpr auto request3 = Request::Constraint + Request::Cost + Request::Approximation;
-  ASSERT_TRUE(request3.containsAll(request2));
+    constexpr auto request3 = Request::Constraint + Request::Cost + Request::Approximation;
+    ASSERT_TRUE(request3.containsAll(request2));
 }

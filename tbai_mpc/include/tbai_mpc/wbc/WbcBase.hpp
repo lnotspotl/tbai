@@ -8,9 +8,9 @@
 #include <string>
 #include <vector>
 
+#include <tbai_core/control/Controllers.hpp>
 #include <tbai_mpc/quadruped_mpc/quadruped_models/QuadrupedCom.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_models/QuadrupedKinematics.h>
-#include <tbai_core/control/Controllers.hpp>
 #include <tbai_mpc/wbc/Task.hpp>
 
 namespace tbai {
@@ -109,5 +109,5 @@ class WbcBase {
     std::unique_ptr<switched_model::KinematicsModelBase<scalar_t>> kinematicsPtr_;
 };
 
-}  // namespace wbc
+}  // namespace mpc
 }  // namespace tbai

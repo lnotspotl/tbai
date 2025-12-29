@@ -1,5 +1,5 @@
-# ifndef CPPAD_LOCAL_OPTIMIZE_GET_CEXP_INFO_HPP
-# define CPPAD_LOCAL_OPTIMIZE_GET_CEXP_INFO_HPP
+#ifndef CPPAD_LOCAL_OPTIMIZE_GET_CEXP_INFO_HPP
+#define CPPAD_LOCAL_OPTIMIZE_GET_CEXP_INFO_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -16,12 +16,14 @@ in the Eclipse Public License, Version 2.0 are satisfied:
 Create operator information tables
 */
 
-# include <cppad/local/optimize/match_op.hpp>
-# include <cppad/local/optimize/cexp_info.hpp>
-# include <cppad/local/optimize/usage.hpp>
+#include <cppad/local/optimize/cexp_info.hpp>
+#include <cppad/local/optimize/match_op.hpp>
+#include <cppad/local/optimize/usage.hpp>
 
 // BEGIN_CPPAD_LOCAL_OPTIMIZE_NAMESPACE
-namespace CppAD { namespace local { namespace optimize {
+namespace CppAD {
+namespace local {
+namespace optimize {
 
 /*!
 Convert conditional expression skip information from sets for each
@@ -96,32 +98,23 @@ the i-th operator in the operation sequence.
 */
 
 template <class Addr, class Base>
-void get_cexp_info(
-    const player<Base>*                         play                ,
-    const play::const_random_iterator<Addr>&    random_itr          ,
-    const pod_vector<addr_t>&                   op_previous         ,
-    const pod_vector<usage_t>&                  op_usage            ,
-    const pod_vector<addr_t>&                   cexp2op             ,
-    const sparse_list&                          cexp_set            ,
-    vector<struct_cexp_info>&                   cexp_info           ,
-    sparse_list&                                skip_op_true        ,
-    sparse_list&                                skip_op_false       )
-{
-    CPPAD_ASSERT_UNKNOWN( cexp_set.n_set() > 0  );
-    CPPAD_ASSERT_UNKNOWN( cexp_info.size() == 0 );
+void get_cexp_info(const player<Base> *play, const play::const_random_iterator<Addr> &random_itr,
+                   const pod_vector<addr_t> &op_previous, const pod_vector<usage_t> &op_usage,
+                   const pod_vector<addr_t> &cexp2op, const sparse_list &cexp_set, vector<struct_cexp_info> &cexp_info,
+                   sparse_list &skip_op_true, sparse_list &skip_op_false) {
+    CPPAD_ASSERT_UNKNOWN(cexp_set.n_set() > 0);
+    CPPAD_ASSERT_UNKNOWN(cexp_info.size() == 0);
 
     // number of operators in the tape
     const size_t num_op = play->num_op_rec();
-    CPPAD_ASSERT_UNKNOWN( op_usage.size() == num_op );
-    CPPAD_ASSERT_UNKNOWN( op_previous.size() == num_op );
+    CPPAD_ASSERT_UNKNOWN(op_usage.size() == num_op);
+    CPPAD_ASSERT_UNKNOWN(op_previous.size() == num_op);
     //
     // number of conditional expressions in the tape
     size_t num_cexp_op = cexp2op.size();
     //
     // initialize mapping from variable index to operator index
-    CPPAD_ASSERT_UNKNOWN(
-        size_t( std::numeric_limits<addr_t>::max() ) >= num_op
-    );
+    CPPAD_ASSERT_UNKNOWN(size_t(std::numeric_limits<addr_t>::max()) >= num_op);
     // ----------------------------------------------------------------------
     // compute cexp_info
     // ----------------------------------------------------------------------
@@ -131,93 +124,85 @@ void get_cexp_info(
     skip_op_true.resize(num_cexp_op, num_op);
     skip_op_false.resize(num_cexp_op, num_op);
     //
-    for(size_t i = 0; i < num_cexp_op; i++)
-    {   size_t i_op = size_t( cexp2op[i] );
-        CPPAD_ASSERT_UNKNOWN(
-            op_previous[i_op] == 0 || op_usage[i_op] == usage_t(yes_usage)
-        );
-        OpCode        op;     // operator
-        const addr_t* arg;    // arguments
-        size_t        i_var;  // variable index of first result
+    for (size_t i = 0; i < num_cexp_op; i++) {
+        size_t i_op = size_t(cexp2op[i]);
+        CPPAD_ASSERT_UNKNOWN(op_previous[i_op] == 0 || op_usage[i_op] == usage_t(yes_usage));
+        OpCode op;          // operator
+        const addr_t *arg;  // arguments
+        size_t i_var;       // variable index of first result
         random_itr.op_info(i_op, op, arg, i_var);
-        CPPAD_ASSERT_UNKNOWN( op == CExpOp );
+        CPPAD_ASSERT_UNKNOWN(op == CExpOp);
         //
         struct_cexp_info info;
-        info.i_op       = addr_t(i_op);
-        info.cop        = CompareOp( arg[0] );
-        info.flag       = static_cast<unsigned char>(arg[1]);
-        info.left       = arg[2];
-        info.right      = arg[3];
+        info.i_op = addr_t(i_op);
+        info.cop = CompareOp(arg[0]);
+        info.flag = static_cast<unsigned char>(arg[1]);
+        info.left = arg[2];
+        info.right = arg[3];
         //
         // max_left_right
-        addr_t index    = 0;
-        if( arg[1] & 1 )
-            index = std::max(index, info.left);
-        if( arg[1] & 2 )
-            index = std::max(index, info.right);
-        CPPAD_ASSERT_UNKNOWN( index > 0 );
+        addr_t index = 0;
+        if (arg[1] & 1) index = std::max(index, info.left);
+        if (arg[1] & 2) index = std::max(index, info.right);
+        CPPAD_ASSERT_UNKNOWN(index > 0);
         info.max_left_right = index;
         //
         cexp_info[i] = info;
     };
     // Determine which operators can be conditionally skipped
     size_t i_op = 0;
-    while(i_op < num_op)
-    {   size_t j_op = i_op;
+    while (i_op < num_op) {
+        size_t j_op = i_op;
         bool keep = op_usage[i_op] != usage_t(no_usage);
-        keep     &= op_usage[i_op] != usage_t(csum_usage);
-        keep     &= op_previous[i_op] == 0;
-        if( keep )
-        {   sparse_list_const_iterator itr(cexp_set, i_op);
-            if( *itr != cexp_set.end() )
-            {   if( play->GetOp(i_op) == AFunOp )
-                {   // i_op is the first operations in this atomic function call.
+        keep &= op_usage[i_op] != usage_t(csum_usage);
+        keep &= op_previous[i_op] == 0;
+        if (keep) {
+            sparse_list_const_iterator itr(cexp_set, i_op);
+            if (*itr != cexp_set.end()) {
+                if (play->GetOp(i_op) == AFunOp) {  // i_op is the first operations in this atomic function call.
                     // Find the last operation in this call.
                     ++j_op;
-                    while( play->GetOp(j_op) != AFunOp )
-                    {   switch( play->GetOp(j_op) )
-                        {   case FunapOp:
+                    while (play->GetOp(j_op) != AFunOp) {
+                        switch (play->GetOp(j_op)) {
+                            case FunapOp:
                             case FunavOp:
                             case FunrpOp:
                             case FunrvOp:
-                            break;
+                                break;
 
                             default:
-                            CPPAD_ASSERT_UNKNOWN(false);
+                                CPPAD_ASSERT_UNKNOWN(false);
                         }
                         ++j_op;
                     }
                 }
             }
-            while( *itr != cexp_set.end() )
-            {   size_t element = *itr;
-                size_t index   = element / 2;
-                bool   compare = bool( element % 2 );
-                if( compare == false )
-                {   // cexp_info[index].skip_op_false.push_back(i_op);
+            while (*itr != cexp_set.end()) {
+                size_t element = *itr;
+                size_t index = element / 2;
+                bool compare = bool(element % 2);
+                if (compare == false) {  // cexp_info[index].skip_op_false.push_back(i_op);
                     skip_op_false.add_element(index, i_op);
-                    if( j_op != i_op )
-                    {   // cexp_info[index].skip_op_false.push_back(j_op);
+                    if (j_op != i_op) {  // cexp_info[index].skip_op_false.push_back(j_op);
                         skip_op_false.add_element(index, j_op);
                     }
-                }
-                else
-                {   // cexp_info[index].skip_op_true.push_back(i_op);
+                } else {  // cexp_info[index].skip_op_true.push_back(i_op);
                     skip_op_true.add_element(index, i_op);
-                    if( j_op != i_op )
-                    {   // cexp_info[index].skip_op_true.push_back(j_op);
+                    if (j_op != i_op) {  // cexp_info[index].skip_op_true.push_back(j_op);
                         skip_op_true.add_element(index, j_op);
                     }
                 }
                 ++itr;
             }
         }
-        CPPAD_ASSERT_UNKNOWN( i_op <= j_op );
+        CPPAD_ASSERT_UNKNOWN(i_op <= j_op);
         i_op += (1 + j_op) - i_op;
     }
     return;
 }
 
-} } } // END_CPPAD_LOCAL_OPTIMIZE_NAMESPACE
+}  // namespace optimize
+}  // namespace local
+}  // namespace CppAD
 
-# endif
+#endif

@@ -19,48 +19,33 @@ namespace CppAD {
 namespace cg {
 
 class ArArchiver : public Archiver {
-protected:
-    std::string _arPath; // the path to the ar executable
+   protected:
+    std::string _arPath;  // the path to the ar executable
     std::vector<std::string> _flags;
     bool _verbose;
-public:
 
-    inline ArArchiver() :
-        _arPath("/usr/bin/ar"),
-        _verbose(false) {
-    }
+   public:
+    inline ArArchiver() : _arPath("/usr/bin/ar"), _verbose(false) {}
 
-    inline ArArchiver(const std::string& arPath) :
-        _arPath(arPath),
-        _verbose(false) {
-    }
+    inline ArArchiver(const std::string &arPath) : _arPath(arPath), _verbose(false) {}
 
-    inline virtual bool isVerbose() const {
-        return _verbose;
-    }
+    inline virtual bool isVerbose() const { return _verbose; }
 
-    inline virtual void setVerbose(bool verbose) {
-        _verbose = verbose;
-    }
+    inline virtual void setVerbose(bool verbose) { _verbose = verbose; }
 
-    inline const std::vector<std::string>& getFlags() const {
-        return _flags;
-    }
+    inline const std::vector<std::string> &getFlags() const { return _flags; }
 
-    inline void setFlags(const std::vector<std::string>& flags) {
-        _flags = flags;
-    }
+    inline void setFlags(const std::vector<std::string> &flags) { _flags = flags; }
 
-    inline virtual void create(const std::string& library,
-                               const std::set<std::string>& objectFiles,
-                               JobTimer* timer = nullptr) {
+    inline virtual void create(const std::string &library, const std::set<std::string> &objectFiles,
+                               JobTimer *timer = nullptr) {
         // backup output format so that it can be restored
         OStreamConfigRestore coutb(std::cout);
 
         std::vector<std::string> args;
         args.push_back("rcs");
         args.insert(args.end(), _flags.begin(), _flags.end());
-        args.push_back(library); // Output file name
+        args.push_back(library);  // Output file name
         args.insert(args.end(), objectFiles.begin(), objectFiles.end());
 
         if (timer != nullptr) {
@@ -75,10 +60,9 @@ public:
             timer->finishedJob();
         }
     }
-
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

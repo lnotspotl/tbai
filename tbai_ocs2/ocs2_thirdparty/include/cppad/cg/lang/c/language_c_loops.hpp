@@ -19,17 +19,17 @@
 namespace CppAD {
 namespace cg {
 
-template<class Base>
-void LanguageC<Base>::pushLoopIndexedDep(OperationNode <Base>& node) {
-    CPPADCG_ASSERT_KNOWN(node.getArguments().size() >= 1, "Invalid number of arguments for loop indexed dependent operation")
+template <class Base>
+void LanguageC<Base>::pushLoopIndexedDep(OperationNode<Base> &node) {
+    CPPADCG_ASSERT_KNOWN(node.getArguments().size() >= 1,
+                         "Invalid number of arguments for loop indexed dependent operation")
 
     // LoopIndexedDep
     push(node.getArguments()[0]);
 }
 
-template<class Base>
-size_t LanguageC<Base>::printLoopIndexDeps(const std::vector<OperationNode<Base>*>& variableOrder,
-                                           size_t pos) {
+template <class Base>
+size_t LanguageC<Base>::printLoopIndexDeps(const std::vector<OperationNode<Base> *> &variableOrder, size_t pos) {
     CPPADCG_ASSERT_KNOWN(pos < variableOrder.size(), "Invalid number of arguments for array creation operation")
     CPPADCG_ASSERT_KNOWN(variableOrder[pos]->getOperationType() == CGOpCode::LoopIndexedDep, "Invalid operation type")
 
@@ -54,23 +54,24 @@ size_t LanguageC<Base>::printLoopIndexDeps(const std::vector<OperationNode<Base>
     return vSize - 1;
 }
 
-template<class Base>
-inline size_t LanguageC<Base>::printLoopIndexedDepsUsingLoop(const std::vector<OperationNode<Base>*>& variableOrder,
+template <class Base>
+inline size_t LanguageC<Base>::printLoopIndexedDepsUsingLoop(const std::vector<OperationNode<Base> *> &variableOrder,
                                                              size_t starti) {
     CPPADCG_ASSERT_KNOWN(variableOrder[starti] != nullptr, "Invalid node")
-    CPPADCG_ASSERT_KNOWN(variableOrder[starti]->getOperationType() == CGOpCode::LoopIndexedDep, "Invalid operation type")
+    CPPADCG_ASSERT_KNOWN(variableOrder[starti]->getOperationType() == CGOpCode::LoopIndexedDep,
+                         "Invalid operation type")
 
     const size_t vSize = variableOrder.size();
 
-    const OperationNode<Base>& ref = *variableOrder[starti];
+    const OperationNode<Base> &ref = *variableOrder[starti];
 
-    const IndexPattern* refIp = _info->loopDependentIndexPatterns[ref.getInfo()[0]];
+    const IndexPattern *refIp = _info->loopDependentIndexPatterns[ref.getInfo()[0]];
     size_t refAssignOrAdd = ref.getInfo()[1];
 
     /**
      * Check that the assigned value is from an array
      */
-    const OperationNode<Base>* refLeft = ref.getArguments()[0].getOperation();
+    const OperationNode<Base> *refLeft = ref.getArguments()[0].getOperation();
     if (refLeft == nullptr) {
         return starti;
     } else if (refLeft->getOperationType() != CGOpCode::ArrayElement) {
@@ -80,54 +81,48 @@ inline size_t LanguageC<Base>::printLoopIndexedDepsUsingLoop(const std::vector<O
     /**
      * check that the type of index pattern can be used within a loop
      */
-    const LinearIndexPattern* refLIp = nullptr;
-    const SectionedIndexPattern* refSecp = nullptr;
+    const LinearIndexPattern *refLIp = nullptr;
+    const SectionedIndexPattern *refSecp = nullptr;
 
     if (refIp->getType() == IndexPatternType::Linear) {
-        refLIp = static_cast<const LinearIndexPattern*> (refIp);
+        refLIp = static_cast<const LinearIndexPattern *>(refIp);
     } else if (refIp->getType() == IndexPatternType::Sectioned) {
-        refSecp = static_cast<const SectionedIndexPattern*> (refIp);
+        refSecp = static_cast<const SectionedIndexPattern *>(refIp);
     } else {
-        return starti; // cannot determine consecutive elements
+        return starti;  // cannot determine consecutive elements
     }
 
     /**
      * Find last compatible variable in variableOrder
      */
-    const OperationNode<Base>* refArray = refLeft->getArguments()[0].getOperation();
+    const OperationNode<Base> *refArray = refLeft->getArguments()[0].getOperation();
     const size_t startArrayIndex = refLeft->getInfo()[0];
 
     size_t i = starti + 1;
 
     for (; i < vSize; i++) {
-        OperationNode<Base>* node = variableOrder[i];
-        if (node->getOperationType() != CGOpCode::LoopIndexedDep)
-            break;
+        OperationNode<Base> *node = variableOrder[i];
+        if (node->getOperationType() != CGOpCode::LoopIndexedDep) break;
 
-        const OperationNode<Base>* nodeLeft = variableOrder[i]->getArguments()[0].getOperation();
-        if (nodeLeft->getOperationType() != CGOpCode::ArrayElement)
-            break;
+        const OperationNode<Base> *nodeLeft = variableOrder[i]->getArguments()[0].getOperation();
+        if (nodeLeft->getOperationType() != CGOpCode::ArrayElement) break;
 
-        const OperationNode<Base>* arrayi = nodeLeft->getArguments()[0].getOperation();
-        if (arrayi != refArray)
-            break;
+        const OperationNode<Base> *arrayi = nodeLeft->getArguments()[0].getOperation();
+        if (arrayi != refArray) break;
 
         long offset = long(i) - long(starti);
 
-        if (nodeLeft->getInfo()[0] != startArrayIndex + offset)
-            break;
+        if (nodeLeft->getInfo()[0] != startArrayIndex + offset) break;
 
-        if (node->getInfo()[1] != refAssignOrAdd)
-            break;
+        if (node->getInfo()[1] != refAssignOrAdd) break;
 
-        const IndexPattern* ip = _info->loopDependentIndexPatterns[node->getInfo()[0]];
+        const IndexPattern *ip = _info->loopDependentIndexPatterns[node->getInfo()[0]];
         if (!isOffsetBy(ip, refIp, offset)) {
-            break; // different pattern type
+            break;  // different pattern type
         }
     }
 
-    if (i - starti < 3)
-        return starti; // no point in looping for 2 elements
+    if (i - starti < 3) return starti;  // no point in looping for 2 elements
 
     /**
      * Create the dependent variable name with the new index pattern
@@ -140,12 +135,14 @@ inline size_t LanguageC<Base>::printLoopIndexedDepsUsingLoop(const std::vector<O
         p2dip.reset(encapsulateIndexPattern(*refSecp, 0));
     }
 
-    std::unique_ptr<OperationNode<Base>> op2(OperationNode<Base>::makeTemporaryNode(CGOpCode::LoopIndexedDep, ref.getInfo(), ref.getArguments()));
-    op2->getInfo()[1] = (std::numeric_limits<size_t>::max)(); // just to be safe (this would be the index pattern id in the handler)
+    std::unique_ptr<OperationNode<Base>> op2(
+        OperationNode<Base>::makeTemporaryNode(CGOpCode::LoopIndexedDep, ref.getInfo(), ref.getArguments()));
+    op2->getInfo()[1] =
+        (std::numeric_limits<size_t>::max)();  // just to be safe (this would be the index pattern id in the handler)
     op2->getArguments().push_back(_info->auxIterationIndexOp);
 
     std::ostringstream rightAssign;
-    
+
     rightAssign << _nameGen->generateIndexedDependent(*op2, 0, *p2dip);
 
     /**
@@ -172,8 +169,7 @@ inline size_t LanguageC<Base>::printLoopIndexedDepsUsingLoop(const std::vector<O
     return i - 1;
 }
 
-
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

@@ -22,44 +22,30 @@ namespace cg {
  * A very simple logger
  */
 class SimpleLogger {
-protected:
+   protected:
     // verbosity level
     Verbosity verbosity_;
     // output stream used for logging
-    std::ostream* log_;
-public:
+    std::ostream *log_;
 
+   public:
     /**
      * Creates a new simple logger
      */
-    inline SimpleLogger() :
-            verbosity_(Verbosity::None),
-            log_(&std::cout) {
-    }
+    inline SimpleLogger() : verbosity_(Verbosity::None), log_(&std::cout) {}
 
-    inline virtual ~SimpleLogger() {
-    }
+    inline virtual ~SimpleLogger() {}
 
-    inline std::ostream& log() const {
-        return *log_;
-    }
+    inline std::ostream &log() const { return *log_; }
 
-    inline void setLog(std::ostream& out) {
-        log_ = &out;
-    }
+    inline void setLog(std::ostream &out) { log_ = &out; }
 
-    inline void setVerbosity(Verbosity verbosity) {
-        verbosity_ = verbosity;
-    }
+    inline void setVerbosity(Verbosity verbosity) { verbosity_ = verbosity; }
 
-    inline Verbosity getVerbosity() const {
-        return verbosity_;
-    }
-
+    inline Verbosity getVerbosity() const { return verbosity_; }
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
-#endif	
-
+#endif

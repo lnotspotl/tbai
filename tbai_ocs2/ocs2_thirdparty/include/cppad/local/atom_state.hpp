@@ -1,5 +1,5 @@
-# ifndef CPPAD_LOCAL_ATOM_STATE_HPP
-# define CPPAD_LOCAL_ATOM_STATE_HPP
+#ifndef CPPAD_LOCAL_ATOM_STATE_HPP
+#define CPPAD_LOCAL_ATOM_STATE_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-16 Bradley M. Bell
 
@@ -12,7 +12,8 @@ in the Eclipse Public License, Version 2.0 are satisfied:
       GNU General Public License, Version 2.0 or later.
 ---------------------------------------------------------------------------- */
 
-namespace CppAD { namespace local { // BEGIN_CPPAD_LOCAL_NAMESPACE
+namespace CppAD {
+namespace local {  // BEGIN_CPPAD_LOCAL_NAMESPACE
 
 enum enum_atom_state {
     /// next AFunOp marks beginning of a atomic function call
@@ -28,5 +29,6 @@ enum enum_atom_state {
     end_atom
 };
 
-} } // END_CPPAD_LOCAL_NAMESPACE
-# endif
+}
+}  // namespace CppAD
+#endif

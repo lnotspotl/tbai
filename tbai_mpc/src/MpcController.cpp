@@ -4,20 +4,17 @@
 
 #include "tbai_mpc/MpcController.hpp"
 
-#include <tbai_mpc/quadruped_mpc/core/MotionPhaseDefinition.h>
-#include <tbai_core/Rotations.hpp>
-#include <tbai_core/Throws.hpp>
-#include <tbai_mpc/quadruped_mpc/quadruped_interfaces/Interfaces.h>
-#include <tbai_mpc/wbc/Factory.hpp>
-#include <tbai_core/Utils.hpp>
-
-
 #include <ocs2_ddp/DDP_Settings.h>
 #include <ocs2_mpc/MPC_BASE.h>
 #include <ocs2_mpc/MPC_Settings.h>
 #include <ocs2_sqp/SqpSettings.h>
-
+#include <tbai_core/Rotations.hpp>
+#include <tbai_core/Throws.hpp>
+#include <tbai_core/Utils.hpp>
 #include <tbai_mpc/quadruped_mpc/QuadrupedMpc.h>
+#include <tbai_mpc/quadruped_mpc/core/MotionPhaseDefinition.h>
+#include <tbai_mpc/quadruped_mpc/quadruped_interfaces/Interfaces.h>
+#include <tbai_mpc/wbc/Factory.hpp>
 
 namespace tbai {
 namespace mpc {
@@ -25,7 +22,7 @@ namespace mpc {
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
-MpcController::MpcController(const std::shared_ptr<tbai::StateSubscriber>& stateSubscriberPtr,
+MpcController::MpcController(const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
                              std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> velocityGeneratorPtr)
     : stateSubscriberPtr_(stateSubscriberPtr), velocityGeneratorPtr_(std::move(velocityGeneratorPtr)) {
     logger_ = tbai::getLogger("mpc_controller");
@@ -35,9 +32,9 @@ MpcController::MpcController(const std::shared_ptr<tbai::StateSubscriber>& state
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
-void MpcController::initialize(const std::string& urdfString, const std::string& taskSettingsFile,
-                               const std::string& frameDeclarationFile, const std::string& controllerConfigFile,
-                               const std::string& targetCommandFile, scalar_t trajdt, size_t trajKnots) {
+void MpcController::initialize(const std::string &urdfString, const std::string &taskSettingsFile,
+                               const std::string &frameDeclarationFile, const std::string &controllerConfigFile,
+                               const std::string &targetCommandFile, scalar_t trajdt, size_t trajKnots) {
     // Create quadruped interface
     // quadrupedInterfacePtr_ =
     //     anymal::getAnymalInterface(urdfString, switched_model::loadQuadrupedSettings(taskSettingsFile),
@@ -45,11 +42,11 @@ void MpcController::initialize(const std::string& urdfString, const std::string&
 
     quadrupedInterfacePtr_ =
         anymal::getGo2Interface(urdfString, switched_model::loadQuadrupedSettings(taskSettingsFile),
-                                    anymal::frameDeclarationFromFile(frameDeclarationFile));
+                                anymal::frameDeclarationFromFile(frameDeclarationFile));
     // Create WBC
-    wbcPtr_ = tbai::mpc::getWbcUnique(controllerConfigFile, urdfString, quadrupedInterfacePtr_->getComModel(),
-                                           quadrupedInterfacePtr_->getKinematicModel(),
-                                           quadrupedInterfacePtr_->getJointNames());
+    wbcPtr_ =
+        tbai::mpc::getWbcUnique(controllerConfigFile, urdfString, quadrupedInterfacePtr_->getComModel(),
+                                quadrupedInterfacePtr_->getKinematicModel(), quadrupedInterfacePtr_->getJointNames());
 
     // Create reference trajectory generator
     auto kinematicsPtr = std::shared_ptr<switched_model::KinematicsModelBase<scalar_t>>(
@@ -73,7 +70,6 @@ std::unique_ptr<ocs2::MPC_BASE> MpcController::createMpcInterface() {
     // auto mpcSettings = ocs2::mpc::Settings();
     // return getSqpMpc(*quadrupedInterfacePtr_, mpcSettings, sqpSettings);
 }
-
 
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
@@ -142,8 +138,7 @@ void MpcController::referenceThreadLoop() {
         TBAI_LOG_WARN_THROTTLE(logger_, 0.005, "Reference thread loop");
         // Generate and publish reference trajectory
         auto observation = generateSystemObservation();
-        auto targetTrajectories =
-            referenceTrajectoryGeneratorPtr_->generateReferenceTrajectory(tNow_, observation);
+        auto targetTrajectories = referenceTrajectoryGeneratorPtr_->generateReferenceTrajectory(tNow_, observation);
         mrtPtr_->setTargetTrajectories(targetTrajectories);
 
         TBAI_LOG_INFO_THROTTLE(logger_, 5.0, "Publishing reference");
@@ -176,7 +171,7 @@ bool MpcController::checkStability() const {
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
-void MpcController::changeController(const std::string& controllerType, scalar_t currentTime) {
+void MpcController::changeController(const std::string &controllerType, scalar_t currentTime) {
     preStep(currentTime, 0.0);
 
     if (!mrt_initialized_ || currentTime + 0.1 > mrtPtr_->getPolicy().timeTrajectory_.back()) {
@@ -195,7 +190,6 @@ void MpcController::changeController(const std::string& controllerType, scalar_t
 void MpcController::startReferenceThread() {
     // Stop existing thread if running
     stopReferenceThread();
-
 
     TBAI_LOG_WARN(logger_, "Starting reference thread");
     stopReferenceThread_ = false;
@@ -216,7 +210,7 @@ void MpcController::stopReferenceThread() {
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
-bool MpcController::isSupported(const std::string& controllerType) {
+bool MpcController::isSupported(const std::string &controllerType) {
     return controllerType == "WBC";
 }
 
@@ -256,14 +250,14 @@ void MpcController::setObservation() {
 /*********************************************************************************************************************/
 ocs2::SystemObservation MpcController::generateSystemObservation() const {
     auto state = stateSubscriberPtr_->getLatestState();
-    const tbai::vector_t& rbdState = state.x;
+    const tbai::vector_t &rbdState = state.x;
 
     // Set observation time
     ocs2::SystemObservation observation;
     observation.time = state.timestamp - initTime_;
 
     // Set mode
-    const std::vector<bool>& contactFlags = state.contactFlags;
+    const std::vector<bool> &contactFlags = state.contactFlags;
     std::array<bool, 4> contactFlagsArray = {contactFlags[0], contactFlags[1], contactFlags[2], contactFlags[3]};
     observation.mode = switched_model::stanceLeg2ModeNumber(contactFlagsArray);
 

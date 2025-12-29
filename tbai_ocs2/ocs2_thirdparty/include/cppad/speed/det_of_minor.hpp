@@ -1,5 +1,5 @@
-# ifndef CPPAD_SPEED_DET_OF_MINOR_HPP
-# define CPPAD_SPEED_DET_OF_MINOR_HPP
+#ifndef CPPAD_SPEED_DET_OF_MINOR_HPP
+#define CPPAD_SPEED_DET_OF_MINOR_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -209,24 +209,18 @@ $end
 ---------------------------------------------------------------------------
 */
 // BEGIN C++
-# include <vector>
-# include <cstddef>
+#include <cstddef>
+#include <vector>
 
-namespace CppAD { // BEGIN CppAD namespace
+namespace CppAD {  // BEGIN CppAD namespace
 template <class Scalar>
-Scalar det_of_minor(
-    const std::vector<Scalar>& a  ,
-    size_t                     m  ,
-    size_t                     n  ,
-    std::vector<size_t>&       r  ,
-    std::vector<size_t>&       c  )
-{
-    const size_t R0 = r[m]; // R(0)
-    size_t       Cj = c[m]; // C(j)    (case j = 0)
-    size_t       Cj1 = m;   // C(j-1)  (case j = 0)
+Scalar det_of_minor(const std::vector<Scalar> &a, size_t m, size_t n, std::vector<size_t> &r, std::vector<size_t> &c) {
+    const size_t R0 = r[m];  // R(0)
+    size_t Cj = c[m];        // C(j)    (case j = 0)
+    size_t Cj1 = m;          // C(j-1)  (case j = 0)
 
     // check for 1 by 1 case
-    if( n == 1 ) return a[ R0 * m + Cj ];
+    if (n == 1) return a[R0 * m + Cj];
 
     // initialize determinant of the minor M
     Scalar detM = Scalar(0);
@@ -238,9 +232,8 @@ Scalar det_of_minor(
     r[m] = r[R0];
 
     // for each column of M
-    for(size_t j = 0; j < n; j++)
-    {   // element with index (0,j) in the minor M
-        Scalar M0j = a[ R0 * m + Cj ];
+    for (size_t j = 0; j < n; j++) {  // element with index (0,j) in the minor M
+        Scalar M0j = a[R0 * m + Cj];
 
         // remove column with index j in M to form next sub-minor S of M
         c[Cj1] = c[Cj];
@@ -252,15 +245,15 @@ Scalar det_of_minor(
         c[Cj1] = Cj;
 
         // include this sub-minor term in the summation
-        if( s > 0 )
+        if (s > 0)
             detM = detM + M0j * detS;
         else
             detM = detM - M0j * detS;
 
         // advance to next column of M
         Cj1 = Cj;
-        Cj  = c[Cj];
-        s   = - s;
+        Cj = c[Cj];
+        s = -s;
     }
 
     // restore row zero to the minor representation for M
@@ -269,6 +262,6 @@ Scalar det_of_minor(
     // return the determinant of the minor M
     return detM;
 }
-} // END CppAD namespace
+}  // namespace CppAD
 // END C++
-# endif
+#endif

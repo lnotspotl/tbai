@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_AD_ASSIGN_HPP
-# define CPPAD_CORE_AD_ASSIGN_HPP
+#ifndef CPPAD_CORE_AD_ASSIGN_HPP
+#define CPPAD_CORE_AD_ASSIGN_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -60,7 +60,7 @@ $end
 ------------------------------------------------------------------------------
 */
 
-namespace CppAD { // BEGIN_CPPAD_NAMESPACE
+namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
 
 /*!
 \file ad_assign.hpp
@@ -96,11 +96,11 @@ The tape identifier will be an invalid tape identifier,
 so this object is initially a parameter.
 */
 template <class Base>
-AD<Base>& AD<Base>::operator=(const Base &b)
-{   value_   = b;
+AD<Base> &AD<Base>::operator=(const Base &b) {
+    value_ = b;
     tape_id_ = 0;
     //
-    CPPAD_ASSERT_UNKNOWN( ! ( Variable(*this) | Dynamic(*this) ) );
+    CPPAD_ASSERT_UNKNOWN(!(Variable(*this) | Dynamic(*this)));
     return *this;
 }
 
@@ -111,9 +111,9 @@ Assignment to an ADVec<Base> element drops the vector information.
 Base type for this AD object.
 */
 template <class Base>
-AD<Base>& AD<Base>::operator=(const VecAD_reference<Base> &x)
-{   *this = x.ADBase();
-    CPPAD_ASSERT_UNKNOWN( ! Dynamic(*this) );
+AD<Base> &AD<Base>::operator=(const VecAD_reference<Base> &x) {
+    *this = x.ADBase();
+    CPPAD_ASSERT_UNKNOWN(!Dynamic(*this));
     return *this;
 }
 
@@ -133,12 +133,11 @@ is the object that is being assigned to an AD<Base> object.
 */
 template <class Base>
 template <class T>
-AD<Base>& AD<Base>::operator=(const T &t)
-{   *this = Base(t);
-    CPPAD_ASSERT_UNKNOWN( ! ( Variable(*this) | Dynamic(*this) ) );
+AD<Base> &AD<Base>::operator=(const T &t) {
+    *this = Base(t);
+    CPPAD_ASSERT_UNKNOWN(!(Variable(*this) | Dynamic(*this)));
     return *this;
 }
 
-
-} // END_CPPAD_NAMESPACE
-# endif
+}  // namespace CppAD
+#endif

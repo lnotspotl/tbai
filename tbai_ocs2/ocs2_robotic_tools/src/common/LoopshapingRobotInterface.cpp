@@ -39,16 +39,17 @@ namespace ocs2 {
 LoopshapingRobotInterface::LoopshapingRobotInterface(std::unique_ptr<RobotInterface> robotInterfacePtr,
                                                      std::shared_ptr<LoopshapingDefinition> loopshapingDefinitionPtr)
     : robotInterfacePtr_(std::move(robotInterfacePtr)), loopshapingDefinitionPtr_(std::move(loopshapingDefinitionPtr)) {
-  // wrap with loopshaping
-  optimalControlProblem_ =
-      LoopshapingOptimalControlProblem::create(robotInterfacePtr_->getOptimalControlProblem(), loopshapingDefinitionPtr_);
+    // wrap with loopshaping
+    optimalControlProblem_ = LoopshapingOptimalControlProblem::create(robotInterfacePtr_->getOptimalControlProblem(),
+                                                                      loopshapingDefinitionPtr_);
 
-  initializerPtr_.reset(new ocs2::LoopshapingInitializer(robotInterfacePtr_->getInitializer(), loopshapingDefinitionPtr_));
+    initializerPtr_.reset(
+        new ocs2::LoopshapingInitializer(robotInterfacePtr_->getInitializer(), loopshapingDefinitionPtr_));
 
-  if (robotInterfacePtr_->getReferenceManagerPtr() != nullptr) {
-    loopshapingReferenceManager_ =
-        std::make_shared<LoopshapingReferenceManager>(robotInterfacePtr_->getReferenceManagerPtr(), loopshapingDefinitionPtr_);
-  }
+    if (robotInterfacePtr_->getReferenceManagerPtr() != nullptr) {
+        loopshapingReferenceManager_ = std::make_shared<LoopshapingReferenceManager>(
+            robotInterfacePtr_->getReferenceManagerPtr(), loopshapingDefinitionPtr_);
+    }
 }
 
 }  // namespace ocs2

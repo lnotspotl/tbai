@@ -97,5 +97,5 @@ void SqpWbc::loadSettings(const std::string &configFile) {
     loadCppDataType<scalar_t>(configFile, prefix + "jointStanceKd", jointStanceKd_);
 }
 
-}  // namespace wbc
+}  // namespace mpc
 }  // namespace tbai

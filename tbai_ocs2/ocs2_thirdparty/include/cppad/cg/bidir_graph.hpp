@@ -18,57 +18,53 @@
 namespace CppAD {
 namespace cg {
 
-template<class Base>
+template <class Base>
 class PathNodeEdges {
-public:
+   public:
     using Node = OperationNode<Base>;
     using Path = OperationPathNode<Base>;
-public:
+
+   public:
     std::vector<size_t> arguments;
-    std::vector<Path> usage; // parent node and argument index in that node
+    std::vector<Path> usage;  // parent node and argument index in that node
 };
 
 /**
  * Bidirectional graph used to navigate through the operations graph.
  */
-template<class Base>
+template <class Base>
 class BidirGraph {
-public:
+   public:
     using Node = OperationNode<Base>;
     using SourceCodePath = typename CodeHandler<Base>::SourceCodePath;
-private:
-    std::map<Node*, PathNodeEdges<Base> > graph_;
-public:
-    inline virtual ~BidirGraph() { }
 
-    inline bool empty() const {
-        return graph_.empty();
-    }
+   private:
+    std::map<Node *, PathNodeEdges<Base> > graph_;
 
-    inline void connect(Node& node,
-                        size_t argument) {
-        connect(graph_[&node], node, argument);
-    }
+   public:
+    inline virtual ~BidirGraph() {}
 
-    inline void connect(PathNodeEdges<Base>& nodeInfo,
-                        Node& node,
-                        size_t argument) {
+    inline bool empty() const { return graph_.empty(); }
+
+    inline void connect(Node &node, size_t argument) { connect(graph_[&node], node, argument); }
+
+    inline void connect(PathNodeEdges<Base> &nodeInfo, Node &node, size_t argument) {
         CPPADCG_ASSERT_UNKNOWN(argument < node.getArguments().size());
         CPPADCG_ASSERT_UNKNOWN(node.getArguments()[argument].getOperation() != nullptr);
         CPPADCG_ASSERT_UNKNOWN(&graph_[&node] == &nodeInfo);
 
         nodeInfo.arguments.push_back(argument);
 
-        auto* aNode = node.getArguments()[argument].getOperation();
+        auto *aNode = node.getArguments()[argument].getOperation();
         graph_[aNode].usage.push_back(OperationPathNode<Base>(&node, argument));
     }
 
-    inline bool contains(Node& node) const {
+    inline bool contains(Node &node) const {
         auto it = graph_.find(&node);
         return it != graph_.end();
     }
 
-    inline PathNodeEdges<Base>* find(Node& node) {
+    inline PathNodeEdges<Base> *find(Node &node) {
         auto it = graph_.find(&node);
         if (it != graph_.end())
             return &it->second;
@@ -76,7 +72,7 @@ public:
             return nullptr;
     }
 
-    inline const PathNodeEdges<Base>* find(Node& node) const {
+    inline const PathNodeEdges<Base> *find(Node &node) const {
         auto it = graph_.find(&node);
         if (it != graph_.end())
             return &it->second;
@@ -84,22 +80,15 @@ public:
             return nullptr;
     }
 
-    inline bool erase(Node& node) {
-        return graph_.erase(&node) > 0;
-    }
+    inline bool erase(Node &node) { return graph_.erase(&node) > 0; }
 
-    inline PathNodeEdges<Base>& operator[](Node& node) {
-        return graph_[&node];
-    }
+    inline PathNodeEdges<Base> &operator[](Node &node) { return graph_[&node]; }
 
     /**
      * Find a path from node to target without any additional bifurcation along
      * the path.
      */
-    inline std::vector<SourceCodePath> findSingleBifurcation(Node& expression,
-                                                             Node& target,
-                                                             size_t& bifIndex) const {
-
+    inline std::vector<SourceCodePath> findSingleBifurcation(Node &expression, Node &target, size_t &bifIndex) const {
         std::vector<SourceCodePath> paths;
         bifIndex = -1;
 
@@ -107,13 +96,12 @@ public:
             return paths;
         }
 
-        const PathNodeEdges<Base>* tail = find(target);
-        if (tail == nullptr)
-            return paths;
+        const PathNodeEdges<Base> *tail = find(target);
+        if (tail == nullptr) return paths;
 
         paths.reserve(2);
         paths.resize(1);
-        paths[0].reserve(20); // path down
+        paths[0].reserve(20);  // path down
 
         if (tail->usage.empty()) {
             // only one path with one element
@@ -122,8 +110,7 @@ public:
         }
 
         paths = findPathUpTo(expression, target);
-        if (paths.size() > 1)
-            bifIndex = 0;
+        if (paths.size() > 1) bifIndex = 0;
 
         if (paths[0][0].node != &expression) {
             /**
@@ -132,16 +119,15 @@ public:
              */
             SourceCodePath pathCommon;
 
-            auto* n = paths[0][0].node;
-            auto* edges = find(*n);
-            CPPADCG_ASSERT_UNKNOWN(edges != nullptr); // must exist
+            auto *n = paths[0][0].node;
+            auto *edges = find(*n);
+            CPPADCG_ASSERT_UNKNOWN(edges != nullptr);  // must exist
 
             while (true) {
-                n = edges->usage.begin()->node; // ignore other usages for now!!!!
+                n = edges->usage.begin()->node;  // ignore other usages for now!!!!
 
                 pathCommon.push_back(*edges->usage.begin());
-                if (n == &expression)
-                    break;
+                if (n == &expression) break;
 
                 edges = find(*n);
                 CPPADCG_ASSERT_UNKNOWN(edges != nullptr);
@@ -151,24 +137,21 @@ public:
             bifIndex = pathCommon.size();
 
             std::reverse(pathCommon.begin(), pathCommon.end());
-            for (auto& p: paths)
-                p.insert(p.begin(), pathCommon.begin(), pathCommon.end());
+            for (auto &p : paths) p.insert(p.begin(), pathCommon.begin(), pathCommon.end());
         }
 
         return paths;
     }
 
-private:
-
+   private:
     /**
      * Find a path from node to target without any additional bifurcation along the path
      */
-    std::vector<SourceCodePath> findPathUpTo(Node& node,
-                                             Node& target) const {
-        auto* n = &node;
+    std::vector<SourceCodePath> findPathUpTo(Node &node, Node &target) const {
+        auto *n = &node;
 
-        auto* edges = find(*n);
-        CPPADCG_ASSERT_UNKNOWN(edges != nullptr); // must exist
+        auto *edges = find(*n);
+        CPPADCG_ASSERT_UNKNOWN(edges != nullptr);  // must exist
 
         std::vector<SourceCodePath> paths;
         paths.reserve(2);
@@ -178,14 +161,14 @@ private:
             if (edges->arguments.size() > 1) {
                 // found bifurcation: must restart!
                 size_t a1Index = edges->arguments[0];
-                const auto& a1 = n->getArguments()[a1Index];
+                const auto &a1 = n->getArguments()[a1Index];
                 paths = findPathUpTo(*a1.getOperation(), target);
                 if (paths.size() == 2) {
                     return paths;
                 }
 
                 size_t a2Index = edges->arguments[1];
-                const auto& a2 = n->getArguments()[a2Index];
+                const auto &a2 = n->getArguments()[a2Index];
                 auto paths2 = findPathUpTo(*a2.getOperation(), target);
                 if (paths2.size() == 2) {
                     return paths2;
@@ -200,12 +183,12 @@ private:
                 return paths;
             }
 
-            size_t argIndex1 = *edges->arguments.begin(); // only one argument
+            size_t argIndex1 = *edges->arguments.begin();  // only one argument
             paths[0].push_back(OperationPathNode<Base>(n, argIndex1));
 
             n = n->getArguments()[argIndex1].getOperation();
             edges = find(*n);
-            CPPADCG_ASSERT_UNKNOWN(edges != nullptr); // must exist
+            CPPADCG_ASSERT_UNKNOWN(edges != nullptr);  // must exist
         }
 
         paths[0].push_back(OperationPathNode<Base>(n, -1));
@@ -289,10 +272,9 @@ private:
         }
     }
 #endif
-
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

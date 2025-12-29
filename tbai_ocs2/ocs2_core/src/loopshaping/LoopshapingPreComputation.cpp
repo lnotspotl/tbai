@@ -34,55 +34,55 @@ namespace ocs2 {
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-LoopshapingPreComputation::LoopshapingPreComputation(const PreComputation& systemPreComputation,
+LoopshapingPreComputation::LoopshapingPreComputation(const PreComputation &systemPreComputation,
                                                      std::shared_ptr<LoopshapingDefinition> loopshapingDefinition)
     : systemPreCompPtr_(systemPreComputation.clone()), loopshapingDefinition_(std::move(loopshapingDefinition)) {}
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-LoopshapingPreComputation::LoopshapingPreComputation(const LoopshapingPreComputation& other)
+LoopshapingPreComputation::LoopshapingPreComputation(const LoopshapingPreComputation &other)
     : loopshapingDefinition_(other.loopshapingDefinition_) {
-  systemPreCompPtr_.reset(other.systemPreCompPtr_->clone());
+    systemPreCompPtr_.reset(other.systemPreCompPtr_->clone());
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-LoopshapingPreComputation* LoopshapingPreComputation::clone() const {
-  return new LoopshapingPreComputation(*this);
+LoopshapingPreComputation *LoopshapingPreComputation::clone() const {
+    return new LoopshapingPreComputation(*this);
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-void LoopshapingPreComputation::request(RequestSet request, scalar_t t, const vector_t& x, const vector_t& u) {
-  loopshapingDefinition_->getSystemState(x, systemState_);
-  loopshapingDefinition_->getSystemInput(x, u, systemInput_);
-  loopshapingDefinition_->getFilterState(x, filterState_);
-  loopshapingDefinition_->getFilteredInput(x, u, filterInput_);
+void LoopshapingPreComputation::request(RequestSet request, scalar_t t, const vector_t &x, const vector_t &u) {
+    loopshapingDefinition_->getSystemState(x, systemState_);
+    loopshapingDefinition_->getSystemInput(x, u, systemInput_);
+    loopshapingDefinition_->getFilterState(x, filterState_);
+    loopshapingDefinition_->getFilteredInput(x, u, filterInput_);
 
-  systemPreCompPtr_->request(request, t, systemState_, systemInput_);
+    systemPreCompPtr_->request(request, t, systemState_, systemInput_);
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-void LoopshapingPreComputation::requestPreJump(RequestSet request, scalar_t t, const vector_t& x) {
-  loopshapingDefinition_->getSystemState(x, systemState_);
-  loopshapingDefinition_->getFilterState(x, filterState_);
+void LoopshapingPreComputation::requestPreJump(RequestSet request, scalar_t t, const vector_t &x) {
+    loopshapingDefinition_->getSystemState(x, systemState_);
+    loopshapingDefinition_->getFilterState(x, filterState_);
 
-  systemPreCompPtr_->requestPreJump(request, t, systemState_);
+    systemPreCompPtr_->requestPreJump(request, t, systemState_);
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-void LoopshapingPreComputation::requestFinal(RequestSet request, scalar_t t, const vector_t& x) {
-  loopshapingDefinition_->getSystemState(x, systemState_);
-  loopshapingDefinition_->getFilterState(x, filterState_);
+void LoopshapingPreComputation::requestFinal(RequestSet request, scalar_t t, const vector_t &x) {
+    loopshapingDefinition_->getSystemState(x, systemState_);
+    loopshapingDefinition_->getFilterState(x, filterState_);
 
-  systemPreCompPtr_->requestFinal(request, t, systemState_);
+    systemPreCompPtr_->requestFinal(request, t, systemState_);
 }
 
 }  // namespace ocs2

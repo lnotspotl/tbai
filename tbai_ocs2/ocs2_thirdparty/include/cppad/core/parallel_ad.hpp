@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_PARALLEL_AD_HPP
-# define CPPAD_CORE_PARALLEL_AD_HPP
+#ifndef CPPAD_CORE_PARALLEL_AD_HPP
+#define CPPAD_CORE_PARALLEL_AD_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -65,7 +65,7 @@ $end
 -----------------------------------------------------------------------------
 */
 
-# include <cppad/local/std_set.hpp>
+#include <cppad/local/std_set.hpp>
 
 // BEGIN CppAD namespace
 namespace CppAD {
@@ -76,15 +76,11 @@ static variables that my be used.
 */
 
 template <class Base>
-void parallel_ad(void)
-{   CPPAD_ASSERT_KNOWN(
-        ! thread_alloc::in_parallel() ,
-        "parallel_ad must be called before entering parallel execution mode."
-    );
-    CPPAD_ASSERT_KNOWN(
-        AD<Base>::tape_ptr() == CPPAD_NULL ,
-        "parallel_ad cannot be called while a tape recording is in progress"
-    );
+void parallel_ad(void) {
+    CPPAD_ASSERT_KNOWN(!thread_alloc::in_parallel(),
+                       "parallel_ad must be called before entering parallel execution mode.");
+    CPPAD_ASSERT_KNOWN(AD<Base>::tape_ptr() == CPPAD_NULL,
+                       "parallel_ad cannot be called while a tape recording is in progress");
 
     // ensure statics in following functions are initialized
     elapsed_seconds();
@@ -96,22 +92,21 @@ void parallel_ad(void)
 
     // the sparse_pack class has member functions with static data
     local::sparse_pack sp;
-    sp.resize(1, 1);       // so can call add_element
-    sp.add_element(0, 0);  // has static data
-    sp.clear(0);           // has static data
-    sp.is_element(0, 0);   // has static data
-    local::sparse_pack::const_iterator itr(sp, 0); // has static data
-    ++itr;                                  // has static data
+    sp.resize(1, 1);                                // so can call add_element
+    sp.add_element(0, 0);                           // has static data
+    sp.clear(0);                                    // has static data
+    sp.is_element(0, 0);                            // has static data
+    local::sparse_pack::const_iterator itr(sp, 0);  // has static data
+    ++itr;                                          // has static data
 
     // statics that depend on the value of Base
     AD<Base>::tape_id_ptr(0);
     AD<Base>::tape_handle(0);
     discrete<Base>::List();
-    CheckSimpleVector< Base, CppAD::vector<Base> >();
-    CheckSimpleVector< AD<Base>, CppAD::vector< AD<Base> > >();
-
+    CheckSimpleVector<Base, CppAD::vector<Base> >();
+    CheckSimpleVector<AD<Base>, CppAD::vector<AD<Base> > >();
 }
 
-} // END CppAD namespace
+}  // namespace CppAD
 
-# endif
+#endif

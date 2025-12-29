@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_EXPM1_HPP
-# define CPPAD_CORE_EXPM1_HPP
+#ifndef CPPAD_CORE_EXPM1_HPP
+#define CPPAD_CORE_EXPM1_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -63,33 +63,36 @@ contains an example and test of this function.
 $end
 -------------------------------------------------------------------------------
 */
-# include <cppad/configure.hpp>
-# if ! CPPAD_USE_CPLUSPLUS_2011
+#include <cppad/configure.hpp>
+#if !CPPAD_USE_CPLUSPLUS_2011
 
 // BEGIN CppAD namespace
 namespace CppAD {
 
 template <class Type>
-Type expm1_template(const Type &x)
-{   return CppAD::exp(x) - Type(1);
+Type expm1_template(const Type &x) {
+    return CppAD::exp(x) - Type(1);
 }
 
-inline float expm1(const float &x)
-{   return expm1_template(x); }
+inline float expm1(const float &x) {
+    return expm1_template(x);
+}
 
-inline double expm1(const double &x)
-{   return expm1_template(x); }
-
-template <class Base>
-AD<Base> expm1(const AD<Base> &x)
-{   return expm1_template(x); }
+inline double expm1(const double &x) {
+    return expm1_template(x);
+}
 
 template <class Base>
-AD<Base> expm1(const VecAD_reference<Base> &x)
-{   return expm1_template( x.ADBase() ); }
+AD<Base> expm1(const AD<Base> &x) {
+    return expm1_template(x);
+}
 
+template <class Base>
+AD<Base> expm1(const VecAD_reference<Base> &x) {
+    return expm1_template(x.ADBase());
+}
 
-} // END CppAD namespace
+}  // namespace CppAD
 
-# endif // CPPAD_USE_CPLUSPLUS_2011
-# endif // CPPAD_EXPM1_INCLUDED
+#endif  // CPPAD_USE_CPLUSPLUS_2011
+#endif  // CPPAD_EXPM1_INCLUDED

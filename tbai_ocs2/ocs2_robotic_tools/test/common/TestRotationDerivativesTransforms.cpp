@@ -28,7 +28,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 
 #include <gtest/gtest.h>
-
 #include <ocs2_core/Types.h>
 #include <ocs2_robotic_tools/common/RotationDerivativesTransforms.h>
 #include <ocs2_robotic_tools/common/RotationTransforms.h>
@@ -41,40 +40,46 @@ using Quaternion_t = Eigen::Quaternion<scalar_t>;
 using AngleAxis_t = Eigen::AngleAxis<scalar_t>;
 
 TEST(RotationDerivativesTransforms, global) {
-  const vector3_t eulerAngles(0.1, 0.2, 0.3);
-  const vector3_t eulerAngleDerivatives(0.4, 0.5, 0.6);
+    const vector3_t eulerAngles(0.1, 0.2, 0.3);
+    const vector3_t eulerAngleDerivatives(0.4, 0.5, 0.6);
 
-  // Check mapping vs. direct
-  const matrix3_t mapping = getMappingFromEulerAnglesZyxDerivativeToGlobalAngularVelocity(eulerAngles);
-  const vector3_t angularVelocity = getGlobalAngularVelocityFromEulerAnglesZyxDerivatives(eulerAngles, eulerAngleDerivatives);
-  ASSERT_TRUE(angularVelocity.isApprox(mapping * eulerAngleDerivatives));
+    // Check mapping vs. direct
+    const matrix3_t mapping = getMappingFromEulerAnglesZyxDerivativeToGlobalAngularVelocity(eulerAngles);
+    const vector3_t angularVelocity =
+        getGlobalAngularVelocityFromEulerAnglesZyxDerivatives(eulerAngles, eulerAngleDerivatives);
+    ASSERT_TRUE(angularVelocity.isApprox(mapping * eulerAngleDerivatives));
 
-  // Check mapping back
-  const vector3_t eulerAngleDerivativesRecovered = getEulerAnglesZyxDerivativesFromGlobalAngularVelocity(eulerAngles, angularVelocity);
-  ASSERT_TRUE(eulerAngleDerivativesRecovered.isApprox(eulerAngleDerivatives));
+    // Check mapping back
+    const vector3_t eulerAngleDerivativesRecovered =
+        getEulerAnglesZyxDerivativesFromGlobalAngularVelocity(eulerAngles, angularVelocity);
+    ASSERT_TRUE(eulerAngleDerivativesRecovered.isApprox(eulerAngleDerivatives));
 }
 
 TEST(RotationDerivativesTransforms, local) {
-  const vector3_t eulerAngles(0.1, 0.2, 0.3);
-  const vector3_t eulerAngleDerivatives(0.4, 0.5, 0.6);
+    const vector3_t eulerAngles(0.1, 0.2, 0.3);
+    const vector3_t eulerAngleDerivatives(0.4, 0.5, 0.6);
 
-  // Check mapping vs. direct
-  const matrix3_t mapping = getMappingFromEulerAnglesZyxDerivativeToLocalAngularVelocity(eulerAngles);
-  const vector3_t angularVelocity = getLocalAngularVelocityFromEulerAnglesZyxDerivatives(eulerAngles, eulerAngleDerivatives);
-  ASSERT_TRUE(angularVelocity.isApprox(mapping * eulerAngleDerivatives));
+    // Check mapping vs. direct
+    const matrix3_t mapping = getMappingFromEulerAnglesZyxDerivativeToLocalAngularVelocity(eulerAngles);
+    const vector3_t angularVelocity =
+        getLocalAngularVelocityFromEulerAnglesZyxDerivatives(eulerAngles, eulerAngleDerivatives);
+    ASSERT_TRUE(angularVelocity.isApprox(mapping * eulerAngleDerivatives));
 
-  // Check mapping back
-  const vector3_t eulerAngleDerivativesRecovered = getEulerAnglesZyxDerivativesFromLocalAngularVelocity(eulerAngles, angularVelocity);
-  ASSERT_TRUE(eulerAngleDerivativesRecovered.isApprox(eulerAngleDerivatives));
+    // Check mapping back
+    const vector3_t eulerAngleDerivativesRecovered =
+        getEulerAnglesZyxDerivativesFromLocalAngularVelocity(eulerAngles, angularVelocity);
+    ASSERT_TRUE(eulerAngleDerivativesRecovered.isApprox(eulerAngleDerivatives));
 }
 
 TEST(RotationDerivativesTransforms, localVsGlobal) {
-  const vector3_t eulerAngles(0.1, 0.2, 0.3);
-  const vector3_t eulerAngleDerivatives(0.4, 0.5, 0.6);
-  const matrix3_t R = getRotationMatrixFromZyxEulerAngles(eulerAngles);
+    const vector3_t eulerAngles(0.1, 0.2, 0.3);
+    const vector3_t eulerAngleDerivatives(0.4, 0.5, 0.6);
+    const matrix3_t R = getRotationMatrixFromZyxEulerAngles(eulerAngles);
 
-  const vector3_t localAngularVelocity = getLocalAngularVelocityFromEulerAnglesZyxDerivatives(eulerAngles, eulerAngleDerivatives);
-  const vector3_t globalAngularVelocity = getGlobalAngularVelocityFromEulerAnglesZyxDerivatives(eulerAngles, eulerAngleDerivatives);
+    const vector3_t localAngularVelocity =
+        getLocalAngularVelocityFromEulerAnglesZyxDerivatives(eulerAngles, eulerAngleDerivatives);
+    const vector3_t globalAngularVelocity =
+        getGlobalAngularVelocityFromEulerAnglesZyxDerivatives(eulerAngles, eulerAngleDerivatives);
 
-  ASSERT_TRUE(globalAngularVelocity.isApprox(R * localAngularVelocity));
+    ASSERT_TRUE(globalAngularVelocity.isApprox(R * localAngularVelocity));
 }

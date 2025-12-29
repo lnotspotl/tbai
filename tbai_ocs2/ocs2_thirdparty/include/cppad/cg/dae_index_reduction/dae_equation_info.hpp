@@ -1,5 +1,5 @@
 #ifndef CPPAD_CG_DAE_EQUATION_INFO_HPP
-#define	CPPAD_CG_DAE_EQUATION_INFO_HPP
+#define CPPAD_CG_DAE_EQUATION_INFO_HPP
 /* --------------------------------------------------------------------------
  *  CppADCodeGen: C++ Algorithmic Differentiation with Source Code Generation:
  *    Copyright (C) 2013 Ciengis
@@ -15,7 +15,6 @@
  * Author: Joao Leal
  */
 
-
 namespace CppAD {
 namespace cg {
 
@@ -23,7 +22,7 @@ namespace cg {
  * DAE equation information
  */
 class DaeEquationInfo {
-private:
+   private:
     /**
      * A unique identifier for this equation (used internally)
      */
@@ -47,74 +46,46 @@ private:
      * Whether or not if it is an explicit differential equation
      */
     bool explicit_;
-public:
 
-    inline DaeEquationInfo() :
-        id_(0),
-        originalIndex_(-1),
-        antiDerivative_(-1),
-        assignedVarIndex_(-1),
-        explicit_(false) {
-    }
+   public:
+    inline DaeEquationInfo()
+        : id_(0), originalIndex_(-1), antiDerivative_(-1), assignedVarIndex_(-1), explicit_(false) {}
 
-    inline DaeEquationInfo(size_t id,
-                           int originalIndex,
-                           int derivativeOf,
-                           int assignedVarIndex,
-                           bool explicitEq = false) :
-        id_(id),
-        originalIndex_(originalIndex),
-        antiDerivative_(derivativeOf),
-        assignedVarIndex_(assignedVarIndex),
-        explicit_(explicitEq) {
-    }
+    inline DaeEquationInfo(size_t id, int originalIndex, int derivativeOf, int assignedVarIndex,
+                           bool explicitEq = false)
+        : id_(id),
+          originalIndex_(originalIndex),
+          antiDerivative_(derivativeOf),
+          assignedVarIndex_(assignedVarIndex),
+          explicit_(explicitEq) {}
 
     /**
      * Provides a unique identifier for the equation.
-     * 
+     *
      * @return a unique identifier for the equation.
      */
-    inline size_t getId() const {
-        return id_;
-    }
+    inline size_t getId() const { return id_; }
 
-    inline void setId(size_t id) {
-        id_ = id;
-    }
+    inline void setId(size_t id) { id_ = id; }
 
-    inline int getAntiDerivative() const {
-        return antiDerivative_;
-    }
+    inline int getAntiDerivative() const { return antiDerivative_; }
 
-    inline void setAntiDerivative(int derivativeOf) {
-        antiDerivative_ = derivativeOf;
-    }
+    inline void setAntiDerivative(int derivativeOf) { antiDerivative_ = derivativeOf; }
 
-    inline int getAssignedVarIndex() const {
-        return assignedVarIndex_;
-    }
+    inline int getAssignedVarIndex() const { return assignedVarIndex_; }
 
-    inline void setAssignedVarIndex(int assignedVarIndex) {
-        assignedVarIndex_ = assignedVarIndex;
-    }
+    inline void setAssignedVarIndex(int assignedVarIndex) { assignedVarIndex_ = assignedVarIndex; }
 
-    inline int getOriginalIndex() const {
-        return originalIndex_;
-    }
+    inline int getOriginalIndex() const { return originalIndex_; }
 
-    inline bool isExplicit() const {
-        return explicit_;
-    }
+    inline bool isExplicit() const { return explicit_; }
 
-    inline void setExplicit(bool explicitEq) {
-        explicit_ = explicitEq;
-    }
+    inline void setExplicit(bool explicitEq) { explicit_ = explicitEq; }
 
-    inline virtual ~DaeEquationInfo() {
-    }
+    inline virtual ~DaeEquationInfo() {}
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

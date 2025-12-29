@@ -32,21 +32,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace ocs2 {
 
-scalar_t LoopshapingStateInputCost::getValue(scalar_t t, const vector_t& x, const vector_t& u, const TargetTrajectories& targetTrajectories,
-                                             const PreComputation& preComp) const {
-  if (this->empty()) {
-    return 0.0;
-  }
+scalar_t LoopshapingStateInputCost::getValue(scalar_t t, const vector_t &x, const vector_t &u,
+                                             const TargetTrajectories &targetTrajectories,
+                                             const PreComputation &preComp) const {
+    if (this->empty()) {
+        return 0.0;
+    }
 
-  const LoopshapingPreComputation& preCompLS = cast<LoopshapingPreComputation>(preComp);
-  const auto& x_system = preCompLS.getSystemState();
-  const auto& u_system = preCompLS.getSystemInput();
-  const auto& u_filter = preCompLS.getFilteredInput();
+    const LoopshapingPreComputation &preCompLS = cast<LoopshapingPreComputation>(preComp);
+    const auto &x_system = preCompLS.getSystemState();
+    const auto &u_system = preCompLS.getSystemInput();
+    const auto &u_filter = preCompLS.getFilteredInput();
 
-  const scalar_t L_system =
-      StateInputCostCollection::getValue(t, x_system, u_system, targetTrajectories, preCompLS.getSystemPreComputation());
+    const scalar_t L_system = StateInputCostCollection::getValue(t, x_system, u_system, targetTrajectories,
+                                                                 preCompLS.getSystemPreComputation());
 
-  return L_system + loopshapingDefinition_->loopshapingCost(u_filter);
+    return L_system + loopshapingDefinition_->loopshapingCost(u_filter);
 }
 
 }  // namespace ocs2

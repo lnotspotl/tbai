@@ -1,10 +1,10 @@
 #include "tbai_mpc/wbc/WbcBase.hpp"
 
-#include <tbai_mpc/quadruped_mpc/quadruped_models/QuadrupedCom.h>
 #include <ocs2_core/misc/LoadData.h>
+#include <pinocchio/fwd.hpp>
 #include <tbai_mpc/quadruped_mpc/core/MotionPhaseDefinition.h>
 #include <tbai_mpc/quadruped_mpc/core/Rotations.h>
-#include <pinocchio/fwd.hpp>
+#include <tbai_mpc/quadruped_mpc/quadruped_models/QuadrupedCom.h>
 
 // pinocchio
 #include <pinocchio/algorithm/crba.hpp>
@@ -135,7 +135,9 @@ Task WbcBase::createTorqueLimitTask() {
     D.block(0, 0, switched_model::JOINT_COORDINATE_SIZE, nDecisionVariables_) << Mj, -JjT;
 
     // lower bound
-    D.block(switched_model::JOINT_COORDINATE_SIZE, 0, switched_model::JOINT_COORDINATE_SIZE, nDecisionVariables_) << -Mj, JjT;
+    D.block(switched_model::JOINT_COORDINATE_SIZE, 0, switched_model::JOINT_COORDINATE_SIZE, nDecisionVariables_)
+        << -Mj,
+        JjT;
 
     vector_t f = vector_t::Ones(Drows);
 
@@ -294,7 +296,8 @@ void WbcBase::updateMeasuredState(const vector_t &stateMeasured, const vector_t 
     qMeasured_.segment<4>(3) = switched_model::quaternionBaseToOrigin(eulerXYZ).coeffs();
 
     // joint angles: LF, RF, LH, RH
-    qMeasured_.tail<switched_model::JOINT_COORDINATE_SIZE>() = stateMeasured.tail<switched_model::JOINT_COORDINATE_SIZE>();
+    qMeasured_.tail<switched_model::JOINT_COORDINATE_SIZE>() =
+        stateMeasured.tail<switched_model::JOINT_COORDINATE_SIZE>();
 
     // flip lh and rf
     std::swap(qMeasured_[10], qMeasured_[13]);
@@ -311,7 +314,8 @@ void WbcBase::updateMeasuredState(const vector_t &stateMeasured, const vector_t 
     vMeasured_.segment<3>(3) = stateMeasured.segment<3>(6);
 
     // joint velocities: LF, RF, LH, RH
-    vMeasured_.tail<switched_model::JOINT_COORDINATE_SIZE>() = inputMeasured.tail<switched_model::JOINT_COORDINATE_SIZE>();
+    vMeasured_.tail<switched_model::JOINT_COORDINATE_SIZE>() =
+        inputMeasured.tail<switched_model::JOINT_COORDINATE_SIZE>();
     std::swap(vMeasured_[9], vMeasured_[12]);
     std::swap(vMeasured_[10], vMeasured_[13]);
     std::swap(vMeasured_[11], vMeasured_[14]);
@@ -421,5 +425,5 @@ void WbcBase::loadSettings(const std::string &configFile, const std::string &con
     loadCppDataType<scalar_t>(configFile, configPrefix + "torqueLimit", torqueLimit_);
 }
 
-}  // namespace wbc
+}  // namespace mpc
 }  // namespace tbai

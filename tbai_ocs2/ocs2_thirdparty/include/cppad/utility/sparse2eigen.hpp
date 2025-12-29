@@ -1,5 +1,5 @@
-# ifndef CPPAD_UTILITY_SPARSE2EIGEN_HPP
-# define CPPAD_UTILITY_SPARSE2EIGEN_HPP
+#ifndef CPPAD_UTILITY_SPARSE2EIGEN_HPP
+#define CPPAD_UTILITY_SPARSE2EIGEN_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -91,43 +91,42 @@ and false otherwise.
 
 $end
 */
-# include <cppad/configure.hpp>
-# if CPPAD_HAS_EIGEN
+#include <cppad/configure.hpp>
+#if CPPAD_HAS_EIGEN
 
-# include <Eigen/Sparse>
-# include <cppad/utility/sparse_rcv.hpp>
-# include <cppad/utility/vector.hpp>
+#include <Eigen/Sparse>
+#include <cppad/utility/sparse_rcv.hpp>
+#include <cppad/utility/vector.hpp>
 
-namespace CppAD { // BEGIN CPPAD_NAMESPACE
+namespace CppAD {  // BEGIN CPPAD_NAMESPACE
 
 // BEGIN_PROTOTYPE
 template <class SizeVector, class ValueVector, int Options>
-void sparse2eigen(
-const CppAD::sparse_rcv<SizeVector, ValueVector>&               source       ,
-Eigen::SparseMatrix<typename ValueVector::value_type, Options>& destination  )
+void sparse2eigen(const CppAD::sparse_rcv<SizeVector, ValueVector> &source,
+                  Eigen::SparseMatrix<typename ValueVector::value_type, Options> &destination)
 // END_PROTOTYPE
-{   using Eigen::Index;
+{
+    using Eigen::Index;
     typedef typename ValueVector::value_type value_type;
-    typedef Eigen::Triplet<value_type>       triplet;
-    std::vector<triplet> vec( source.nnz() );
+    typedef Eigen::Triplet<value_type> triplet;
+    std::vector<triplet> vec(source.nnz());
     //
-    const SizeVector&  row = source.row();
-    const SizeVector&  col = source.col();
-    const ValueVector& val = source.val();
+    const SizeVector &row = source.row();
+    const SizeVector &col = source.col();
+    const ValueVector &val = source.val();
     //
-    for(size_t k = 0; k < source.nnz(); k++)
-        vec[k] = triplet( int(row[k]), int(col[k]), val[k] );
+    for (size_t k = 0; k < source.nnz(); k++) vec[k] = triplet(int(row[k]), int(col[k]), val[k]);
     //
     size_t nr = source.nr();
     size_t nc = source.nc();
-    destination.resize( Index(nr), Index(nc) );
+    destination.resize(Index(nr), Index(nc));
     destination.setFromTriplets(vec.begin(), vec.end());
     //
-    CPPAD_ASSERT_UNKNOWN( destination.isCompressed() );
+    CPPAD_ASSERT_UNKNOWN(destination.isCompressed());
     //
     return;
 }
 
-}       // END_CPPAD_NAMESPACE
-# endif // CPPAD_HAS_EIGEN
-# endif
+}  // namespace CppAD
+#endif  // CPPAD_HAS_EIGEN
+#endif

@@ -24,9 +24,9 @@ namespace cg {
  *
  * @author Joao Leal
  */
-template<class Base>
+template <class Base>
 class LangMathMLDefaultVariableNameGenerator : public VariableNameGenerator<Base> {
-protected:
+   protected:
     // auxiliary string stream
     std::stringstream _ss;
     // array name of the dependent variables
@@ -47,22 +47,21 @@ protected:
     size_t _maxTemporaryArrayID;
     // the highest ID used for the temporary sparse array variables
     size_t _maxTemporarySparseArrayID;
-public:
 
-    inline LangMathMLDefaultVariableNameGenerator(const std::string& depName = "y",
-                                                  const std::string& indepName = "x",
-                                                  const std::string& tmpName = "v",
-                                                  const std::string& tmpArrayName = "a",
-                                                  const std::string& tmpSparseArrayName = "s") :
-        _depName(depName),
-        _indepName(indepName),
-        _tmpName(tmpName),
-        _tmpArrayName(tmpArrayName),
-        _tmpSparseArrayName(tmpSparseArrayName),
-        _minTemporaryID(0), // not really required (but it avoids warnings)
-        _maxTemporaryID(0), // not really required (but it avoids warnings)
-        _maxTemporaryArrayID(0), // not really required (but it avoids warnings)
-        _maxTemporarySparseArrayID(0) { // not really required (but it avoids warnings)
+   public:
+    inline LangMathMLDefaultVariableNameGenerator(const std::string &depName = "y", const std::string &indepName = "x",
+                                                  const std::string &tmpName = "v",
+                                                  const std::string &tmpArrayName = "a",
+                                                  const std::string &tmpSparseArrayName = "s")
+        : _depName(depName),
+          _indepName(indepName),
+          _tmpName(tmpName),
+          _tmpArrayName(tmpArrayName),
+          _tmpSparseArrayName(tmpSparseArrayName),
+          _minTemporaryID(0),              // not really required (but it avoids warnings)
+          _maxTemporaryID(0),              // not really required (but it avoids warnings)
+          _maxTemporaryArrayID(0),         // not really required (but it avoids warnings)
+          _maxTemporarySparseArrayID(0) {  // not really required (but it avoids warnings)
 
         this->_independent.push_back(FuncArgument(_indepName));
         this->_dependent.push_back(FuncArgument(_depName));
@@ -73,106 +72,114 @@ public:
 
     inline virtual ~LangMathMLDefaultVariableNameGenerator() = default;
 
-    inline size_t getMinTemporaryVariableID() const override {
-        return _minTemporaryID;
-    }
+    inline size_t getMinTemporaryVariableID() const override { return _minTemporaryID; }
 
-    inline size_t getMaxTemporaryVariableID() const override {
-        return _maxTemporaryID;
-    }
+    inline size_t getMaxTemporaryVariableID() const override { return _maxTemporaryID; }
 
-    inline size_t getMaxTemporaryArrayVariableID() const override {
-        return _maxTemporaryArrayID;
-    }
+    inline size_t getMaxTemporaryArrayVariableID() const override { return _maxTemporaryArrayID; }
 
-    size_t getMaxTemporarySparseArrayVariableID() const override {
-        return _maxTemporarySparseArrayID;
-    }
+    size_t getMaxTemporarySparseArrayVariableID() const override { return _maxTemporarySparseArrayID; }
 
     inline std::string generateDependent(size_t index) override {
         _ss.clear();
         _ss.str("");
 
         _ss << "<msub>"
-                "<mi>" << _depName << "</mi>"
-                "<mn>" << index << "</mn>"
-                "</msub>";
+               "<mi>"
+            << _depName
+            << "</mi>"
+               "<mn>"
+            << index
+            << "</mn>"
+               "</msub>";
 
         return _ss.str();
     }
 
-    inline std::string generateIndependent(const OperationNode<Base>& independent,
-                                           size_t id) override {
+    inline std::string generateIndependent(const OperationNode<Base> &independent, size_t id) override {
         _ss.clear();
         _ss.str("");
 
         _ss << "<msub>"
-                "<mi>" << _indepName << "</mi>"
-                "<mn>" << (id - 1) << "</mn>"
-                "</msub>";
+               "<mi>"
+            << _indepName
+            << "</mi>"
+               "<mn>"
+            << (id - 1)
+            << "</mn>"
+               "</msub>";
 
         return _ss.str();
     }
 
-    inline std::string generateTemporary(const OperationNode<Base>& variable,
-                                         size_t id) override {
+    inline std::string generateTemporary(const OperationNode<Base> &variable, size_t id) override {
         _ss.clear();
         _ss.str("");
 
         if (this->_temporary[0].array) {
             _ss << "<msub>"
-                    "<mi>" << _tmpName << "</mi>"
-                    "<mn>" << (id - this->_minTemporaryID) << "</mn>"
-                    "</msub>";
+                   "<mi>"
+                << _tmpName
+                << "</mi>"
+                   "<mn>"
+                << (id - this->_minTemporaryID)
+                << "</mn>"
+                   "</msub>";
         } else {
             _ss << "<msub>"
-                    "<mi>" << _tmpName << "</mi>"
-                    "<mn>" << id << "</mn>"
-                    "</msub>";
+                   "<mi>"
+                << _tmpName
+                << "</mi>"
+                   "<mn>"
+                << id
+                << "</mn>"
+                   "</msub>";
         }
 
         return _ss.str();
     }
 
-    std::string generateTemporaryArray(const OperationNode<Base>& variable,
-                                       size_t id) override {
+    std::string generateTemporaryArray(const OperationNode<Base> &variable, size_t id) override {
         _ss.clear();
         _ss.str("");
 
         CPPADCG_ASSERT_UNKNOWN(variable.getOperationType() == CGOpCode::ArrayCreation);
 
-        _ss << "<mi>" << _tmpArrayName << "</mi>"
-                "<mfenced open='[' close=']'>"
-                "<mrow>"
-                "<mn>" << id - 1 << "</mn>"
-                "<mo>:</mo>"///////////////////////////////////////// TODO
-                "</mrow>"
-                "</mfenced>";
+        _ss << "<mi>" << _tmpArrayName
+            << "</mi>"
+               "<mfenced open='[' close=']'>"
+               "<mrow>"
+               "<mn>"
+            << id - 1
+            << "</mn>"
+               "<mo>:</mo>"  ///////////////////////////////////////// TODO
+               "</mrow>"
+               "</mfenced>";
 
         return _ss.str();
     }
 
-    std::string generateTemporarySparseArray(const OperationNode<Base>& variable,
-                                             size_t id) override {
+    std::string generateTemporarySparseArray(const OperationNode<Base> &variable, size_t id) override {
         _ss.clear();
         _ss.str("");
 
         CPPADCG_ASSERT_UNKNOWN(variable.getOperationType() == CGOpCode::SparseArrayCreation);
 
-        _ss << "<mi>" << _tmpSparseArrayName << "</mi>"
-                "<mfenced open='[' close=']'>"
-                "<mrow>"
-                "<mn>" << id - 1 << "</mn>"
-                "<mo>:</mo>"///////////////////////////////////////// TODO
-                "</mrow>"
-                "</mfenced>";
+        _ss << "<mi>" << _tmpSparseArrayName
+            << "</mi>"
+               "<mfenced open='[' close=']'>"
+               "<mrow>"
+               "<mn>"
+            << id - 1
+            << "</mn>"
+               "<mo>:</mo>"  ///////////////////////////////////////// TODO
+               "</mrow>"
+               "</mfenced>";
 
         return _ss.str();
     }
 
-    std::string generateIndexedDependent(const OperationNode<Base>& var,
-                                         size_t id,
-                                         const IndexPattern& ip) override {
+    std::string generateIndexedDependent(const OperationNode<Base> &var, size_t id, const IndexPattern &ip) override {
         CPPADCG_ASSERT_KNOWN(var.getOperationType() == CGOpCode::LoopIndexedDep, "Invalid node type");
         CPPADCG_ASSERT_KNOWN(!var.getArguments().empty(), "Invalid number of arguments");
 
@@ -180,8 +187,8 @@ public:
         _ss.str("");
 
         _ss << "<msub>"
-                "<mi>" << _depName << "</mi>"
-            << "<mrow>";
+               "<mi>"
+            << _depName << "</mi>" << "<mrow>";
         LanguageMathML<Base>::indexPattern2String(_ss, ip, getIndexes(var, 1));
         _ss << "</mrow>";
         _ss << "</msub>";
@@ -189,19 +196,17 @@ public:
         return _ss.str();
     }
 
-    std::string generateIndexedIndependent(const OperationNode<Base>& independent,
-                                           size_t id,
-                                           const IndexPattern& ip) override {
+    std::string generateIndexedIndependent(const OperationNode<Base> &independent, size_t id,
+                                           const IndexPattern &ip) override {
         CPPADCG_ASSERT_KNOWN(independent.getOperationType() == CGOpCode::LoopIndexedIndep, "Invalid node type");
         CPPADCG_ASSERT_KNOWN(independent.getArguments().size() > 0, "Invalid number of arguments");
 
         _ss.clear();
         _ss.str("");
 
-
         _ss << "<msub>"
-                "<mi>" << _indepName << "</mi>"
-            << "<mrow>";
+               "<mi>"
+            << _indepName << "</mi>" << "<mrow>";
         LanguageMathML<Base>::indexPattern2String(_ss, ip, getIndexes(independent));
         _ss << "</mrow>";
         _ss << "</msub>";
@@ -209,9 +214,7 @@ public:
         return _ss.str();
     }
 
-    inline void setTemporaryVariableID(size_t minTempID,
-                                       size_t maxTempID,
-                                       size_t maxTempArrayID,
+    inline void setTemporaryVariableID(size_t minTempID, size_t maxTempID, size_t maxTempArrayID,
                                        size_t maxTempSparseArrayID) override {
         _minTemporaryID = minTempID;
         _maxTemporaryID = maxTempID;
@@ -224,73 +227,56 @@ public:
         CPPADCG_ASSERT_UNKNOWN(_minTemporaryID <= _maxTemporaryID + 1);
     }
 
-    const std::string& getIndependentArrayName(const OperationNode<Base>& indep,
-                                               size_t id) override {
+    const std::string &getIndependentArrayName(const OperationNode<Base> &indep, size_t id) override {
         return _indepName;
     }
 
-    size_t getIndependentArrayIndex(const OperationNode<Base>& indep,
-                                    size_t id) override {
-        return id - 1;
-    }
+    size_t getIndependentArrayIndex(const OperationNode<Base> &indep, size_t id) override { return id - 1; }
 
-    bool isConsecutiveInIndepArray(const OperationNode<Base>& indepFirst,
-                                   size_t idFirst,
-                                   const OperationNode<Base>& indepSecond,
-                                   size_t idSecond) override {
+    bool isConsecutiveInIndepArray(const OperationNode<Base> &indepFirst, size_t idFirst,
+                                   const OperationNode<Base> &indepSecond, size_t idSecond) override {
         return idFirst + 1 == idSecond;
     }
 
-    bool isInSameIndependentArray(const OperationNode<Base>& indep1,
-                                  size_t id1,
-                                  const OperationNode<Base>& indep2,
+    bool isInSameIndependentArray(const OperationNode<Base> &indep1, size_t id1, const OperationNode<Base> &indep2,
                                   size_t id2) override {
         return true;
     }
 
-    const std::string& getTemporaryVarArrayName(const OperationNode<Base>& var,
-                                                size_t id) override {
-        return _tmpName;
-    }
+    const std::string &getTemporaryVarArrayName(const OperationNode<Base> &var, size_t id) override { return _tmpName; }
 
-    size_t getTemporaryVarArrayIndex(const OperationNode<Base>& var,
-                                     size_t id) override {
+    size_t getTemporaryVarArrayIndex(const OperationNode<Base> &var, size_t id) override {
         return id - this->_minTemporaryID;
     }
 
-    bool isConsecutiveInTemporaryVarArray(const OperationNode<Base>& varFirst,
-                                          size_t idFirst,
-                                          const OperationNode<Base>& varSecond,
-                                          size_t idSecond) override {
+    bool isConsecutiveInTemporaryVarArray(const OperationNode<Base> &varFirst, size_t idFirst,
+                                          const OperationNode<Base> &varSecond, size_t idSecond) override {
         return idFirst + 1 == idSecond;
     }
 
-    bool isInSameTemporaryVarArray(const OperationNode<Base>& var1,
-                                   size_t id1,
-                                   const OperationNode<Base>& var2,
+    bool isInSameTemporaryVarArray(const OperationNode<Base> &var1, size_t id1, const OperationNode<Base> &var2,
                                    size_t id2) override {
         return true;
     }
 
-protected:
-
-    static inline std::vector<const OperationNode<Base>*> getIndexes(const OperationNode<Base>& var,
-                                                                     size_t offset = 0) {
-        const std::vector<Argument<Base> >& args = var.getArguments();
-        std::vector<const OperationNode<Base>*> indexes(args.size() - offset);
+   protected:
+    static inline std::vector<const OperationNode<Base> *> getIndexes(const OperationNode<Base> &var,
+                                                                      size_t offset = 0) {
+        const std::vector<Argument<Base> > &args = var.getArguments();
+        std::vector<const OperationNode<Base> *> indexes(args.size() - offset);
 
         for (size_t a = offset; a < args.size(); a++) {
             CPPADCG_ASSERT_KNOWN(args[a].getOperation() != nullptr, "Invalid argument");
             CPPADCG_ASSERT_KNOWN(args[a].getOperation()->getOperationType() == CGOpCode::Index, "Invalid argument");
 
-            indexes[a - offset] = &static_cast<const IndexOperationNode<Base>*> (args[a].getOperation())->getIndex();
+            indexes[a - offset] = &static_cast<const IndexOperationNode<Base> *>(args[a].getOperation())->getIndex();
         }
 
         return indexes;
     }
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

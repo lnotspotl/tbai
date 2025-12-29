@@ -32,54 +32,56 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace ocs2 {
 namespace ipm {
 
-std::pair<vector_t, vector_t> initializeIntermediateSlackVariable(OptimalControlProblem& ocpDefinition, scalar_t time,
-                                                                  const vector_t& state, const vector_t& input,
-                                                                  scalar_t initialSlackLowerBound, scalar_t initialSlackMarginRate) {
-  vector_t slackStateIneq, slackStateInputIneq;
+std::pair<vector_t, vector_t> initializeIntermediateSlackVariable(OptimalControlProblem &ocpDefinition, scalar_t time,
+                                                                  const vector_t &state, const vector_t &input,
+                                                                  scalar_t initialSlackLowerBound,
+                                                                  scalar_t initialSlackMarginRate) {
+    vector_t slackStateIneq, slackStateInputIneq;
 
-  if (!ocpDefinition.stateInequalityConstraintPtr->empty() || !ocpDefinition.inequalityConstraintPtr->empty()) {
-    constexpr auto request = Request::Constraint;
-    ocpDefinition.preComputationPtr->request(request, time, state, input);
-  }
+    if (!ocpDefinition.stateInequalityConstraintPtr->empty() || !ocpDefinition.inequalityConstraintPtr->empty()) {
+        constexpr auto request = Request::Constraint;
+        ocpDefinition.preComputationPtr->request(request, time, state, input);
+    }
 
-  if (!ocpDefinition.stateInequalityConstraintPtr->empty()) {
-    const auto ineqConstraint =
-        toVector(ocpDefinition.stateInequalityConstraintPtr->getValue(time, state, *ocpDefinition.preComputationPtr));
-    slackStateIneq = initializeSlackVariable(ineqConstraint, initialSlackLowerBound, initialSlackMarginRate);
-  }
+    if (!ocpDefinition.stateInequalityConstraintPtr->empty()) {
+        const auto ineqConstraint = toVector(
+            ocpDefinition.stateInequalityConstraintPtr->getValue(time, state, *ocpDefinition.preComputationPtr));
+        slackStateIneq = initializeSlackVariable(ineqConstraint, initialSlackLowerBound, initialSlackMarginRate);
+    }
 
-  if (!ocpDefinition.inequalityConstraintPtr->empty()) {
-    const auto ineqConstraint =
-        toVector(ocpDefinition.inequalityConstraintPtr->getValue(time, state, input, *ocpDefinition.preComputationPtr));
-    slackStateInputIneq = initializeSlackVariable(ineqConstraint, initialSlackLowerBound, initialSlackMarginRate);
-  }
+    if (!ocpDefinition.inequalityConstraintPtr->empty()) {
+        const auto ineqConstraint = toVector(
+            ocpDefinition.inequalityConstraintPtr->getValue(time, state, input, *ocpDefinition.preComputationPtr));
+        slackStateInputIneq = initializeSlackVariable(ineqConstraint, initialSlackLowerBound, initialSlackMarginRate);
+    }
 
-  return std::make_pair(std::move(slackStateIneq), std::move(slackStateInputIneq));
+    return std::make_pair(std::move(slackStateIneq), std::move(slackStateInputIneq));
 }
 
-vector_t initializeTerminalSlackVariable(OptimalControlProblem& ocpDefinition, scalar_t time, const vector_t& state,
+vector_t initializeTerminalSlackVariable(OptimalControlProblem &ocpDefinition, scalar_t time, const vector_t &state,
                                          scalar_t initialSlackLowerBound, scalar_t initialSlackMarginRate) {
-  if (ocpDefinition.finalInequalityConstraintPtr->empty()) {
-    return vector_t();
-  }
+    if (ocpDefinition.finalInequalityConstraintPtr->empty()) {
+        return vector_t();
+    }
 
-  constexpr auto request = Request::Constraint;
-  ocpDefinition.preComputationPtr->requestFinal(request, time, state);
-  const auto ineqConstraint = toVector(ocpDefinition.finalInequalityConstraintPtr->getValue(time, state, *ocpDefinition.preComputationPtr));
-  return initializeSlackVariable(ineqConstraint, initialSlackLowerBound, initialSlackMarginRate);
+    constexpr auto request = Request::Constraint;
+    ocpDefinition.preComputationPtr->requestFinal(request, time, state);
+    const auto ineqConstraint =
+        toVector(ocpDefinition.finalInequalityConstraintPtr->getValue(time, state, *ocpDefinition.preComputationPtr));
+    return initializeSlackVariable(ineqConstraint, initialSlackLowerBound, initialSlackMarginRate);
 }
 
-vector_t initializeEventSlackVariable(OptimalControlProblem& ocpDefinition, scalar_t time, const vector_t& state,
+vector_t initializeEventSlackVariable(OptimalControlProblem &ocpDefinition, scalar_t time, const vector_t &state,
                                       scalar_t initialSlackLowerBound, scalar_t initialSlackMarginRate) {
-  if (ocpDefinition.preJumpInequalityConstraintPtr->empty()) {
-    return vector_t();
-  }
+    if (ocpDefinition.preJumpInequalityConstraintPtr->empty()) {
+        return vector_t();
+    }
 
-  constexpr auto request = Request::Constraint;
-  ocpDefinition.preComputationPtr->requestPreJump(request, time, state);
-  const auto ineqConstraint =
-      toVector(ocpDefinition.preJumpInequalityConstraintPtr->getValue(time, state, *ocpDefinition.preComputationPtr));
-  return initializeSlackVariable(ineqConstraint, initialSlackLowerBound, initialSlackMarginRate);
+    constexpr auto request = Request::Constraint;
+    ocpDefinition.preComputationPtr->requestPreJump(request, time, state);
+    const auto ineqConstraint =
+        toVector(ocpDefinition.preJumpInequalityConstraintPtr->getValue(time, state, *ocpDefinition.preComputationPtr));
+    return initializeSlackVariable(ineqConstraint, initialSlackLowerBound, initialSlackMarginRate);
 }
 
 }  // namespace ipm

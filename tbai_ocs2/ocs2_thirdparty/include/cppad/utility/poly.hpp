@@ -1,5 +1,5 @@
-# ifndef CPPAD_UTILITY_POLY_HPP
-# define CPPAD_UTILITY_POLY_HPP
+#ifndef CPPAD_UTILITY_POLY_HPP
+#define CPPAD_UTILITY_POLY_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -139,14 +139,15 @@ $end
 ------------------------------------------------------------------------------
 */
 // BEGIN C++
-# include <cstddef>  // used to defined size_t
-# include <cppad/utility/check_simple_vector.hpp>
+#include <cstddef>  // used to defined size_t
 
-namespace CppAD {    // BEGIN CppAD namespace
+#include <cppad/utility/check_simple_vector.hpp>
+
+namespace CppAD {  // BEGIN CppAD namespace
 
 template <class Type, class Vector>
-Type Poly(size_t k, const Vector &a, const Type &z)
-{   size_t i;
+Type Poly(size_t k, const Vector &a, const Type &z) {
+    size_t i;
     size_t d = a.size() - 1;
 
     Type tmp;
@@ -155,37 +156,35 @@ Type Poly(size_t k, const Vector &a, const Type &z)
     CheckSimpleVector<Type, Vector>();
 
     // case where derivative order greater than degree of polynomial
-    if( k > d )
-    {   tmp = 0;
+    if (k > d) {
+        tmp = 0;
         return tmp;
     }
     // case where we are evaluating a derivative
-    if( k > 0 )
-    {   // initialize factor as (k-1) !
+    if (k > 0) {  // initialize factor as (k-1) !
         size_t factor = 1;
-        for(i = 2; i < k; i++)
-            factor *= i;
+        for (i = 2; i < k; i++) factor *= i;
 
         // set b to coefficient vector corresponding to derivative
         Vector b(d - k + 1);
-        for(i = k; i <= d; i++)
-        {   factor   *= i;
-            tmp       = double( factor );
-            b[i - k]  = a[i] * tmp;
-            factor   /= (i - k + 1);
+        for (i = k; i <= d; i++) {
+            factor *= i;
+            tmp = double(factor);
+            b[i - k] = a[i] * tmp;
+            factor /= (i - k + 1);
         }
         // value of derivative polynomial
         return Poly(0, b, z);
     }
     // case where we are evaluating the original polynomial
     Type sum = a[d];
-    i        = d;
-    while(i > 0)
-    {   sum *= z;
+    i = d;
+    while (i > 0) {
+        sum *= z;
         sum += a[--i];
     }
     return sum;
 }
-} // END CppAD namespace
+}  // namespace CppAD
 // END C++
-# endif
+#endif

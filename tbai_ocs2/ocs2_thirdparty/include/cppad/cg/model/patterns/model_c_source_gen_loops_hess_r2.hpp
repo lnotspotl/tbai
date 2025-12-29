@@ -18,9 +18,9 @@
 namespace CppAD {
 namespace cg {
 
-template<class Base>
-void ModelCSourceGen<Base>::generateSparseHessianWithLoopsSourceFromRev2(const std::map<size_t, CompressedVectorInfo>& hessInfo,
-                                                                         size_t maxCompressedSize) {
+template <class Base>
+void ModelCSourceGen<Base>::generateSparseHessianWithLoopsSourceFromRev2(
+    const std::map<size_t, CompressedVectorInfo> &hessInfo, size_t maxCompressedSize) {
     using namespace std;
     using namespace CppAD::cg::loops;
 
@@ -38,21 +38,15 @@ void ModelCSourceGen<Base>::generateSparseHessianWithLoopsSourceFromRev2(const s
     string nlRev2Suffix = "noloop_" + suffix;
 
     _cache.str("");
-    _cache << "#include <stdlib.h>\n"
-            << LanguageC<Base>::ATOMICFUN_STRUCT_DEFINITION << "\n\n";
+    _cache << "#include <stdlib.h>\n" << LanguageC<Base>::ATOMICFUN_STRUCT_DEFINITION << "\n\n";
     generateFunctionDeclarationSource(_cache, functionRev2, nlRev2Suffix, _nonLoopRev2Elements, argsDcl);
-    generateFunctionDeclarationSourceLoopForRev(_cache, langC, _name, "jrow", _loopRev2Groups, generateFunctionNameLoopRev2);
+    generateFunctionDeclarationSourceLoopForRev(_cache, langC, _name, "jrow", _loopRev2Groups,
+                                                generateFunctionNameLoopRev2);
 
     _cache << "\n";
 
-    printForRevUsageFunction(_cache, _baseTypeName, _name,
-                             model_function, 3,
-                             functionRev2, suffix,
-                             "jrow", "it", "hess",
-                             _loopRev2Groups,
-                             _nonLoopRev2Elements,
-                             hessInfo,
-                             generateFunctionNameLoopRev2,
+    printForRevUsageFunction(_cache, _baseTypeName, _name, model_function, 3, functionRev2, suffix, "jrow", "it",
+                             "hess", _loopRev2Groups, _nonLoopRev2Elements, hessInfo, generateFunctionNameLoopRev2,
                              _hessSparsity.rows.size(), maxCompressedSize);
 
     finishedJob();
@@ -61,7 +55,7 @@ void ModelCSourceGen<Base>::generateSparseHessianWithLoopsSourceFromRev2(const s
     _cache.str("");
 }
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

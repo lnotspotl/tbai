@@ -20,19 +20,16 @@ namespace cg {
 
 /**
  * Abstract class used to load compiled models in a dynamic library
- * 
+ *
  * @author Joao Leal
  */
-template<class Base>
+template <class Base>
 class DynamicLib : public FunctorModelLibrary<Base> {
-public:
-
-    inline virtual ~DynamicLib() {
-    }
-
+   public:
+    inline virtual ~DynamicLib() {}
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

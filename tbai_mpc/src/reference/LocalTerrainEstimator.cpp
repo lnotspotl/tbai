@@ -25,7 +25,7 @@ LocalTerrainEstimator::LocalTerrainEstimator(
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
-void LocalTerrainEstimator::updateFootholds(const ocs2::SystemObservation& observation) {
+void LocalTerrainEstimator::updateFootholds(const ocs2::SystemObservation &observation) {
     // Base position
     auto basePose = getBasePose(observation.state);
 
@@ -51,7 +51,7 @@ void LocalTerrainEstimator::updateFootholds(const ocs2::SystemObservation& obser
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
-void LocalTerrainEstimator::updateLocalTerrainEstimate(const std::vector<vector3_t>& footholds) {
+void LocalTerrainEstimator::updateLocalTerrainEstimate(const std::vector<vector3_t> &footholds) {
     const auto normalAndPosition = estimatePlane(footholds);
     terrainPlane_ = TerrainPlane(normalAndPosition.position,
                                  orientationWorldToTerrainFromSurfaceNormalInWorld(normalAndPosition.normal));

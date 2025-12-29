@@ -36,40 +36,45 @@ namespace ocs2 {
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-LoopshapingInitializer::LoopshapingInitializer(const Initializer& systembase, std::shared_ptr<LoopshapingDefinition> loopshapingDefinition)
+LoopshapingInitializer::LoopshapingInitializer(const Initializer &systembase,
+                                               std::shared_ptr<LoopshapingDefinition> loopshapingDefinition)
     : systembase_(systembase.clone()), loopshapingDefinition_(std::move(loopshapingDefinition)) {}
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-LoopshapingInitializer::LoopshapingInitializer(const LoopshapingInitializer& other)
-    : Initializer(other), systembase_(other.systembase_->clone()), loopshapingDefinition_(other.loopshapingDefinition_) {}
+LoopshapingInitializer::LoopshapingInitializer(const LoopshapingInitializer &other)
+    : Initializer(other),
+      systembase_(other.systembase_->clone()),
+      loopshapingDefinition_(other.loopshapingDefinition_) {}
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-LoopshapingInitializer* LoopshapingInitializer::clone() const {
-  return new LoopshapingInitializer(*this);
+LoopshapingInitializer *LoopshapingInitializer::clone() const {
+    return new LoopshapingInitializer(*this);
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-void LoopshapingInitializer::compute(scalar_t time, const vector_t& state, scalar_t nextTime, vector_t& input, vector_t& nextState) {
-  // system state-input initializer
-  vector_t systemInput, systemNextState;
-  const vector_t systemState = loopshapingDefinition_->getSystemState(state);
-  systembase_->compute(time, systemState, nextTime, systemInput, systemNextState);
+void LoopshapingInitializer::compute(scalar_t time, const vector_t &state, scalar_t nextTime, vector_t &input,
+                                     vector_t &nextState) {
+    // system state-input initializer
+    vector_t systemInput, systemNextState;
+    const vector_t systemState = loopshapingDefinition_->getSystemState(state);
+    systembase_->compute(time, systemState, nextTime, systemInput, systemNextState);
 
-  // Compute input
-  vector_t equilibriumFilterInput;
-  const vector_t filterState = loopshapingDefinition_->getFilterState(state);
-  loopshapingDefinition_->getFilterEquilibriumGivenState(systemInput, filterState, equilibriumFilterInput);
-  input = loopshapingDefinition_->augmentedSystemInput(systemInput, equilibriumFilterInput);
+    // Compute input
+    vector_t equilibriumFilterInput;
+    const vector_t filterState = loopshapingDefinition_->getFilterState(state);
+    loopshapingDefinition_->getFilterEquilibriumGivenState(systemInput, filterState, equilibriumFilterInput);
+    input = loopshapingDefinition_->augmentedSystemInput(systemInput, equilibriumFilterInput);
 
-  // Next filter state
-  vector_t filterNextState = filterState + (nextTime - time) * loopshapingDefinition_->filterFlowMap(filterState, input);
-  nextState = loopshapingDefinition_->concatenateSystemAndFilterState(systemNextState, filterNextState);
+    // Next filter state
+    vector_t filterNextState =
+        filterState + (nextTime - time) * loopshapingDefinition_->filterFlowMap(filterState, input);
+    nextState = loopshapingDefinition_->concatenateSystemAndFilterState(systemNextState, filterNextState);
 }
 
 }  // namespace ocs2

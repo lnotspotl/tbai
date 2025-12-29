@@ -34,104 +34,104 @@ namespace ocs2 {
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-void StateInputConstraintCppAd::initialize(size_t stateDim, size_t inputDim, size_t parameterDim, const std::string& modelName,
-                                           const std::string& modelFolder, bool recompileLibraries, bool verbose) {
-  auto constraintAd = [=](const ad_vector_t& x, const ad_vector_t& p, ad_vector_t& y) {
-    assert(x.rows() == 1 + stateDim + inputDim);
-    const ad_scalar_t time = x(0);
-    const ad_vector_t state = x.segment(1, stateDim);
-    const ad_vector_t input = x.tail(inputDim);
-    y = this->constraintFunction(time, state, input, p);
-  };
-  adInterfacePtr_.reset(new ocs2::CppAdInterface(constraintAd, 1 + stateDim + inputDim, parameterDim, modelName, modelFolder));
+void StateInputConstraintCppAd::initialize(size_t stateDim, size_t inputDim, size_t parameterDim,
+                                           const std::string &modelName, const std::string &modelFolder,
+                                           bool recompileLibraries, bool verbose) {
+    auto constraintAd = [=](const ad_vector_t &x, const ad_vector_t &p, ad_vector_t &y) {
+        assert(x.rows() == 1 + stateDim + inputDim);
+        const ad_scalar_t time = x(0);
+        const ad_vector_t state = x.segment(1, stateDim);
+        const ad_vector_t input = x.tail(inputDim);
+        y = this->constraintFunction(time, state, input, p);
+    };
+    adInterfacePtr_.reset(
+        new ocs2::CppAdInterface(constraintAd, 1 + stateDim + inputDim, parameterDim, modelName, modelFolder));
 
-  ocs2::CppAdInterface::ApproximationOrder orderCppAd;
-  if (getOrder() == ConstraintOrder::Linear) {
-    orderCppAd = ocs2::CppAdInterface::ApproximationOrder::First;
-  } else {
-    orderCppAd = ocs2::CppAdInterface::ApproximationOrder::Second;
-  }
+    ocs2::CppAdInterface::ApproximationOrder orderCppAd;
+    if (getOrder() == ConstraintOrder::Linear) {
+        orderCppAd = ocs2::CppAdInterface::ApproximationOrder::First;
+    } else {
+        orderCppAd = ocs2::CppAdInterface::ApproximationOrder::Second;
+    }
 
-  if (recompileLibraries) {
-    adInterfacePtr_->createModels(orderCppAd, verbose);
-  } else {
-    adInterfacePtr_->loadModelsIfAvailable(orderCppAd, verbose);
-  }
+    if (recompileLibraries) {
+        adInterfacePtr_->createModels(orderCppAd, verbose);
+    } else {
+        adInterfacePtr_->loadModelsIfAvailable(orderCppAd, verbose);
+    }
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-StateInputConstraintCppAd::StateInputConstraintCppAd(const StateInputConstraintCppAd& rhs)
+StateInputConstraintCppAd::StateInputConstraintCppAd(const StateInputConstraintCppAd &rhs)
     : StateInputConstraint(rhs), adInterfacePtr_(new ocs2::CppAdInterface(*rhs.adInterfacePtr_)) {}
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-vector_t StateInputConstraintCppAd::getValue(scalar_t time, const vector_t& state, const vector_t& input,
-                                             const PreComputation& preComputation) const {
-  vector_t tapedTimeStateInput(1 + state.rows() + input.rows());
-  tapedTimeStateInput << time, state, input;
-  return adInterfacePtr_->getFunctionValue(tapedTimeStateInput, getParameters(time, preComputation));
+vector_t StateInputConstraintCppAd::getValue(scalar_t time, const vector_t &state, const vector_t &input,
+                                             const PreComputation &preComputation) const {
+    vector_t tapedTimeStateInput(1 + state.rows() + input.rows());
+    tapedTimeStateInput << time, state, input;
+    return adInterfacePtr_->getFunctionValue(tapedTimeStateInput, getParameters(time, preComputation));
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-VectorFunctionLinearApproximation StateInputConstraintCppAd::getLinearApproximation(scalar_t time, const vector_t& state,
-                                                                                    const vector_t& input,
-                                                                                    const PreComputation& preComputation) const {
-  VectorFunctionLinearApproximation constraint;
+VectorFunctionLinearApproximation StateInputConstraintCppAd::getLinearApproximation(
+    scalar_t time, const vector_t &state, const vector_t &input, const PreComputation &preComputation) const {
+    VectorFunctionLinearApproximation constraint;
 
-  const size_t stateDim = state.rows();
-  const size_t inputDim = input.rows();
-  const vector_t params = getParameters(time, preComputation);
-  vector_t tapedTimeStateInput(1 + stateDim + inputDim);
-  tapedTimeStateInput << time, state, input;
+    const size_t stateDim = state.rows();
+    const size_t inputDim = input.rows();
+    const vector_t params = getParameters(time, preComputation);
+    vector_t tapedTimeStateInput(1 + stateDim + inputDim);
+    tapedTimeStateInput << time, state, input;
 
-  constraint.f = adInterfacePtr_->getFunctionValue(tapedTimeStateInput, params);
-  const matrix_t J = adInterfacePtr_->getJacobian(tapedTimeStateInput, params);
-  constraint.dfdx = J.middleCols(1, stateDim);
-  constraint.dfdu = J.rightCols(inputDim);
+    constraint.f = adInterfacePtr_->getFunctionValue(tapedTimeStateInput, params);
+    const matrix_t J = adInterfacePtr_->getJacobian(tapedTimeStateInput, params);
+    constraint.dfdx = J.middleCols(1, stateDim);
+    constraint.dfdu = J.rightCols(inputDim);
 
-  return constraint;
+    return constraint;
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-VectorFunctionQuadraticApproximation StateInputConstraintCppAd::getQuadraticApproximation(scalar_t time, const vector_t& state,
-                                                                                          const vector_t& input,
-                                                                                          const PreComputation& preComputation) const {
-  if (getOrder() != ConstraintOrder::Quadratic) {
-    throw std::runtime_error("[StateInputConstraintCppAd] Quadratic approximation not supported!");
-  }
+VectorFunctionQuadraticApproximation StateInputConstraintCppAd::getQuadraticApproximation(
+    scalar_t time, const vector_t &state, const vector_t &input, const PreComputation &preComputation) const {
+    if (getOrder() != ConstraintOrder::Quadratic) {
+        throw std::runtime_error("[StateInputConstraintCppAd] Quadratic approximation not supported!");
+    }
 
-  VectorFunctionQuadraticApproximation constraint;
+    VectorFunctionQuadraticApproximation constraint;
 
-  const size_t stateDim = state.rows();
-  const size_t inputDim = input.rows();
-  const vector_t params = getParameters(time, preComputation);
-  vector_t tapedTimeStateInput(1 + stateDim + inputDim);
-  tapedTimeStateInput << time, state, input;
+    const size_t stateDim = state.rows();
+    const size_t inputDim = input.rows();
+    const vector_t params = getParameters(time, preComputation);
+    vector_t tapedTimeStateInput(1 + stateDim + inputDim);
+    tapedTimeStateInput << time, state, input;
 
-  constraint.f = adInterfacePtr_->getFunctionValue(tapedTimeStateInput, params);
-  const matrix_t J = adInterfacePtr_->getJacobian(tapedTimeStateInput, params);
-  constraint.dfdx = J.middleCols(1, stateDim);
-  constraint.dfdu = J.rightCols(inputDim);
+    constraint.f = adInterfacePtr_->getFunctionValue(tapedTimeStateInput, params);
+    const matrix_t J = adInterfacePtr_->getJacobian(tapedTimeStateInput, params);
+    constraint.dfdx = J.middleCols(1, stateDim);
+    constraint.dfdu = J.rightCols(inputDim);
 
-  const size_t numConstraints = constraint.f.rows();
-  constraint.dfdxx.resize(numConstraints);
-  constraint.dfdux.resize(numConstraints);
-  constraint.dfduu.resize(numConstraints);
-  for (int i = 0; i < numConstraints; i++) {
-    const matrix_t H = adInterfacePtr_->getHessian(i, tapedTimeStateInput, params);
-    constraint.dfdxx[i] = H.block(1, 1, stateDim, stateDim);
-    constraint.dfdux[i] = H.block(1 + stateDim, 1, inputDim, stateDim);
-    constraint.dfduu[i] = H.bottomRightCorner(inputDim, inputDim);
-  }
+    const size_t numConstraints = constraint.f.rows();
+    constraint.dfdxx.resize(numConstraints);
+    constraint.dfdux.resize(numConstraints);
+    constraint.dfduu.resize(numConstraints);
+    for (int i = 0; i < numConstraints; i++) {
+        const matrix_t H = adInterfacePtr_->getHessian(i, tapedTimeStateInput, params);
+        constraint.dfdxx[i] = H.block(1, 1, stateDim, stateDim);
+        constraint.dfdux[i] = H.block(1 + stateDim, 1, inputDim, stateDim);
+        constraint.dfduu[i] = H.bottomRightCorner(inputDim, inputDim);
+    }
 
-  return constraint;
+    return constraint;
 }
 
 }  // namespace ocs2

@@ -24,17 +24,16 @@ namespace cg {
  *
  * @author Joao Leal
  */
-template<class Base>
+template <class Base>
 class CCompiler {
-public:
-
+   public:
     /**
      * Provides the path to a temporary folder that should not exist
      * (it will be deleted after the dynamic library is created)
      *
      * @return path to a temporary folder.
      */
-    virtual const std::string& getTemporaryFolder() const = 0;
+    virtual const std::string &getTemporaryFolder() const = 0;
 
     /**
      * Defines the path to a temporary folder that should not exist
@@ -42,7 +41,7 @@ public:
      *
      * @param tmpFolder path to a temporary folder.
      */
-    virtual void setTemporaryFolder(const std::string& tmpFolder) = 0;
+    virtual void setTemporaryFolder(const std::string &tmpFolder) = 0;
 
     virtual bool isSaveToDiskFirst() const = 0;
 
@@ -54,7 +53,7 @@ public:
      *
      * @return path to a folder.
      */
-    virtual const std::string& getSourcesFolder() const = 0;
+    virtual const std::string &getSourcesFolder() const = 0;
 
     /**
      * Defines the path to a folder where the source files should be created
@@ -62,11 +61,11 @@ public:
      *
      * @param srcFolder path to the folder.
      */
-    virtual void setSourcesFolder(const std::string& srcFolder) = 0;
+    virtual void setSourcesFolder(const std::string &srcFolder) = 0;
 
-    virtual const std::set<std::string>& getObjectFiles() const = 0;
+    virtual const std::set<std::string> &getObjectFiles() const = 0;
 
-    virtual const std::set<std::string>& getSourceFiles() const = 0;
+    virtual const std::set<std::string> &getSourceFiles() const = 0;
 
     virtual bool isVerbose() const = 0;
 
@@ -79,17 +78,15 @@ public:
      * @param posIndepCode whether or not to create position-independent
      *                     code for dynamic linking
      */
-    virtual void compileSources(const std::map<std::string, std::string>& sources,
-                                bool posIndepCode,
-                                JobTimer* timer = nullptr) = 0;
+    virtual void compileSources(const std::map<std::string, std::string> &sources, bool posIndepCode,
+                                JobTimer *timer = nullptr) = 0;
 
     /**
      * Creates a dynamic library from the previously compiled object files
      *
      * @param library the path to the dynamic library to be created
      */
-    virtual void buildDynamic(const std::string& library,
-                              JobTimer* timer = nullptr) = 0;
+    virtual void buildDynamic(const std::string &library, JobTimer *timer = nullptr) = 0;
 
     /**
      * Deletes the previously compiled object files and clears of files
@@ -98,10 +95,9 @@ public:
     virtual void cleanup() = 0;
 
     inline virtual ~CCompiler() = default;
-
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

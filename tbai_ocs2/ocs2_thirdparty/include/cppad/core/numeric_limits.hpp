@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_NUMERIC_LIMITS_HPP
-# define CPPAD_CORE_NUMERIC_LIMITS_HPP
+#ifndef CPPAD_CORE_NUMERIC_LIMITS_HPP
+#define CPPAD_CORE_NUMERIC_LIMITS_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -138,14 +138,14 @@ contains an example and test of these functions.
 $end
 ------------------------------------------------------------------------------
 */
-# include <iostream>
+#include <iostream>
 
-# include <cppad/configure.hpp>
-# include <cppad/local/define.hpp>
-# include <cppad/core/cppad_assert.hpp>
-# include <cppad/local/declare_ad.hpp>
+#include <cppad/configure.hpp>
+#include <cppad/core/cppad_assert.hpp>
+#include <cppad/local/declare_ad.hpp>
+#include <cppad/local/define.hpp>
 
-namespace CppAD { // BEGIN_CPPAD_NAMESPACE
+namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
 /*!
 \file numeric_limits.hpp
 File that defines CppAD numeric_limits for AD types
@@ -154,37 +154,25 @@ File that defines CppAD numeric_limits for AD types
 /// All tthese defaults correspond to errors
 template <class Float>
 class numeric_limits {
-public:
+   public:
     /// machine epsilon
-    static Float epsilon(void)
-    {   CPPAD_ASSERT_KNOWN(
-        false,
-        "numeric_limits<Float>::epsilon() is not specialized for this Float"
-        );
+    static Float epsilon(void) {
+        CPPAD_ASSERT_KNOWN(false, "numeric_limits<Float>::epsilon() is not specialized for this Float");
         return Float(0);
     }
     /// minimum positive normalized value
-    static Float min(void)
-    {   CPPAD_ASSERT_KNOWN(
-        false,
-        "numeric_limits<Float>::min() is not specialized for this Float"
-        );
+    static Float min(void) {
+        CPPAD_ASSERT_KNOWN(false, "numeric_limits<Float>::min() is not specialized for this Float");
         return Float(0);
     }
     /// maximum finite value
-    static Float max(void)
-    {   CPPAD_ASSERT_KNOWN(
-        false,
-        "numeric_limits<Float>::max() is not specialized for this Float"
-        );
+    static Float max(void) {
+        CPPAD_ASSERT_KNOWN(false, "numeric_limits<Float>::max() is not specialized for this Float");
         return Float(0);
     }
     /// not a number
-    static Float quiet_NaN(void)
-    {   CPPAD_ASSERT_KNOWN(
-        false,
-        "numeric_limits<Float>::quiet_NaN() is not specialized for this Float"
-        );
+    static Float quiet_NaN(void) {
+        CPPAD_ASSERT_KNOWN(false, "numeric_limits<Float>::quiet_NaN() is not specialized for this Float");
         return Float(0);
     }
     /// number of decimal digits
@@ -193,23 +181,19 @@ public:
 
 /// Partial specialization that defines limits for for all AD types
 template <class Base>
-class numeric_limits< AD<Base> > {
-public:
+class numeric_limits<AD<Base> > {
+   public:
     /// machine epsilon
-    static AD<Base> epsilon(void)
-    {   return AD<Base>( numeric_limits<Base>::epsilon() ); }
+    static AD<Base> epsilon(void) { return AD<Base>(numeric_limits<Base>::epsilon()); }
     /// minimum positive normalized value
-    static AD<Base> min(void)
-    {   return AD<Base>( numeric_limits<Base>::min() ); }
+    static AD<Base> min(void) { return AD<Base>(numeric_limits<Base>::min()); }
     /// maximum finite value
-    static AD<Base> max(void)
-    {   return AD<Base>( numeric_limits<Base>::max() ); }
+    static AD<Base> max(void) { return AD<Base>(numeric_limits<Base>::max()); }
     /// not a number
-    static AD<Base> quiet_NaN(void)
-    {   return AD<Base>( numeric_limits<Base>::quiet_NaN() ); }
+    static AD<Base> quiet_NaN(void) { return AD<Base>(numeric_limits<Base>::quiet_NaN()); }
     /// number of decimal digits
     static const int digits10 = numeric_limits<Base>::digits10;
 };
 
-} // END_CPPAD_NAMESPACE
-# endif
+}  // namespace CppAD
+#endif

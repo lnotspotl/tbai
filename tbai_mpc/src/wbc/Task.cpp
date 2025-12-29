@@ -58,5 +58,5 @@ vector_t vvstack(const vector_t &v1, const vector_t &v2) {
     return (vector_t(v1.rows() + v2.rows()) << v1, v2).finished();
 }
 
-}  // namespace wbc
+}  // namespace mpc
 }  // namespace tbai

@@ -32,15 +32,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace ocs2;
 
 TEST(TestFixtureLoopShapingCost, testStateInputCostApproximation) {
-  for (const auto config : configNames) {
-    TestFixtureLoopShapingCost test(config);
-    test.testStateInputCostApproximation();
-  }
+    for (const auto config : configNames) {
+        TestFixtureLoopShapingCost test(config);
+        test.testStateInputCostApproximation();
+    }
 };
 
 TEST(TestFixtureLoopShapingCost, testStateCostApproximation) {
-  for (const auto config : configNames) {
-    TestFixtureLoopShapingCost test(config);
-    test.testStateCostApproximation();
-  }
+    for (const auto config : configNames) {
+        TestFixtureLoopShapingCost test(config);
+        test.testStateCostApproximation();
+    }
 }

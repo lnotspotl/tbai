@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_ATOMIC_TWO_FORWARD_HPP
-# define CPPAD_CORE_ATOMIC_TWO_FORWARD_HPP
+#ifndef CPPAD_CORE_ATOMIC_TWO_FORWARD_HPP
+#define CPPAD_CORE_ATOMIC_TWO_FORWARD_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -234,7 +234,7 @@ $end
 -----------------------------------------------------------------------------
 */
 
-namespace CppAD { // BEGIN_CPPAD_NAMESPACE
+namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
 /*!
 \file atomic/two_forward.hpp
 Atomic forward mode
@@ -263,14 +263,10 @@ Taylor coefficient corresponding to y for this calculation
 See the forward mode in user's documentation for atomic_two
 */
 template <class Base>
-bool atomic_base<Base>::forward(
-    size_t                    p  ,
-    size_t                    q  ,
-    const vector<bool>&       vx ,
-          vector<bool>&       vy ,
-    const vector<Base>&       tx ,
-          vector<Base>&       ty )
-{   return false; }
+bool atomic_base<Base>::forward(size_t p, size_t q, const vector<bool> &vx, vector<bool> &vy, const vector<Base> &tx,
+                                vector<Base> &ty) {
+    return false;
+}
 /*!
 Link from atomic_base to forward mode (for replacement by derived class)
 
@@ -295,14 +291,10 @@ Taylor coefficient corresponding to y for this calculation
 See the forward mode in user's documentation for atomic_two
 */
 template <class Base>
-bool atomic_base<Base>::forward(
-    size_t                    p   ,
-    size_t                    q   ,
-    const vector<bool>&       vx  ,
-          vector<bool>&       vy  ,
-    const vector< AD<Base> >& atx ,
-          vector< AD<Base> >& aty )
-{   return false; }
+bool atomic_base<Base>::forward(size_t p, size_t q, const vector<bool> &vx, vector<bool> &vy,
+                                const vector<AD<Base> > &atx, vector<AD<Base> > &aty) {
+    return false;
+}
 /*!
 Convert atomic_three interface to atomic_two interface
 
@@ -326,36 +318,31 @@ Taylor coefficient corresponding to y for this calculation
 
 See the forward mode in user's documentation for atomic_three
 */
-# define CPPAD_ATOMIC_BASE_MUSTDO 0
+#define CPPAD_ATOMIC_BASE_MUSTDO 0
 template <class Base>
-bool atomic_base<Base>::forward(
-    size_t                       order_low  ,
-    size_t                       order_up   ,
-    const vector<ad_type_enum>&  type_x     ,
-    vector<ad_type_enum>&        type_y     ,
-    const vector<Base>&          taylor_x   ,
-    vector<Base>&                taylor_y   )
-{   //
+bool atomic_base<Base>::forward(size_t order_low, size_t order_up, const vector<ad_type_enum> &type_x,
+                                vector<ad_type_enum> &type_y, const vector<Base> &taylor_x,
+                                vector<Base> &taylor_y) {  //
     // atomic_base::afun(ax, ay) calls bool version directly
-    CPPAD_ASSERT_UNKNOWN( type_x.size() == 0 );
-    CPPAD_ASSERT_UNKNOWN( type_y.size() == 0 );
+    CPPAD_ASSERT_UNKNOWN(type_x.size() == 0);
+    CPPAD_ASSERT_UNKNOWN(type_y.size() == 0);
     //
-# if CPPAD_ATOMIC_BASE_MUSTDO
+#if CPPAD_ATOMIC_BASE_MUSTDO
     size_t thread = thread_alloc::thread_num();
     allocate_work(thread);
-    vector <bool>& vx  = work_[thread]->vx;
-    vector <bool>& vy  = work_[thread]->vy;
+    vector<bool> &vx = work_[thread]->vx;
+    vector<bool> &vy = work_[thread]->vy;
     vx.resize(type_x.size());
     vy.resize(type_y.size());
-# else
+#else
     vector<bool> vx, vy;
-# endif
+#endif
     //
     bool ok = forward(order_low, order_up, vx, vy, taylor_x, taylor_y);
     //
     return ok;
 }
-# undef CPPAD_ATOMIC_BASE_MUSTDO
+#undef CPPAD_ATOMIC_BASE_MUSTDO
 /*!
 Convert atomic_three interface to atomic_two interface
 
@@ -380,17 +367,12 @@ Taylor coefficient corresponding to y for this calculation
 See the forward mode in user's documentation for atomic_three
 */
 template <class Base>
-bool atomic_base<Base>::forward(
-    size_t                       order_low  ,
-    size_t                       order_up   ,
-    const vector<ad_type_enum>&  type_x     ,
-    vector<ad_type_enum>&        type_y     ,
-    const vector< AD<Base> >&    ataylor_x  ,
-    vector< AD<Base> >&          ataylor_y  )
-{   //
+bool atomic_base<Base>::forward(size_t order_low, size_t order_up, const vector<ad_type_enum> &type_x,
+                                vector<ad_type_enum> &type_y, const vector<AD<Base> > &ataylor_x,
+                                vector<AD<Base> > &ataylor_y) {  //
     // atomic_base::afun(ax, ay) calls bool version directly
-    CPPAD_ASSERT_UNKNOWN( type_x.size() == 0 );
-    CPPAD_ASSERT_UNKNOWN( type_y.size() == 0 );
+    CPPAD_ASSERT_UNKNOWN(type_x.size() == 0);
+    CPPAD_ASSERT_UNKNOWN(type_y.size() == 0);
     //
     vector<bool> vx, vy;
     bool ok = forward(order_low, order_up, vx, vy, ataylor_x, ataylor_y);
@@ -398,5 +380,5 @@ bool atomic_base<Base>::forward(
     return ok;
 }
 
-} // END_CPPAD_NAMESPACE
-# endif
+}  // namespace CppAD
+#endif

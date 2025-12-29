@@ -22,14 +22,14 @@ namespace cg {
  * DAE variable information
  */
 class DaeVarInfo {
-private:
+   private:
     /**
      * A unique identifier for this variable (used internally)
      */
     size_t id_;
     /**
      * The index of the variable for which this variable is the time
-     * derivative. A negative value means that the current variable isn't 
+     * derivative. A negative value means that the current variable isn't
      * a time derivative.
      */
     int antiDerivative_;
@@ -44,12 +44,12 @@ private:
      */
     bool integratedDependent_;
     /**
-     * Whether or not this variable is an integrated variable (usually 
+     * Whether or not this variable is an integrated variable (usually
      * associated with time)
      */
     bool integratedVariable_;
     /**
-     * A custom variable name (keep it empty to use an automatically 
+     * A custom variable name (keep it empty to use an automatically
      * generated name)
      */
     std::string name_;
@@ -64,106 +64,87 @@ private:
      */
     int order_;
     /**
-     * The original variable index for which this variable is the 
+     * The original variable index for which this variable is the
      * time derivative (with the order provided by order_). A negative value
      * means that the current variable was never a time derivative.
      */
     int originalAntiDerivative_;
-public:
 
+   public:
     /**
      * Creates a new DAE variable
-     * 
+     *
      * @param name A custom variable name (keep it empty to use an
      *             automatically generated name)
      * @param id A unique identifier for this variable (used internally)
      */
-    inline DaeVarInfo(const std::string& name = "",
-                      size_t id = 0) :
-        id_(id),
-        antiDerivative_(-1),
-        derivative_(-1),
-        integratedDependent_(true),
-        integratedVariable_(false),
-        name_(name),
-        originalIndex_(-1),
-        order_(0),
-        originalAntiDerivative_(-1) {
-    }
+    inline DaeVarInfo(const std::string &name = "", size_t id = 0)
+        : id_(id),
+          antiDerivative_(-1),
+          derivative_(-1),
+          integratedDependent_(true),
+          integratedVariable_(false),
+          name_(name),
+          originalIndex_(-1),
+          order_(0),
+          originalAntiDerivative_(-1) {}
 
-    inline DaeVarInfo(int derivativeOf,
-                      const std::string& name = "",
-                      size_t id = 0) :
-        id_(id),
-        antiDerivative_(derivativeOf),
-        derivative_(-1),
-        integratedDependent_(true),
-        integratedVariable_(false),
-        name_(name),
-        originalIndex_(-1),
-        order_(0),
-        originalAntiDerivative_(-1) {
-    }
+    inline DaeVarInfo(int derivativeOf, const std::string &name = "", size_t id = 0)
+        : id_(id),
+          antiDerivative_(derivativeOf),
+          derivative_(-1),
+          integratedDependent_(true),
+          integratedVariable_(false),
+          name_(name),
+          originalIndex_(-1),
+          order_(0),
+          originalAntiDerivative_(-1) {}
 
     /**
      * Provides a unique identifier for the variable.
-     * 
+     *
      * @return a unique identifier for the variable.
      */
-    inline size_t getId() const {
-        return id_;
-    }
+    inline size_t getId() const { return id_; }
 
-    inline void setId(size_t id) {
-        id_ = id;
-    }
+    inline void setId(size_t id) { id_ = id; }
 
     /**
      * The index of the variable that the current variable is the derivative
-     * of. A negative value means that the current variable isn't a 
+     * of. A negative value means that the current variable isn't a
      * derivative.
-     * 
-     * @return The index of the variable for which this variable is the 
+     *
+     * @return The index of the variable for which this variable is the
      *         derivative of.
      */
-    inline int getAntiDerivative() const {
-        return antiDerivative_;
-    }
+    inline int getAntiDerivative() const { return antiDerivative_; }
 
-    inline void setAntiDerivative(int derivativeOf) {
-        antiDerivative_ = derivativeOf;
-    }
+    inline void setAntiDerivative(int derivativeOf) { antiDerivative_ = derivativeOf; }
 
     /**
      * The index of the time derivative for this variable. A negative value
      * means that there is none.
-     * 
+     *
      * @return The index of the time derivative for this variable.
      */
-    inline int getDerivative() const {
-        return derivative_;
-    }
+    inline int getDerivative() const { return derivative_; }
 
     /**
-     * Defines the index of the time derivative for this variable. 
-     * 
+     * Defines the index of the time derivative for this variable.
+     *
      * @param derivative The index of the time derivative for this variable.
      *                   A negative value means that there is none.
      */
-    inline void setDerivative(int derivative) {
-        derivative_ = derivative;
-    }
+    inline void setDerivative(int derivative) { derivative_ = derivative; }
 
     /**
-     * Determines whether or not this variable depends on the 
+     * Determines whether or not this variable depends on the
      * independent/integrated variables.
-     * 
+     *
      * @return true if it is a parameter that does not depend on the
      *              integrated variables
      */
-    inline bool isFunctionOfIntegrated() const {
-        return integratedDependent_;
-    }
+    inline bool isFunctionOfIntegrated() const { return integratedDependent_; }
 
     /**
      * Defines this variable as a parameter/constant that does not depend on
@@ -193,80 +174,68 @@ public:
     /**
      * Determines whether or not this is an integrated variable, also known
      * as the independent variable of the DAE system (typically time).
-     * 
+     *
      * @return true if it is the integrated variable
      */
-    inline bool isIntegratedVariable() const {
-        return integratedVariable_;
-    }
+    inline bool isIntegratedVariable() const { return integratedVariable_; }
 
     /**
-     * Returns the custom variable name. If the string is empty an 
+     * Returns the custom variable name. If the string is empty an
      * automatically generated name will be used.
-     * 
+     *
      * @return the custom variable name
      */
-    inline const std::string& getName() const {
-        return name_;
-    }
+    inline const std::string &getName() const { return name_; }
 
     /**
-     * Defines a custom variable name. If the string is empty an 
+     * Defines a custom variable name. If the string is empty an
      * automatically generated name will be used.
-     * 
+     *
      * @param name the custom variable name
      */
-    inline void setName(const std::string& name) {
-        name_ = name;
-    }
+    inline void setName(const std::string &name) { name_ = name; }
 
     /**
      * Provides the variable index corresponding to the original model.
-     * 
-     * @return The corresponding variable index in the original model. A 
+     *
+     * @return The corresponding variable index in the original model. A
      *         negative value means that this variable was created by the
      *         algorithm.
      */
-    inline int getOriginalIndex() const {
-        return originalIndex_;
-    }
+    inline int getOriginalIndex() const { return originalIndex_; }
 
     /**
      * Defines the variable index in the original model.
-     * 
+     *
      * @param originalIndex The corresponding variable index in the original
      *                      model. A negative value means that this variable
      *                      was created by the algorithm.
      */
-    inline void setOriginalIndex(int originalIndex) {
-        originalIndex_ = originalIndex;
-    }
+    inline void setOriginalIndex(int originalIndex) { originalIndex_ = originalIndex; }
 
     /**
      * Provides the original variable index for which this variable is/was
      * the time derivative (with the order provided by order_).
-     * A negative value means that the current variable was never a time 
+     * A negative value means that the current variable was never a time
      * derivative.
-     * A non-negative value does not mean that this variable should be 
-     * treated as a time derivative since it might have been transformed 
+     * A non-negative value does not mean that this variable should be
+     * treated as a time derivative since it might have been transformed
      * into an algebraic variable by the algorithm.
-     * 
-     * @return the index in the original model for which this variable is 
+     *
+     * @return the index in the original model for which this variable is
      *         the time derivative
      */
-    inline int getOriginalAntiDerivative() const {
-        return originalAntiDerivative_;
-    }
+    inline int getOriginalAntiDerivative() const { return originalAntiDerivative_; }
 
     /**
      * Defines the original variable index for which this variable is/was
      * the time derivative (with the order provided by order_).
-     * A negative value means that the current variable was never a time 
+     * A negative value means that the current variable was never a time
      * derivative.
-     * A non-negative value does not mean that this variable should be 
-     * treated as a time derivative since it might have been transformed 
+     * A non-negative value does not mean that this variable should be
+     * treated as a time derivative since it might have been transformed
      * into an algebraic variable by the algorithm.
-     * 
+     *
      * @param originalAntiDerivative the index in the original model for
      *                               which this variable is the time
      *                               derivative
@@ -279,34 +248,28 @@ public:
      * Provides the order of a time derivative.
      * A negative value means that it is a constant.
      * An order higher than zero does not mean that the variable should be
-     * treated as a time derivative, it could very well be a time derivative 
+     * treated as a time derivative, it could very well be a time derivative
      * transformed into an algebraic variable by the algorithm.
      *
      * @return The order of the time derivative
      */
-    inline int getOrder() const {
-        return order_;
-    }
+    inline int getOrder() const { return order_; }
 
     /**
      * Defines the order of a time derivative.
      * A negative value means that it is a constant.
      * An order higher than zero does not mean that the variable should be
-     * treated as a time derivative, it could very well be a time derivative 
+     * treated as a time derivative, it could very well be a time derivative
      * transformed into an algebraic variable by the algorithm.
-     * 
+     *
      * @param order The order of the time derivative
      */
-    inline void setOrder(int order) {
-        order_ = order;
-    }
+    inline void setOrder(int order) { order_ = order; }
 
-    inline void printInfo(std::ostream& out = std::cout) const {
+    inline void printInfo(std::ostream &out = std::cout) const {
         out << name_ << ":\n";
-        if (antiDerivative_ >= 0)
-            out << " derivative-of: " << antiDerivative_ << "\n";
-        if (derivative_ >= 0)
-            out << " derivative: " << derivative_ << "\n";
+        if (antiDerivative_ >= 0) out << " derivative-of: " << antiDerivative_ << "\n";
+        if (derivative_ >= 0) out << " derivative: " << derivative_ << "\n";
         if (integratedDependent_)
             out << " integrated dependent\n";
         else if (integratedVariable_)
@@ -314,11 +277,10 @@ public:
         out.flush();
     }
 
-    inline virtual ~DaeVarInfo() {
-    }
+    inline virtual ~DaeVarInfo() {}
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

@@ -27,44 +27,43 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************/
 
-#include <gtest/gtest.h>
-
 #include <algorithm>
 
+#include <gtest/gtest.h>
 #include <ocs2_core/Types.h>
 #include <ocs2_core/integration/TrapezoidalIntegration.h>
 
 TEST(TrapezoidalIntegrationTest, Rectangle) {
-  const ocs2::scalar_t width = 8.0;
-  const ocs2::scalar_t height = 2.0;
-  const size_t numIntervals = 100;
-  const ocs2::scalar_t dx = width / numIntervals;
+    const ocs2::scalar_t width = 8.0;
+    const ocs2::scalar_t height = 2.0;
+    const size_t numIntervals = 100;
+    const ocs2::scalar_t dx = width / numIntervals;
 
-  ocs2::scalar_array_t xTrj(numIntervals + 1, 0.0);
-  auto x = -dx;
-  std::generate(xTrj.begin(), xTrj.end(), [&x, dx]() { return (x += dx); });
+    ocs2::scalar_array_t xTrj(numIntervals + 1, 0.0);
+    auto x = -dx;
+    std::generate(xTrj.begin(), xTrj.end(), [&x, dx]() { return (x += dx); });
 
-  ocs2::scalar_array_t yTrj(numIntervals + 1, height);
+    ocs2::scalar_array_t yTrj(numIntervals + 1, height);
 
-  const auto area = ocs2::trapezoidalIntegration(xTrj, yTrj, 0.0);
-  ASSERT_NEAR(area, width * height, 1e-12);
+    const auto area = ocs2::trapezoidalIntegration(xTrj, yTrj, 0.0);
+    ASSERT_NEAR(area, width * height, 1e-12);
 }
 
 TEST(TrapezoidalIntegrationTest, RightTriangle) {
-  const ocs2::scalar_t width = 8.0;
-  const ocs2::scalar_t height = 2.0;
-  const size_t numIntervals = 10;
-  const ocs2::scalar_t dx = width / numIntervals;
-  const ocs2::scalar_t dy = height / numIntervals;
+    const ocs2::scalar_t width = 8.0;
+    const ocs2::scalar_t height = 2.0;
+    const size_t numIntervals = 10;
+    const ocs2::scalar_t dx = width / numIntervals;
+    const ocs2::scalar_t dy = height / numIntervals;
 
-  ocs2::scalar_array_t xTrj(numIntervals + 1, 0.0);
-  auto x = -dx;
-  std::generate(xTrj.begin(), xTrj.end(), [&x, dx]() { return (x += dx); });
+    ocs2::scalar_array_t xTrj(numIntervals + 1, 0.0);
+    auto x = -dx;
+    std::generate(xTrj.begin(), xTrj.end(), [&x, dx]() { return (x += dx); });
 
-  ocs2::scalar_array_t yTrj(numIntervals + 1, 0.0);
-  auto y = -dy;
-  std::generate(yTrj.begin(), yTrj.end(), [&y, dy]() { return (y += dy); });
+    ocs2::scalar_array_t yTrj(numIntervals + 1, 0.0);
+    auto y = -dy;
+    std::generate(yTrj.begin(), yTrj.end(), [&y, dy]() { return (y += dy); });
 
-  const auto area = ocs2::trapezoidalIntegration(xTrj, yTrj, 0.0);
-  ASSERT_NEAR(area, width * height / 2.0, 1e-12);
+    const auto area = ocs2::trapezoidalIntegration(xTrj, yTrj, 0.0);
+    ASSERT_NEAR(area, width * height / 2.0, 1e-12);
 }

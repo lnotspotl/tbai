@@ -27,7 +27,7 @@ typedef struct Array {
      * Array values. For dense arrays its size is defined by
      * ::size otherwise by ::nnz.
      */
-    void* data;
+    void *data;
     /**
      * Total array size.
      */
@@ -39,7 +39,7 @@ typedef struct Array {
     /**
      * Indexes of sparse array (undefined for dense).
      */
-    const unsigned long* idx;
+    const unsigned long *idx;
     /**
      * Number of non-zeros (size of data; undefined for dense).
      */
@@ -53,23 +53,12 @@ struct LangCAtomicFun {
     /**
      * A pointer to the compiled model object (e.g. LinuxDynamicLibModel)
      */
-    void* libModel;
+    void *libModel;
 
-    int (*forward)(void* libModel,
-                   int atomicIndex,
-                   int q,
-                   int p,
-                   const Array tx[],
-                   Array* ty);
+    int (*forward)(void *libModel, int atomicIndex, int q, int p, const Array tx[], Array *ty);
 
-    int (*reverse)(void* libModel,
-                   int atomicIndex,
-                   int p,
-                   const Array tx[],
-                   Array* px,
-                   const Array py[]);
+    int (*reverse)(void *libModel, int atomicIndex, int p, const Array tx[], Array *px, const Array py[]);
 };
-
 }
 
 #endif

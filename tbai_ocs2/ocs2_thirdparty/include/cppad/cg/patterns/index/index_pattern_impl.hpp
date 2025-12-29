@@ -18,12 +18,12 @@
 namespace CppAD {
 namespace cg {
 
-template<class VectorSizeT>
-IndexPattern* IndexPattern::detect(const VectorSizeT& x2y) {
+template <class VectorSizeT>
+IndexPattern *IndexPattern::detect(const VectorSizeT &x2y) {
     CPPADCG_ASSERT_UNKNOWN(x2y.size() > 0)
 
     size_t maxCount = std::min<size_t>(std::max<size_t>(3ul, x2y.size() / 4), 8ul);
-    std::map<size_t, IndexPattern*> linearSections = SectionedIndexPattern::detectLinearSections(x2y, maxCount);
+    std::map<size_t, IndexPattern *> linearSections = SectionedIndexPattern::detectLinearSections(x2y, maxCount);
 
     if (linearSections.size() == 1) {
         return linearSections.begin()->second;
@@ -32,14 +32,13 @@ IndexPattern* IndexPattern::detect(const VectorSizeT& x2y) {
     } else {
         return new Random1DIndexPattern(x2y);
     }
-
 }
 
-IndexPattern* IndexPattern::detect(const std::map<size_t, size_t>& x2y) {
+IndexPattern *IndexPattern::detect(const std::map<size_t, size_t> &x2y) {
     CPPADCG_ASSERT_UNKNOWN(!x2y.empty())
 
     size_t maxCount = std::min<size_t>(std::max<size_t>(3ul, x2y.size() / 4), 8ul);
-    std::map<size_t, IndexPattern*> linearSections = SectionedIndexPattern::detectLinearSections(x2y, maxCount);
+    std::map<size_t, IndexPattern *> linearSections = SectionedIndexPattern::detectLinearSections(x2y, maxCount);
 
     if (linearSections.size() == 1) {
         return linearSections.begin()->second;
@@ -50,15 +49,15 @@ IndexPattern* IndexPattern::detect(const std::map<size_t, size_t>& x2y) {
     }
 }
 
-inline bool IndexPattern::isConstant(const IndexPattern& ip) {
+inline bool IndexPattern::isConstant(const IndexPattern &ip) {
     if (ip.getType() == IndexPatternType::Linear) {
-        const auto& lip = static_cast<const LinearIndexPattern&> (ip);
+        const auto &lip = static_cast<const LinearIndexPattern &>(ip);
         return lip.getLinearSlopeDy() == 0;
     }
     return false;
 }
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

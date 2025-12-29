@@ -1,5 +1,5 @@
-# ifndef CPPAD_SPEED_MAT_SUM_SQ_HPP
-# define CPPAD_SPEED_MAT_SUM_SQ_HPP
+#ifndef CPPAD_SPEED_MAT_SUM_SQ_HPP
+#define CPPAD_SPEED_MAT_SUM_SQ_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -125,28 +125,26 @@ $end
 ------------------------------------------------------------------------------
 */
 // BEGIN C++
-# include <cstddef>
+#include <cstddef>
 //
 namespace CppAD {
-    template <class Vector>
-    void mat_sum_sq(size_t n, Vector& x , Vector& y , Vector& z)
-    {   size_t i, j, k;
-        // Very simple computation of y = x * x for speed comparison
-        for(i = 0; i < n; i++)
-        {   for(j = 0; j < n; j++)
-            {   y[i * n + j] = 0.;
-                for(k = 0; k < n; k++)
-                    y[i * n + j] += x[i * n + k] * x[k * n + j];
-            }
+template <class Vector>
+void mat_sum_sq(size_t n, Vector &x, Vector &y, Vector &z) {
+    size_t i, j, k;
+    // Very simple computation of y = x * x for speed comparison
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) {
+            y[i * n + j] = 0.;
+            for (k = 0; k < n; k++) y[i * n + j] += x[i * n + k] * x[k * n + j];
         }
-        z[0] = 0.;
-        for(i = 0; i < n; i++)
-        {   for(j = 0; j < n; j++)
-                z[0] += y[i * n + j];
-        }
-        return;
     }
-
+    z[0] = 0.;
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) z[0] += y[i * n + j];
+    }
+    return;
 }
+
+}  // namespace CppAD
 // END C++
-# endif
+#endif

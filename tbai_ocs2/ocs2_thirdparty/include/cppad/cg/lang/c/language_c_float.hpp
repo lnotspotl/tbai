@@ -20,133 +20,133 @@ namespace cg {
 
 /**
  * Specialization of the C language function names for floats (requires C99)
- * 
+ *
  * @author Joao Leal
  */
-template<>
-inline const std::string& LanguageC<float>::absFuncName() {
-    static const std::string name("fabsf"); // C99
+template <>
+inline const std::string &LanguageC<float>::absFuncName() {
+    static const std::string name("fabsf");  // C99
     return name;
 }
 
-template<>
-inline const std::string& LanguageC<float>::acosFuncName() {
-    static const std::string name("acosf"); // C99
+template <>
+inline const std::string &LanguageC<float>::acosFuncName() {
+    static const std::string name("acosf");  // C99
     return name;
 }
 
-template<>
-inline const std::string& LanguageC<float>::asinFuncName() {
-    static const std::string name("asinf"); // C99
+template <>
+inline const std::string &LanguageC<float>::asinFuncName() {
+    static const std::string name("asinf");  // C99
     return name;
 }
 
-template<>
-inline const std::string& LanguageC<float>::atanFuncName() {
-    static const std::string name("atanf"); // C99
+template <>
+inline const std::string &LanguageC<float>::atanFuncName() {
+    static const std::string name("atanf");  // C99
     return name;
 }
 
-template<>
-inline const std::string& LanguageC<float>::coshFuncName() {
-    static const std::string name("coshf"); // C99
+template <>
+inline const std::string &LanguageC<float>::coshFuncName() {
+    static const std::string name("coshf");  // C99
     return name;
 }
 
-template<>
-inline const std::string& LanguageC<float>::cosFuncName() {
-    static const std::string name("cosf"); // C99
+template <>
+inline const std::string &LanguageC<float>::cosFuncName() {
+    static const std::string name("cosf");  // C99
     return name;
 }
 
-template<>
-inline const std::string& LanguageC<float>::expFuncName() {
-    static const std::string name("expf"); // C99
+template <>
+inline const std::string &LanguageC<float>::expFuncName() {
+    static const std::string name("expf");  // C99
     return name;
 }
 
-template<>
-inline const std::string& LanguageC<float>::logFuncName() {
-    static const std::string name("logf"); // C99
+template <>
+inline const std::string &LanguageC<float>::logFuncName() {
+    static const std::string name("logf");  // C99
     return name;
 }
 
-template<>
-inline const std::string& LanguageC<float>::sinhFuncName() {
-    static const std::string name("sinhf"); // C99
+template <>
+inline const std::string &LanguageC<float>::sinhFuncName() {
+    static const std::string name("sinhf");  // C99
     return name;
 }
 
-template<>
-inline const std::string& LanguageC<float>::sinFuncName() {
-    static const std::string name("sinf"); // C99
+template <>
+inline const std::string &LanguageC<float>::sinFuncName() {
+    static const std::string name("sinf");  // C99
     return name;
 }
 
-template<>
-inline const std::string& LanguageC<float>::sqrtFuncName() {
-    static const std::string name("sqrtf"); // C99
+template <>
+inline const std::string &LanguageC<float>::sqrtFuncName() {
+    static const std::string name("sqrtf");  // C99
     return name;
 }
 
-template<>
-inline const std::string& LanguageC<float>::tanhFuncName() {
-    static const std::string name("tanhf"); // C99
+template <>
+inline const std::string &LanguageC<float>::tanhFuncName() {
+    static const std::string name("tanhf");  // C99
     return name;
 }
 
-template<>
-inline const std::string& LanguageC<float>::tanFuncName() {
-    static const std::string name("tanf"); // C99
+template <>
+inline const std::string &LanguageC<float>::tanFuncName() {
+    static const std::string name("tanf");  // C99
     return name;
 }
 
 #if CPPAD_USE_CPLUSPLUS_2011
-template<>
-inline const std::string& LanguageC<float>::erfFuncName() {
-    static const std::string name("erff"); // C99
+template <>
+inline const std::string &LanguageC<float>::erfFuncName() {
+    static const std::string name("erff");  // C99
     return name;
 }
 
-template<>
-inline const std::string& LanguageC<float>::asinhFuncName() {
-    static const std::string name("asinhf"); // C99
+template <>
+inline const std::string &LanguageC<float>::asinhFuncName() {
+    static const std::string name("asinhf");  // C99
     return name;
 }
 
-template<>
-inline const std::string& LanguageC<float>::acoshFuncName() {
-    static const std::string name("acoshf"); // C99
+template <>
+inline const std::string &LanguageC<float>::acoshFuncName() {
+    static const std::string name("acoshf");  // C99
     return name;
 }
 
-template<>
-inline const std::string& LanguageC<float>::atanhFuncName() {
-    static const std::string name("atanhf"); // C99
+template <>
+inline const std::string &LanguageC<float>::atanhFuncName() {
+    static const std::string name("atanhf");  // C99
     return name;
 }
 
-template<>
-inline const std::string& LanguageC<float>::expm1FuncName() {
-    static const std::string name("expm1f"); // C99
+template <>
+inline const std::string &LanguageC<float>::expm1FuncName() {
+    static const std::string name("expm1f");  // C99
     return name;
 }
 
-template<>
-inline const std::string& LanguageC<float>::log1pFuncName() {
-    static const std::string name("log1pf"); // C99
+template <>
+inline const std::string &LanguageC<float>::log1pFuncName() {
+    static const std::string name("log1pf");  // C99
     return name;
 }
 
 #endif
 
-template<>
-inline const std::string& LanguageC<float>::getPrintfBaseFormat() {
+template <>
+inline const std::string &LanguageC<float>::getPrintfBaseFormat() {
     static const std::string format("%f");
     return format;
 }
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_NEAR_EQUAL_EXT_HPP
-# define CPPAD_CORE_NEAR_EQUAL_EXT_HPP
+#ifndef CPPAD_CORE_NEAR_EQUAL_EXT_HPP
+#define CPPAD_CORE_NEAR_EQUAL_EXT_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -129,59 +129,48 @@ namespace CppAD {
 
 // fold into base type and then use <cppad/near_equal.hpp>
 template <class Base>
-CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION
-bool NearEqual(
-const AD<Base> &x, const AD<Base> &y, const Base &r, const Base &a)
-{   return NearEqual(x.value_, y.value_, r, a);
+CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION bool NearEqual(const AD<Base> &x, const AD<Base> &y, const Base &r,
+                                                     const Base &a) {
+    return NearEqual(x.value_, y.value_, r, a);
 }
 
 template <class Base>
-CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION
-bool NearEqual(
-const Base &x, const AD<Base> &y, const Base &r, const Base &a)
-{   return NearEqual(x, y.value_, r, a);
+CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION bool NearEqual(const Base &x, const AD<Base> &y, const Base &r, const Base &a) {
+    return NearEqual(x, y.value_, r, a);
 }
 
 template <class Base>
-CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION
-bool NearEqual(
-const AD<Base> &x, const Base &y, const Base &r, const Base &a)
-{   return NearEqual(x.value_, y, r, a);
+CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION bool NearEqual(const AD<Base> &x, const Base &y, const Base &r, const Base &a) {
+    return NearEqual(x.value_, y, r, a);
 }
 
 // fold into AD type and then use cases above
 template <class Base>
-CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION
-bool NearEqual(
-    const VecAD_reference<Base> &x, const VecAD_reference<Base> &y,
-    const Base &r, const Base &a)
-{   return NearEqual(x.ADBase(), y.ADBase(), r, a);
+CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION bool NearEqual(const VecAD_reference<Base> &x, const VecAD_reference<Base> &y,
+                                                     const Base &r, const Base &a) {
+    return NearEqual(x.ADBase(), y.ADBase(), r, a);
 }
 template <class Base>
-CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION
-bool NearEqual(const VecAD_reference<Base> &x, const AD<Base> &y,
-    const Base &r, const Base &a)
-{   return NearEqual(x.ADBase(), y, r, a);
+CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION bool NearEqual(const VecAD_reference<Base> &x, const AD<Base> &y, const Base &r,
+                                                     const Base &a) {
+    return NearEqual(x.ADBase(), y, r, a);
 }
 template <class Base>
-CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION
-bool NearEqual(const VecAD_reference<Base> &x, const Base &y,
-    const Base &r, const Base &a)
-{   return NearEqual(x.ADBase(), y, r, a);
+CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION bool NearEqual(const VecAD_reference<Base> &x, const Base &y, const Base &r,
+                                                     const Base &a) {
+    return NearEqual(x.ADBase(), y, r, a);
 }
 template <class Base>
-CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION
-bool NearEqual(const AD<Base> &x, const VecAD_reference<Base> &y,
-    const Base &r, const Base &a)
-{   return NearEqual(x, y.ADBase(), r, a);
+CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION bool NearEqual(const AD<Base> &x, const VecAD_reference<Base> &y, const Base &r,
+                                                     const Base &a) {
+    return NearEqual(x, y.ADBase(), r, a);
 }
 template <class Base>
-CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION
-bool NearEqual(const Base &x, const VecAD_reference<Base> &y,
-    const Base &r, const Base &a)
-{   return NearEqual(x, y.ADBase(), r, a);
+CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION bool NearEqual(const Base &x, const VecAD_reference<Base> &y, const Base &r,
+                                                     const Base &a) {
+    return NearEqual(x, y.ADBase(), r, a);
 }
 
-} // END CppAD namespace
+}  // namespace CppAD
 
-# endif
+#endif

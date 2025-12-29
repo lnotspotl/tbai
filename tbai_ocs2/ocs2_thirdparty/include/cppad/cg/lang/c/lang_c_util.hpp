@@ -21,11 +21,11 @@ namespace cg {
 
 /**
  * Prints the model to standard output
- * 
+ *
  * @param fun the model
  */
-template<class Base>
-inline void printModel(ADFun<CG<Base> >& fun) {
+template <class Base>
+inline void printModel(ADFun<CG<Base> > &fun) {
     std::vector<std::string> depNames;
     std::vector<std::string> indepNames;
     printModel(fun, depNames, indepNames);
@@ -33,15 +33,14 @@ inline void printModel(ADFun<CG<Base> >& fun) {
 
 /**
  * Prints the model to standard output
- * 
+ *
  * @param fun the model
  * @param depNames the names to be used for the dependent variables
  * @param indepNames the names to be used for the independent variables
  */
-template<class Base>
-inline void printModel(ADFun<CG<Base> >& fun,
-                       const std::vector<std::string>& depNames,
-                       const std::vector<std::string>& indepNames) {
+template <class Base>
+inline void printModel(ADFun<CG<Base> > &fun, const std::vector<std::string> &depNames,
+                       const std::vector<std::string> &indepNames) {
     CPPADCG_ASSERT_UNKNOWN(depNames.size() <= fun.Range())
     CPPADCG_ASSERT_UNKNOWN(indepNames.size() <= fun.Domain())
 
@@ -57,8 +56,7 @@ inline void printModel(ADFun<CG<Base> >& fun,
     /**
      * generate the source code
      */
-    LangCCustomVariableNameGenerator<Base> nameGen(depNames, indepNames,
-                                                   "y", "x", "z", "array");
+    LangCCustomVariableNameGenerator<Base> nameGen(depNames, indepNames, "y", "x", "z", "array");
 
     std::ostringstream code;
     handler.generateCode(code, langC, dep0, nameGen);
@@ -68,15 +66,14 @@ inline void printModel(ADFun<CG<Base> >& fun,
 /**
  * Prints the model resulting in a single dependent variable.
  */
-template<class Base>
-inline void printExpression(const CG<Base>& dep,
-                            std::ostream& out = std::cout) {
-    if(dep.getOperationNode() != nullptr) {
-        if(dep.getOperationNode()->getCodeHandler() == nullptr) {
+template <class Base>
+inline void printExpression(const CG<Base> &dep, std::ostream &out = std::cout) {
+    if (dep.getOperationNode() != nullptr) {
+        if (dep.getOperationNode()->getCodeHandler() == nullptr) {
             throw CGException("Unable to print expression: found an operation node without a CodeHandler!");
         }
 
-        CodeHandler<Base>& handler = *dep.getOperationNode()->getCodeHandler();
+        CodeHandler<Base> &handler = *dep.getOperationNode()->getCodeHandler();
         LanguageC<double> langC("double");
         LangCDefaultVariableNameGenerator<double> nameGen;
 
@@ -91,13 +88,12 @@ inline void printExpression(const CG<Base>& dep,
     }
 }
 
-template<class Base>
-inline void printExpression(OperationNode<Base>& dep,
-                            std::ostream& out = std::cout) {
+template <class Base>
+inline void printExpression(OperationNode<Base> &dep, std::ostream &out = std::cout) {
     printExpression(CG<Base>(dep), out);
 }
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

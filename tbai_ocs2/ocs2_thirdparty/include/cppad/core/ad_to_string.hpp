@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_AD_TO_STRING_HPP
-# define CPPAD_CORE_AD_TO_STRING_HPP
+#ifndef CPPAD_CORE_AD_TO_STRING_HPP
+#define CPPAD_CORE_AD_TO_STRING_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-16 Bradley M. Bell
 
@@ -51,20 +51,21 @@ includes an example and test of $code to_string$$ with AD types.
 
 $end
 */
-# include <cppad/utility/to_string.hpp>
-# include <cppad/core/ad.hpp>
+#include <cppad/core/ad.hpp>
+#include <cppad/utility/to_string.hpp>
 
 namespace CppAD {
 
-    // Template definition is in cppad/utility/to_string.hpp.
-    // Partial specialzation for AD<Base> types
-    template<class Base>
-    struct to_string_struct< CppAD::AD<Base> >
-    {   std::string operator()(const CppAD::AD<Base>& value)
-        {   to_string_struct<Base> ts;
-            return ts( Value( Var2Par( value ) ) ); }
-    };
+// Template definition is in cppad/utility/to_string.hpp.
+// Partial specialzation for AD<Base> types
+template <class Base>
+struct to_string_struct<CppAD::AD<Base> > {
+    std::string operator()(const CppAD::AD<Base> &value) {
+        to_string_struct<Base> ts;
+        return ts(Value(Var2Par(value)));
+    }
+};
 
-}
+}  // namespace CppAD
 
-# endif
+#endif

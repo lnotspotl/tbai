@@ -1,9 +1,9 @@
 #include "tbai_mpc/reference/ReferenceTrajectoryGenerator.hpp"
 
-#include <tbai_mpc/quadruped_mpc/quadruped_commands/ReferenceExtrapolation.h>
 #include <ocs2_core/misc/LoadData.h>
 #include <tbai_mpc/quadruped_mpc/core/Rotations.h>
 #include <tbai_mpc/quadruped_mpc/core/SwitchedModel.h>
+#include <tbai_mpc/quadruped_mpc/quadruped_commands/ReferenceExtrapolation.h>
 
 namespace tbai {
 namespace mpc {
@@ -15,10 +15,8 @@ using namespace switched_model;
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 ReferenceTrajectoryGenerator::ReferenceTrajectoryGenerator(
-    const std::string& configFile,
-    std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> velocityGeneratorPtr,
-    std::shared_ptr<switched_model::KinematicsModelBase<ocs2::scalar_t>> kinematicsPtr,
-    ocs2::scalar_t trajdt,
+    const std::string &configFile, std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> velocityGeneratorPtr,
+    std::shared_ptr<switched_model::KinematicsModelBase<ocs2::scalar_t>> kinematicsPtr, ocs2::scalar_t trajdt,
     size_t trajKnots)
     : velocityGeneratorPtr_(std::move(velocityGeneratorPtr)),
       terrainEstimator_(std::move(kinematicsPtr)),
@@ -32,7 +30,7 @@ ReferenceTrajectoryGenerator::ReferenceTrajectoryGenerator(
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 ocs2::TargetTrajectories ReferenceTrajectoryGenerator::generateReferenceTrajectory(
-    ocs2::scalar_t currentTime, const ocs2::SystemObservation& observation) {
+    ocs2::scalar_t currentTime, const ocs2::SystemObservation &observation) {
     // Update observation
     updateObservation(observation);
 
@@ -76,7 +74,7 @@ ocs2::TargetTrajectories ReferenceTrajectoryGenerator::generateReferenceTrajecto
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
-void ReferenceTrajectoryGenerator::updateObservation(const ocs2::SystemObservation& observation) {
+void ReferenceTrajectoryGenerator::updateObservation(const ocs2::SystemObservation &observation) {
     latestObservation_ = observation;
     initialized_ = true;
 
@@ -89,7 +87,7 @@ void ReferenceTrajectoryGenerator::updateObservation(const ocs2::SystemObservati
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
-void ReferenceTrajectoryGenerator::setTerrainPlane(const switched_model::TerrainPlane& plane) {
+void ReferenceTrajectoryGenerator::setTerrainPlane(const switched_model::TerrainPlane &plane) {
     useExternalTerrain_ = true;
     externalTerrainPlane_ = plane;
 }
@@ -97,7 +95,7 @@ void ReferenceTrajectoryGenerator::setTerrainPlane(const switched_model::Terrain
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
-const switched_model::TerrainPlane& ReferenceTrajectoryGenerator::getTerrainPlane() const {
+const switched_model::TerrainPlane &ReferenceTrajectoryGenerator::getTerrainPlane() const {
     if (useExternalTerrain_) {
         return externalTerrainPlane_;
     }
@@ -132,7 +130,7 @@ BaseReferenceState ReferenceTrajectoryGenerator::getBaseReferenceState() const {
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
-void ReferenceTrajectoryGenerator::loadSettings(const std::string& configFile) {
+void ReferenceTrajectoryGenerator::loadSettings(const std::string &configFile) {
     // Load target COM height
     ocs2::loadData::loadCppDataType<ocs2::scalar_t>(configFile, "comHeight", comHeight_);
 

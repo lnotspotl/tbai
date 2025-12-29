@@ -1,5 +1,5 @@
-# ifndef CPPAD_LOCAL_SPARSE_PACK_HPP
-# define CPPAD_LOCAL_SPARSE_PACK_HPP
+#ifndef CPPAD_LOCAL_SPARSE_PACK_HPP
+#define CPPAD_LOCAL_SPARSE_PACK_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -11,10 +11,11 @@ Secondary License when the conditions for such availability set forth
 in the Eclipse Public License, Version 2.0 are satisfied:
       GNU General Public License, Version 2.0 or later.
 ---------------------------------------------------------------------------- */
-# include <cppad/core/cppad_assert.hpp>
-# include <cppad/local/pod_vector.hpp>
+#include <cppad/core/cppad_assert.hpp>
+#include <cppad/local/pod_vector.hpp>
 
-namespace CppAD { namespace local { // BEGIN_CPPAD_LOCAL_NAMESPACE
+namespace CppAD {
+namespace local {  // BEGIN_CPPAD_LOCAL_NAMESPACE
 /*!
 \file sparse_pack.hpp
 Vector of sets of positive integers stored as a packed array of bools.
@@ -32,7 +33,8 @@ This defines the CppAD vector_of_sets concept.
 
 class sparse_pack {
     friend class sparse_pack_const_iterator;
-private:
+
+   private:
     /// Type used to pack elements (should be the same as corresponding
     /// typedef in multiple_n_bit() in test_more/sparse_hacobian.cpp)
     typedef size_t Pack;
@@ -48,8 +50,8 @@ private:
     /// (set by constructor and resize).
     size_t n_pack_;
     /// Data for all the sets.
-    pod_vector<Pack>  data_;
-// ============================================================================
+    pod_vector<Pack> data_;
+    // ============================================================================
     /*!
     Assign a set equal to the union of a set and a vector;
 
@@ -68,35 +70,25 @@ private:
     resulting set.
     All of the elements must have value less than end();
     */
-    void binary_union(
-        size_t                    target ,
-        size_t                    left   ,
-        const pod_vector<size_t>& right  )
-    {
+    void binary_union(size_t target, size_t left, const pod_vector<size_t> &right) {
         // initialize target = left
         size_t t = target * n_pack_;
-        size_t l = left   * n_pack_;
+        size_t l = left * n_pack_;
         size_t j = n_pack_;
-        while(j--)
-            data_[t++] = data_[l++];
+        while (j--) data_[t++] = data_[l++];
 
         // add the elements in right
-        for(size_t i = 0; i < right.size(); ++i)
-            add_element(target, right[i]);
+        for (size_t i = 0; i < right.size(); ++i) add_element(target, right[i]);
     }
-public:
+
+   public:
     /// declare a const iterator
     typedef sparse_pack_const_iterator const_iterator;
     // -----------------------------------------------------------------
     /*!
     Default constructor (no sets)
     */
-    sparse_pack(void) :
-    n_bit_( std::numeric_limits<Pack>::digits ),
-    n_set_(0)      ,
-    end_(0)        ,
-    n_pack_(0)
-    { }
+    sparse_pack(void) : n_bit_(std::numeric_limits<Pack>::digits), n_set_(0), end_(0), n_pack_(0) {}
     // -----------------------------------------------------------------
     /*!
     Make use of copy constructor an error
@@ -104,9 +96,7 @@ public:
     \param v
     vector that we are attempting to make a copy of.
     */
-    sparse_pack(const sparse_pack& v) :
-    n_bit_( std::numeric_limits<Pack>::digits )
-    {   // Error:
+    sparse_pack(const sparse_pack &v) : n_bit_(std::numeric_limits<Pack>::digits) {  // Error:
         // Probably a sparse_pack argument has been passed by value
         CPPAD_ASSERT_UNKNOWN(0);
     }
@@ -118,12 +108,12 @@ public:
     this sparse_pack will be set to a deep copyof other.
 
     */
-    void operator=(const sparse_pack& other)
-    {   CPPAD_ASSERT_UNKNOWN( n_bit_  == other.n_bit_);
-        n_set_  = other.n_set_;
-        end_    = other.end_;
+    void operator=(const sparse_pack &other) {
+        CPPAD_ASSERT_UNKNOWN(n_bit_ == other.n_bit_);
+        n_set_ = other.n_set_;
+        end_ = other.end_;
         n_pack_ = other.n_pack_;
-        data_   = other.data_;
+        data_ = other.data_;
     }
     // -----------------------------------------------------------------
     /*!
@@ -132,12 +122,11 @@ public:
     \param other
     this sparse_pack will be swapped with other.
     */
-    void swap(sparse_pack& other)
-    {   // size_t objects
-        CPPAD_ASSERT_UNKNOWN( n_bit_  == other.n_bit_);
-        std::swap(n_set_  , other.n_set_);
-        std::swap(end_    , other.end_);
-        std::swap(n_pack_ , other.n_pack_);
+    void swap(sparse_pack &other) {  // size_t objects
+        CPPAD_ASSERT_UNKNOWN(n_bit_ == other.n_bit_);
+        std::swap(n_set_, other.n_set_);
+        std::swap(end_, other.end_);
+        std::swap(n_pack_, other.n_pack_);
         //
         // pod_vectors
         data_.swap(other.data_);
@@ -146,8 +135,7 @@ public:
     /*!
     Destructor
     */
-    ~sparse_pack(void)
-    { }
+    ~sparse_pack(void) {}
     // -----------------------------------------------------------------
     /*!
     Change number of sets, set end, and initialize all sets as empty
@@ -163,24 +151,22 @@ public:
     end must be greater than zero (unless n_set is also zero).
     If n_set is zero, end must also be zero.
     */
-    void resize(size_t n_set, size_t end)
-    {
-        n_set_          = n_set;
-        end_            = end;
-        if( n_set_ == 0 )
-        {   CPPAD_ASSERT_UNKNOWN( end == 0 );
+    void resize(size_t n_set, size_t end) {
+        n_set_ = n_set;
+        end_ = end;
+        if (n_set_ == 0) {
+            CPPAD_ASSERT_UNKNOWN(end == 0);
             data_.clear();
             return;
         }
         // now start a new vector with empty sets
         Pack zero(0);
 
-        n_pack_         = ( 1 + (end_ - 1) / n_bit_ );
-        size_t i        = n_set_ * n_pack_;
+        n_pack_ = (1 + (end_ - 1) / n_bit_);
+        size_t i = n_set_ * n_pack_;
 
         data_.resize(i);
-        while(i--)
-            data_[i] = zero;
+        while (i--) data_[i] = zero;
     }
     // -----------------------------------------------------------------
     /*!
@@ -189,18 +175,17 @@ public:
     \param i
     is the index in of the set we are counting the elements of.
     */
-    size_t number_elements(size_t i) const
-    {   static Pack one(1);
-        CPPAD_ASSERT_UNKNOWN( i < n_set_ );
-        size_t count  = 0;
-        for(size_t k = 0; k < n_pack_; k++)
-        {   Pack   unit = data_[ i * n_pack_ + k ];
-            Pack   mask = one;
-            size_t n    = std::min(n_bit_, end_ - n_bit_ * k);
-            for(size_t bit = 0; bit < n; bit++)
-            {   CPPAD_ASSERT_UNKNOWN( mask > one || bit == 0);
-                if( mask & unit )
-                    ++count;
+    size_t number_elements(size_t i) const {
+        static Pack one(1);
+        CPPAD_ASSERT_UNKNOWN(i < n_set_);
+        size_t count = 0;
+        for (size_t k = 0; k < n_pack_; k++) {
+            Pack unit = data_[i * n_pack_ + k];
+            Pack mask = one;
+            size_t n = std::min(n_bit_, end_ - n_bit_ * k);
+            for (size_t bit = 0; bit < n; bit++) {
+                CPPAD_ASSERT_UNKNOWN(mask > one || bit == 0);
+                if (mask & unit) ++count;
                 mask = mask << 1;
             }
         }
@@ -223,8 +208,7 @@ public:
     that depends on the value of set i,
     before processing the posts to set i.
     */
-    void post_element(size_t i, size_t element)
-    {   add_element(i, element); }
+    void post_element(size_t i, size_t element) { add_element(i, element); }
     // -----------------------------------------------------------------
     /*!
     process post entries for a specific set.
@@ -236,8 +220,7 @@ public:
     Upon call, post_[i] is location in data_ of the elements that get
     added to the i-th set.  Upon return, post_[i] is zero.
     */
-    void process_post(size_t i)
-    {   return; }
+    void process_post(size_t i) { return; }
     // -----------------------------------------------------------------
     /*!
     Add one element to a set.
@@ -248,14 +231,14 @@ public:
     \param element
     is the element we are adding to the set.
     */
-    void add_element(size_t i, size_t element)
-    {   static Pack one(1);
-        CPPAD_ASSERT_UNKNOWN( i   < n_set_ );
-        CPPAD_ASSERT_UNKNOWN( element < end_ );
-        size_t j  = element / n_bit_;
-        size_t k  = element - j * n_bit_;
+    void add_element(size_t i, size_t element) {
+        static Pack one(1);
+        CPPAD_ASSERT_UNKNOWN(i < n_set_);
+        CPPAD_ASSERT_UNKNOWN(element < end_);
+        size_t j = element / n_bit_;
+        size_t k = element - j * n_bit_;
         Pack mask = one << k;
-        data_[ i * n_pack_ + j] |= mask;
+        data_[i * n_pack_ + j] |= mask;
     }
     // -----------------------------------------------------------------
     /*!
@@ -267,15 +250,15 @@ public:
     \param element
     is the element we are checking to see if it is in the set.
     */
-    bool is_element(size_t i, size_t element) const
-    {   static Pack one(1);
+    bool is_element(size_t i, size_t element) const {
+        static Pack one(1);
         static Pack zero(0);
-        CPPAD_ASSERT_UNKNOWN( i   < n_set_ );
-        CPPAD_ASSERT_UNKNOWN( element < end_ );
-        size_t j  = element / n_bit_;
-        size_t k  = element - j * n_bit_;
+        CPPAD_ASSERT_UNKNOWN(i < n_set_);
+        CPPAD_ASSERT_UNKNOWN(element < end_);
+        size_t j = element / n_bit_;
+        size_t k = element - j * n_bit_;
         Pack mask = one << k;
-        return (data_[ i * n_pack_ + j] & mask) != zero;
+        return (data_[i * n_pack_ + j] & mask) != zero;
     }
     // -----------------------------------------------------------------
     /*!
@@ -287,15 +270,13 @@ public:
     \par Checked Assertions
     \li target < n_set_
     */
-    void clear(size_t target)
-    {   // value with all its bits set to false
+    void clear(size_t target) {  // value with all its bits set to false
         static Pack zero(0);
-        CPPAD_ASSERT_UNKNOWN( target < n_set_ );
+        CPPAD_ASSERT_UNKNOWN(target < n_set_);
         size_t t = target * n_pack_;
 
         size_t j = n_pack_;
-        while(j--)
-            data_[t++] = zero;
+        while (j--) data_[t++] = zero;
     }
     // -----------------------------------------------------------------
     /*!
@@ -317,19 +298,15 @@ public:
     \li other_value  < other.n_set_
     \li n_pack_     == other.n_pack_
     */
-    void assignment(
-        size_t               this_target  ,
-        size_t               other_value  ,
-        const sparse_pack&   other        )
-    {   CPPAD_ASSERT_UNKNOWN( this_target  <   n_set_        );
-        CPPAD_ASSERT_UNKNOWN( other_value  <   other.n_set_  );
-        CPPAD_ASSERT_UNKNOWN( n_pack_      ==  other.n_pack_ );
+    void assignment(size_t this_target, size_t other_value, const sparse_pack &other) {
+        CPPAD_ASSERT_UNKNOWN(this_target < n_set_);
+        CPPAD_ASSERT_UNKNOWN(other_value < other.n_set_);
+        CPPAD_ASSERT_UNKNOWN(n_pack_ == other.n_pack_);
         size_t t = this_target * n_pack_;
         size_t v = other_value * n_pack_;
 
         size_t j = n_pack_;
-        while(j--)
-            data_[t++] = other.data_[v++];
+        while (j--) data_[t++] = other.data_[v++];
     }
     // -----------------------------------------------------------------
     /*!
@@ -358,23 +335,18 @@ public:
     \li other_right <  other.n_set_
     \li n_pack_     == other.n_pack_
     */
-    void binary_union(
-        size_t                  this_target  ,
-        size_t                  this_left    ,
-        size_t                  other_right  ,
-        const sparse_pack&      other        )
-    {   CPPAD_ASSERT_UNKNOWN( this_target < n_set_         );
-        CPPAD_ASSERT_UNKNOWN( this_left   < n_set_         );
-        CPPAD_ASSERT_UNKNOWN( other_right < other.n_set_   );
-        CPPAD_ASSERT_UNKNOWN( n_pack_    ==  other.n_pack_ );
+    void binary_union(size_t this_target, size_t this_left, size_t other_right, const sparse_pack &other) {
+        CPPAD_ASSERT_UNKNOWN(this_target < n_set_);
+        CPPAD_ASSERT_UNKNOWN(this_left < n_set_);
+        CPPAD_ASSERT_UNKNOWN(other_right < other.n_set_);
+        CPPAD_ASSERT_UNKNOWN(n_pack_ == other.n_pack_);
 
         size_t t = this_target * n_pack_;
-        size_t l  = this_left  * n_pack_;
-        size_t r  = other_right * n_pack_;
+        size_t l = this_left * n_pack_;
+        size_t r = other_right * n_pack_;
 
         size_t j = n_pack_;
-        while(j--)
-            data_[t++] = ( data_[l++] | other.data_[r++] );
+        while (j--) data_[t++] = (data_[l++] | other.data_[r++]);
     }
     // -----------------------------------------------------------------
     /*!
@@ -403,23 +375,18 @@ public:
     \li other_right <  other.n_set_
     \li n_pack_     == other.n_pack_
     */
-    void binary_intersection(
-        size_t                  this_target  ,
-        size_t                  this_left    ,
-        size_t                  other_right  ,
-        const sparse_pack&      other        )
-    {   CPPAD_ASSERT_UNKNOWN( this_target < n_set_         );
-        CPPAD_ASSERT_UNKNOWN( this_left   < n_set_         );
-        CPPAD_ASSERT_UNKNOWN( other_right < other.n_set_   );
-        CPPAD_ASSERT_UNKNOWN( n_pack_    ==  other.n_pack_ );
+    void binary_intersection(size_t this_target, size_t this_left, size_t other_right, const sparse_pack &other) {
+        CPPAD_ASSERT_UNKNOWN(this_target < n_set_);
+        CPPAD_ASSERT_UNKNOWN(this_left < n_set_);
+        CPPAD_ASSERT_UNKNOWN(other_right < other.n_set_);
+        CPPAD_ASSERT_UNKNOWN(n_pack_ == other.n_pack_);
 
         size_t t = this_target * n_pack_;
-        size_t l  = this_left  * n_pack_;
-        size_t r  = other_right * n_pack_;
+        size_t l = this_left * n_pack_;
+        size_t r = other_right * n_pack_;
 
         size_t j = n_pack_;
-        while(j--)
-            data_[t++] = ( data_[l++] & other.data_[r++] );
+        while (j--) data_[t++] = (data_[l++] & other.data_[r++]);
     }
     // -----------------------------------------------------------------
     /*!
@@ -428,8 +395,7 @@ public:
     \return
     Number of from sets for this vector of sets object
     */
-    size_t n_set(void) const
-    {   return n_set_; }
+    size_t n_set(void) const { return n_set_; }
     // -----------------------------------------------------------------
     /*!
     Fetch end for this vector of sets object.
@@ -437,8 +403,7 @@ public:
     \return
     is the maximum element value plus one (the minimum element value is 0).
     */
-    size_t end(void) const
-    {   return end_; }
+    size_t end(void) const { return end_; }
     // -----------------------------------------------------------------
     /*!
     Amount of memory used by this vector of sets
@@ -446,9 +411,7 @@ public:
     \return
     The amount of memory in units of type unsigned char memory.
     */
-    size_t memory(void) const
-    {   return data_.capacity() * sizeof(Pack);
-    }
+    size_t memory(void) const { return data_.capacity() * sizeof(Pack); }
     /*!
     Print the vector of sets (used for debugging)
     */
@@ -463,45 +426,40 @@ sparse_list_const_iterator and sparse_sizevec_const_iterator classes.
 This defines the CppAD vector_of_sets iterator concept.
 */
 class sparse_pack_const_iterator {
-private:
+   private:
     /// Type used to pack elements in sparse_pack
     typedef sparse_pack::Pack Pack;
 
     /// data for the entire vector of sets
-    const pod_vector<Pack>&  data_;
+    const pod_vector<Pack> &data_;
 
     /// Number of bits per Pack value
-    const size_t             n_bit_;
+    const size_t n_bit_;
 
     /// Number of Pack values necessary to represent end_ bits.
-    const size_t             n_pack_;
+    const size_t n_pack_;
 
     /// Possible elements in each set are 0, 1, ..., end_ - 1;
-    const size_t             end_;
+    const size_t end_;
 
     /// index of this set in the vector of sets;
-    const size_t             set_index_;
+    const size_t set_index_;
 
     /// value of the next element in this set
     /// (use end_ for no such element exists; i.e., past end of the set).
-    size_t                   next_element_;
-public:
+    size_t next_element_;
+
+   public:
     /// construct a const_iterator for a set in a sparse_pack object
-    sparse_pack_const_iterator (const sparse_pack& pack, size_t set_index)
-    :
-    data_          ( pack.data_ )         ,
-    n_bit_         ( pack.n_bit_ )        ,
-    n_pack_        ( pack.n_pack_ )       ,
-    end_           ( pack.end_ )          ,
-    set_index_     ( set_index )
-    {   static Pack one(1);
-        CPPAD_ASSERT_UNKNOWN( set_index_ < pack.n_set_ );
+    sparse_pack_const_iterator(const sparse_pack &pack, size_t set_index)
+        : data_(pack.data_), n_bit_(pack.n_bit_), n_pack_(pack.n_pack_), end_(pack.end_), set_index_(set_index) {
+        static Pack one(1);
+        CPPAD_ASSERT_UNKNOWN(set_index_ < pack.n_set_);
         //
         next_element_ = 0;
-        if( next_element_ < end_ )
-        {   Pack check = data_[ set_index_ * n_pack_ + 0 ];
-            if( check & one )
-                return;
+        if (next_element_ < end_) {
+            Pack check = data_[set_index_ * n_pack_ + 0];
+            if (check & one) return;
         }
         // element with index zero is not in this set of integers,
         // advance to first element or end
@@ -509,52 +467,46 @@ public:
     }
 
     /// advance to next element in this set
-    sparse_pack_const_iterator& operator++(void)
-    {   static Pack one(1);
-        CPPAD_ASSERT_UNKNOWN( next_element_ <= end_ );
-        if( next_element_ == end_ )
-            return *this;
+    sparse_pack_const_iterator &operator++(void) {
+        static Pack one(1);
+        CPPAD_ASSERT_UNKNOWN(next_element_ <= end_);
+        if (next_element_ == end_) return *this;
         //
         ++next_element_;
-        if( next_element_ == end_ )
-            return *this;
+        if (next_element_ == end_) return *this;
         //
         // initialize packed data index
-        size_t j  = next_element_ / n_bit_;
+        size_t j = next_element_ / n_bit_;
 
         // initialize bit index
-        size_t k  = next_element_ - j * n_bit_;
+        size_t k = next_element_ - j * n_bit_;
 
         // initialize mask
         size_t mask = one << k;
 
         // start search at this packed value
-        Pack check = data_[ set_index_ * n_pack_ + j ];
+        Pack check = data_[set_index_ * n_pack_ + j];
         //
-        while( true )
-        {   // check if this element is in the set
-            if( check & mask )
-                return *this;
+        while (true) {  // check if this element is in the set
+            if (check & mask) return *this;
 
             // increment next element before checking this one
             next_element_++;
-            if( next_element_ == end_ )
-                return *this;
+            if (next_element_ == end_) return *this;
 
             // shift mask to left one bit so corresponds to next_element_
             // (use mask <<= 1. not one << k, so compiler knows value)
             k++;
             mask <<= 1;
-            CPPAD_ASSERT_UNKNOWN( k <= n_bit_ );
+            CPPAD_ASSERT_UNKNOWN(k <= n_bit_);
 
             // check if we must go to next packed data index
-            if( k == n_bit_ )
-            {   // get next packed value
-                k     = 0;
-                mask  = one;
+            if (k == n_bit_) {  // get next packed value
+                k = 0;
+                mask = one;
                 j++;
-                CPPAD_ASSERT_UNKNOWN( j < n_pack_ );
-                check = data_[ set_index_ * n_pack_ + j ];
+                CPPAD_ASSERT_UNKNOWN(j < n_pack_);
+                check = data_[set_index_ * n_pack_ + j];
             }
         }
         // should never get here
@@ -564,22 +516,20 @@ public:
 
     /// obtain value of this element of the set of positive integers
     /// (end_ for no such element)
-    size_t operator*(void) const
-    {   return next_element_; }
+    size_t operator*(void) const { return next_element_; }
 };
 // =========================================================================
 /*!
 Print the vector of sets (used for debugging)
 */
-inline void sparse_pack::print(void) const
-{   std::cout << "sparse_pack:\n";
-    for(size_t i = 0; i < n_set(); i++)
-    {   std::cout << "set[" << i << "] = {";
+inline void sparse_pack::print(void) const {
+    std::cout << "sparse_pack:\n";
+    for (size_t i = 0; i < n_set(); i++) {
+        std::cout << "set[" << i << "] = {";
         const_iterator itr(*this, i);
-        while( *itr != end() )
-        {   std::cout << *itr;
-            if( *(++itr) != end() )
-                std::cout << ",";
+        while (*itr != end()) {
+            std::cout << *itr;
+            if (*(++itr) != end()) std::cout << ",";
         }
         std::cout << "}\n";
     }
@@ -615,39 +565,31 @@ if true, the user sparsity patter is the transposed.
 is the error message to display if some values in the user sparstiy
 pattern are not valid.
 */
-template<class SetVector>
-void sparsity_user2internal(
-    sparse_pack&            internal  ,
-    const SetVector&        user      ,
-    size_t                  n_set     ,
-    size_t                  end       ,
-    bool                    transpose ,
-    const char*             error_msg )
-{   CPPAD_ASSERT_KNOWN(size_t( user.size() ) == n_set * end, error_msg );
+template <class SetVector>
+void sparsity_user2internal(sparse_pack &internal, const SetVector &user, size_t n_set, size_t end, bool transpose,
+                            const char *error_msg) {
+    CPPAD_ASSERT_KNOWN(size_t(user.size()) == n_set * end, error_msg);
 
     // size of internal sparsity pattern
     internal.resize(n_set, end);
 
-    if( transpose )
-    {   // transposed pattern case
-        for(size_t j = 0; j < end; j++)
-        {   for(size_t i = 0; i < n_set; i++)
-            {   if( user[ j * n_set + i ] )
-                    internal.add_element(i, j);
+    if (transpose) {  // transposed pattern case
+        for (size_t j = 0; j < end; j++) {
+            for (size_t i = 0; i < n_set; i++) {
+                if (user[j * n_set + i]) internal.add_element(i, j);
             }
         }
         return;
-    }
-    else
-    {   for(size_t i = 0; i < n_set; i++)
-        {   for(size_t j = 0; j < end; j++)
-            {   if( user[ i * end + j ] )
-                internal.add_element(i, j);
+    } else {
+        for (size_t i = 0; i < n_set; i++) {
+            for (size_t j = 0; j < end; j++) {
+                if (user[i * end + j]) internal.add_element(i, j);
             }
         }
     }
     return;
 }
 
-} } // END_CPPAD_LOCAL_NAMESPACE
-# endif
+}  // namespace local
+}  // namespace CppAD
+#endif

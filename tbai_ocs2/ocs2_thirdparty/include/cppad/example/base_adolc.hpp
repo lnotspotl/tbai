@@ -1,5 +1,5 @@
-# ifndef CPPAD_EXAMPLE_BASE_ADOLC_HPP
-# define CPPAD_EXAMPLE_BASE_ADOLC_HPP
+#ifndef CPPAD_EXAMPLE_BASE_ADOLC_HPP
+#define CPPAD_EXAMPLE_BASE_ADOLC_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -86,8 +86,8 @@ In addition, it is included before $code <cppad/cppad.hpp>$$,
 but it needs to include parts of CppAD that are used by this file.
 This is done with the following include commands:
 $srccode%cpp% */
-# include <adolc/adolc.h>
-# include <cppad/base_require.hpp>
+#include <adolc/adolc.h>
+#include <cppad/base_require.hpp>
 /* %$$
 
 $head CondExpOp$$
@@ -106,53 +106,44 @@ values of the independent variables
 (in the same spirit as the CppAD $cref CondExp$$ function).
 $srccode%cpp% */
 namespace CppAD {
-    inline adouble CondExpOp(
-        enum  CppAD::CompareOp     cop ,
-        const adouble            &left ,
-        const adouble           &right ,
-        const adouble        &trueCase ,
-        const adouble       &falseCase )
-    {   adouble result;
-        switch( cop )
-        {
-            case CompareLt: // left < right
+inline adouble CondExpOp(enum CppAD::CompareOp cop, const adouble &left, const adouble &right, const adouble &trueCase,
+                         const adouble &falseCase) {
+    adouble result;
+    switch (cop) {
+        case CompareLt:  // left < right
             condassign(result, right - left, trueCase, falseCase);
             break;
 
-            case CompareLe: // left <= right
+        case CompareLe:  // left <= right
             condassign(result, left - right, falseCase, trueCase);
             break;
 
-            case CompareEq: // left == right
+        case CompareEq:  // left == right
             condassign(result, left - right, falseCase, trueCase);
             condassign(result, right - left, falseCase, result);
             break;
 
-            case CompareGe: // left >= right
+        case CompareGe:  // left >= right
             condassign(result, right - left, falseCase, trueCase);
             break;
 
-            case CompareGt: // left > right
+        case CompareGt:  // left > right
             condassign(result, left - right, trueCase, falseCase);
             break;
-            default:
-            CppAD::ErrorHandler::Call(
-                true     , __LINE__ , __FILE__ ,
-                "CppAD::CondExp",
-                "Error: for unknown reason."
-            );
+        default:
+            CppAD::ErrorHandler::Call(true, __LINE__, __FILE__, "CppAD::CondExp", "Error: for unknown reason.");
             result = trueCase;
-        }
-        return result;
     }
+    return result;
 }
+}  // namespace CppAD
 /* %$$
 
 $head CondExpRel$$
 The $cref/CPPAD_COND_EXP_REL/base_cond_exp/CondExpRel/$$ macro invocation
 $srccode%cpp% */
 namespace CppAD {
-    CPPAD_COND_EXP_REL(adouble)
+CPPAD_COND_EXP_REL(adouble)
 }
 /* %$$
 
@@ -162,15 +153,12 @@ two $code adouble$$ variables correspond to the same operations sequence.
 Make $code EqualOpSeq$$ an error if it gets used:
 $srccode%cpp% */
 namespace CppAD {
-    inline bool EqualOpSeq(const adouble &x, const adouble &y)
-    {   CppAD::ErrorHandler::Call(
-            true     , __LINE__ , __FILE__ ,
-            "CppAD::EqualOpSeq(x, y)",
-            "Error: adouble does not support EqualOpSeq."
-        );
-        return false;
-    }
+inline bool EqualOpSeq(const adouble &x, const adouble &y) {
+    CppAD::ErrorHandler::Call(true, __LINE__, __FILE__, "CppAD::EqualOpSeq(x, y)",
+                              "Error: adouble does not support EqualOpSeq.");
+    return false;
 }
+}  // namespace CppAD
 /* %$$
 
 $head Identical$$
@@ -179,44 +167,54 @@ $code adouble$$ depends on the independent variables.
 To be safe (but slow) return $code false$$ in all the cases below.
 $srccode%cpp% */
 namespace CppAD {
-    inline bool IdenticalCon(const adouble &x)
-    {   return false; }
-    inline bool IdenticalZero(const adouble &x)
-    {   return false; }
-    inline bool IdenticalOne(const adouble &x)
-    {   return false; }
-    inline bool IdenticalEqualCon(const adouble &x, const adouble &y)
-    {   return false; }
+inline bool IdenticalCon(const adouble &x) {
+    return false;
 }
+inline bool IdenticalZero(const adouble &x) {
+    return false;
+}
+inline bool IdenticalOne(const adouble &x) {
+    return false;
+}
+inline bool IdenticalEqualCon(const adouble &x, const adouble &y) {
+    return false;
+}
+}  // namespace CppAD
 /* %$$
 
 $head Integer$$
 $srccode%cpp% */
-    inline int Integer(const adouble &x)
-    {    return static_cast<int>( x.getValue() ); }
+inline int Integer(const adouble &x) {
+    return static_cast<int>(x.getValue());
+}
 /* %$$
 
 $head azmul$$
 $srccode%cpp% */
 namespace CppAD {
-    CPPAD_AZMUL( adouble )
+CPPAD_AZMUL(adouble)
 }
 /* %$$
 
 $head Ordered$$
 $srccode%cpp% */
 namespace CppAD {
-    inline bool GreaterThanZero(const adouble &x)
-    {    return (x > 0); }
-    inline bool GreaterThanOrZero(const adouble &x)
-    {    return (x >= 0); }
-    inline bool LessThanZero(const adouble &x)
-    {    return (x < 0); }
-    inline bool LessThanOrZero(const adouble &x)
-    {    return (x <= 0); }
-    inline bool abs_geq(const adouble& x, const adouble& y)
-    {   return fabs(x) >= fabs(y); }
+inline bool GreaterThanZero(const adouble &x) {
+    return (x > 0);
 }
+inline bool GreaterThanOrZero(const adouble &x) {
+    return (x >= 0);
+}
+inline bool LessThanZero(const adouble &x) {
+    return (x < 0);
+}
+inline bool LessThanOrZero(const adouble &x) {
+    return (x <= 0);
+}
+inline bool abs_geq(const adouble &x, const adouble &y) {
+    return fabs(x) >= fabs(y);
+}
+}  // namespace CppAD
 /* %$$
 
 $head Unary Standard Math$$
@@ -249,24 +247,21 @@ The adolc package does not support these functions so make
 their use an error:
 $srccode%cpp% */
 namespace CppAD {
-# define CPPAD_BASE_ADOLC_NO_SUPPORT(fun)                         \
-    inline adouble fun(const adouble& x)                          \
-    {   CPPAD_ASSERT_KNOWN(                                       \
-            false,                                                \
-            #fun ": adolc does not support this function"         \
-        );                                                        \
-        return 0.0;                                               \
+#define CPPAD_BASE_ADOLC_NO_SUPPORT(fun)                                          \
+    inline adouble fun(const adouble &x) {                                        \
+        CPPAD_ASSERT_KNOWN(false, #fun ": adolc does not support this function"); \
+        return 0.0;                                                               \
     }
-# if CPPAD_USE_CPLUSPLUS_2011
-    CPPAD_BASE_ADOLC_NO_SUPPORT(erf)
-    CPPAD_BASE_ADOLC_NO_SUPPORT(asinh)
-    CPPAD_BASE_ADOLC_NO_SUPPORT(acosh)
-    CPPAD_BASE_ADOLC_NO_SUPPORT(atanh)
-    CPPAD_BASE_ADOLC_NO_SUPPORT(expm1)
-    CPPAD_BASE_ADOLC_NO_SUPPORT(log1p)
-# endif
-# undef CPPAD_BASE_ADOLC_NO_SUPPORT
-}
+#if CPPAD_USE_CPLUSPLUS_2011
+CPPAD_BASE_ADOLC_NO_SUPPORT(erf)
+CPPAD_BASE_ADOLC_NO_SUPPORT(asinh)
+CPPAD_BASE_ADOLC_NO_SUPPORT(acosh)
+CPPAD_BASE_ADOLC_NO_SUPPORT(atanh)
+CPPAD_BASE_ADOLC_NO_SUPPORT(expm1)
+CPPAD_BASE_ADOLC_NO_SUPPORT(log1p)
+#endif
+#undef CPPAD_BASE_ADOLC_NO_SUPPORT
+}  // namespace CppAD
 /* %$$
 
 $head sign$$
@@ -275,16 +270,16 @@ $code codassign$$ function so that its $code adouble$$ operation sequence
 does not depend on the value of $icode x$$.
 $srccode%cpp% */
 namespace CppAD {
-    inline adouble sign(const adouble& x)
-    {   adouble s_plus, s_minus, half(.5);
-        // set s_plus to sign(x)/2,  except for case x == 0, s_plus = -.5
-        condassign(s_plus,  +x, -half, +half);
-        // set s_minus to -sign(x)/2, except for case x == 0, s_minus = -.5
-        condassign(s_minus, -x, -half, +half);
-        // set s to sign(x)
-        return s_plus - s_minus;
-    }
+inline adouble sign(const adouble &x) {
+    adouble s_plus, s_minus, half(.5);
+    // set s_plus to sign(x)/2,  except for case x == 0, s_plus = -.5
+    condassign(s_plus, +x, -half, +half);
+    // set s_minus to -sign(x)/2, except for case x == 0, s_minus = -.5
+    condassign(s_minus, -x, -half, +half);
+    // set s to sign(x)
+    return s_plus - s_minus;
 }
+}  // namespace CppAD
 /* %$$
 
 $head abs$$
@@ -292,9 +287,10 @@ This $cref/required/base_require/$$ function uses the adolc $code fabs$$
 function:
 $srccode%cpp% */
 namespace CppAD {
-    inline adouble abs(const adouble& x)
-    {   return fabs(x); }
+inline adouble abs(const adouble &x) {
+    return fabs(x);
 }
+}  // namespace CppAD
 /* %$$
 
 $head pow$$
@@ -306,7 +302,7 @@ The following defines the CppAD $cref numeric_limits$$
 for the type $code adouble$$:
 $srccode%cpp% */
 namespace CppAD {
-    CPPAD_NUMERIC_LIMITS(double, adouble)
+CPPAD_NUMERIC_LIMITS(double, adouble)
 }
 /* %$$
 
@@ -315,16 +311,17 @@ The following defines the CppAD $cref to_string$$ function
 for the type $code adouble$$:
 $srccode%cpp% */
 namespace CppAD {
-    template <> struct to_string_struct<adouble>
-    {   std::string operator()(const adouble& x)
-        {   std::stringstream os;
-            int n_digits = 1 + std::numeric_limits<double>::digits10;
-            os << std::setprecision(n_digits);
-            os << x.value();
-            return os.str();
-        }
-    };
-}
+template <>
+struct to_string_struct<adouble> {
+    std::string operator()(const adouble &x) {
+        std::stringstream os;
+        int n_digits = 1 + std::numeric_limits<double>::digits10;
+        os << std::setprecision(n_digits);
+        os << x.value();
+        return os.str();
+    }
+};
+}  // namespace CppAD
 /* %$$
 
 $head hash_code$$
@@ -335,20 +332,17 @@ $cref/default/base_hash/Default/$$ hashing function.
 For this reason, the $code adouble$$ class overrides the default definition.
 $srccode|cpp| */
 namespace CppAD {
-    inline unsigned short hash_code(const adouble& x)
-    {   unsigned short code = 0;
-        double value = x.value();
-        if( value == 0.0 )
-            return code;
-        double log_x = std::log( fabs( value ) );
-        // assume log( std::numeric_limits<double>::max() ) is near 700
-        code = static_cast<unsigned short>(
-            (CPPAD_HASH_TABLE_SIZE / 700 + 1) * log_x
-        );
-        code = code % CPPAD_HASH_TABLE_SIZE;
-        return code;
-    }
+inline unsigned short hash_code(const adouble &x) {
+    unsigned short code = 0;
+    double value = x.value();
+    if (value == 0.0) return code;
+    double log_x = std::log(fabs(value));
+    // assume log( std::numeric_limits<double>::max() ) is near 700
+    code = static_cast<unsigned short>((CPPAD_HASH_TABLE_SIZE / 700 + 1) * log_x);
+    code = code % CPPAD_HASH_TABLE_SIZE;
+    return code;
 }
+}  // namespace CppAD
 /* |$$
 Note that after the hash codes match, the
 $cref/Identical/base_adolc.hpp/Identical/$$ function will be used
@@ -360,4 +354,4 @@ $code adouble$$ independent variables (and hence can change).
 
 $end
 */
-# endif
+#endif

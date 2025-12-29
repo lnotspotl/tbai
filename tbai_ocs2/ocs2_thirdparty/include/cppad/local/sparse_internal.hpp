@@ -1,5 +1,5 @@
-# ifndef CPPAD_LOCAL_SPARSE_INTERNAL_HPP
-# define CPPAD_LOCAL_SPARSE_INTERNAL_HPP
+#ifndef CPPAD_LOCAL_SPARSE_INTERNAL_HPP
+#define CPPAD_LOCAL_SPARSE_INTERNAL_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -13,12 +13,13 @@ in the Eclipse Public License, Version 2.0 are satisfied:
 ---------------------------------------------------------------------------- */
 
 // necessary definitions
-# include <cppad/local/define.hpp>
-# include <cppad/local/sparse_pack.hpp>
-# include <cppad/local/sparse_list.hpp>
-# include <cppad/local/sparse_sizevec.hpp>
+#include <cppad/local/define.hpp>
+#include <cppad/local/sparse_list.hpp>
+#include <cppad/local/sparse_pack.hpp>
+#include <cppad/local/sparse_sizevec.hpp>
 
-namespace CppAD { namespace local { // BEGIN_CPPAD_LOCAL_NAMESPACE
+namespace CppAD {
+namespace local {  // BEGIN_CPPAD_LOCAL_NAMESPACE
 /*!
 \file sparse_internal.hpp
 Routines that enable code to be independent of which internal spasity pattern
@@ -36,17 +37,16 @@ type of an element in the sparsity structrue.
 \par <code>internal_sparsity<Element_type>::pattern_type</code>
 is the type of the corresponding internal sparsity pattern.
 */
-template <class Element_type> struct internal_sparsity;
+template <class Element_type>
+struct internal_sparsity;
 /// Specilization for bool elements.
 template <>
-struct internal_sparsity<bool>
-{
+struct internal_sparsity<bool> {
     typedef sparse_pack pattern_type;
 };
 /// Specilization for <code>std::set<size_t></code> elements.
 template <>
-struct internal_sparsity< std::set<size_t> >
-{
+struct internal_sparsity<std::set<size_t> > {
     typedef sparse_list pattern_type;
 };
 // ---------------------------------------------------------------------------
@@ -99,175 +99,144 @@ This is the sparsity pattern for variables,
 or its transpose, depending on the value of transpose.
 */
 template <class SizeVector, class InternalSparsity>
-void set_internal_sparsity(
-    bool                          zero_empty       ,
-    bool                          input_empty      ,
-    bool                          transpose        ,
-    const pod_vector<size_t>&     internal_index   ,
-    InternalSparsity&             internal_pattern ,
-    const sparse_rc<SizeVector>&  pattern_in       )
-{
+void set_internal_sparsity(bool zero_empty, bool input_empty, bool transpose, const pod_vector<size_t> &internal_index,
+                           InternalSparsity &internal_pattern, const sparse_rc<SizeVector> &pattern_in) {
     size_t nr = internal_index.size();
-# ifndef NDEBUG
+#ifndef NDEBUG
     size_t nc = internal_pattern.end();
-    if( transpose )
-    {   CPPAD_ASSERT_UNKNOWN( pattern_in.nr() == nc );
-        CPPAD_ASSERT_UNKNOWN( pattern_in.nc() == nr );
+    if (transpose) {
+        CPPAD_ASSERT_UNKNOWN(pattern_in.nr() == nc);
+        CPPAD_ASSERT_UNKNOWN(pattern_in.nc() == nr);
+    } else {
+        CPPAD_ASSERT_UNKNOWN(pattern_in.nr() == nr);
+        CPPAD_ASSERT_UNKNOWN(pattern_in.nc() == nc);
     }
-    else
-    {   CPPAD_ASSERT_UNKNOWN( pattern_in.nr() == nr );
-        CPPAD_ASSERT_UNKNOWN( pattern_in.nc() == nc );
-    }
-    if( input_empty ) for(size_t i = 0; i < nr; i++)
-    {   size_t i_var = internal_index[i];
-        CPPAD_ASSERT_UNKNOWN( internal_pattern.number_elements(i_var) == 0 );
-    }
-# endif
-    const SizeVector& row( pattern_in.row() );
-    const SizeVector& col( pattern_in.col() );
+    if (input_empty)
+        for (size_t i = 0; i < nr; i++) {
+            size_t i_var = internal_index[i];
+            CPPAD_ASSERT_UNKNOWN(internal_pattern.number_elements(i_var) == 0);
+        }
+#endif
+    const SizeVector &row(pattern_in.row());
+    const SizeVector &col(pattern_in.col());
     size_t nnz = row.size();
-    for(size_t k = 0; k < nnz; k++)
-    {   size_t r = row[k];
+    for (size_t k = 0; k < nnz; k++) {
+        size_t r = row[k];
         size_t c = col[k];
-        if( transpose )
-            std::swap(r, c);
+        if (transpose) std::swap(r, c);
         //
         size_t i_var = internal_index[r];
-        CPPAD_ASSERT_UNKNOWN( i_var < internal_pattern.n_set() );
-        CPPAD_ASSERT_UNKNOWN( c < nc );
-        bool ignore  = zero_empty && i_var == 0;
-        if( ! ignore )
-            internal_pattern.post_element( internal_index[r], c );
+        CPPAD_ASSERT_UNKNOWN(i_var < internal_pattern.n_set());
+        CPPAD_ASSERT_UNKNOWN(c < nc);
+        bool ignore = zero_empty && i_var == 0;
+        if (!ignore) internal_pattern.post_element(internal_index[r], c);
     }
     // process posts
-    for(size_t i = 0; i < nr; ++i)
-        internal_pattern.process_post( internal_index[i] );
+    for (size_t i = 0; i < nr; ++i) internal_pattern.process_post(internal_index[i]);
 }
 template <class InternalSparsity>
-void set_internal_sparsity(
-    bool                          zero_empty       ,
-    bool                          input_empty      ,
-    bool                          transpose        ,
-    const pod_vector<size_t>&     internal_index   ,
-    InternalSparsity&             internal_pattern ,
-    const vectorBool&             pattern_in       )
-{   size_t nr = internal_index.size();
+void set_internal_sparsity(bool zero_empty, bool input_empty, bool transpose, const pod_vector<size_t> &internal_index,
+                           InternalSparsity &internal_pattern, const vectorBool &pattern_in) {
+    size_t nr = internal_index.size();
     size_t nc = internal_pattern.end();
-# ifndef NDEBUG
-    CPPAD_ASSERT_UNKNOWN( pattern_in.size() == nr * nc );
-    if( input_empty ) for(size_t i = 0; i < nr; i++)
-    {   size_t i_var = internal_index[i];
-        CPPAD_ASSERT_UNKNOWN( internal_pattern.number_elements(i_var) == 0 );
-    }
-# endif
-    for(size_t i = 0; i < nr; i++)
-    {   for(size_t j = 0; j < nc; j++)
-        {   bool flag = pattern_in[i * nc + j];
-            if( transpose )
-                flag = pattern_in[j * nr + i];
-            if( flag )
-            {   size_t i_var = internal_index[i];
-                CPPAD_ASSERT_UNKNOWN( i_var < internal_pattern.n_set() );
-                CPPAD_ASSERT_UNKNOWN( j < nc );
-                bool ignore  = zero_empty && i_var == 0;
-                if( ! ignore )
-                    internal_pattern.post_element( i_var, j);
-            }
+#ifndef NDEBUG
+    CPPAD_ASSERT_UNKNOWN(pattern_in.size() == nr * nc);
+    if (input_empty)
+        for (size_t i = 0; i < nr; i++) {
+            size_t i_var = internal_index[i];
+            CPPAD_ASSERT_UNKNOWN(internal_pattern.number_elements(i_var) == 0);
         }
-    }
-    // process posts
-    for(size_t i = 0; i < nr; ++i)
-        internal_pattern.process_post( internal_index[i] );
-    return;
-}
-template <class InternalSparsity>
-void set_internal_sparsity(
-    bool                          zero_empty       ,
-    bool                          input_empty      ,
-    bool                          transpose        ,
-    const pod_vector<size_t>&     internal_index   ,
-    InternalSparsity&             internal_pattern ,
-    const vector<bool>&           pattern_in       )
-{   size_t nr = internal_index.size();
-    size_t nc = internal_pattern.end();
-# ifndef NDEBUG
-    CPPAD_ASSERT_UNKNOWN( pattern_in.size() == nr * nc );
-    if( input_empty ) for(size_t i = 0; i < nr; i++)
-    {   size_t i_var = internal_index[i];
-        CPPAD_ASSERT_UNKNOWN( internal_pattern.number_elements(i_var) == 0 );
-    }
-# endif
-    for(size_t i = 0; i < nr; i++)
-    {   for(size_t j = 0; j < nc; j++)
-        {   bool flag = pattern_in[i * nc + j];
-            if( transpose )
-                flag = pattern_in[j * nr + i];
-            if( flag )
-            {   size_t i_var = internal_index[i];
-                CPPAD_ASSERT_UNKNOWN( i_var < internal_pattern.n_set() );
-                CPPAD_ASSERT_UNKNOWN( j < nc );
-                bool ignore  = zero_empty && i_var == 0;
-                if( ! ignore )
-                    internal_pattern.post_element( i_var, j);
-            }
-        }
-    }
-    // process posts
-    for(size_t i = 0; i < nr; ++i)
-        internal_pattern.process_post( internal_index[i] );
-    return;
-}
-template <class InternalSparsity>
-void set_internal_sparsity(
-    bool                               zero_empty       ,
-    bool                               input_empty      ,
-    bool                               transpose        ,
-    const pod_vector<size_t>&          internal_index   ,
-    InternalSparsity&                  internal_pattern ,
-    const vector< std::set<size_t> >&  pattern_in       )
-{   size_t nr = internal_index.size();
-    size_t nc = internal_pattern.end();
-# ifndef NDEBUG
-    if( input_empty ) for(size_t i = 0; i < nr; i++)
-    {   size_t i_var = internal_index[i];
-        CPPAD_ASSERT_UNKNOWN( internal_pattern.number_elements(i_var) == 0 );
-    }
-# endif
-    if( transpose )
-    {   CPPAD_ASSERT_UNKNOWN( pattern_in.size() == nc );
-        for(size_t j = 0; j < nc; j++)
-        {   std::set<size_t>::const_iterator itr( pattern_in[j].begin() );
-            while( itr != pattern_in[j].end() )
-            {   size_t i = *itr;
+#endif
+    for (size_t i = 0; i < nr; i++) {
+        for (size_t j = 0; j < nc; j++) {
+            bool flag = pattern_in[i * nc + j];
+            if (transpose) flag = pattern_in[j * nr + i];
+            if (flag) {
                 size_t i_var = internal_index[i];
-                CPPAD_ASSERT_UNKNOWN( i_var < internal_pattern.n_set() );
-                CPPAD_ASSERT_UNKNOWN( j < nc );
-                bool ignore  = zero_empty && i_var == 0;
-                if( ! ignore )
-                    internal_pattern.post_element( i_var, j);
+                CPPAD_ASSERT_UNKNOWN(i_var < internal_pattern.n_set());
+                CPPAD_ASSERT_UNKNOWN(j < nc);
+                bool ignore = zero_empty && i_var == 0;
+                if (!ignore) internal_pattern.post_element(i_var, j);
+            }
+        }
+    }
+    // process posts
+    for (size_t i = 0; i < nr; ++i) internal_pattern.process_post(internal_index[i]);
+    return;
+}
+template <class InternalSparsity>
+void set_internal_sparsity(bool zero_empty, bool input_empty, bool transpose, const pod_vector<size_t> &internal_index,
+                           InternalSparsity &internal_pattern, const vector<bool> &pattern_in) {
+    size_t nr = internal_index.size();
+    size_t nc = internal_pattern.end();
+#ifndef NDEBUG
+    CPPAD_ASSERT_UNKNOWN(pattern_in.size() == nr * nc);
+    if (input_empty)
+        for (size_t i = 0; i < nr; i++) {
+            size_t i_var = internal_index[i];
+            CPPAD_ASSERT_UNKNOWN(internal_pattern.number_elements(i_var) == 0);
+        }
+#endif
+    for (size_t i = 0; i < nr; i++) {
+        for (size_t j = 0; j < nc; j++) {
+            bool flag = pattern_in[i * nc + j];
+            if (transpose) flag = pattern_in[j * nr + i];
+            if (flag) {
+                size_t i_var = internal_index[i];
+                CPPAD_ASSERT_UNKNOWN(i_var < internal_pattern.n_set());
+                CPPAD_ASSERT_UNKNOWN(j < nc);
+                bool ignore = zero_empty && i_var == 0;
+                if (!ignore) internal_pattern.post_element(i_var, j);
+            }
+        }
+    }
+    // process posts
+    for (size_t i = 0; i < nr; ++i) internal_pattern.process_post(internal_index[i]);
+    return;
+}
+template <class InternalSparsity>
+void set_internal_sparsity(bool zero_empty, bool input_empty, bool transpose, const pod_vector<size_t> &internal_index,
+                           InternalSparsity &internal_pattern, const vector<std::set<size_t> > &pattern_in) {
+    size_t nr = internal_index.size();
+    size_t nc = internal_pattern.end();
+#ifndef NDEBUG
+    if (input_empty)
+        for (size_t i = 0; i < nr; i++) {
+            size_t i_var = internal_index[i];
+            CPPAD_ASSERT_UNKNOWN(internal_pattern.number_elements(i_var) == 0);
+        }
+#endif
+    if (transpose) {
+        CPPAD_ASSERT_UNKNOWN(pattern_in.size() == nc);
+        for (size_t j = 0; j < nc; j++) {
+            std::set<size_t>::const_iterator itr(pattern_in[j].begin());
+            while (itr != pattern_in[j].end()) {
+                size_t i = *itr;
+                size_t i_var = internal_index[i];
+                CPPAD_ASSERT_UNKNOWN(i_var < internal_pattern.n_set());
+                CPPAD_ASSERT_UNKNOWN(j < nc);
+                bool ignore = zero_empty && i_var == 0;
+                if (!ignore) internal_pattern.post_element(i_var, j);
                 ++itr;
             }
         }
-    }
-    else
-    {   CPPAD_ASSERT_UNKNOWN( pattern_in.size() == nr );
-        for(size_t i = 0; i < nr; i++)
-        {   std::set<size_t>::const_iterator itr( pattern_in[i].begin() );
-            while( itr != pattern_in[i].end() )
-            {   size_t j = *itr;
+    } else {
+        CPPAD_ASSERT_UNKNOWN(pattern_in.size() == nr);
+        for (size_t i = 0; i < nr; i++) {
+            std::set<size_t>::const_iterator itr(pattern_in[i].begin());
+            while (itr != pattern_in[i].end()) {
+                size_t j = *itr;
                 size_t i_var = internal_index[i];
-                CPPAD_ASSERT_UNKNOWN( i_var < internal_pattern.n_set() );
-                CPPAD_ASSERT_UNKNOWN( j < nc );
-                bool ignore  = zero_empty && i_var == 0;
-                if( ! ignore )
-                    internal_pattern.post_element( i_var, j);
+                CPPAD_ASSERT_UNKNOWN(i_var < internal_pattern.n_set());
+                CPPAD_ASSERT_UNKNOWN(j < nc);
+                bool ignore = zero_empty && i_var == 0;
+                if (!ignore) internal_pattern.post_element(i_var, j);
                 ++itr;
             }
         }
     }
     // process posts
-    for(size_t i = 0; i < nr; ++i)
-        internal_pattern.process_post( internal_index[i] );
+    for (size_t i = 0; i < nr; ++i) internal_pattern.process_post(internal_index[i]);
     return;
 }
 // ---------------------------------------------------------------------------
@@ -299,37 +268,34 @@ Upon return it is an index sparsity pattern for each of the variables
 in internal_index, or its transpose, depending on the value of transpose.
 */
 template <class SizeVector, class InternalSparsity>
-void get_internal_sparsity(
-    bool                          transpose         ,
-    const pod_vector<size_t>&     internal_index    ,
-    const InternalSparsity&       internal_pattern  ,
-    sparse_rc<SizeVector>&        pattern_out        )
-{   typedef typename InternalSparsity::const_iterator iterator;
+void get_internal_sparsity(bool transpose, const pod_vector<size_t> &internal_index,
+                           const InternalSparsity &internal_pattern, sparse_rc<SizeVector> &pattern_out) {
+    typedef typename InternalSparsity::const_iterator iterator;
     // number variables
     size_t nr = internal_index.size();
     // column size of interanl sparstiy pattern
     size_t nc = internal_pattern.end();
     // determine nnz, the number of possibly non-zero index pairs
     size_t nnz = 0;
-    for(size_t i = 0; i < nr; i++)
-    {   CPPAD_ASSERT_UNKNOWN( internal_index[i] < internal_pattern.n_set() );
+    for (size_t i = 0; i < nr; i++) {
+        CPPAD_ASSERT_UNKNOWN(internal_index[i] < internal_pattern.n_set());
         iterator itr(internal_pattern, internal_index[i]);
         size_t j = *itr;
-        while( j < nc )
-        {   ++nnz;
+        while (j < nc) {
+            ++nnz;
             j = *(++itr);
         }
     }
     // transposed
-    if( transpose )
-    {   pattern_out.resize(nc, nr, nnz);
+    if (transpose) {
+        pattern_out.resize(nc, nr, nnz);
         //
         size_t k = 0;
-        for(size_t i = 0; i < nr; i++)
-        {   iterator itr(internal_pattern, internal_index[i]);
+        for (size_t i = 0; i < nr; i++) {
+            iterator itr(internal_pattern, internal_index[i]);
             size_t j = *itr;
-            while( j < nc )
-            {   pattern_out.set(k++, j, i);
+            while (j < nc) {
+                pattern_out.set(k++, j, i);
                 j = *(++itr);
             }
         }
@@ -339,23 +305,20 @@ void get_internal_sparsity(
     pattern_out.resize(nr, nc, nnz);
     //
     size_t k = 0;
-    for(size_t i = 0; i < nr; i++)
-    {   iterator itr(internal_pattern, internal_index[i]);
+    for (size_t i = 0; i < nr; i++) {
+        iterator itr(internal_pattern, internal_index[i]);
         size_t j = *itr;
-        while( j < nc )
-        {   pattern_out.set(k++, i, j);
+        while (j < nc) {
+            pattern_out.set(k++, i, j);
             j = *(++itr);
         }
     }
     return;
 }
 template <class InternalSparsity>
-void get_internal_sparsity(
-    bool                          transpose         ,
-    const pod_vector<size_t>&     internal_index    ,
-    const InternalSparsity&       internal_pattern  ,
-    vectorBool&                   pattern_out       )
-{   typedef typename InternalSparsity::const_iterator iterator;
+void get_internal_sparsity(bool transpose, const pod_vector<size_t> &internal_index,
+                           const InternalSparsity &internal_pattern, vectorBool &pattern_out) {
+    typedef typename InternalSparsity::const_iterator iterator;
     // number variables
     size_t nr = internal_index.size();
     //
@@ -363,15 +326,14 @@ void get_internal_sparsity(
     size_t nc = internal_pattern.end();
     //
     pattern_out.resize(nr * nc);
-    for(size_t ij = 0; ij < nr * nc; ij++)
-        pattern_out[ij] = false;
+    for (size_t ij = 0; ij < nr * nc; ij++) pattern_out[ij] = false;
     //
-    for(size_t i = 0; i < nr; i++)
-    {   CPPAD_ASSERT_UNKNOWN( internal_index[i] < internal_pattern.n_set() );
+    for (size_t i = 0; i < nr; i++) {
+        CPPAD_ASSERT_UNKNOWN(internal_index[i] < internal_pattern.n_set());
         iterator itr(internal_pattern, internal_index[i]);
         size_t j = *itr;
-        while( j < nc )
-        {   if( transpose )
+        while (j < nc) {
+            if (transpose)
                 pattern_out[j * nr + i] = true;
             else
                 pattern_out[i * nc + j] = true;
@@ -381,12 +343,9 @@ void get_internal_sparsity(
     return;
 }
 template <class InternalSparsity>
-void get_internal_sparsity(
-    bool                          transpose         ,
-    const pod_vector<size_t>&     internal_index    ,
-    const InternalSparsity&       internal_pattern  ,
-    vector<bool>&                 pattern_out       )
-{   typedef typename InternalSparsity::const_iterator iterator;
+void get_internal_sparsity(bool transpose, const pod_vector<size_t> &internal_index,
+                           const InternalSparsity &internal_pattern, vector<bool> &pattern_out) {
+    typedef typename InternalSparsity::const_iterator iterator;
     // number variables
     size_t nr = internal_index.size();
     //
@@ -394,15 +353,14 @@ void get_internal_sparsity(
     size_t nc = internal_pattern.end();
     //
     pattern_out.resize(nr * nc);
-    for(size_t ij = 0; ij < nr * nc; ij++)
-        pattern_out[ij] = false;
+    for (size_t ij = 0; ij < nr * nc; ij++) pattern_out[ij] = false;
     //
-    for(size_t i = 0; i < nr; i++)
-    {   CPPAD_ASSERT_UNKNOWN( internal_index[i] < internal_pattern.n_set() );
+    for (size_t i = 0; i < nr; i++) {
+        CPPAD_ASSERT_UNKNOWN(internal_index[i] < internal_pattern.n_set());
         iterator itr(internal_pattern, internal_index[i]);
         size_t j = *itr;
-        while( j < nc )
-        {   if( transpose )
+        while (j < nc) {
+            if (transpose)
                 pattern_out[j * nr + i] = true;
             else
                 pattern_out[i * nc + j] = true;
@@ -412,31 +370,27 @@ void get_internal_sparsity(
     return;
 }
 template <class InternalSparsity>
-void get_internal_sparsity(
-    bool                          transpose         ,
-    const pod_vector<size_t>&     internal_index    ,
-    const InternalSparsity&       internal_pattern  ,
-    vector< std::set<size_t> >&   pattern_out       )
-{   typedef typename InternalSparsity::const_iterator iterator;
+void get_internal_sparsity(bool transpose, const pod_vector<size_t> &internal_index,
+                           const InternalSparsity &internal_pattern, vector<std::set<size_t> > &pattern_out) {
+    typedef typename InternalSparsity::const_iterator iterator;
     // number variables
     size_t nr = internal_index.size();
     //
     // column size of interanl sparstiy pattern
     size_t nc = internal_pattern.end();
     //
-    if( transpose )
+    if (transpose)
         pattern_out.resize(nc);
     else
         pattern_out.resize(nr);
-    for(size_t k = 0; k < pattern_out.size(); k++)
-        pattern_out[k].clear();
+    for (size_t k = 0; k < pattern_out.size(); k++) pattern_out[k].clear();
     //
-    for(size_t i = 0; i < nr; i++)
-    {   CPPAD_ASSERT_UNKNOWN( internal_index[i] < internal_pattern.n_set() );
+    for (size_t i = 0; i < nr; i++) {
+        CPPAD_ASSERT_UNKNOWN(internal_index[i] < internal_pattern.n_set());
         iterator itr(internal_pattern, internal_index[i]);
         size_t j = *itr;
-        while( j < nc )
-        {   if( transpose )
+        while (j < nc) {
+            if (transpose)
                 pattern_out[j].insert(i);
             else
                 pattern_out[i].insert(j);
@@ -446,8 +400,7 @@ void get_internal_sparsity(
     return;
 }
 
+}  // namespace local
+}  // namespace CppAD
 
-
-} } // END_CPPAD_LOCAL_NAMESPACE
-
-# endif
+#endif

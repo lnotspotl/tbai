@@ -18,24 +18,22 @@
 namespace CppAD {
 namespace cg {
 
-template<class Base>
-inline void CodeHandler<Base>::substituteIndependent(const CG<Base>& indep,
-                                                     const CG<Base>& dep,
+template <class Base>
+inline void CodeHandler<Base>::substituteIndependent(const CG<Base> &indep, const CG<Base> &dep,
                                                      bool removeFromIndependents) {
     substituteIndependent(*indep.getOperationNode(), *dep.getOperationNode(), removeFromIndependents);
 }
 
-template<class Base>
-inline void CodeHandler<Base>::substituteIndependent(OperationNode<Base>& indep,
-                                                     OperationNode<Base>& dep,
+template <class Base>
+inline void CodeHandler<Base>::substituteIndependent(OperationNode<Base> &indep, OperationNode<Base> &dep,
                                                      bool removeFromIndependents) {
     using std::vector;
     using CGBase = CG<Base>;
 
-    //check if the independent variable belongs to this handler
+    // check if the independent variable belongs to this handler
     size_t indepIndex = getIndependentVariableIndex(indep);
 
-    //check if the dependent variable belongs to this handler
+    // check if the dependent variable belongs to this handler
     size_t pos = dep.getHandlerPosition();
     if (pos >= _codeBlocks.size() || &dep != _codeBlocks[pos]) {
         throw CGException("The dependent variable does not belong to this handler");
@@ -47,10 +45,10 @@ inline void CodeHandler<Base>::substituteIndependent(OperationNode<Base>& indep,
     Argument<Base> arg;
     // change the independent variable
     if (dummyExp.isVariable()) {
-        arg = Argument<Base> (*dummyExp.getOperationNode());
+        arg = Argument<Base>(*dummyExp.getOperationNode());
     } else {
         // create a bogus variable to avoid searching for all occurrences of the independent variable
-        arg = Argument<Base> (dummyExp.getValue());
+        arg = Argument<Base>(dummyExp.getValue());
     }
 
     indep.makeAlias(arg);
@@ -61,10 +59,10 @@ inline void CodeHandler<Base>::substituteIndependent(OperationNode<Base>& indep,
     }
 }
 
-template<class Base>
-inline void CodeHandler<Base>::undoSubstituteIndependent(OperationNode<Base>& indep) {
+template <class Base>
+inline void CodeHandler<Base>::undoSubstituteIndependent(OperationNode<Base> &indep) {
     typename std::vector<OperationNode<Base> *>::const_iterator it =
-            std::find(_independentVariables.begin(), _independentVariables.end(), &indep);
+        std::find(_independentVariables.begin(), _independentVariables.end(), &indep);
     if (it == _independentVariables.end()) {
         throw CGException("Variable not found in the independent variable vector");
     }
@@ -72,21 +70,21 @@ inline void CodeHandler<Base>::undoSubstituteIndependent(OperationNode<Base>& in
     indep.setOperation(CGOpCode::Inv);
 }
 
-template<class Base>
-inline void CodeHandler<Base>::removeIndependent(OperationNode<Base>& indep) {
+template <class Base>
+inline void CodeHandler<Base>::removeIndependent(OperationNode<Base> &indep) {
     if (indep.getOperationType() != CGOpCode::Alias) {
         throw CGException("Cannot remove independent variable: not an alias");
     }
 
     typename std::vector<OperationNode<Base> *>::iterator it =
-            std::find(_independentVariables.begin(), _independentVariables.end(), &indep);
+        std::find(_independentVariables.begin(), _independentVariables.end(), &indep);
     if (it == _independentVariables.end()) {
         throw CGException("Variable not found in the independent variable vector");
     }
     _independentVariables.erase(it);
 }
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

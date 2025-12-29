@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_COMPOUND_ASSIGN_HPP
-# define CPPAD_CORE_COMPOUND_ASSIGN_HPP
+#ifndef CPPAD_CORE_COMPOUND_ASSIGN_HPP
+#define CPPAD_CORE_COMPOUND_ASSIGN_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -133,9 +133,9 @@ $latex \[
 $end
 -----------------------------------------------------------------------------
 */
-# include <cppad/core/add_eq.hpp>
-# include <cppad/core/sub_eq.hpp>
-# include <cppad/core/mul_eq.hpp>
-# include <cppad/core/div_eq.hpp>
+#include <cppad/core/add_eq.hpp>
+#include <cppad/core/div_eq.hpp>
+#include <cppad/core/mul_eq.hpp>
+#include <cppad/core/sub_eq.hpp>
 
-# endif
+#endif

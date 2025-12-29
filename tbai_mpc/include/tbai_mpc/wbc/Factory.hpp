@@ -20,5 +20,5 @@ std::shared_ptr<WbcBase> getWbcShared(const std::string &controllerConfigFile, c
                                       const switched_model::KinematicsModelBase<scalar_t> &kinematics,
                                       const std::vector<std::string> &jointNames);
 
-}  // namespace wbc
+}  // namespace mpc
 }  // namespace tbai

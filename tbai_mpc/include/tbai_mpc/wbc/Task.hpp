@@ -45,5 +45,5 @@ matrix_t mvstack(const matrix_t &m1, const matrix_t &m2);
 /* Stack two vectors vertically */
 vector_t vvstack(const vector_t &v1, const vector_t &v2);
 
-}  // namespace wbc
+}  // namespace mpc
 }  // namespace tbai

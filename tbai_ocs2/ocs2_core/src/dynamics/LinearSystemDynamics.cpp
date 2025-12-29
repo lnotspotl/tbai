@@ -36,56 +36,58 @@ namespace ocs2 {
 /******************************************************************************************************/
 LinearSystemDynamics::LinearSystemDynamics(matrix_t A, matrix_t B, matrix_t G /*= matrix_t()*/)
     : A_(std::move(A)), B_(std::move(B)), G_(std::move(G)) {
-  if (G_.size() == 0) {
-    G_.setIdentity(A_.rows(), A_.rows());
-  }
+    if (G_.size() == 0) {
+        G_.setIdentity(A_.rows(), A_.rows());
+    }
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-LinearSystemDynamics* LinearSystemDynamics::clone() const {
-  return new LinearSystemDynamics(*this);
+LinearSystemDynamics *LinearSystemDynamics::clone() const {
+    return new LinearSystemDynamics(*this);
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-vector_t LinearSystemDynamics::computeFlowMap(scalar_t t, const vector_t& x, const vector_t& u, const PreComputation&) {
-  vector_t f = A_ * x;
-  f.noalias() += B_ * u;
-  return f;
+vector_t LinearSystemDynamics::computeFlowMap(scalar_t t, const vector_t &x, const vector_t &u,
+                                              const PreComputation &) {
+    vector_t f = A_ * x;
+    f.noalias() += B_ * u;
+    return f;
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-vector_t LinearSystemDynamics::computeJumpMap(scalar_t t, const vector_t& x, const PreComputation&) {
-  return G_ * x;
+vector_t LinearSystemDynamics::computeJumpMap(scalar_t t, const vector_t &x, const PreComputation &) {
+    return G_ * x;
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-VectorFunctionLinearApproximation LinearSystemDynamics::linearApproximation(scalar_t t, const vector_t& x, const vector_t& u,
-                                                                            const PreComputation&) {
-  VectorFunctionLinearApproximation approximation;
-  approximation.f = A_ * x;
-  approximation.f.noalias() += B_ * u;
-  approximation.dfdx = A_;
-  approximation.dfdu = B_;
-  return approximation;
+VectorFunctionLinearApproximation LinearSystemDynamics::linearApproximation(scalar_t t, const vector_t &x,
+                                                                            const vector_t &u, const PreComputation &) {
+    VectorFunctionLinearApproximation approximation;
+    approximation.f = A_ * x;
+    approximation.f.noalias() += B_ * u;
+    approximation.dfdx = A_;
+    approximation.dfdu = B_;
+    return approximation;
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-VectorFunctionLinearApproximation LinearSystemDynamics::jumpMapLinearApproximation(scalar_t t, const vector_t& x, const PreComputation&) {
-  VectorFunctionLinearApproximation approximation;
-  approximation.f = G_ * x;
-  approximation.dfdx = G_;
-  approximation.dfdu.setZero(A_.rows(), 0);
-  return approximation;
+VectorFunctionLinearApproximation LinearSystemDynamics::jumpMapLinearApproximation(scalar_t t, const vector_t &x,
+                                                                                   const PreComputation &) {
+    VectorFunctionLinearApproximation approximation;
+    approximation.f = G_ * x;
+    approximation.dfdx = G_;
+    approximation.dfdu.setZero(A_.rows(), 0);
+    return approximation;
 }
 
 }  // namespace ocs2

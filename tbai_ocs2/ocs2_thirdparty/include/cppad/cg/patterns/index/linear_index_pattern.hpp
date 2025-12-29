@@ -23,63 +23,41 @@ namespace cg {
  * Linear pattern y = ((x - offset) / dx) * dy + b
  */
 class LinearIndexPattern : public IndexPattern {
-protected:
+   protected:
     long xOffset_;
     // slope
     long dy_;
     long dx_;
     // constant term
     long b_;
-public:
 
-    inline LinearIndexPattern(long xOffset, long dy, long dx, long b) :
-        xOffset_(xOffset),
-        dy_(dy),
-        dx_(dx),
-        b_(b) {
-    }
+   public:
+    inline LinearIndexPattern(long xOffset, long dy, long dx, long b) : xOffset_(xOffset), dy_(dy), dx_(dx), b_(b) {}
 
     inline virtual ~LinearIndexPattern() = default;
 
-    inline long getXOffset()const {
-        return xOffset_;
-    }
+    inline long getXOffset() const { return xOffset_; }
 
-    inline long getLinearSlopeDy() const {
-        return dy_;
-    }
+    inline long getLinearSlopeDy() const { return dy_; }
 
-    inline void setLinearSlopeDy(long dy) {
-        dy_ = dy;
-    }
+    inline void setLinearSlopeDy(long dy) { dy_ = dy; }
 
-    inline long getLinearSlopeDx() const {
-        return dx_;
-    }
+    inline long getLinearSlopeDx() const { return dx_; }
 
-    inline long getLinearConstantTerm() const {
-        return b_;
-    }
+    inline long getLinearConstantTerm() const { return b_; }
 
-    inline void setLinearConstantTerm(long b) {
-        b_ = b;
-    }
+    inline void setLinearConstantTerm(long b) { b_ = b; }
 
-    inline IndexPatternType getType() const override {
-        return IndexPatternType::Linear;
-    }
+    inline IndexPatternType getType() const override { return IndexPatternType::Linear; }
 
-    inline void getSubIndexes(std::set<IndexPattern*>& indexes) const override {
+    inline void getSubIndexes(std::set<IndexPattern *> &indexes) const override {
         // nothing to add
     }
 
-    inline long evaluate(long x) const {
-        return ((x - xOffset_) / dx_) * dy_ + b_;
-    }
-
+    inline long evaluate(long x) const { return ((x - xOffset_) / dx_) * dy_ + b_; }
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

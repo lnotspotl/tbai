@@ -32,29 +32,29 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace ocs2;
 
 TEST(TestFixtureLoopShapingDynamics, evaluateDynamics) {
-  for (const auto config : configNames) {
-    TestFixtureLoopShapingDynamics test(config);
-    test.evaluateDynamics();
-  }
+    for (const auto config : configNames) {
+        TestFixtureLoopShapingDynamics test(config);
+        test.evaluateDynamics();
+    }
 };
 
 TEST(TestFixtureLoopShapingDynamics, evaluateDynamicsApproximation) {
-  for (const auto config : configNames) {
-    TestFixtureLoopShapingDynamics test(config);
-    test.evaluateDynamicsApproximation();
-  }
+    for (const auto config : configNames) {
+        TestFixtureLoopShapingDynamics test(config);
+        test.evaluateDynamicsApproximation();
+    }
 }
 
 TEST(TestFixtureLoopShapingDynamics, evaluateJumpMap) {
-  for (const auto config : configNames) {
-    TestFixtureLoopShapingDynamics test(config);
-    test.evaluateJumpMap();
-  }
+    for (const auto config : configNames) {
+        TestFixtureLoopShapingDynamics test(config);
+        test.evaluateJumpMap();
+    }
 }
 
 TEST(TestFixtureLoopShapingDynamics, evaluateJumpMapApproximation) {
-  for (const auto config : configNames) {
-    TestFixtureLoopShapingDynamics test(config);
-    test.evaluateJumpMapApproximation();
-  }
+    for (const auto config : configNames) {
+        TestFixtureLoopShapingDynamics test(config);
+        test.evaluateJumpMapApproximation();
+    }
 }

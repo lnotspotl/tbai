@@ -34,17 +34,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace ocs2;
 
 TEST(TestFixtureLoopShapingAugmentedLagrangian, testStateInputApproximation) {
-  for (const auto config : configNames) {
-    TestFixtureLoopShapingAugmentedLagrangian test(config);
-    test.testStateInputEvaluation();
-    test.testStateInputApproximation();
-  }
+    for (const auto config : configNames) {
+        TestFixtureLoopShapingAugmentedLagrangian test(config);
+        test.testStateInputEvaluation();
+        test.testStateInputApproximation();
+    }
 }
 
 TEST(TestFixtureLoopShapingAugmentedLagrangian, testStateApproximation) {
-  for (const auto config : configNames) {
-    TestFixtureLoopShapingAugmentedLagrangian test(config);
-    test.testStateEvaluation();
-    test.testStateApproximation();
-  }
+    for (const auto config : configNames) {
+        TestFixtureLoopShapingAugmentedLagrangian test(config);
+        test.testStateEvaluation();
+        test.testStateApproximation();
+    }
 }

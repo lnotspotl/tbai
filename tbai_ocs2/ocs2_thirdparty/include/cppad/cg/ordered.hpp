@@ -17,7 +17,7 @@
 
 namespace CppAD {
 
-template<class Base>
+template <class Base>
 bool GreaterThanZero(const cg::CG<Base> &x) {
     if (!x.isParameter()) {
         throw cg::CGException("GreaterThanZero cannot be called for non-parameters");
@@ -26,7 +26,7 @@ bool GreaterThanZero(const cg::CG<Base> &x) {
     return GreaterThanZero(x.getValue());
 }
 
-template<class Base>
+template <class Base>
 bool GreaterThanOrZero(const cg::CG<Base> &x) {
     if (!x.isParameter()) {
         throw cg::CGException("GreaterThanOrZero cannot be called for non-parameters");
@@ -35,7 +35,7 @@ bool GreaterThanOrZero(const cg::CG<Base> &x) {
     return GreaterThanOrZero(x.getValue());
 }
 
-template<class Base>
+template <class Base>
 bool LessThanZero(const cg::CG<Base> &x) {
     if (!x.isParameter()) {
         throw cg::CGException("LessThanZero cannot be called for non-parameters");
@@ -44,7 +44,7 @@ bool LessThanZero(const cg::CG<Base> &x) {
     return LessThanZero(x.getValue());
 }
 
-template<class Base>
+template <class Base>
 bool LessThanOrZero(const cg::CG<Base> &x) {
     if (!x.isParameter()) {
         throw cg::CGException("LessThanOrZero cannot be called for non-parameters");
@@ -53,9 +53,8 @@ bool LessThanOrZero(const cg::CG<Base> &x) {
     return LessThanOrZero(x.getValue());
 }
 
-template<class Base>
-bool abs_geq(const cg::CG<Base>& x,
-             const cg::CG<Base>& y) {
+template <class Base>
+bool abs_geq(const cg::CG<Base> &x, const cg::CG<Base> &y) {
     if (!x.isParameter()) {
         throw cg::CGException("abs_geq cannot be called for non-parameters (x)");
     } else if (!y.isParameter()) {
@@ -65,6 +64,6 @@ bool abs_geq(const cg::CG<Base>& x,
     return abs_geq(x.getValue(), y.getValue());
 }
 
-} // END CppAD namespace
+}  // namespace CppAD
 
 #endif

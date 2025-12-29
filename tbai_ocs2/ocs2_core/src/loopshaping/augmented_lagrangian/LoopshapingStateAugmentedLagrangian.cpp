@@ -32,52 +32,55 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace ocs2 {
 
-std::vector<LagrangianMetrics> LoopshapingStateAugmentedLagrangian::getValue(scalar_t t, const vector_t& x,
-                                                                             const std::vector<Multiplier>& termsMultiplier,
-                                                                             const PreComputation& preComp) const {
-  if (this->empty()) {
-    return {};
-  }
+std::vector<LagrangianMetrics> LoopshapingStateAugmentedLagrangian::getValue(
+    scalar_t t, const vector_t &x, const std::vector<Multiplier> &termsMultiplier,
+    const PreComputation &preComp) const {
+    if (this->empty()) {
+        return {};
+    }
 
-  const LoopshapingPreComputation& preCompLS = cast<LoopshapingPreComputation>(preComp);
-  const auto& x_system = preCompLS.getSystemState();
-  const auto& preComp_system = preCompLS.getSystemPreComputation();
+    const LoopshapingPreComputation &preCompLS = cast<LoopshapingPreComputation>(preComp);
+    const auto &x_system = preCompLS.getSystemState();
+    const auto &preComp_system = preCompLS.getSystemPreComputation();
 
-  return StateAugmentedLagrangianCollection::getValue(t, x_system, termsMultiplier, preComp_system);
+    return StateAugmentedLagrangianCollection::getValue(t, x_system, termsMultiplier, preComp_system);
 }
 
 ScalarFunctionQuadraticApproximation LoopshapingStateAugmentedLagrangian::getQuadraticApproximation(
-    scalar_t t, const vector_t& x, const std::vector<Multiplier>& termsMultiplier, const PreComputation& preComp) const {
-  if (this->empty()) {
-    return ScalarFunctionQuadraticApproximation::Zero(x.rows());
-  }
+    scalar_t t, const vector_t &x, const std::vector<Multiplier> &termsMultiplier,
+    const PreComputation &preComp) const {
+    if (this->empty()) {
+        return ScalarFunctionQuadraticApproximation::Zero(x.rows());
+    }
 
-  const LoopshapingPreComputation& preCompLS = cast<LoopshapingPreComputation>(preComp);
-  const auto& x_system = preCompLS.getSystemState();
-  const auto& preComp_system = preCompLS.getSystemPreComputation();
-  const auto stateDim = x.rows();
-  const auto sysStateDim = x_system.rows();
-  const auto filtStateDim = x.rows() - sysStateDim;
+    const LoopshapingPreComputation &preCompLS = cast<LoopshapingPreComputation>(preComp);
+    const auto &x_system = preCompLS.getSystemState();
+    const auto &preComp_system = preCompLS.getSystemPreComputation();
+    const auto stateDim = x.rows();
+    const auto sysStateDim = x_system.rows();
+    const auto filtStateDim = x.rows() - sysStateDim;
 
-  auto Phi_system = StateAugmentedLagrangianCollection::getQuadraticApproximation(t, x_system, termsMultiplier, preComp_system);
+    auto Phi_system =
+        StateAugmentedLagrangianCollection::getQuadraticApproximation(t, x_system, termsMultiplier, preComp_system);
 
-  ScalarFunctionQuadraticApproximation Phi;
-  Phi.f = std::move(Phi_system.f);
-  Phi.dfdx.setZero(stateDim);
-  Phi.dfdx.head(sysStateDim) = Phi_system.dfdx;
-  Phi.dfdxx.setZero(stateDim, stateDim);
-  Phi.dfdxx.topLeftCorner(sysStateDim, sysStateDim) = Phi_system.dfdxx;
-  return Phi;
+    ScalarFunctionQuadraticApproximation Phi;
+    Phi.f = std::move(Phi_system.f);
+    Phi.dfdx.setZero(stateDim);
+    Phi.dfdx.head(sysStateDim) = Phi_system.dfdx;
+    Phi.dfdxx.setZero(stateDim, stateDim);
+    Phi.dfdxx.topLeftCorner(sysStateDim, sysStateDim) = Phi_system.dfdxx;
+    return Phi;
 }
 
-void LoopshapingStateAugmentedLagrangian::updateLagrangian(scalar_t t, const vector_t& x, std::vector<LagrangianMetrics>& termsMetrics,
-                                                           std::vector<Multiplier>& termsMultiplier) const {
-  if (this->empty()) {
-    termsMultiplier.clear();
-  }
+void LoopshapingStateAugmentedLagrangian::updateLagrangian(scalar_t t, const vector_t &x,
+                                                           std::vector<LagrangianMetrics> &termsMetrics,
+                                                           std::vector<Multiplier> &termsMultiplier) const {
+    if (this->empty()) {
+        termsMultiplier.clear();
+    }
 
-  const auto x_system = loopshapingDefinition_->getSystemState(x);
-  StateAugmentedLagrangianCollection::updateLagrangian(t, x_system, termsMetrics, termsMultiplier);
+    const auto x_system = loopshapingDefinition_->getSystemState(x);
+    StateAugmentedLagrangianCollection::updateLagrangian(t, x_system, termsMetrics, termsMultiplier);
 }
 
 }  // namespace ocs2

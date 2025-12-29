@@ -39,24 +39,24 @@ LoopshapingSynchronizedModule::LoopshapingSynchronizedModule(
     : loopshapingDefinitionPtr_(std::move(loopshapingDefinitionPtr)),
       synchronizedModulesPtrArray_(std::move(synchronizedModulesPtrArray)) {}
 
-void LoopshapingSynchronizedModule::preSolverRun(scalar_t initTime, scalar_t finalTime, const vector_t& initState,
-                                                 const ReferenceManagerInterface& referenceManager) {
-  if (!synchronizedModulesPtrArray_.empty()) {
-    const auto systemState = loopshapingDefinitionPtr_->getSystemState(initState);
-    for (auto& module : synchronizedModulesPtrArray_) {
-      module->preSolverRun(initTime, finalTime, systemState, referenceManager);
+void LoopshapingSynchronizedModule::preSolverRun(scalar_t initTime, scalar_t finalTime, const vector_t &initState,
+                                                 const ReferenceManagerInterface &referenceManager) {
+    if (!synchronizedModulesPtrArray_.empty()) {
+        const auto systemState = loopshapingDefinitionPtr_->getSystemState(initState);
+        for (auto &module : synchronizedModulesPtrArray_) {
+            module->preSolverRun(initTime, finalTime, systemState, referenceManager);
+        }
     }
-  }
 }
 
-void LoopshapingSynchronizedModule::postSolverRun(const PrimalSolution& primalSolution) {
-  if (!synchronizedModulesPtrArray_.empty()) {
-    const auto systemPrimalSolution = loopshapingToSystemPrimalSolution(primalSolution, *loopshapingDefinitionPtr_);
+void LoopshapingSynchronizedModule::postSolverRun(const PrimalSolution &primalSolution) {
+    if (!synchronizedModulesPtrArray_.empty()) {
+        const auto systemPrimalSolution = loopshapingToSystemPrimalSolution(primalSolution, *loopshapingDefinitionPtr_);
 
-    for (auto& module : synchronizedModulesPtrArray_) {
-      module->postSolverRun(systemPrimalSolution);
+        for (auto &module : synchronizedModulesPtrArray_) {
+            module->postSolverRun(systemPrimalSolution);
+        }
     }
-  }
 }
 
 }  // namespace ocs2

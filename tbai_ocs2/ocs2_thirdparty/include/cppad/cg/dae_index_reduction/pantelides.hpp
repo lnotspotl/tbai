@@ -16,8 +16,8 @@
  * Author: Joao Leal
  */
 
-#include <cppad/cg/dae_index_reduction/dae_structural_index_reduction.hpp>
 #include <cppad/cg/dae_index_reduction/augment_path_depth_lookahead.hpp>
+#include <cppad/cg/dae_index_reduction/dae_structural_index_reduction.hpp>
 
 namespace CppAD {
 namespace cg {
@@ -25,12 +25,13 @@ namespace cg {
 /**
  * Pantelides DAE index reduction algorithm
  */
-template<class Base>
+template <class Base>
 class Pantelides : public DaeStructuralIndexReduction<Base> {
-protected:
+   protected:
     using CGBase = CppAD::cg::CG<Base>;
     using ADCG = CppAD::AD<CGBase>;
-protected:
+
+   protected:
     // avoids having to type this->graph_
     using DaeStructuralIndexReduction<Base>::graph_;
     // typical values used to avoid NaNs in the tape validation by CppAD
@@ -38,9 +39,9 @@ protected:
     // whether or not reduceIndex() has been called
     bool reduced_;
     AugmentPathDepthLookahead<Base> defaultAugmentPath_;
-    AugmentPath<Base>* augmentPath_;
-public:
+    AugmentPath<Base> *augmentPath_;
 
+   public:
     /**
      * Creates the DAE index reduction algorithm that implements the
      * Pantelides method.
@@ -51,38 +52,28 @@ public:
      * @param eqName Equation names (it can be an empty vector)
      * @param x Typical variable values (used to avoid NaNs in CppAD checks)
      */
-    Pantelides(ADFun<CG<Base> >& fun,
-               const std::vector<DaeVarInfo>& varInfo,
-               const std::vector<std::string>& eqName,
-               const std::vector<Base>& x) :
-            DaeStructuralIndexReduction<Base>(fun, varInfo, eqName),
-            x_(x),
-            reduced_(false),
-            augmentPath_(&defaultAugmentPath_) {
+    Pantelides(ADFun<CG<Base>> &fun, const std::vector<DaeVarInfo> &varInfo, const std::vector<std::string> &eqName,
+               const std::vector<Base> &x)
+        : DaeStructuralIndexReduction<Base>(fun, varInfo, eqName),
+          x_(x),
+          reduced_(false),
+          augmentPath_(&defaultAugmentPath_) {}
 
-    }
+    Pantelides(const Pantelides &p) = delete;
 
-    Pantelides(const Pantelides& p) = delete;
-
-    Pantelides& operator=(const Pantelides& p) = delete;
+    Pantelides &operator=(const Pantelides &p) = delete;
 
     virtual ~Pantelides() = default;
 
-    AugmentPath<Base>& getAugmentPath() const {
-        return *augmentPath_;
-    }
+    AugmentPath<Base> &getAugmentPath() const { return *augmentPath_; }
 
-    void setAugmentPath(AugmentPath<Base>& a) const {
-        augmentPath_ = &a;
-    }
+    void setAugmentPath(AugmentPath<Base> &a) const { augmentPath_ = &a; }
 
-    inline std::unique_ptr<ADFun<CG<Base>>> reduceIndex(std::vector<DaeVarInfo>& newVarInfo,
-                                                        std::vector<DaeEquationInfo>& equationInfo) override {
-        if (reduced_)
-            throw CGException("reduceIndex() can only be called once!");
+    inline std::unique_ptr<ADFun<CG<Base>>> reduceIndex(std::vector<DaeVarInfo> &newVarInfo,
+                                                        std::vector<DaeEquationInfo> &equationInfo) override {
+        if (reduced_) throw CGException("reduceIndex() can only be called once!");
 
-        if (this->verbosity_ >= Verbosity::Low)
-            log() << "########  Pantelides method  ########\n";
+        if (this->verbosity_ >= Verbosity::Low) log() << "########  Pantelides method  ########\n";
 
         augmentPath_->setLogger(*this);
 
@@ -101,36 +92,33 @@ public:
         return reducedFun;
     }
 
-protected:
+   protected:
     using DaeStructuralIndexReduction<Base>::log;
 
     /**
      *
      */
     inline void detectSubset2Dif() {
-        auto& vnodes = graph_.variables();
-        auto& enodes = graph_.equations();
+        auto &vnodes = graph_.variables();
+        auto &enodes = graph_.equations();
 
-        Enode<Base>* ll;
+        Enode<Base> *ll;
 
-        if (this->verbosity_ >= Verbosity::High)
-            graph_.printDot(this->log());
+        if (this->verbosity_ >= Verbosity::High) graph_.printDot(this->log());
 
         size_t Ndash = enodes.size();
         for (size_t k = 0; k < Ndash; k++) {
-            Enode<Base>* i = enodes[k];
+            Enode<Base> *i = enodes[k];
 
-            if (this->verbosity_ >= Verbosity::High)
-                log() << "Outer loop: equation k = " << *i << "\n";
+            if (this->verbosity_ >= Verbosity::High) log() << "Outer loop: equation k = " << *i << "\n";
 
             bool pathfound = false;
             while (!pathfound) {
-
                 /**
                  * delete all V-nodes with A!=0 and their incident edges
                  * from the graph
                  */
-                for (Vnode<Base>* jj : vnodes) {
+                for (Vnode<Base> *jj : vnodes) {
                     if (!jj->isDeleted() && jj->derivative() != nullptr) {
                         jj->deleteNode(log(), this->verbosity_);
                     }
@@ -141,16 +129,16 @@ protected:
                 pathfound = augmentPath_->augmentPath(*i);
 
                 if (!pathfound) {
-                    const size_t vsize = vnodes.size(); // the size might change
+                    const size_t vsize = vnodes.size();  // the size might change
                     for (size_t l = 0; l < vsize; ++l) {
-                        Vnode<Base>* jj = vnodes[l];
+                        Vnode<Base> *jj = vnodes[l];
                         if (jj->isColored() && !jj->isDeleted()) {
                             // add new variable derivatives of colored variables
                             graph_.createDerivate(*jj);
                         }
                     }
 
-                    const size_t esize = enodes.size(); // the size might change
+                    const size_t esize = enodes.size();  // the size might change
                     for (size_t l = 0; l < esize; l++) {
                         ll = enodes[l];
                         if (ll->isColored()) {
@@ -162,22 +150,22 @@ protected:
                     // structural check to avoid infinite recursion
                     for (size_t l = esize; l < enodes.size(); l++) {
                         ll = enodes[l];
-                        const std::vector<Vnode<Base>*>& nvars = ll->originalVariables();
+                        const std::vector<Vnode<Base> *> &nvars = ll->originalVariables();
                         bool ok = false;
-                        for (Vnode<Base>* js : nvars) {
+                        for (Vnode<Base> *js : nvars) {
                             if (js->equations().size() > 1) {
                                 ok = true;
                                 break;
                             }
                         }
-                        if (!ok)
-                            throw CGException("Invalid equation structure. The model appears to be over-defined.");
+                        if (!ok) throw CGException("Invalid equation structure. The model appears to be over-defined.");
                     }
 
-                    for (Vnode<Base>* jj : vnodes) {
+                    for (Vnode<Base> *jj : vnodes) {
                         if (jj->isColored() && !jj->isDeleted()) {
-                            Vnode<Base>* jDiff = jj->derivative();
-                            jDiff->setAssignmentEquation(*jj->assignmentEquation()->derivative(), log(), this->verbosity_);
+                            Vnode<Base> *jDiff = jj->derivative();
+                            jDiff->setAssignmentEquation(*jj->assignmentEquation()->derivative(), log(),
+                                                         this->verbosity_);
                         }
                     }
 
@@ -190,14 +178,11 @@ protected:
                     }
                 }
             }
-
         }
-
     }
-
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

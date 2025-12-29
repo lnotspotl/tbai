@@ -1,5 +1,5 @@
-# ifndef CPPAD_UTILITY_POW_INT_HPP
-# define CPPAD_UTILITY_POW_INT_HPP
+#ifndef CPPAD_UTILITY_POW_INT_HPP
+#define CPPAD_UTILITY_POW_INT_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -110,30 +110,25 @@ $end
 
 namespace CppAD {
 
-    template <class Type>
-    inline Type pow (const Type& x, const int& n)
-    {
-        Type p(1);
-        int n2 = n / 2;
+template <class Type>
+inline Type pow(const Type &x, const int &n) {
+    Type p(1);
+    int n2 = n / 2;
 
-        if( n == 0 )
-            return p;
-        if( n < 0 )
-            return p / pow(x, -n);
-        if( n == 1 )
-            return x;
+    if (n == 0) return p;
+    if (n < 0) return p / pow(x, -n);
+    if (n == 1) return x;
 
-        // p = (x^2)^(n/2)
-        p = pow( x * x , n2 );
+    // p = (x^2)^(n/2)
+    p = pow(x * x, n2);
 
-        // n is even case
-        if( n % 2 == 0 )
-            return p;
+    // n is even case
+    if (n % 2 == 0) return p;
 
-        // n is odd case
-        return p * x;
-    }
-
+    // n is odd case
+    return p * x;
 }
 
-# endif
+}  // namespace CppAD
+
+#endif

@@ -18,10 +18,8 @@
 namespace CppAD {
 namespace cg {
 
-template<class VectorBool, class Base>
-void zeroOrderDependency(ADFun<Base>& fun,
-                         const VectorBool& vx,
-                         VectorBool& vy) {
+template <class VectorBool, class Base>
+void zeroOrderDependency(ADFun<Base> &fun, const VectorBool &vx, VectorBool &vy) {
     size_t m = fun.Range();
     CPPADCG_ASSERT_KNOWN(vx.size() >= fun.Domain(), "Invalid vx size");
     CPPADCG_ASSERT_KNOWN(vy.size() >= m, "Invalid vy size");
@@ -40,9 +38,8 @@ void zeroOrderDependency(ADFun<Base>& fun,
     }
 }
 
-template<class VectorSet>
-inline bool isIdentityPattern(const VectorSet& pattern,
-                              size_t mRows) {
+template <class VectorSet>
+inline bool isIdentityPattern(const VectorSet &pattern, size_t mRows) {
     CPPADCG_ASSERT_UNKNOWN(pattern.size() >= mRows);
 
     for (size_t i = 0; i < mRows; i++) {
@@ -53,10 +50,8 @@ inline bool isIdentityPattern(const VectorSet& pattern,
     return true;
 }
 
-template<class VectorSet>
-inline VectorSet transposePattern(const VectorSet& pattern,
-                                  size_t mRows,
-                                  size_t nCols) {
+template <class VectorSet>
+inline VectorSet transposePattern(const VectorSet &pattern, size_t mRows, size_t nCols) {
     CPPADCG_ASSERT_UNKNOWN(pattern.size() >= mRows);
 
     VectorSet transpose(nCols);
@@ -77,10 +72,8 @@ inline VectorSet transposePattern(const VectorSet& pattern,
  * @param mRows number of rows of A to use
  * @param result the resulting sparsity matrix
  */
-template<class VectorSet, class VectorSet2>
-inline void addTransMatrixSparsity(const VectorSet& a,
-                                   size_t mRows,
-                                   VectorSet2& result) {
+template <class VectorSet, class VectorSet2>
+inline void addTransMatrixSparsity(const VectorSet &a, size_t mRows, VectorSet2 &result) {
     CPPADCG_ASSERT_UNKNOWN(a.size() >= mRows);
 
     for (size_t i = 0; i < mRows; i++) {
@@ -98,9 +91,8 @@ inline void addTransMatrixSparsity(const VectorSet& a,
  * @param a The matrix to be added to the result
  * @param result the resulting sparsity matrix
  */
-template<class VectorSet, class VectorSet2>
-inline void addTransMatrixSparsity(const VectorSet& a,
-                                   VectorSet2& result) {
+template <class VectorSet, class VectorSet2>
+inline void addTransMatrixSparsity(const VectorSet &a, VectorSet2 &result) {
     addTransMatrixSparsity<VectorSet, VectorSet2>(a, a.size(), result);
 }
 
@@ -112,10 +104,8 @@ inline void addTransMatrixSparsity(const VectorSet& a,
  * @param mRows number of rows of A to use
  * @param result the resulting sparsity matrix
  */
-template<class VectorSet, class VectorSet2>
-inline void addMatrixSparsity(const VectorSet& a,
-                              size_t mRows,
-                              VectorSet2& result) {
+template <class VectorSet, class VectorSet2>
+inline void addMatrixSparsity(const VectorSet &a, size_t mRows, VectorSet2 &result) {
     CPPADCG_ASSERT_UNKNOWN(result.size() >= mRows);
     CPPADCG_ASSERT_UNKNOWN(a.size() <= mRows);
 
@@ -135,9 +125,8 @@ inline void addMatrixSparsity(const VectorSet& a,
  * @param a The matrix to be added to the result
  * @param result the resulting sparsity matrix
  */
-template<class VectorSet, class VectorSet2>
-inline void addMatrixSparsity(const VectorSet& a,
-                              VectorSet2& result) {
+template <class VectorSet, class VectorSet2>
+inline void addMatrixSparsity(const VectorSet &a, VectorSet2 &result) {
     CPPADCG_ASSERT_UNKNOWN(result.size() == a.size());
 
     addMatrixSparsity<VectorSet, VectorSet2>(a, a.size(), result);
@@ -152,10 +141,8 @@ inline void addMatrixSparsity(const VectorSet& a,
  * @param result the resulting sparsity matrix
  * @param q The number of columns of B and the result
  */
-template<class VectorSet, class VectorSet2>
-inline void multMatrixMatrixSparsity(const VectorSet& a,
-                                     const VectorSet2& b,
-                                     CppAD::vector<std::set<size_t> >& result,
+template <class VectorSet, class VectorSet2>
+inline void multMatrixMatrixSparsity(const VectorSet &a, const VectorSet2 &b, CppAD::vector<std::set<size_t> > &result,
                                      size_t q) {
     multMatrixMatrixSparsity(a, b, result, a.size(), b.size(), q);
 }
@@ -173,32 +160,28 @@ inline void multMatrixMatrixSparsity(const VectorSet& a,
  * @param n The number of columns of A and rows of B
  * @param q The number of columns of B and the result
  */
-template<class VectorSet, class VectorSet2>
-inline void multMatrixMatrixSparsity(const VectorSet& a,
-                                     const VectorSet2& b,
-                                     CppAD::vector<std::set<size_t> >& result,
-                                     size_t m,
-                                     size_t n,
-                                     size_t q) {
+template <class VectorSet, class VectorSet2>
+inline void multMatrixMatrixSparsity(const VectorSet &a, const VectorSet2 &b, CppAD::vector<std::set<size_t> > &result,
+                                     size_t m, size_t n, size_t q) {
     CPPADCG_ASSERT_UNKNOWN(a.size() >= m);
     CPPADCG_ASSERT_UNKNOWN(b.size() >= n);
     CPPADCG_ASSERT_UNKNOWN(result.size() >= m);
 
-    //check if b is identity
+    // check if b is identity
     if (n == q) {
         if (isIdentityPattern(b, n)) {
-            addMatrixSparsity(a, m, result); // R += A
+            addMatrixSparsity(a, m, result);  // R += A
             return;
         }
     }
 
     VectorSet2 bt = transposePattern(b, n, q);
 
-    for (size_t jj = 0; jj < q; jj++) { //loop columns of b
-        const std::set<size_t>& colB = bt[jj];
+    for (size_t jj = 0; jj < q; jj++) {  // loop columns of b
+        const std::set<size_t> &colB = bt[jj];
         if (colB.size() > 0) {
             for (size_t i = 0; i < m; i++) {
-                const std::set<size_t>& rowA = a[i];
+                const std::set<size_t> &rowA = a[i];
                 for (size_t rowb : colB) {
                     if (rowA.find(rowb) != rowA.end()) {
                         result[i].insert(jj);
@@ -223,18 +206,14 @@ inline void multMatrixMatrixSparsity(const VectorSet& a,
  * @param n The number of columns of A and rows of the result
  * @param q The number of columns of B and the result
  */
-template<class VectorSet, class VectorSet2>
-inline void multMatrixTransMatrixSparsity(const VectorSet& a,
-                                          const VectorSet2& b,
-                                          CppAD::vector<std::set<size_t> >& result,
-                                          size_t m,
-                                          size_t n,
-                                          size_t q) {
+template <class VectorSet, class VectorSet2>
+inline void multMatrixTransMatrixSparsity(const VectorSet &a, const VectorSet2 &b,
+                                          CppAD::vector<std::set<size_t> > &result, size_t m, size_t n, size_t q) {
     CPPADCG_ASSERT_UNKNOWN(a.size() >= m);
     CPPADCG_ASSERT_UNKNOWN(b.size() >= m);
     CPPADCG_ASSERT_UNKNOWN(result.size() >= n);
 
-    //check if B is empty
+    // check if B is empty
     bool empty = true;
     for (size_t i = 0; i < m; i++) {
         if (b[i].size() > 0) {
@@ -243,29 +222,29 @@ inline void multMatrixTransMatrixSparsity(const VectorSet& a,
         }
     }
     if (empty) {
-        return; //nothing to do: R += 0
+        return;  // nothing to do: R += 0
     }
 
-    //check if A is identity
+    // check if A is identity
     if (m == n && isIdentityPattern(a, m)) {
-        addMatrixSparsity(b, n, result); // R += B
+        addMatrixSparsity(b, n, result);  // R += B
         return;
     }
 
-    //check if B is identity
+    // check if B is identity
     if (m == q && isIdentityPattern(b, m)) {
-        addTransMatrixSparsity(a, m, result); // R += A^T
+        addTransMatrixSparsity(a, m, result);  // R += A^T
         return;
     }
 
     VectorSet at = transposePattern(a, m, n);
     VectorSet2 bt = transposePattern(b, m, q);
 
-    for (size_t jj = 0; jj < q; jj++) { //loop columns of b
-        const std::set<size_t>& colB = bt[jj];
+    for (size_t jj = 0; jj < q; jj++) {  // loop columns of b
+        const std::set<size_t> &colB = bt[jj];
         if (colB.size() > 0) {
             for (size_t i = 0; i < n; i++) {
-                const std::set<size_t>& rowAt = at[i];
+                const std::set<size_t> &rowAt = at[i];
                 if (rowAt.size() > 0) {
                     for (size_t rowb : colB) {
                         if (rowAt.find(rowb) != rowAt.end()) {
@@ -277,7 +256,6 @@ inline void multMatrixTransMatrixSparsity(const VectorSet& a,
             }
         }
     }
-
 }
 
 /**
@@ -292,17 +270,13 @@ inline void multMatrixTransMatrixSparsity(const VectorSet& a,
  * @param n The number of columns of B
  * @param q The number of rows of A and the result
  */
-template<class VectorSet, class VectorSet2>
-inline void multMatrixMatrixSparsityTrans(const VectorSet& aT,
-                                          const VectorSet2& b,
-                                          CppAD::vector<std::set<size_t> >& rT,
-                                          size_t m,
-                                          size_t n,
-                                          size_t q) {
+template <class VectorSet, class VectorSet2>
+inline void multMatrixMatrixSparsityTrans(const VectorSet &aT, const VectorSet2 &b,
+                                          CppAD::vector<std::set<size_t> > &rT, size_t m, size_t n, size_t q) {
     CPPADCG_ASSERT_UNKNOWN(aT.size() >= m);
     CPPADCG_ASSERT_UNKNOWN(b.size() >= m);
 
-    //check if b is empty
+    // check if b is empty
     bool empty = true;
     for (size_t i = 0; i < m; i++) {
         if (b[i].size() > 0) {
@@ -311,19 +285,19 @@ inline void multMatrixMatrixSparsityTrans(const VectorSet& aT,
         }
     }
     if (empty) {
-        return; //nothing to do:  R^T += 0
+        return;  // nothing to do:  R^T += 0
     }
 
-    //check if a is identity
+    // check if a is identity
     if (m == q && isIdentityPattern(aT, m)) {
-        addTransMatrixSparsity(b, m, rT); // R^T += B^T
+        addTransMatrixSparsity(b, m, rT);  // R^T += B^T
         return;
     }
 
     VectorSet a = transposePattern(aT, m, q);
     VectorSet2 bT = transposePattern(b, m, n);
 
-    for (size_t jj = 0; jj < n; jj++) { //loop columns of b
+    for (size_t jj = 0; jj < n; jj++) {  // loop columns of b
         for (size_t i = 0; i < q; i++) {
             for (size_t it : a[i]) {
                 if (bT[jj].find(it) != bT[jj].end()) {
@@ -335,10 +309,8 @@ inline void multMatrixMatrixSparsityTrans(const VectorSet& aT,
     }
 }
 
-template<class VectorBool>
-void printSparsityPattern(const VectorBool& sparsity,
-                          const std::string& name,
-                          size_t m, size_t n) {
+template <class VectorBool>
+void printSparsityPattern(const VectorBool &sparsity, const std::string &name, size_t m, size_t n) {
     size_t width = std::ceil(std::log10((m > n) ? m : n));
     if (!name.empty()) {
         std::cout << name << "  sparsity:\n";
@@ -357,10 +329,8 @@ void printSparsityPattern(const VectorBool& sparsity,
     std::cout << std::endl;
 }
 
-template<class VectorSet>
-void printSparsityPattern(const VectorSet& sparsity,
-                          const std::string& name,
-                          bool printLocationByRow = false) {
+template <class VectorSet>
+void printSparsityPattern(const VectorSet &sparsity, const std::string &name, bool printLocationByRow = false) {
     size_t maxDim = sparsity.size();
     size_t nnz = 0;
     for (size_t i = 0; i < sparsity.size(); i++) {
@@ -389,8 +359,7 @@ void printSparsityPattern(const VectorSet& sparsity,
             if (j != 0 && long(j) != last + 1) {
                 std::cout << std::setw((j - last - 1) * (width3 + 1)) << " ";
             }
-            if (printLocationByRow)
-                std::cout << std::setw(width2) << e << ":";
+            if (printLocationByRow) std::cout << std::setw(width2) << e << ":";
             std::cout << std::setw(width) << j << " ";
             last = j;
             e++;
@@ -400,22 +369,17 @@ void printSparsityPattern(const VectorSet& sparsity,
     std::cout << std::endl;
 }
 
-template<class VectorSize>
-void printSparsityPattern(const VectorSize& row,
-                          const VectorSize& col,
-                          const std::string& name,
-                          size_t m) {
+template <class VectorSize>
+void printSparsityPattern(const VectorSize &row, const VectorSize &col, const std::string &name, size_t m) {
     std::vector<std::set<size_t> > sparsity(m);
     generateSparsitySet(row, col, sparsity);
     printSparsityPattern(sparsity, name);
 }
 
-inline bool intersects(const std::set<size_t>& a,
-                       const std::set<size_t>& b) {
+inline bool intersects(const std::set<size_t> &a, const std::set<size_t> &b) {
     if (a.empty() || b.empty()) {
         return false;
-    } else if (*a.rbegin() < *b.begin() ||
-            *a.begin() > *b.rbegin()) {
+    } else if (*a.rbegin() < *b.begin() || *a.begin() > *b.rbegin()) {
         return false;
     }
 
@@ -442,8 +406,8 @@ inline bool intersects(const std::set<size_t>& a,
  * @param ty The array to search in
  * @return The first code handler found or nullptr if none was found
  */
-template<class Base>
-inline CodeHandler<Base>* findHandler(const std::vector<CG<Base> >& ty) {
+template <class Base>
+inline CodeHandler<Base> *findHandler(const std::vector<CG<Base> > &ty) {
     for (size_t i = 0; i < ty.size(); i++) {
         if (ty[i].getCodeHandler() != nullptr) {
             return ty[i].getCodeHandler();
@@ -452,8 +416,8 @@ inline CodeHandler<Base>* findHandler(const std::vector<CG<Base> >& ty) {
     return nullptr;
 }
 
-template<class Base>
-inline CodeHandler<Base>* findHandler(const CppAD::vector<CG<Base> >& ty) {
+template <class Base>
+inline CodeHandler<Base> *findHandler(const CppAD::vector<CG<Base> > &ty) {
     for (size_t i = 0; i < ty.size(); i++) {
         if (ty[i].getCodeHandler() != nullptr) {
             return ty[i].getCodeHandler();
@@ -462,8 +426,8 @@ inline CodeHandler<Base>* findHandler(const CppAD::vector<CG<Base> >& ty) {
     return nullptr;
 }
 
-template<class Base>
-inline CodeHandler<Base>* findHandler(CppAD::cg::ArrayView<const CG<Base> > ty) {
+template <class Base>
+inline CodeHandler<Base> *findHandler(CppAD::cg::ArrayView<const CG<Base> > ty) {
     for (size_t i = 0; i < ty.size(); i++) {
         if (ty[i].getCodeHandler() != nullptr) {
             return ty[i].getCodeHandler();
@@ -472,8 +436,8 @@ inline CodeHandler<Base>* findHandler(CppAD::cg::ArrayView<const CG<Base> > ty) 
     return nullptr;
 }
 
-template<class Base>
-inline Argument<Base> asArgument(const CG<Base>& tx) {
+template <class Base>
+inline Argument<Base> asArgument(const CG<Base> &tx) {
     if (tx.isParameter()) {
         return Argument<Base>(tx.getValue());
     } else {
@@ -481,8 +445,8 @@ inline Argument<Base> asArgument(const CG<Base>& tx) {
     }
 }
 
-template<class Base>
-inline std::vector<Argument<Base> > asArguments(const std::vector<CG<Base> >& tx) {
+template <class Base>
+inline std::vector<Argument<Base> > asArguments(const std::vector<CG<Base> > &tx) {
     std::vector<Argument<Base> > arguments(tx.size());
     for (size_t i = 0; i < arguments.size(); i++) {
         arguments[i] = asArgument(tx[i]);
@@ -490,8 +454,8 @@ inline std::vector<Argument<Base> > asArguments(const std::vector<CG<Base> >& tx
     return arguments;
 }
 
-template<class Base>
-inline std::vector<Argument<Base> > asArguments(const CppAD::vector<CG<Base> >& tx) {
+template <class Base>
+inline std::vector<Argument<Base> > asArguments(const CppAD::vector<CG<Base> > &tx) {
     std::vector<Argument<Base> > arguments(tx.size());
     for (size_t i = 0; i < arguments.size(); i++) {
         arguments[i] = asArgument(tx[i]);
@@ -509,9 +473,9 @@ inline std::vector<Argument<Base> > asArguments(const CppAD::vector<CG<Base> >& 
  * @param map the map from which to get the keys from
  * @param keys the map keys will be inserted into this set
  */
-template<class Key, class Value>
-void mapKeys(const std::map<Key, Value>& map, std::set<Key>& keys) {
-    for (const auto& p : map) {
+template <class Key, class Value>
+void mapKeys(const std::map<Key, Value> &map, std::set<Key> &keys) {
+    for (const auto &p : map) {
         keys.insert(keys.end(), p.first);
     }
 }
@@ -522,8 +486,8 @@ void mapKeys(const std::map<Key, Value>& map, std::set<Key>& keys) {
  * @param map the map from which to get the keys from
  * @param keys the map keys will be saved in this vector
  */
-template<class Key, class Value>
-void mapKeys(const std::map<Key, Value>& map, std::vector<Key>& keys) {
+template <class Key, class Value>
+void mapKeys(const std::map<Key, Value> &map, std::vector<Key> &keys) {
     keys.resize(map.size());
 
     size_t i = 0;
@@ -540,16 +504,14 @@ void mapKeys(const std::map<Key, Value>& map, std::vector<Key>& keys) {
  * @param keys The keys
  * @return true if all the keys and only these keys where found in the map
  */
-template<class Key, class Value>
-bool compareMapKeys(const std::map<Key, Value>& map, const std::set<Key>& keys) {
-    if (map.size() != keys.size())
-        return false;
+template <class Key, class Value>
+bool compareMapKeys(const std::map<Key, Value> &map, const std::set<Key> &keys) {
+    if (map.size() != keys.size()) return false;
 
     typename std::map<Key, Value>::const_iterator itm = map.begin();
     typename std::set<Key>::const_iterator itk = keys.begin();
     for (; itm != map.end(); ++itm, ++itk) {
-        if (itm->first != *itk)
-            return false;
+        if (itm->first != *itk) return false;
     }
 
     return true;
@@ -562,14 +524,13 @@ bool compareMapKeys(const std::map<Key, Value>& map, const std::set<Key>& keys) 
  * @param keys the keys (the filter) to be retrieved from the map
  * @return a new map only with the keys found in provided filter
  */
-template<class Key, class Value>
-inline std::map<Key, Value> filterBykeys(const std::map<Key, Value>& m,
-                                         const std::set<Key>& keys) {
+template <class Key, class Value>
+inline std::map<Key, Value> filterBykeys(const std::map<Key, Value> &m, const std::set<Key> &keys) {
     std::map<Key, Value> filtered;
 
     typename std::map<Key, Value>::const_iterator itM;
 
-    for (const Key& k : keys) {
+    for (const Key &k : keys) {
         itM = m.find(k);
         if (itM != m.end()) {
             filtered[itM->first] = itM->second;
@@ -587,8 +548,8 @@ inline std::map<Key, Value> filterBykeys(const std::map<Key, Value>& m,
  *         0 if they have all the same elements
  *         1 if the second set is considered lower than the first.
  */
-template<class T>
-inline int compare(const std::set<T>& s1, const std::set<T>& s2) {
+template <class T>
+inline int compare(const std::set<T> &s1, const std::set<T> &s2) {
     if (s1.size() < s2.size()) {
         return -1;
     } else if (s1.size() > s2.size()) {
@@ -606,33 +567,30 @@ inline int compare(const std::set<T>& s1, const std::set<T>& s2) {
     }
 }
 
-template<class T>
+template <class T>
 struct SetComparator {
-
-    bool operator() (const std::set<T>& lhs, const std::set<T>& rhs) const {
-        return compare(lhs, rhs) == -1;
-    }
+    bool operator()(const std::set<T> &lhs, const std::set<T> &rhs) const { return compare(lhs, rhs) == -1; }
 };
 
 /***************************************************************************
  * Generic functions for printing stl containers
  **************************************************************************/
-template<class Base>
-inline void print(const Base& v) {
+template <class Base>
+inline void print(const Base &v) {
     std::cout << v;
 }
 
-template<class Key, class Value>
-inline void print(const std::map<Key, Value>& m) {
-    for (const std::pair<Key, Value>& p : m) {
+template <class Key, class Value>
+inline void print(const std::map<Key, Value> &m) {
+    for (const std::pair<Key, Value> &p : m) {
         std::cout << p.first << " : ";
         print(p.second);
         std::cout << std::endl;
     }
 }
 
-template<class Base>
-inline void print(const std::set<Base>& s) {
+template <class Base>
+inline void print(const std::set<Base> &s) {
     std::cout << "[";
 
     for (auto itj = s.begin(); itj != s.end(); ++itj) {
@@ -643,22 +601,24 @@ inline void print(const std::set<Base>& s) {
     std::cout.flush();
 }
 
-template<class Base>
-inline void print(const std::set<Base*>& s) {
+template <class Base>
+inline void print(const std::set<Base *> &s) {
     std::cout << "[";
 
     for (const auto itj = s.begin(); itj != s.end(); ++itj) {
         if (itj != s.begin()) std::cout << " ";
-        Base* v = *itj;
-        if (v == nullptr) std::cout << "NULL";
-        else print(*v);
+        Base *v = *itj;
+        if (v == nullptr)
+            std::cout << "NULL";
+        else
+            print(*v);
     }
     std::cout << "]";
     std::cout.flush();
 }
 
-template<class Base>
-inline void print(const std::vector<Base>& v) {
+template <class Base>
+inline void print(const std::vector<Base> &v) {
     std::cout << "[";
 
     for (size_t i = 0; i < v.size(); i++) {
@@ -683,17 +643,14 @@ inline void print(const std::vector<Base>& v) {
  * @return a value with the print operation if x is a variable, otherwise a
  *         copy of x
  */
-template<class Base>
-inline CG<Base> makePrintValue(const std::string& before,
-                               const CG<Base>& x,
-                               const std::string& after = "") {
+template <class Base>
+inline CG<Base> makePrintValue(const std::string &before, const CG<Base> &x, const std::string &after = "") {
     std::cout << before << x << after;
 
     if (x.getOperationNode() != nullptr) {
-        auto* handler = x.getCodeHandler();
+        auto *handler = x.getCodeHandler();
         CG<Base> out(*handler->makePrintNode(before, *x.getOperationNode(), after));
-        if (x.isValueDefined())
-            out.setValue(x.getValue());
+        if (x.isValueDefined()) out.setValue(x.getValue());
         return out;
     } else {
         return x;
@@ -711,9 +668,7 @@ inline CG<Base> makePrintValue(const std::string& before,
  * @param toReplace the text to be replaced
  * @param replacement the replacement text
  */
-inline void replaceString(std::string& text,
-                          const std::string& toReplace,
-                          const std::string& replacement) {
+inline void replaceString(std::string &text, const std::string &toReplace, const std::string &replacement) {
     size_t pos = 0;
     while ((pos = text.find(toReplace, pos)) != std::string::npos) {
         text.replace(pos, toReplace.length(), replacement);
@@ -721,13 +676,11 @@ inline void replaceString(std::string& text,
     }
 }
 
-inline std::vector<std::string> explode(const std::string& text,
-                                        const std::string& delimiter) {
+inline std::vector<std::string> explode(const std::string &text, const std::string &delimiter) {
     std::vector<std::string> matches;
 
     const size_t dlen = delimiter.length();
-    if (dlen == 0)
-        return matches;
+    if (dlen == 0) return matches;
 
     size_t pos = 0;
     size_t start = 0;
@@ -747,8 +700,7 @@ inline std::vector<std::string> explode(const std::string& text,
     return matches;
 }
 
-inline std::string implode(const std::vector<std::string>& text,
-                           const std::string& delimiter) {
+inline std::string implode(const std::vector<std::string> &text, const std::string &delimiter) {
     if (text.empty()) {
         return "";
     } else if (text.size() == 1) {
@@ -756,8 +708,7 @@ inline std::string implode(const std::vector<std::string>& text,
     } else {
         std::string out;
         size_t n = 0;
-        for (const auto& s: text)
-            n += s.size();
+        for (const auto &s : text) n += s.size();
         out.reserve(n + (text.size() - 1) * delimiter.size());
         out = text[0];
         for (size_t i = 1; i < text.size(); ++i) {
@@ -768,7 +719,7 @@ inline std::string implode(const std::vector<std::string>& text,
     }
 }
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

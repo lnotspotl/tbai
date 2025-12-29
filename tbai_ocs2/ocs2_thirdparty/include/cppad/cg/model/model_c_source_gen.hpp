@@ -23,9 +23,9 @@ namespace cg {
  * Auxiliary internal class
  */
 class CompressedVectorInfo {
-public:
-    std::vector<std::set<size_t> > locations; // location of each index in the compressed array
-    std::vector<size_t> indexes; // row or column index
+   public:
+    std::vector<std::set<size_t> > locations;  // location of each index in the compressed array
+    std::vector<size_t> indexes;               // row or column index
     bool ordered;
 };
 
@@ -34,13 +34,13 @@ public:
  *
  * @author Joao Leal
  */
-template<class Base>
+template <class Base>
 class ModelCSourceGen {
     using CGBase = CppAD::cg::CG<Base>;
     using ADCG = CppAD::AD<CGBase>;
     using SparsitySetType = std::vector<std::set<size_t> >;
-    using TapeVarType = std::pair<size_t, size_t>; // tape independent -> reference orig independent (temporaries only)
-public:
+    using TapeVarType = std::pair<size_t, size_t>;  // tape independent -> reference orig independent (temporaries only)
+   public:
     static const std::string FUNCTION_FORWAD_ZERO;
     static const std::string FUNCTION_JACOBIAN;
     static const std::string FUNCTION_HESSIAN;
@@ -60,32 +60,28 @@ public:
     static const std::string FUNCTION_REVERSE_TWO_SPARSITY;
     static const std::string FUNCTION_INFO;
     static const std::string FUNCTION_ATOMIC_FUNC_NAMES;
-protected:
+
+   protected:
     static const std::string CONST;
 
     /**
      * Useful class for storing matrix indexes
      */
     class Position {
-    public:
+       public:
         bool defined;
         std::vector<size_t> row;
         std::vector<size_t> col;
 
-        inline Position() :
-            defined(false) {
+        inline Position() : defined(false) {}
+
+        inline Position(const std::vector<size_t> &r, const std::vector<size_t> &c) : defined(true), row(r), col(c) {
+            CPPADCG_ASSERT_KNOWN(r.size() == c.size(),
+                                 "The number of row indexes must be the same as the number of column indexes.")
         }
 
-        inline Position(const std::vector<size_t>& r, const std::vector<size_t>& c) :
-            defined(true),
-            row(r),
-            col(c) {
-            CPPADCG_ASSERT_KNOWN(r.size() == c.size(), "The number of row indexes must be the same as the number of column indexes.")
-        }
-
-        template<class VectorSet>
-        inline Position(const VectorSet& elements) :
-            defined(true) {
+        template <class VectorSet>
+        inline Position(const VectorSet &elements) : defined(true) {
             size_t nnz = 0;
             for (size_t i = 0; i < elements.size(); i++) {
                 nnz += elements[i].size();
@@ -108,7 +104,7 @@ protected:
      * Saves sparsity information in more than one format
      */
     class LocalSparsityInfo {
-    public:
+       public:
         /**
          * Calculated sparsity from the model
          * (may differ from the requested sparsity)
@@ -124,7 +120,7 @@ protected:
      * Used for coloring
      */
     class Color {
-    public:
+       public:
         /// all row with this color
         std::set<size_t> rows;
         /// maps column indexes to the corresponding row
@@ -135,20 +131,20 @@ protected:
         std::set<size_t> forbiddenRows;
     };
 
-protected:
+   protected:
     /**
      * the original model
      */
-    ADFun<CGBase>& _fun;
+    ADFun<CGBase> &_fun;
     /**
      * Altered model without the loop equations and with extra dependents
      * for the non-indexed temporary variables used by loops
      */
-    LoopFreeModel<Base>* _funNoLoops;
+    LoopFreeModel<Base> *_funNoLoops;
     /**
      * loop models
      */
-    std::set<LoopModel<Base>*> _loopTapes;
+    std::set<LoopModel<Base> *> _loopTapes;
     /**
      * the name of the model
      */
@@ -225,7 +221,7 @@ protected:
     /**
      * Maps each atomic function ID to information regarding how the atomic function is used
      */
-    std::map<size_t, AtomicUseInfo<Base> >* _atomicsInfo;
+    std::map<size_t, AtomicUseInfo<Base> > *_atomicsInfo;
     /**
      * A string cache for code generation
      */
@@ -246,7 +242,7 @@ protected:
      * Maps the column groups of each loop model to the set of columns
      * (loop->group->{columns->{compressed forward 1 position} })
      */
-    std::map<LoopModel<Base>*, std::map<size_t, std::map<size_t, std::set<size_t> > > > _loopFor1Groups;
+    std::map<LoopModel<Base> *, std::map<size_t, std::map<size_t, std::set<size_t> > > > _loopFor1Groups;
     /**
      * Jacobian columns with a contribution from non loop equations
      *  [var]{compressed forward 1 position}
@@ -256,7 +252,7 @@ protected:
      * Maps the column groups of each loop model to the set of columns
      * (loop->group->{row->{compressed reverse 1 position} })
      */
-    std::map<LoopModel<Base>*, std::map<size_t, std::map<size_t, std::set<size_t> > > > _loopRev1Groups;
+    std::map<LoopModel<Base> *, std::map<size_t, std::map<size_t, std::set<size_t> > > > _loopRev1Groups;
     /**
      * Jacobian rows with a contribution from non loop equations
      *  [eq]{compressed reverse 1 position}
@@ -266,7 +262,7 @@ protected:
      * Maps the row groups of each loop model to the set of rows
      * (loop->group->{rows->{compressed reverse 2 position} })
      */
-    std::map<LoopModel<Base>*, std::map<size_t, std::map<size_t, std::set<size_t> > > > _loopRev2Groups;
+    std::map<LoopModel<Base> *, std::map<size_t, std::map<size_t, std::set<size_t> > > > _loopRev2Groups;
     /**
      * Hessian rows with a contribution from non loop equations
      *  [var]{compressed reverse 2 position}
@@ -275,13 +271,13 @@ protected:
     /**
      *
      */
-    JobTimer* _jobTimer;
+    JobTimer *_jobTimer;
     /**
      * Generated source code (maps file names to content)
      */
     std::map<std::string, std::string> _sources;
-public:
 
+   public:
     /**
      * Creates a new C language compilation helper for a model
      *
@@ -289,57 +285,49 @@ public:
      *            after this object)
      * @param model The model name (must be a valid C function name)
      */
-    ModelCSourceGen(ADFun<CppAD::cg::CG<Base> >& fun,
-                    std::string model) :
-        _fun(fun),
-        _funNoLoops(nullptr),
-        _name(std::move(model)),
-        _baseTypeName(ModelCSourceGen<Base>::baseTypeName()),
-        _parameterPrecision(std::numeric_limits<Base>::digits10),
-        _multiThreading(true),
-        _zero(true),
-        _zeroEvaluated(false),
-        _jacobian(false),
-        _hessian(false),
-        _sparseJacobian(false),
-        _sparseHessian(false),
-        _hessianByEquation(false),
-        _forwardOne(false),
-        _reverseOne(false),
-        _reverseTwo(false),
-        _sparseJacobianReusesOne(true),
-        _sparseHessianReusesRev2(true),
-        _jacMode(JacobianADMode::Automatic),
-        _atomicsInfo(nullptr),
-        _maxAssignPerFunc(20000),
-        _maxOperationsPerAssignment(1000),
-        _jobTimer(nullptr) {
-
+    ModelCSourceGen(ADFun<CppAD::cg::CG<Base> > &fun, std::string model)
+        : _fun(fun),
+          _funNoLoops(nullptr),
+          _name(std::move(model)),
+          _baseTypeName(ModelCSourceGen<Base>::baseTypeName()),
+          _parameterPrecision(std::numeric_limits<Base>::digits10),
+          _multiThreading(true),
+          _zero(true),
+          _zeroEvaluated(false),
+          _jacobian(false),
+          _hessian(false),
+          _sparseJacobian(false),
+          _sparseHessian(false),
+          _hessianByEquation(false),
+          _forwardOne(false),
+          _reverseOne(false),
+          _reverseTwo(false),
+          _sparseJacobianReusesOne(true),
+          _sparseHessianReusesRev2(true),
+          _jacMode(JacobianADMode::Automatic),
+          _atomicsInfo(nullptr),
+          _maxAssignPerFunc(20000),
+          _maxOperationsPerAssignment(1000),
+          _jobTimer(nullptr) {
         CPPADCG_ASSERT_KNOWN(!_name.empty(), "Model name cannot be empty");
-        CPPADCG_ASSERT_KNOWN((_name[0] >= 'a' && _name[0] <= 'z') ||
-                             (_name[0] >= 'A' && _name[0] <= 'Z'),
+        CPPADCG_ASSERT_KNOWN((_name[0] >= 'a' && _name[0] <= 'z') || (_name[0] >= 'A' && _name[0] <= 'Z'),
                              "Invalid model name character");
         for (size_t i = 1; i < _name.size(); i++) {
             char c = _name[i];
-            CPPADCG_ASSERT_KNOWN((c >= 'a' && c <= 'z') ||
-                                 (c >= 'A' && c <= 'Z') ||
-                                 (c >= '0' && c <= '9') ||
-                                 c == '_'
-                                 , "Invalid model name character");
+            CPPADCG_ASSERT_KNOWN((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_',
+                                 "Invalid model name character");
         }
     }
 
-    ModelCSourceGen(const ModelCSourceGen&) = delete;
-    ModelCSourceGen& operator=(const ModelCSourceGen&) = delete;
+    ModelCSourceGen(const ModelCSourceGen &) = delete;
+    ModelCSourceGen &operator=(const ModelCSourceGen &) = delete;
 
     /**
      * Provides the model name which should be a valid C function name.
      *
      * @return the model name
      */
-    inline const std::string& getName() const {
-        return _name;
-    }
+    inline const std::string &getName() const { return _name; }
 
     /**
      * Defines typical values for the independent variable vector. These
@@ -349,23 +337,20 @@ public:
      * @param x The typical values. An empty vector removes the currently
      *          defined values.
      */
-    template<class VectorBase>
-    inline void setTypicalIndependentValues(const VectorBase& x) {
-        CPPAD_ASSERT_KNOWN(x.size() == 0 || x.size() == _fun.Domain(),
-                           "Invalid independent variable vector size")
+    template <class VectorBase>
+    inline void setTypicalIndependentValues(const VectorBase &x) {
+        CPPAD_ASSERT_KNOWN(x.size() == 0 || x.size() == _fun.Domain(), "Invalid independent variable vector size")
         _x.resize(x.size());
         for (size_t i = 0; i < x.size(); i++) {
             _x[i] = x[i];
         }
     }
 
-    inline void setRelatedDependents(const std::vector<std::set<size_t> >& relatedDepCandidates) {
+    inline void setRelatedDependents(const std::vector<std::set<size_t> > &relatedDepCandidates) {
         _relatedDepCandidates = relatedDepCandidates;
     }
 
-    inline const std::vector<std::set<size_t> >& getRelatedDependents() const {
-        return _relatedDepCandidates;
-    }
+    inline const std::vector<std::set<size_t> > &getRelatedDependents() const { return _relatedDepCandidates; }
 
     /**
      * Provides the maximum precision used to print constant values in the
@@ -373,9 +358,7 @@ public:
      *
      * @return the maximum number of digits
      */
-    virtual size_t getParameterPrecision() const {
-        return _parameterPrecision;
-    }
+    virtual size_t getParameterPrecision() const { return _parameterPrecision; }
 
     /**
      * Defines the maximum precision used to print constant values in the
@@ -383,9 +366,7 @@ public:
      *
      * @param p the maximum number of digits
      */
-    virtual void setParameterPrecision(size_t p) {
-        _parameterPrecision = p;
-    }
+    virtual void setParameterPrecision(size_t p) { _parameterPrecision = p; }
 
     /**
      * Returns whether or not multithreading directives can be generated to
@@ -399,9 +380,7 @@ public:
      *
      * @return whether or not multithreading can be used for this model
      */
-    inline bool isMultiThreading() const {
-        return _multiThreading;
-    }
+    inline bool isMultiThreading() const { return _multiThreading; }
 
     /**
      * Defines whether or not multithreading directives can be generated to
@@ -416,12 +395,11 @@ public:
      * @param multiThreading whether or not multithreading can be used for this
      *                       model
      */
-    inline void setMultiThreading(bool multiThreading) {
-        _multiThreading = multiThreading;
-    }
+    inline void setMultiThreading(bool multiThreading) { _multiThreading = multiThreading; }
 
     inline bool isJacobianMultiThreadingEnabled() const {
-        return _multiThreading && _loopTapes.empty() && _sparseJacobian && _sparseJacobianReusesOne && (_forwardOne || _reverseOne);
+        return _multiThreading && _loopTapes.empty() && _sparseJacobian && _sparseJacobianReusesOne &&
+               (_forwardOne || _reverseOne);
     }
 
     inline bool isHessianMultiThreadingEnabled() const {
@@ -435,9 +413,7 @@ public:
      * @return true if source-code for a dense Hessian should be created,
      *         false otherwise
      */
-    inline bool isCreateHessian() const {
-        return _hessian;
-    }
+    inline bool isCreateHessian() const { return _hessian; }
 
     /**
      * Defines whether or not to generate source-code for a function
@@ -446,9 +422,7 @@ public:
      * @param create true if source-code for a dense Hessian should be
      *               created, false otherwise
      */
-    inline void setCreateHessian(bool create) {
-        _hessian = create;
-    }
+    inline void setCreateHessian(bool create) { _hessian = create; }
 
     /**
      * Provides the Automatic Differentiation mode used to generate the
@@ -456,9 +430,7 @@ public:
      *
      * @return the Automatic Differentiation mode
      */
-    inline JacobianADMode getJacobianADMode() const {
-        return _jacMode;
-    }
+    inline JacobianADMode getJacobianADMode() const { return _jacMode; }
 
     /**
      * Defines the Automatic Differentiation mode used to generate the
@@ -466,9 +438,7 @@ public:
      *
      * @param mode the Automatic Differentiation mode
      */
-    inline void setJacobianADMode(JacobianADMode mode) {
-        _jacMode = mode;
-    }
+    inline void setJacobianADMode(JacobianADMode mode) { _jacMode = mode; }
 
     /**
      * Determines whether or not to generate source-code for a function
@@ -477,9 +447,7 @@ public:
      * @return true if source-code for a dense Jacobian should be created,
      *         false otherwise
      */
-    inline bool isCreateJacobian() const {
-        return _jacobian;
-    }
+    inline bool isCreateJacobian() const { return _jacobian; }
 
     /**
      * Defines whether or not to generate source-code for a function
@@ -488,9 +456,7 @@ public:
      * @param create true if source-code for a dense Jacobian should be
      *               created, false otherwise
      */
-    inline void setCreateJacobian(bool create) {
-        _jacobian = create;
-    }
+    inline void setCreateJacobian(bool create) { _jacobian = create; }
 
     /**
      * Determines whether or not to generate source-code for a function
@@ -510,9 +476,7 @@ public:
      * @return true if source-code for a sparse Hessian should be created,
      *         false otherwise
      */
-    inline bool isCreateSparseHessian() const {
-        return _sparseHessian;
-    }
+    inline bool isCreateSparseHessian() const { return _sparseHessian; }
 
     /**
      * Defines whether or not to generate source-code for a function
@@ -532,9 +496,7 @@ public:
      * @param create true if source-code for a sparse Hessian should be
      *               created, false otherwise
      */
-    inline void setCreateSparseHessian(bool create) {
-        _sparseHessian = create;
-    }
+    inline void setCreateSparseHessian(bool create) { _sparseHessian = create; }
 
     /**
      * Determines whether or not the sparse Hessian should reuse functions
@@ -545,9 +507,7 @@ public:
      * @return true if the functions created for reverse 2 mode should be
      *         reused to determine the sparse Hessian, false otherwise
      */
-    inline bool isSparseHessianReusesRev2() const {
-        return _sparseHessianReusesRev2;
-    }
+    inline bool isSparseHessianReusesRev2() const { return _sparseHessianReusesRev2; }
 
     /**
      * Defines whether or not the sparse Hessian should reuse functions
@@ -558,9 +518,7 @@ public:
      * @param reuse true if the functions created for reverse 2 mode should be
      *              reused to determine the sparse Hessian, false otherwise
      */
-    inline void setSparseHessianReusesRev2(bool reuse) {
-        _sparseHessianReusesRev2 = reuse;
-    }
+    inline void setSparseHessianReusesRev2(bool reuse) { _sparseHessianReusesRev2 = reuse; }
 
     /**
      * Determines whether or not to generate source-code for a function that
@@ -572,9 +530,7 @@ public:
      * @return true if source-code for a Hessians sparsities patterns should
      *         be created, false otherwise
      */
-    inline bool isCreateHessianSparsityByEquation() const {
-        return _hessianByEquation;
-    }
+    inline bool isCreateHessianSparsityByEquation() const { return _hessianByEquation; }
 
     /**
      * Defines whether or not to generate source-code for a function that
@@ -586,9 +542,7 @@ public:
      * @param create true if source-code for a Hessians sparsities should be
      *               created, false otherwise
      */
-    inline void setCreateHessianSparsityByEquation(bool create) {
-        _hessianByEquation = create;
-    }
+    inline void setCreateHessianSparsityByEquation(bool create) { _hessianByEquation = create; }
 
     /**
      * Determines whether or not to generate source-code for a function
@@ -604,9 +558,7 @@ public:
      * @return true if source-code for a sparse Jacobian should be created,
      *         false otherwise
      */
-    inline bool isCreateSparseJacobian() const {
-        return _sparseJacobian;
-    }
+    inline bool isCreateSparseJacobian() const { return _sparseJacobian; }
 
     /**
      * Defines whether or not to generate source-code for a function
@@ -622,9 +574,7 @@ public:
      * @param create true if source-code for a sparse Jacobian should be
      *               created, false otherwise
      */
-    inline void setCreateSparseJacobian(bool create) {
-        _sparseJacobian = create;
-    }
+    inline void setCreateSparseJacobian(bool create) { _sparseJacobian = create; }
 
     /**
      * Determines whether or not the sparse Jacobian should reuse functions
@@ -636,9 +586,7 @@ public:
      * @return true if the functions created for forward or reverse 1 mode
      *         should be reused to determine the sparse Jacobian, false otherwise
      */
-    inline bool isSparseJacobianReuse1stOrderPasses() const {
-        return _sparseJacobianReusesOne;
-    }
+    inline bool isSparseJacobianReuse1stOrderPasses() const { return _sparseJacobianReusesOne; }
 
     /**
      * Defines whether or not the sparse Jacobian should reuse functions
@@ -651,9 +599,7 @@ public:
      *              should be reused to determine the sparse Jacobian,
      *              false otherwise
      */
-    inline void setSparseJacobianReuse1stOrderPasses(bool reuse) {
-        _sparseJacobianReusesOne = reuse;
-    }
+    inline void setSparseJacobianReuse1stOrderPasses(bool reuse) { _sparseJacobianReusesOne = reuse; }
 
     /**
      * Determines whether or not to generate source-code for a function
@@ -662,9 +608,7 @@ public:
      * @return true if source-code for the original model should be created,
      *         false otherwise
      */
-    inline bool isCreateForwardZero() const {
-        return _zero;
-    }
+    inline bool isCreateForwardZero() const { return _zero; }
 
     /**
      * Defines whether or not to generate source-code for a function
@@ -673,9 +617,7 @@ public:
      * @param create true if source-code for the original model should be
      *                created, false otherwise
      */
-    inline void setCreateForwardZero(bool create) {
-        _zero = create;
-    }
+    inline void setCreateForwardZero(bool create) { _zero = create; }
 
     /**
      * Determines whether or not to generate source-code for the
@@ -691,9 +633,7 @@ public:
      * @return true if the generation of the source for first-order forward
      *         mode is enabled, false otherwise.
      */
-    inline bool isCreateSparseForwardOne() const {
-        return _forwardOne;
-    }
+    inline bool isCreateSparseForwardOne() const { return _forwardOne; }
 
     /**
      * Defines whether or not to generate source-code for the
@@ -709,9 +649,7 @@ public:
      * @param create true if the generation of the source for first-order
      *               forward mode is enabled, false otherwise.
      */
-    inline void setCreateForwardOne(bool create) {
-        _forwardOne = create;
-    }
+    inline void setCreateForwardOne(bool create) { _forwardOne = create; }
 
     /**
      * Determines whether or not to generate source-code for the
@@ -727,9 +665,7 @@ public:
      * @return true if the generation of the source for first-order reverse
      *         mode is enabled, false otherwise.
      */
-    inline bool isCreateReverseOne() const {
-        return _reverseOne;
-    }
+    inline bool isCreateReverseOne() const { return _reverseOne; }
 
     /**
      * Determines whether or not to generate source-code for the
@@ -745,9 +681,7 @@ public:
      * @param create true if the source for first-order reverse mode functions
      *               should be generated, false otherwise.
      */
-    inline void setCreateReverseOne(bool create) {
-        _reverseOne = create;
-    }
+    inline void setCreateReverseOne(bool create) { _reverseOne = create; }
 
     /**
      * Determines whether or not to generate source-code for the
@@ -764,9 +698,7 @@ public:
      * @return true if the generation of the source for second-order reverse
      *         mode is enabled, false otherwise.
      */
-    inline bool isCreateReverseTwo() const {
-        return _reverseOne;
-    }
+    inline bool isCreateReverseTwo() const { return _reverseOne; }
 
     /**
      * Defines whether or not to enable the generation of the source-code
@@ -785,9 +717,7 @@ public:
      * @param create true to enable the generation of the source for
      *               second-order reverse mode, false otherwise.
      */
-    inline void setCreateReverseTwo(bool create) {
-        _reverseTwo = create;
-    }
+    inline void setCreateReverseTwo(bool create) { _reverseTwo = create; }
 
     /**
      * Specifies a user defined Jacobian sparsity to be computed.
@@ -799,8 +729,7 @@ public:
      * @param col The indices of the independent variables for the sparsity
      *            pattern in the order they will be provided
      */
-    inline void setCustomSparseJacobianElements(const std::vector<size_t>& row,
-                                                const std::vector<size_t>& col) {
+    inline void setCustomSparseJacobianElements(const std::vector<size_t> &row, const std::vector<size_t> &col) {
         _custom_jac = Position(row, col);
     }
 
@@ -813,8 +742,8 @@ public:
      *                 set) for each equation/dependent variable (the vector
      *                 must not be larger than the number dependent variables).
      */
-    template<class VectorSet>
-    inline void setCustomSparseJacobianElements(const VectorSet& elements) {
+    template <class VectorSet>
+    inline void setCustomSparseJacobianElements(const VectorSet &elements) {
         _custom_jac = Position(elements);
     }
 
@@ -830,8 +759,7 @@ public:
      * @param col The column indices of the independent variables for the
      *            sparsity pattern in the order they will be provided
      */
-    inline void setCustomSparseHessianElements(const std::vector<size_t>& row,
-                                               const std::vector<size_t>& col) {
+    inline void setCustomSparseHessianElements(const std::vector<size_t> &row, const std::vector<size_t> &col) {
         _custom_hess = Position(row, col);
     }
 
@@ -846,8 +774,8 @@ public:
      *                 pattern (the vector must not be larger than the number
      *                 independent variables).
      */
-    template<class VectorSet>
-    inline void setCustomSparseHessianElements(const VectorSet& elements) {
+    template <class VectorSet>
+    inline void setCustomSparseHessianElements(const VectorSet &elements) {
         _custom_hess = Position(elements);
     }
 
@@ -859,9 +787,7 @@ public:
      *
      * @return The maximum number of assignments per file/function
      */
-    inline size_t getMaxAssignmentsPerFunc() const {
-        return _maxAssignPerFunc;
-    }
+    inline size_t getMaxAssignmentsPerFunc() const { return _maxAssignPerFunc; }
 
     /**
      * Sets the maximum number of assignment per generated function.
@@ -873,18 +799,14 @@ public:
      *
      * @param maxAssignPerFunc The maximum number of assignments per file/function
      */
-    inline void setMaxAssignmentsPerFunc(size_t maxAssignPerFunc) {
-        _maxAssignPerFunc = maxAssignPerFunc;
-    }
+    inline void setMaxAssignmentsPerFunc(size_t maxAssignPerFunc) { _maxAssignPerFunc = maxAssignPerFunc; }
 
     /**
      * The maximum number of operations per variable assignment.
      *
      * @return The maximum number of operations per variable assignment
      */
-    inline size_t getMaxOperationsPerAssignment() const {
-        return _maxOperationsPerAssignment;
-    }
+    inline size_t getMaxOperationsPerAssignment() const { return _maxOperationsPerAssignment; }
 
     /**
      * Defines the maximum number of operations per variable assignment.
@@ -900,33 +822,28 @@ public:
         delete _funNoLoops;
         delete _atomicsInfo;
 
-        for (LoopModel<Base>* it : _loopTapes) {
+        for (LoopModel<Base> *it : _loopTapes) {
             delete it;
         }
     }
 
-public:
+   public:
     static inline std::string baseTypeName();
 
-    template<class T>
-    static void generateFunctionDeclarationSource(std::ostringstream& cache,
-                                                  const std::string& model_function,
-                                                  const std::string& suffix,
-                                                  const std::map<size_t, T>& elements,
-                                                  const std::string& argsDcl);
+    template <class T>
+    static void generateFunctionDeclarationSource(std::ostringstream &cache, const std::string &model_function,
+                                                  const std::string &suffix, const std::map<size_t, T> &elements,
+                                                  const std::string &argsDcl);
 
-protected:
+   protected:
+    virtual VariableNameGenerator<Base> *createVariableNameGenerator(const std::string &depName = "y",
+                                                                     const std::string &indepName = "x",
+                                                                     const std::string &tmpName = "v",
+                                                                     const std::string &tmpArrayName = "array");
 
-    virtual VariableNameGenerator<Base>* createVariableNameGenerator(const std::string& depName = "y",
-                                                                     const std::string& indepName = "x",
-                                                                     const std::string& tmpName = "v",
-                                                                     const std::string& tmpArrayName = "array");
+    const std::map<std::string, std::string> &getSources(MultiThreadingType multiThreadingType, JobTimer *timer);
 
-    const std::map<std::string, std::string>& getSources(MultiThreadingType multiThreadingType,
-                                                         JobTimer* timer);
-
-    virtual void generateSources(MultiThreadingType multiThreadingType,
-                                 JobTimer* timer = nullptr);
+    virtual void generateSources(MultiThreadingType multiThreadingType, JobTimer *timer = nullptr);
 
     virtual void generateLoops();
 
@@ -936,7 +853,7 @@ protected:
 
     virtual bool isAtomicsUsed();
 
-    virtual const std::map<size_t, AtomicUseInfo<Base> >& getAtomicsInfo();
+    virtual const std::map<size_t, AtomicUseInfo<Base> > &getAtomicsInfo();
 
     /***********************************************************************
      * zero order (the original model)
@@ -947,8 +864,7 @@ protected:
     /**
      * Generates the operation graph for the zero order model with loops
      */
-    virtual std::vector<CGBase> prepareForward0WithLoops(CodeHandler<Base>& handler,
-                                                         const std::vector<CGBase>& x);
+    virtual std::vector<CGBase> prepareForward0WithLoops(CodeHandler<Base> &handler, const std::vector<CGBase> &x);
 
     /***********************************************************************
      * Jacobian
@@ -960,22 +876,19 @@ protected:
 
     virtual void generateSparseJacobianSource(bool forward);
 
-    virtual void generateSparseJacobianForRevSource(bool forward,
-                                                    MultiThreadingType multiThreadingType);
+    virtual void generateSparseJacobianForRevSource(bool forward, MultiThreadingType multiThreadingType);
 
-    virtual std::string generateSparseJacobianForRevSingleThreadSource(const std::string& functionName,
+    virtual std::string generateSparseJacobianForRevSingleThreadSource(const std::string &functionName,
                                                                        std::map<size_t, CompressedVectorInfo> jacInfo,
                                                                        size_t maxCompressedSize,
-                                                                       const std::string& functionRevFor,
-                                                                       const std::string& revForSuffix,
-                                                                       bool forward);
+                                                                       const std::string &functionRevFor,
+                                                                       const std::string &revForSuffix, bool forward);
 
-    virtual std::string generateSparseJacobianForRevMultiThreadSource(const std::string& functionName,
+    virtual std::string generateSparseJacobianForRevMultiThreadSource(const std::string &functionName,
                                                                       std::map<size_t, CompressedVectorInfo> jacInfo,
                                                                       size_t maxCompressedSize,
-                                                                      const std::string& functionRevFor,
-                                                                      const std::string& revForSuffix,
-                                                                      bool forward,
+                                                                      const std::string &functionRevFor,
+                                                                      const std::string &revForSuffix, bool forward,
                                                                       MultiThreadingType multiThreadingType);
     /**
      * Generates a sparse Jacobian using loops.
@@ -998,58 +911,41 @@ protected:
      * @param indVars The independent variables
      * @return the operation graph for the compressed jacobin with loops
      */
-    virtual std::vector<CGBase> prepareSparseJacobianWithLoops(CodeHandler<Base>& handler,
-                                                               const std::vector<CGBase>& x,
+    virtual std::vector<CGBase> prepareSparseJacobianWithLoops(CodeHandler<Base> &handler, const std::vector<CGBase> &x,
                                                                bool forward);
 
-    inline void prepareSparseJacobianRowWithLoops(CodeHandler<Base>& handler,
-                                                  LoopModel<Base>& lModel,
-                                                  size_t tapeI,
-                                                  const loops::JacobianWithLoopsRowInfo& rowInfo,
-                                                  const std::vector<std::map<size_t, CGBase> >& dyiDxtape,
-                                                  const std::vector<std::map<size_t, CGBase> >& dzDx,
-                                                  const CGBase& py,
-                                                  IndexOperationNode<Base>& iterationIndexOp,
-                                                  std::vector<loops::IfElseInfo<Base> >& ifElses,
-                                                  size_t& jacLE,
-                                                  std::vector<std::pair<CG<Base>, IndexPattern*> >& indexedLoopResults,
-                                                  std::set<size_t>& allLocations);
+    inline void prepareSparseJacobianRowWithLoops(CodeHandler<Base> &handler, LoopModel<Base> &lModel, size_t tapeI,
+                                                  const loops::JacobianWithLoopsRowInfo &rowInfo,
+                                                  const std::vector<std::map<size_t, CGBase> > &dyiDxtape,
+                                                  const std::vector<std::map<size_t, CGBase> > &dzDx, const CGBase &py,
+                                                  IndexOperationNode<Base> &iterationIndexOp,
+                                                  std::vector<loops::IfElseInfo<Base> > &ifElses, size_t &jacLE,
+                                                  std::vector<std::pair<CG<Base>, IndexPattern *> > &indexedLoopResults,
+                                                  std::set<size_t> &allLocations);
 
-    inline void analyseSparseJacobianWithLoops(const std::vector<size_t>& rows,
-                                               const std::vector<size_t>& cols,
-                                               const std::vector<size_t>& location,
-                                               SparsitySetType& noLoopEvalSparsity,
-                                               std::vector<std::map<size_t, std::set<size_t> > >& noLoopEvalLocations,
-                                               std::map<LoopModel<Base>*, SparsitySetType>& loopsEvalSparsities,
-                                               std::map<LoopModel<Base>*, std::vector<loops::JacobianWithLoopsRowInfo> >& loopEqInfo);
+    inline void analyseSparseJacobianWithLoops(
+        const std::vector<size_t> &rows, const std::vector<size_t> &cols, const std::vector<size_t> &location,
+        SparsitySetType &noLoopEvalSparsity, std::vector<std::map<size_t, std::set<size_t> > > &noLoopEvalLocations,
+        std::map<LoopModel<Base> *, SparsitySetType> &loopsEvalSparsities,
+        std::map<LoopModel<Base> *, std::vector<loops::JacobianWithLoopsRowInfo> > &loopEqInfo);
 
+    virtual void generateSparseJacobianWithLoopsSourceFromForRev(
+        const std::map<size_t, CompressedVectorInfo> &jacInfo, size_t maxCompressedSize,
+        const std::string &localFunctionTypeName, const std::string &suffix, const std::string &keyName,
+        const std::map<size_t, std::set<size_t> > &nonLoopElements,
+        const std::map<LoopModel<Base> *, std::map<size_t, std::map<size_t, std::set<size_t> > > > &loopGroups,
+        void (*generateLocalFunctionName)(std::ostringstream &cache, const std::string &modelName,
+                                          const LoopModel<Base> &loop, size_t g));
 
-    virtual void generateSparseJacobianWithLoopsSourceFromForRev(const std::map<size_t, CompressedVectorInfo>& jacInfo,
-                                                                 size_t maxCompressedSize,
-                                                                 const std::string& localFunctionTypeName,
-                                                                 const std::string& suffix,
-                                                                 const std::string& keyName,
-                                                                 const std::map<size_t, std::set<size_t> >& nonLoopElements,
-                                                                 const std::map<LoopModel<Base>*, std::map<size_t, std::map<size_t, std::set<size_t> > > >& loopGroups,
-                                                                 void (*generateLocalFunctionName)(std::ostringstream& cache, const std::string& modelName, const LoopModel<Base>& loop, size_t g));
+    inline virtual void generateFunctionNameLoopFor1(std::ostringstream &cache, const LoopModel<Base> &loop, size_t g);
 
-    inline virtual void generateFunctionNameLoopFor1(std::ostringstream& cache,
-                                                     const LoopModel<Base>& loop,
-                                                     size_t g);
+    inline static void generateFunctionNameLoopFor1(std::ostringstream &cache, const std::string &modelName,
+                                                    const LoopModel<Base> &loop, size_t g);
 
-    inline static void generateFunctionNameLoopFor1(std::ostringstream& cache,
-                                                    const std::string& modelName,
-                                                    const LoopModel<Base>& loop,
-                                                    size_t g);
+    inline virtual void generateFunctionNameLoopRev1(std::ostringstream &cache, const LoopModel<Base> &loop, size_t i);
 
-    inline virtual void generateFunctionNameLoopRev1(std::ostringstream& cache,
-                                                     const LoopModel<Base>& loop,
-                                                     size_t i);
-
-    inline static void generateFunctionNameLoopRev1(std::ostringstream& cache,
-                                                    const std::string& modelName,
-                                                    const LoopModel<Base>& loop,
-                                                    size_t i);
+    inline static void generateFunctionNameLoopRev1(std::ostringstream &cache, const std::string &modelName,
+                                                    const LoopModel<Base> &loop, size_t i);
 
     /***********************************************************************
      * Hessian
@@ -1063,21 +959,17 @@ protected:
 
     virtual void generateSparseHessianSourceFromRev2(MultiThreadingType multiThreadingType);
 
-    virtual std::string generateSparseHessianRev2SingleThreadSource(const std::string& functionName,
+    virtual std::string generateSparseHessianRev2SingleThreadSource(const std::string &functionName,
                                                                     std::map<size_t, CompressedVectorInfo> hessInfo,
                                                                     size_t maxCompressedSize,
-                                                                    const std::string& functionRev2,
-                                                                    const std::string& rev2Suffix);
+                                                                    const std::string &functionRev2,
+                                                                    const std::string &rev2Suffix);
 
-    virtual std::string generateSparseHessianRev2MultiThreadSource(const std::string& functionName,
-                                                                   std::map<size_t, CompressedVectorInfo> hessInfo,
-                                                                   size_t maxCompressedSize,
-                                                                   const std::string& functionRev2,
-                                                                   const std::string& rev2Suffix,
-                                                                   MultiThreadingType multiThreadingType);
+    virtual std::string generateSparseHessianRev2MultiThreadSource(
+        const std::string &functionName, std::map<size_t, CompressedVectorInfo> hessInfo, size_t maxCompressedSize,
+        const std::string &functionRev2, const std::string &rev2Suffix, MultiThreadingType multiThreadingType);
 
-    virtual void determineSecondOrderElements4Eval(std::vector<size_t>& userRows,
-                                                   std::vector<size_t>& userCols);
+    virtual void determineSecondOrderElements4Eval(std::vector<size_t> &userRows, std::vector<size_t> &userCols);
 
     /**
      * Loops
@@ -1097,58 +989,48 @@ protected:
      *        \sum_k \left( \frac{\partial^2 f_i}{\partial x_w \partial z_k} \frac{\partial z_k}{\partial x_v} +
      *                      \frac{\partial f_i}{\partial z_k} \frac{\partial^2 z_k}{\partial x_w \partial x_v}
      *               \right) +
-     *        \sum_j \left( \frac{\partial^2 f_i}{\partial x_w \partial x_{l(j)}} \frac{\partial x_{l(j)}}{\partial x_v} \right) +
-     *        \frac{\partial^2 f_i}{\partial x_w \partial x_v}
-     * \f]
+     *        \sum_j \left( \frac{\partial^2 f_i}{\partial x_w \partial x_{l(j)}} \frac{\partial x_{l(j)}}{\partial x_v}
+     * \right) + \frac{\partial^2 f_i}{\partial x_w \partial x_v} \f]
      *
      * @param handler The operation graph handler
      * @param indVars The independent variables
      * @return the operation graph for the compressed jacobin with loops
      */
-    virtual std::vector<CGBase> prepareSparseHessianWithLoops(CodeHandler<Base>& handler,
-                                                              std::vector<CGBase>& indVars,
-                                                              std::vector<CGBase>& w,
-                                                              const std::vector<size_t>& lowerHessRows,
-                                                              const std::vector<size_t>& lowerHessCols,
-                                                              const std::vector<size_t>& lowerHessOrder,
-                                                              const std::map<size_t, size_t>& duplicates);
+    virtual std::vector<CGBase> prepareSparseHessianWithLoops(CodeHandler<Base> &handler, std::vector<CGBase> &indVars,
+                                                              std::vector<CGBase> &w,
+                                                              const std::vector<size_t> &lowerHessRows,
+                                                              const std::vector<size_t> &lowerHessCols,
+                                                              const std::vector<size_t> &lowerHessOrder,
+                                                              const std::map<size_t, size_t> &duplicates);
 
-    inline void analyseSparseHessianWithLoops(const std::vector<size_t>& lowerHessRows,
-                                              const std::vector<size_t>& lowerHessCols,
-                                              const std::vector<size_t>& lowerHessOrder,
-                                              SparsitySetType& noLoopEvalJacSparsity,
-                                              SparsitySetType& noLoopEvalHessSparsity,
-                                              std::vector<std::map<size_t, std::set<size_t> > >& noLoopEvalHessLocations,
-                                              std::map<LoopModel<Base>*, loops::HessianWithLoopsInfo<Base> >& loopHessInfo,
-                                              bool useSymmetry);
+    inline void analyseSparseHessianWithLoops(
+        const std::vector<size_t> &lowerHessRows, const std::vector<size_t> &lowerHessCols,
+        const std::vector<size_t> &lowerHessOrder, SparsitySetType &noLoopEvalJacSparsity,
+        SparsitySetType &noLoopEvalHessSparsity,
+        std::vector<std::map<size_t, std::set<size_t> > > &noLoopEvalHessLocations,
+        std::map<LoopModel<Base> *, loops::HessianWithLoopsInfo<Base> > &loopHessInfo, bool useSymmetry);
 
-    inline virtual void generateSparseHessianWithLoopsSourceFromRev2(const std::map<size_t, CompressedVectorInfo>& hessInfo,
-                                                                     size_t maxCompressedSize);
+    inline virtual void generateSparseHessianWithLoopsSourceFromRev2(
+        const std::map<size_t, CompressedVectorInfo> &hessInfo, size_t maxCompressedSize);
 
-    inline virtual void generateFunctionNameLoopRev2(std::ostringstream& cache,
-                                                     const LoopModel<Base>& loop,
-                                                     size_t g);
+    inline virtual void generateFunctionNameLoopRev2(std::ostringstream &cache, const LoopModel<Base> &loop, size_t g);
 
-    static inline void generateFunctionNameLoopRev2(std::ostringstream& cache,
-                                                    const std::string& modelName,
-                                                    const LoopModel<Base>& loop,
-                                                    size_t g);
+    static inline void generateFunctionNameLoopRev2(std::ostringstream &cache, const std::string &modelName,
+                                                    const LoopModel<Base> &loop, size_t g);
 
     /***********************************************************************
      * Sparsities for forward/reverse
      **********************************************************************/
 
-    virtual void generateSparsity1DSource(const std::string& function,
-                                          const std::vector<size_t>& sparsity);
+    virtual void generateSparsity1DSource(const std::string &function, const std::vector<size_t> &sparsity);
 
-    virtual void generateSparsity2DSource(const std::string& function,
-                                          const LocalSparsityInfo& sparsity);
+    virtual void generateSparsity2DSource(const std::string &function, const LocalSparsityInfo &sparsity);
 
-    virtual void generateSparsity2DSource2(const std::string& function,
-                                           const std::vector<LocalSparsityInfo>& sparsities);
+    virtual void generateSparsity2DSource2(const std::string &function,
+                                           const std::vector<LocalSparsityInfo> &sparsities);
 
-    virtual void generateSparsity1DSource2(const std::string& function,
-                                           const std::map<size_t, std::vector<size_t> >& rows);
+    virtual void generateSparsity1DSource2(const std::string &function,
+                                           const std::map<size_t, std::vector<size_t> > &rows);
 
     /***********************************************************************
      * Forward 1 mode
@@ -1156,24 +1038,19 @@ protected:
 
     virtual void generateSparseForwardOneSources();
 
-    virtual void generateSparseForwardOneSourcesWithAtomics(const std::map<size_t, std::vector<size_t> >& elements);
+    virtual void generateSparseForwardOneSourcesWithAtomics(const std::map<size_t, std::vector<size_t> > &elements);
 
-    virtual void generateSparseForwardOneSourcesNoAtomics(const std::map<size_t, std::vector<size_t> >& elements);
+    virtual void generateSparseForwardOneSourcesNoAtomics(const std::map<size_t, std::vector<size_t> > &elements);
 
     virtual void generateForwardOneSources();
 
-    virtual void prepareSparseForwardOneWithLoops(const std::map<size_t, std::vector<size_t> >& elements);
+    virtual void prepareSparseForwardOneWithLoops(const std::map<size_t, std::vector<size_t> > &elements);
 
-    virtual void createForwardOneWithLoopsNL(CodeHandler<Base>& handler,
-                                             size_t j,
-                                             std::vector<CG<Base> >& jacCol);
+    virtual void createForwardOneWithLoopsNL(CodeHandler<Base> &handler, size_t j, std::vector<CG<Base> > &jacCol);
 
-
-    inline static std::map<size_t, std::map<size_t, CG<Base> > > generateLoopFor1Jac(ADFun<CGBase>& fun,
-                                                                                     const SparsitySetType& sparsity,
-                                                                                     const SparsitySetType& evalSparsity,
-                                                                                     const std::vector<CGBase>& xl,
-                                                                                     bool constainsAtomics);
+    inline static std::map<size_t, std::map<size_t, CG<Base> > > generateLoopFor1Jac(
+        ADFun<CGBase> &fun, const SparsitySetType &sparsity, const SparsitySetType &evalSparsity,
+        const std::vector<CGBase> &xl, bool constainsAtomics);
 
     /***********************************************************************
      * Reverse 1 mode
@@ -1181,22 +1058,20 @@ protected:
 
     virtual void generateSparseReverseOneSources();
 
-    virtual void generateSparseReverseOneSourcesWithAtomics(const std::map<size_t, std::vector<size_t> >& elements);
+    virtual void generateSparseReverseOneSourcesWithAtomics(const std::map<size_t, std::vector<size_t> > &elements);
 
-    virtual void generateSparseReverseOneSourcesNoAtomics(const std::map<size_t, std::vector<size_t> >& elements);
+    virtual void generateSparseReverseOneSourcesNoAtomics(const std::map<size_t, std::vector<size_t> > &elements);
 
     virtual void generateReverseOneSources();
 
-    virtual void prepareSparseReverseOneWithLoops(const std::map<size_t, std::vector<size_t> >& elements);
+    virtual void prepareSparseReverseOneWithLoops(const std::map<size_t, std::vector<size_t> > &elements);
 
-    virtual void createReverseOneWithLoopsNL(CodeHandler<Base>& handler,
-                                             size_t i,
-                                             std::vector<CG<Base> >& jacRow);
+    virtual void createReverseOneWithLoopsNL(CodeHandler<Base> &handler, size_t i, std::vector<CG<Base> > &jacRow);
 
-    inline static std::vector<std::map<size_t, CGBase> > generateLoopRev1Jac(ADFun<CGBase>& fun,
-                                                                             const SparsitySetType& sparsity,
-                                                                             const SparsitySetType& evalSparsity,
-                                                                             const std::vector<CGBase>& xl,
+    inline static std::vector<std::map<size_t, CGBase> > generateLoopRev1Jac(ADFun<CGBase> &fun,
+                                                                             const SparsitySetType &sparsity,
+                                                                             const SparsitySetType &evalSparsity,
+                                                                             const std::vector<CGBase> &xl,
                                                                              bool constainsAtomics);
 
     /***********************************************************************
@@ -1205,23 +1080,23 @@ protected:
 
     virtual void generateSparseReverseTwoSources();
 
-    virtual void generateSparseReverseTwoSourcesWithAtomics(const std::map<size_t, std::vector<size_t> >& elements);
+    virtual void generateSparseReverseTwoSourcesWithAtomics(const std::map<size_t, std::vector<size_t> > &elements);
 
-    virtual void generateSparseReverseTwoSourcesNoAtomics(const std::map<size_t, std::vector<size_t> >& elements,
-                                                          const std::vector<size_t>& evalRows,
-                                                          const std::vector<size_t>& evalCols);
+    virtual void generateSparseReverseTwoSourcesNoAtomics(const std::map<size_t, std::vector<size_t> > &elements,
+                                                          const std::vector<size_t> &evalRows,
+                                                          const std::vector<size_t> &evalCols);
 
     virtual void generateReverseTwoSources();
 
-    virtual void generateGlobalDirectionalFunctionSource(const std::string& function,
-                                                         const std::string& function2_suffix,
-                                                         const std::string& function_sparsity,
-                                                         const std::map<size_t, std::vector<size_t> >& elements);
+    virtual void generateGlobalDirectionalFunctionSource(const std::string &function,
+                                                         const std::string &function2_suffix,
+                                                         const std::string &function_sparsity,
+                                                         const std::map<size_t, std::vector<size_t> > &elements);
 
     /**
      * Loops
      */
-    virtual void prepareSparseReverseTwoWithLoops(const std::map<size_t, std::vector<size_t> >& elements);
+    virtual void prepareSparseReverseTwoWithLoops(const std::map<size_t, std::vector<size_t> > &elements);
 
     /***********************************************************************
      * Sparsities
@@ -1242,35 +1117,33 @@ protected:
      * @param sparsity The sparsity pattern to color
      * @return the colors
      */
-    inline std::vector<ModelCSourceGen<Base>::Color> colorByRow(const std::set<size_t>& columns,
-                                                                const SparsitySetType& sparsity);
+    inline std::vector<ModelCSourceGen<Base>::Color> colorByRow(const std::set<size_t> &columns,
+                                                                const SparsitySetType &sparsity);
 
     virtual void generateHessianSparsitySource();
 
+    static inline std::map<size_t, std::vector<std::set<size_t> > > determineOrderByCol(
+        const std::map<size_t, std::vector<size_t> > &elements, const LocalSparsityInfo &sparsity);
 
-    static inline std::map<size_t, std::vector<std::set<size_t> > > determineOrderByCol(const std::map<size_t, std::vector<size_t> >& elements,
-                                                                                        const LocalSparsityInfo& sparsity);
+    static inline std::map<size_t, std::vector<std::set<size_t> > > determineOrderByCol(
+        const std::map<size_t, std::vector<size_t> > &elements, const std::vector<size_t> &userRows,
+        const std::vector<size_t> &userCols);
 
-    static inline std::map<size_t, std::vector<std::set<size_t> > > determineOrderByCol(const std::map<size_t, std::vector<size_t> >& elements,
-                                                                                        const std::vector<size_t>& userRows,
-                                                                                        const std::vector<size_t>& userCols);
+    static inline std::vector<std::set<size_t> > determineOrderByCol(size_t col, const std::vector<size_t> &colElements,
+                                                                     const std::vector<size_t> &userRows,
+                                                                     const std::vector<size_t> &userCols);
 
-    static inline std::vector<std::set<size_t> > determineOrderByCol(size_t col,
-                                                                     const std::vector<size_t>& colElements,
-                                                                     const std::vector<size_t>& userRows,
-                                                                     const std::vector<size_t>& userCols);
+    static inline std::map<size_t, std::vector<std::set<size_t> > > determineOrderByRow(
+        const std::map<size_t, std::vector<size_t> > &elements, const LocalSparsityInfo &sparsity);
 
-    static inline std::map<size_t, std::vector<std::set<size_t> > > determineOrderByRow(const std::map<size_t, std::vector<size_t> >& elements,
-                                                                                        const LocalSparsityInfo& sparsity);
-
-    static inline std::map<size_t, std::vector<std::set<size_t> > > determineOrderByRow(const std::map<size_t, std::vector<size_t> >& elements,
-                                                                                        const std::vector<size_t>& userRows,
-                                                                                        const std::vector<size_t>& userCols);
+    static inline std::map<size_t, std::vector<std::set<size_t> > > determineOrderByRow(
+        const std::map<size_t, std::vector<size_t> > &elements, const std::vector<size_t> &userRows,
+        const std::vector<size_t> &userCols);
 
     static inline std::vector<std::set<size_t> > determineOrderByRow(size_t row,
-                                                                     const std::vector<size_t>& rowsElements,
-                                                                     const std::vector<size_t>& userRows,
-                                                                     const std::vector<size_t>& userCols);
+                                                                     const std::vector<size_t> &rowsElements,
+                                                                     const std::vector<size_t> &userRows,
+                                                                     const std::vector<size_t> &userCols);
 
     /***********************************************************************
      * Multi-threading
@@ -1279,42 +1152,33 @@ protected:
     /**
      *
      */
-    static void printFileStartPThreads(std::ostringstream& cache,
-                                       const std::string& baseTypeName);
+    static void printFileStartPThreads(std::ostringstream &cache, const std::string &baseTypeName);
 
-    static void printFunctionStartPThreads(std::ostringstream& cache,
-                                           size_t size);
+    static void printFunctionStartPThreads(std::ostringstream &cache, size_t size);
 
-    static void printFunctionEndPThreads(std::ostringstream& cache,
-                                         size_t size);
+    static void printFunctionEndPThreads(std::ostringstream &cache, size_t size);
 
-    static void printFileStartOpenMP(std::ostringstream& cache);
+    static void printFileStartOpenMP(std::ostringstream &cache);
 
-    static void printFunctionStartOpenMP(std::ostringstream& cache,
-                                         size_t size);
+    static void printFunctionStartOpenMP(std::ostringstream &cache, size_t size);
 
-    static void printLoopStartOpenMP(std::ostringstream& cache,
-                                     size_t size);
+    static void printLoopStartOpenMP(std::ostringstream &cache, size_t size);
 
-    static void printLoopEndOpenMP(std::ostringstream& cache,
-                                   size_t size);
+    static void printLoopEndOpenMP(std::ostringstream &cache, size_t size);
 
     /**
      *
      */
-    inline void startingJob(const std::string& jobName,
-                            const JobType& type = JobTypeHolder<>::DEFAULT);
+    inline void startingJob(const std::string &jobName, const JobType &type = JobTypeHolder<>::DEFAULT);
 
     inline void finishedJob();
 
-    friend class
-    ModelLibraryCSourceGen<Base>;
+    friend class ModelLibraryCSourceGen<Base>;
 
-    friend class
-    ModelLibraryProcessor<Base>;
+    friend class ModelLibraryProcessor<Base>;
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

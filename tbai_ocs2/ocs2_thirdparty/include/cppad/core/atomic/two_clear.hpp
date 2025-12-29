@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_ATOMIC_TWO_CLEAR_HPP
-# define CPPAD_CORE_ATOMIC_TWO_CLEAR_HPP
+#ifndef CPPAD_CORE_ATOMIC_TWO_CLEAR_HPP
+#define CPPAD_CORE_ATOMIC_TWO_CLEAR_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -49,7 +49,7 @@ $end
 ------------------------------------------------------------------------------
 */
 
-namespace CppAD { // BEGIN_CPPAD_NAMESPACE
+namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
 /*!
 \file atomic/two_clear.hpp
 Free static variables in atomic_base class.
@@ -59,33 +59,27 @@ Free all thread_alloc static memory held by atomic_base (avoids reallocations).
 (This does not include class_object() which is an std::vector.)
 */
 template <class Base>
-void atomic_base<Base>::clear(void)
-{   CPPAD_ASSERT_KNOWN(
-        ! thread_alloc::in_parallel() ,
-        "cannot use atomic_base clear during parallel execution"
-    );
-    bool         set_null = true;
-    size_t       index  = 0;
-    size_t       type  = 0;          // set to avoid warning
-    std::string* name  = CPPAD_NULL;
-    void*        v_ptr = CPPAD_NULL; // set to avoid warning
-    size_t       n_atomic = local::atomic_index<Base>(
-        set_null, index, type, name, v_ptr
-    );
+void atomic_base<Base>::clear(void) {
+    CPPAD_ASSERT_KNOWN(!thread_alloc::in_parallel(), "cannot use atomic_base clear during parallel execution");
+    bool set_null = true;
+    size_t index = 0;
+    size_t type = 0;  // set to avoid warning
+    std::string *name = CPPAD_NULL;
+    void *v_ptr = CPPAD_NULL;  // set to avoid warning
+    size_t n_atomic = local::atomic_index<Base>(set_null, index, type, name, v_ptr);
     //
     set_null = false;
-    for(index = 1; index <= n_atomic; ++index)
-    {   local::atomic_index<Base>(set_null, index, type, name, v_ptr);
-        if( type == 2 )
-        {   atomic_base* op = reinterpret_cast<atomic_base*>(v_ptr);
-            if( op != CPPAD_NULL )
-            {   for(size_t thread = 0; thread < CPPAD_MAX_NUM_THREADS; thread++)
-                    op->free_work(thread);
+    for (index = 1; index <= n_atomic; ++index) {
+        local::atomic_index<Base>(set_null, index, type, name, v_ptr);
+        if (type == 2) {
+            atomic_base *op = reinterpret_cast<atomic_base *>(v_ptr);
+            if (op != CPPAD_NULL) {
+                for (size_t thread = 0; thread < CPPAD_MAX_NUM_THREADS; thread++) op->free_work(thread);
             }
         }
     }
     return;
 }
 
-} // END_CPPAD_NAMESPACE
-# endif
+}  // namespace CppAD
+#endif

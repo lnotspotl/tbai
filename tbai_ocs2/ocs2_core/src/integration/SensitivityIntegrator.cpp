@@ -39,32 +39,34 @@ namespace ocs2 {
 /******************************************************************************************************/
 /******************************************************************************************************/
 DynamicsDiscretizer selectDynamicsDiscretization(SensitivityIntegratorType integratorType) {
-  switch (integratorType) {
-    case SensitivityIntegratorType::EULER:
-      return eulerDiscretization;
-    case SensitivityIntegratorType::RK2:
-      return rk2Discretization;
-    case SensitivityIntegratorType::RK4:
-      return rk4Discretization;
-    default:
-      throw std::runtime_error("Integrator of type " + sensitivity_integrator::toString(integratorType) + " not supported.");
-  }
+    switch (integratorType) {
+        case SensitivityIntegratorType::EULER:
+            return eulerDiscretization;
+        case SensitivityIntegratorType::RK2:
+            return rk2Discretization;
+        case SensitivityIntegratorType::RK4:
+            return rk4Discretization;
+        default:
+            throw std::runtime_error("Integrator of type " + sensitivity_integrator::toString(integratorType) +
+                                     " not supported.");
+    }
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
 DynamicsSensitivityDiscretizer selectDynamicsSensitivityDiscretization(SensitivityIntegratorType integratorType) {
-  switch (integratorType) {
-    case SensitivityIntegratorType::EULER:
-      return eulerSensitivityDiscretization;
-    case SensitivityIntegratorType::RK2:
-      return rk2SensitivityDiscretization;
-    case SensitivityIntegratorType::RK4:
-      return rk4SensitivityDiscretization;
-    default:
-      throw std::runtime_error("Integrator of type " + sensitivity_integrator::toString(integratorType) + " not supported.");
-  }
+    switch (integratorType) {
+        case SensitivityIntegratorType::EULER:
+            return eulerSensitivityDiscretization;
+        case SensitivityIntegratorType::RK2:
+            return rk2SensitivityDiscretization;
+        case SensitivityIntegratorType::RK4:
+            return rk4SensitivityDiscretization;
+        default:
+            throw std::runtime_error("Integrator of type " + sensitivity_integrator::toString(integratorType) +
+                                     " not supported.");
+    }
 }
 
 namespace sensitivity_integrator {
@@ -73,20 +75,24 @@ namespace sensitivity_integrator {
 /******************************************************************************************************/
 /******************************************************************************************************/
 std::string toString(SensitivityIntegratorType integratorType) {
-  static const std::unordered_map<SensitivityIntegratorType, std::string> integratorMap = {
-      {SensitivityIntegratorType::EULER, "EULER"}, {SensitivityIntegratorType::RK2, "RK2"}, {SensitivityIntegratorType::RK4, "RK4"}};
+    static const std::unordered_map<SensitivityIntegratorType, std::string> integratorMap = {
+        {SensitivityIntegratorType::EULER, "EULER"},
+        {SensitivityIntegratorType::RK2, "RK2"},
+        {SensitivityIntegratorType::RK4, "RK4"}};
 
-  return integratorMap.at(integratorType);
+    return integratorMap.at(integratorType);
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-SensitivityIntegratorType fromString(const std::string& name) {
-  static const std::unordered_map<std::string, SensitivityIntegratorType> integratorMap = {
-      {"EULER", SensitivityIntegratorType::EULER}, {"RK2", SensitivityIntegratorType::RK2}, {"RK4", SensitivityIntegratorType::RK4}};
+SensitivityIntegratorType fromString(const std::string &name) {
+    static const std::unordered_map<std::string, SensitivityIntegratorType> integratorMap = {
+        {"EULER", SensitivityIntegratorType::EULER},
+        {"RK2", SensitivityIntegratorType::RK2},
+        {"RK4", SensitivityIntegratorType::RK4}};
 
-  return integratorMap.at(name);
+    return integratorMap.at(name);
 }
 
 }  // namespace sensitivity_integrator

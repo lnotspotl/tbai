@@ -18,23 +18,23 @@
 
 #ifdef LLVM_VERSION_MAJOR
 
-#if LLVM_VERSION_MAJOR==3 && LLVM_VERSION_MINOR==2
+#if LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR == 2
 #include <cppad/cg/model/llvm/v3_2/llvm3_2.hpp>
-#elif LLVM_VERSION_MAJOR==3 && (LLVM_VERSION_MINOR==3 || LLVM_VERSION_MINOR==4)
+#elif LLVM_VERSION_MAJOR == 3 && (LLVM_VERSION_MINOR == 3 || LLVM_VERSION_MINOR == 4)
 #include <cppad/cg/model/llvm/v3_4/llvm3_4.hpp>
-#elif LLVM_VERSION_MAJOR==3 && LLVM_VERSION_MINOR==6
+#elif LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR == 6
 #include <cppad/cg/model/llvm/v3_6/llvm3_6.hpp>
-#elif LLVM_VERSION_MAJOR==3 && LLVM_VERSION_MINOR==8
+#elif LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR == 8
 #include <cppad/cg/model/llvm/v3_8/llvm3_8.hpp>
-#elif LLVM_VERSION_MAJOR==4 && LLVM_VERSION_MINOR==0
+#elif LLVM_VERSION_MAJOR == 4 && LLVM_VERSION_MINOR == 0
 #include <cppad/cg/model/llvm/v4_0/llvm4_0.hpp>
-#elif LLVM_VERSION_MAJOR==5 && LLVM_VERSION_MINOR==0
+#elif LLVM_VERSION_MAJOR == 5 && LLVM_VERSION_MINOR == 0
 #include <cppad/cg/model/llvm/v5_0/llvm5_0.hpp>
-#elif LLVM_VERSION_MAJOR==6 && LLVM_VERSION_MINOR==0
+#elif LLVM_VERSION_MAJOR == 6 && LLVM_VERSION_MINOR == 0
 #include <cppad/cg/model/llvm/v6_0/llvm6_0.hpp>
-#elif LLVM_VERSION_MAJOR==7 && LLVM_VERSION_MINOR==0
+#elif LLVM_VERSION_MAJOR == 7 && LLVM_VERSION_MINOR == 0
 #include <cppad/cg/model/llvm/v7_0/llvm7_0.hpp>
-#elif LLVM_VERSION_MAJOR==8 && LLVM_VERSION_MINOR==0
+#elif LLVM_VERSION_MAJOR == 8 && LLVM_VERSION_MINOR == 0
 #include <cppad/cg/model/llvm/v8_0/llvm8_0.hpp>
 #endif
 

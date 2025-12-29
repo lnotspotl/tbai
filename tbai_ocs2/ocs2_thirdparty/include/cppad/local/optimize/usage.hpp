@@ -1,5 +1,5 @@
-# ifndef CPPAD_LOCAL_OPTIMIZE_USAGE_HPP
-# define CPPAD_LOCAL_OPTIMIZE_USAGE_HPP
+#ifndef CPPAD_LOCAL_OPTIMIZE_USAGE_HPP
+#define CPPAD_LOCAL_OPTIMIZE_USAGE_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -11,10 +11,12 @@ Secondary License when the conditions for such availability set forth
 in the Eclipse Public License, Version 2.0 are satisfied:
       GNU General Public License, Version 2.0 or later.
 ---------------------------------------------------------------------------- */
-# include <cppad/local/define.hpp>
+#include <cppad/local/define.hpp>
 
 // BEGIN_CPPAD_LOCAL_OPTIMIZE_NAMESPACE
-namespace CppAD { namespace local { namespace optimize {
+namespace CppAD {
+namespace local {
+namespace optimize {
 
 typedef CPPAD_VEC_ENUM_TYPE usage_t;
 
@@ -34,6 +36,7 @@ enum enum_usage {
     csum_usage
 };
 
-
-} } } // END_CPPAD_LOCAL_OPTIMIZE_NAMESPACE
-# endif
+}  // namespace optimize
+}  // namespace local
+}  // namespace CppAD
+#endif

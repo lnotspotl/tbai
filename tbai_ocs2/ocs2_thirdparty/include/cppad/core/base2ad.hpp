@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_BASE2AD_HPP
-# define CPPAD_CORE_BASE2AD_HPP
+#ifndef CPPAD_CORE_BASE2AD_HPP
+#define CPPAD_CORE_BASE2AD_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -62,40 +62,40 @@ $end
 ----------------------------------------------------------------------------
 */
 
-namespace CppAD { // BEGIN_CPPAD_NAMESPACE
+namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
 /*!
 \file base2ad.hpp
 */
 /// Create an ADFun< AD<Base>, Base > from this ADFun<Base>
 template <class Base, class RecBase>
-ADFun< AD<Base>, RecBase > ADFun<Base,RecBase>::base2ad(void) const
-{   ADFun< AD<Base>, RecBase > fun;
+ADFun<AD<Base>, RecBase> ADFun<Base, RecBase>::base2ad(void) const {
+    ADFun<AD<Base>, RecBase> fun;
     //
     // This is a base2ad return value and only case where this flag is true
-    fun.base2ad_return_value_      = true;
+    fun.base2ad_return_value_ = true;
     //
     // bool values
-    fun.has_been_optimized_        = has_been_optimized_;
-    fun.check_for_nan_             = check_for_nan_;
+    fun.has_been_optimized_ = has_been_optimized_;
+    fun.check_for_nan_ = check_for_nan_;
     //
     // size_t values
-    fun.compare_change_count_      = compare_change_count_;
-    fun.compare_change_number_     = compare_change_number_;
-    fun.compare_change_op_index_   = compare_change_op_index_;
-    CPPAD_ASSERT_UNKNOWN( fun.num_order_taylor_ == 0 ) ;
-    CPPAD_ASSERT_UNKNOWN( fun.cap_order_taylor_ == 0 );
-    CPPAD_ASSERT_UNKNOWN( fun.num_direction_taylor_ == 0 );
-    fun.num_var_tape_              = num_var_tape_;
+    fun.compare_change_count_ = compare_change_count_;
+    fun.compare_change_number_ = compare_change_number_;
+    fun.compare_change_op_index_ = compare_change_op_index_;
+    CPPAD_ASSERT_UNKNOWN(fun.num_order_taylor_ == 0);
+    CPPAD_ASSERT_UNKNOWN(fun.cap_order_taylor_ == 0);
+    CPPAD_ASSERT_UNKNOWN(fun.num_direction_taylor_ == 0);
+    fun.num_var_tape_ = num_var_tape_;
     //
     // pod_vector objects
-    fun.ind_taddr_                 = ind_taddr_;
-    fun.dep_taddr_                 = dep_taddr_;
-    fun.dep_parameter_             = dep_parameter_;
-    fun.cskip_op_                  = cskip_op_;
-    fun.load_op_                   = load_op_;
+    fun.ind_taddr_ = ind_taddr_;
+    fun.dep_taddr_ = dep_taddr_;
+    fun.dep_parameter_ = dep_parameter_;
+    fun.cskip_op_ = cskip_op_;
+    fun.load_op_ = load_op_;
     //
     // pod_maybe_vector< AD<Base> > = pod_maybe_vector<Base>
-    CPPAD_ASSERT_UNKNOWN( fun.taylor_.size() == 0 );
+    CPPAD_ASSERT_UNKNOWN(fun.taylor_.size() == 0);
     //
     // player
     // (uses move semantics when CPPAD_USE_CPLUSPLUS_2011 is 1)
@@ -108,10 +108,10 @@ ADFun< AD<Base>, RecBase > ADFun<Base,RecBase>::base2ad(void) const
     fun.for_jac_sparse_pack_ = for_jac_sparse_pack_;
     //
     // sparse_list
-    fun.for_jac_sparse_set_  = for_jac_sparse_set_;
+    fun.for_jac_sparse_set_ = for_jac_sparse_set_;
     //
     return fun;
 }
 
-} // END_CPPAD_NAMESPACE
-# endif
+}  // namespace CppAD
+#endif

@@ -1,5 +1,5 @@
-# ifndef CPPAD_UTILITY_SPARSE_RCV_HPP
-# define CPPAD_UTILITY_SPARSE_RCV_HPP
+#ifndef CPPAD_UTILITY_SPARSE_RCV_HPP
+#define CPPAD_UTILITY_SPARSE_RCV_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -214,76 +214,59 @@ $end
 \file sparse_rcv.hpp
 A sparse matrix class.
 */
-# include <cppad/utility/sparse_rc.hpp>
+#include <cppad/utility/sparse_rc.hpp>
 
-namespace CppAD { // BEGIN CPPAD_NAMESPACE
+namespace CppAD {  // BEGIN CPPAD_NAMESPACE
 
 /// Sparse matrices with elements of type Scalar
 template <class SizeVector, class ValueVector>
 class sparse_rcv {
-private:
+   private:
     /// sparsity pattern
     sparse_rc<SizeVector> pattern_;
     /// value_type
     typedef typename ValueVector::value_type value_type;
     /// val_[k] is the value for the k-th possibly non-zero entry in the matrix
-    ValueVector    val_;
-public:
+    ValueVector val_;
+
+   public:
     // ------------------------------------------------------------------------
     /// default constructor
-    sparse_rcv(void)
-    : pattern_(0, 0, 0), val_(0)
-    { }
+    sparse_rcv(void) : pattern_(0, 0, 0), val_(0) {}
     /// constructor
-    sparse_rcv(const sparse_rc<SizeVector>& pattern )
-    :
-    pattern_(pattern)    ,
-    val_(pattern_.nnz())
-    { }
+    sparse_rcv(const sparse_rc<SizeVector> &pattern) : pattern_(pattern), val_(pattern_.nnz()) {}
     /// assignment
-    void operator=(const sparse_rcv& matrix)
-    {   pattern_ = matrix.pattern_;
+    void operator=(const sparse_rcv &matrix) {
+        pattern_ = matrix.pattern_;
         // simple vector assignment requires vectors to have same size
-        val_.resize( matrix.nnz() );
+        val_.resize(matrix.nnz());
         val_ = matrix.val();
     }
     // ------------------------------------------------------------------------
-    void set(size_t k, const value_type& v)
-    {   CPPAD_ASSERT_KNOWN(
-            pattern_.nnz(),
-            "The index k is not less than nnz in sparse_rcv::set"
-        );
+    void set(size_t k, const value_type &v) {
+        CPPAD_ASSERT_KNOWN(pattern_.nnz(), "The index k is not less than nnz in sparse_rcv::set");
         val_[k] = v;
     }
     /// number of rows in matrix
-    size_t nr(void) const
-    {   return pattern_.nr(); }
+    size_t nr(void) const { return pattern_.nr(); }
     /// number of columns in matrix
-    size_t nc(void) const
-    {   return pattern_.nc(); }
+    size_t nc(void) const { return pattern_.nc(); }
     /// number of possibly non-zero elements in matrix
-    size_t nnz(void) const
-    {   return pattern_.nnz(); }
+    size_t nnz(void) const { return pattern_.nnz(); }
     /// row indices
-    const SizeVector& row(void) const
-    {   return pattern_.row(); }
+    const SizeVector &row(void) const { return pattern_.row(); }
     /// column indices
-    const SizeVector& col(void) const
-    {   return pattern_.col(); }
+    const SizeVector &col(void) const { return pattern_.col(); }
     /// value for possibly non-zero elements
-    const ValueVector& val(void) const
-    {   return val_; }
+    const ValueVector &val(void) const { return val_; }
     /// sparsity pattern
-    const sparse_rc<SizeVector>& pat(void) const
-    {   return pattern_; }
+    const sparse_rc<SizeVector> &pat(void) const { return pattern_; }
     /// row-major order
-    SizeVector row_major(void) const
-    {   return pattern_.row_major(); }
+    SizeVector row_major(void) const { return pattern_.row_major(); }
     /// column-major indices
-    SizeVector col_major(void) const
-    {   return pattern_.col_major(); }
+    SizeVector col_major(void) const { return pattern_.col_major(); }
 };
 
-} // END_CPPAD_NAMESPACE
+}  // namespace CppAD
 
-# endif
+#endif

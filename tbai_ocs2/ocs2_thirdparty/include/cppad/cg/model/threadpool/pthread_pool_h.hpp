@@ -99,4 +99,3 @@ void cppadcg_thpool_shutdown();
 )*=*";
 
 const size_t CPPADCG_PTHREAD_POOL_H_FILE_SIZE = 2730;
-

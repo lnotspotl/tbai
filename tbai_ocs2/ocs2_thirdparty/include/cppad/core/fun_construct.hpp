@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_FUN_CONSTRUCT_HPP
-# define CPPAD_CORE_FUN_CONSTRUCT_HPP
+#ifndef CPPAD_CORE_FUN_CONSTRUCT_HPP
+#define CPPAD_CORE_FUN_CONSTRUCT_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -222,7 +222,7 @@ $end
 ----------------------------------------------------------------------------
 */
 
-namespace CppAD { // BEGIN_CPPAD_NAMESPACE
+namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
 /*!
 \file fun_construct.hpp
 ADFun function constructors and assignment operator.
@@ -245,18 +245,17 @@ is the base for the recording that can be stored in this ADFun object;
 i.e., operation sequences that were recorded using the type AD<Base>.
 */
 template <class Base, class RecBase>
-ADFun<Base,RecBase>::ADFun(void) :
-base2ad_return_value_(false),
-has_been_optimized_(false),
-check_for_nan_(true) ,
-compare_change_count_(0),
-compare_change_number_(0),
-compare_change_op_index_(0),
-num_order_taylor_(0),
-cap_order_taylor_(0),
-num_direction_taylor_(0),
-num_var_tape_(0)
-{ }
+ADFun<Base, RecBase>::ADFun(void)
+    : base2ad_return_value_(false),
+      has_been_optimized_(false),
+      check_for_nan_(true),
+      compare_change_count_(0),
+      compare_change_number_(0),
+      compare_change_op_index_(0),
+      num_order_taylor_(0),
+      cap_order_taylor_(0),
+      num_direction_taylor_(0),
+      num_var_tape_(0) {}
 
 /*!
 ADFun copy constructor
@@ -270,19 +269,14 @@ by some compilers to support the following syntax:
 
 */
 template <class Base, class RecBase>
-ADFun<Base,RecBase>::ADFun(const ADFun& g)
-{   if( g.base2ad_return_value_ )
+ADFun<Base, RecBase>::ADFun(const ADFun &g) {
+    if (g.base2ad_return_value_)
         *this = g;
-    else
-    {   CppAD::ErrorHandler::Call(
-            true,
-            __LINE__,
-            __FILE__,
-            "ADFun(const ADFun& g)",
-            "Attempting to use the ADFun<Base> copy constructor.\n"
-            "Perhaps you are passing an ADFun<Base> object "
-            "by value instead of by reference."
-        );
+    else {
+        CppAD::ErrorHandler::Call(true, __LINE__, __FILE__, "ADFun(const ADFun& g)",
+                                  "Attempting to use the ADFun<Base> copy constructor.\n"
+                                  "Perhaps you are passing an ADFun<Base> object "
+                                  "by value instead of by reference.");
     }
 }
 /*!
@@ -305,73 +299,71 @@ i.e., operation sequences that were recorded using the type AD<Base>.
 ADFun object containing the operation sequence to be copied.
 */
 template <class Base, class RecBase>
-void ADFun<Base,RecBase>::operator=(const ADFun& f)
-{
+void ADFun<Base, RecBase>::operator=(const ADFun &f) {
     // go through member variables in ad_fun.hpp order
     //
     // bool objects
-    base2ad_return_value_      = false;
-    has_been_optimized_        = f.has_been_optimized_;
-    check_for_nan_             = f.check_for_nan_;
+    base2ad_return_value_ = false;
+    has_been_optimized_ = f.has_been_optimized_;
+    check_for_nan_ = f.check_for_nan_;
     //
     // size_t objects
-    compare_change_count_      = f.compare_change_count_;
-    compare_change_number_     = f.compare_change_number_;
-    compare_change_op_index_   = f.compare_change_op_index_;
-    num_order_taylor_          = f.num_order_taylor_;
-    cap_order_taylor_          = f.cap_order_taylor_;
-    num_direction_taylor_      = f.num_direction_taylor_;
-    num_var_tape_              = f.num_var_tape_;
+    compare_change_count_ = f.compare_change_count_;
+    compare_change_number_ = f.compare_change_number_;
+    compare_change_op_index_ = f.compare_change_op_index_;
+    num_order_taylor_ = f.num_order_taylor_;
+    cap_order_taylor_ = f.cap_order_taylor_;
+    num_direction_taylor_ = f.num_direction_taylor_;
+    num_var_tape_ = f.num_var_tape_;
     //
     // pod_vector objects
-    ind_taddr_                 = f.ind_taddr_;
-    dep_taddr_                 = f.dep_taddr_;
-    dep_parameter_             = f.dep_parameter_;
-    cskip_op_                  = f.cskip_op_;
-    load_op_                   = f.load_op_;
+    ind_taddr_ = f.ind_taddr_;
+    dep_taddr_ = f.dep_taddr_;
+    dep_parameter_ = f.dep_parameter_;
+    cskip_op_ = f.cskip_op_;
+    load_op_ = f.load_op_;
     //
     // pod_vector_maybe_vectors
-    taylor_                    = f.taylor_;
-    subgraph_partial_          = f.subgraph_partial_;
+    taylor_ = f.taylor_;
+    subgraph_partial_ = f.subgraph_partial_;
     //
     // player
-    play_                      = f.play_;
+    play_ = f.play_;
     //
     // subgraph
-    subgraph_info_             = f.subgraph_info_;
+    subgraph_info_ = f.subgraph_info_;
     //
     // sparse_pack
-    for_jac_sparse_pack_       = f.for_jac_sparse_pack_;
+    for_jac_sparse_pack_ = f.for_jac_sparse_pack_;
     //
     // sparse_list
-    for_jac_sparse_set_        = f.for_jac_sparse_set_;
+    for_jac_sparse_set_ = f.for_jac_sparse_set_;
 }
-# if CPPAD_USE_CPLUSPLUS_2011
+#if CPPAD_USE_CPLUSPLUS_2011
 /// Move semantics version of assignment operator
 template <class Base, class RecBase>
-void ADFun<Base,RecBase>::operator=(ADFun&& f)
-{
+void ADFun<Base, RecBase>::operator=(ADFun &&f) {
     // bool objects
-    base2ad_return_value_      = false; // f might be, but this is not
-    has_been_optimized_        = f.has_been_optimized_;
-    check_for_nan_             = f.check_for_nan_;
+    base2ad_return_value_ = false;  // f might be, but this is not
+    has_been_optimized_ = f.has_been_optimized_;
+    check_for_nan_ = f.check_for_nan_;
     //
     // size_t objects
-    compare_change_count_      = f.compare_change_count_;
-    compare_change_number_     = f.compare_change_number_;
-    compare_change_op_index_   = f.compare_change_op_index_;
-    num_order_taylor_          = f.num_order_taylor_;
-    cap_order_taylor_          = f.cap_order_taylor_;
-    num_direction_taylor_      = f.num_direction_taylor_;
-    num_var_tape_              = f.num_var_tape_;
+    compare_change_count_ = f.compare_change_count_;
+    compare_change_number_ = f.compare_change_number_;
+    compare_change_op_index_ = f.compare_change_op_index_;
+    num_order_taylor_ = f.num_order_taylor_;
+    cap_order_taylor_ = f.cap_order_taylor_;
+    num_direction_taylor_ = f.num_direction_taylor_;
+    num_var_tape_ = f.num_var_tape_;
     //
     // pod_vector objects
-    ind_taddr_.swap(      f.ind_taddr_);
-    dep_taddr_.swap(      f.dep_taddr_);
-    dep_parameter_.swap(  f.dep_parameter_);
-    taylor_.swap(         f.taylor_);
-    cskip_op_.swap(       f.cskip_op_);
-    load_op_.swap(        f.load_op_);
+    ind_taddr_.swap(f.ind_taddr_);
+    dep_taddr_.swap(f.dep_taddr_);
+    dep_parameter_.swap(f.dep_parameter_);
+    taylor_.swap(f.taylor_);
+    cskip_op_.swap(f.cskip_op_);
+    load_op_.swap(f.load_op_);
     //
     // player
     play_.swap(f.play_);
@@ -380,12 +372,12 @@ void ADFun<Base,RecBase>::operator=(ADFun&& f)
     subgraph_info_.swap(f.subgraph_info_);
     //
     // sparse_pack
-    for_jac_sparse_pack_.swap( f.for_jac_sparse_pack_);
+    for_jac_sparse_pack_.swap(f.for_jac_sparse_pack_);
     //
     // sparse_list
-    for_jac_sparse_set_.swap( f.for_jac_sparse_set_);
+    for_jac_sparse_set_.swap(f.for_jac_sparse_set_);
 }
-# endif
+#endif
 
 /*!
 ADFun constructor from an operation sequence.
@@ -423,117 +415,88 @@ are stored in this ADFun object.
 */
 template <class Base, class RecBase>
 template <class ADVector>
-ADFun<Base,RecBase>::ADFun(const ADVector &x, const ADVector &y)
-{
+ADFun<Base, RecBase>::ADFun(const ADVector &x, const ADVector &y) {
     // used to identify the RecBase type in calls to sweeps
     RecBase not_used_rec_base;
 
-    CPPAD_ASSERT_KNOWN(
-        x.size() > 0,
-        "ADFun<Base>: independent variable vector has size zero."
-    );
-    CPPAD_ASSERT_KNOWN(
-        Variable(x[0]),
-        "ADFun<Base>: independent variable vector has been changed."
-    );
-    local::ADTape<Base>* tape = AD<Base>::tape_ptr(x[0].tape_id_);
-    CPPAD_ASSERT_KNOWN(
-        tape->size_independent_ == size_t ( x.size() ),
-        "ADFun<Base>: independent variable vector has been changed."
-    );
+    CPPAD_ASSERT_KNOWN(x.size() > 0, "ADFun<Base>: independent variable vector has size zero.");
+    CPPAD_ASSERT_KNOWN(Variable(x[0]), "ADFun<Base>: independent variable vector has been changed.");
+    local::ADTape<Base> *tape = AD<Base>::tape_ptr(x[0].tape_id_);
+    CPPAD_ASSERT_KNOWN(tape->size_independent_ == size_t(x.size()),
+                       "ADFun<Base>: independent variable vector has been changed.");
     size_t j, n = x.size();
-# ifndef NDEBUG
+#ifndef NDEBUG
     size_t i, m = y.size();
-    for(j = 0; j < n; j++)
-    {   CPPAD_ASSERT_KNOWN(
-        size_t(x[j].taddr_) == (j+1),
-        "ADFun<Base>: independent variable vector has been changed."
-        );
-        CPPAD_ASSERT_KNOWN(
-        x[j].tape_id_ == x[0].tape_id_,
-        "ADFun<Base>: independent variable vector has been changed."
-        );
+    for (j = 0; j < n; j++) {
+        CPPAD_ASSERT_KNOWN(size_t(x[j].taddr_) == (j + 1),
+                           "ADFun<Base>: independent variable vector has been changed.");
+        CPPAD_ASSERT_KNOWN(x[j].tape_id_ == x[0].tape_id_,
+                           "ADFun<Base>: independent variable vector has been changed.");
     }
-    for(i = 0; i < m; i++)
-    {   CPPAD_ASSERT_KNOWN(
-        CppAD::Parameter( y[i] ) | (y[i].tape_id_ == x[0].tape_id_) ,
-        "ADFun<Base>: dependent vector contains variables for"
-        "\na different tape than the independent variables."
-        );
+    for (i = 0; i < m; i++) {
+        CPPAD_ASSERT_KNOWN(CppAD::Parameter(y[i]) | (y[i].tape_id_ == x[0].tape_id_),
+                           "ADFun<Base>: dependent vector contains variables for"
+                           "\na different tape than the independent variables.");
     }
-# endif
+#endif
 
     // stop the tape and store the operation sequence
     Dependent(tape, y);
 
-
     // ad_fun.hpp member values not set by dependent
-    check_for_nan_       = true;
+    check_for_nan_ = true;
 
     // allocate memory for one zero order taylor_ coefficient
-    CPPAD_ASSERT_UNKNOWN( num_order_taylor_ == 0 );
-    CPPAD_ASSERT_UNKNOWN( num_direction_taylor_ == 0 );
+    CPPAD_ASSERT_UNKNOWN(num_order_taylor_ == 0);
+    CPPAD_ASSERT_UNKNOWN(num_direction_taylor_ == 0);
     size_t c = 1;
     size_t r = 1;
     capacity_order(c, r);
-    CPPAD_ASSERT_UNKNOWN( cap_order_taylor_     == c );
-    CPPAD_ASSERT_UNKNOWN( num_direction_taylor_ == r );
+    CPPAD_ASSERT_UNKNOWN(cap_order_taylor_ == c);
+    CPPAD_ASSERT_UNKNOWN(num_direction_taylor_ == r);
 
     // set zero order coefficients corresponding to indpendent variables
-    CPPAD_ASSERT_UNKNOWN( n == ind_taddr_.size() );
-    for(j = 0; j < n; j++)
-    {   CPPAD_ASSERT_UNKNOWN( ind_taddr_[j] == (j+1) );
-        CPPAD_ASSERT_UNKNOWN( size_t(x[j].taddr_) == (j+1) );
-        taylor_[ ind_taddr_[j] ]  = x[j].value_;
+    CPPAD_ASSERT_UNKNOWN(n == ind_taddr_.size());
+    for (j = 0; j < n; j++) {
+        CPPAD_ASSERT_UNKNOWN(ind_taddr_[j] == (j + 1));
+        CPPAD_ASSERT_UNKNOWN(size_t(x[j].taddr_) == (j + 1));
+        taylor_[ind_taddr_[j]] = x[j].value_;
     }
 
     // use independent variable values to fill in values for others
-    CPPAD_ASSERT_UNKNOWN( cskip_op_.size() == play_.num_op_rec() );
-    CPPAD_ASSERT_UNKNOWN( load_op_.size()  == play_.num_load_op_rec() );
-    local::sweep::forward0(&play_, std::cout, false,
-        n, num_var_tape_, cap_order_taylor_, taylor_.data(),
-        cskip_op_.data(), load_op_,
-        compare_change_count_,
-        compare_change_number_,
-        compare_change_op_index_,
-        not_used_rec_base
-    );
-    CPPAD_ASSERT_UNKNOWN( compare_change_count_    == 1 );
-    CPPAD_ASSERT_UNKNOWN( compare_change_number_   == 0 );
-    CPPAD_ASSERT_UNKNOWN( compare_change_op_index_ == 0 );
+    CPPAD_ASSERT_UNKNOWN(cskip_op_.size() == play_.num_op_rec());
+    CPPAD_ASSERT_UNKNOWN(load_op_.size() == play_.num_load_op_rec());
+    local::sweep::forward0(&play_, std::cout, false, n, num_var_tape_, cap_order_taylor_, taylor_.data(),
+                           cskip_op_.data(), load_op_, compare_change_count_, compare_change_number_,
+                           compare_change_op_index_, not_used_rec_base);
+    CPPAD_ASSERT_UNKNOWN(compare_change_count_ == 1);
+    CPPAD_ASSERT_UNKNOWN(compare_change_number_ == 0);
+    CPPAD_ASSERT_UNKNOWN(compare_change_op_index_ == 0);
 
     // now set the number of orders stored
     num_order_taylor_ = 1;
 
-# ifndef NDEBUG
+#ifndef NDEBUG
     // on MS Visual Studio 2012, CppAD required in front of isnan ?
-    for(i = 0; i < m; i++)
-    if( taylor_[dep_taddr_[i]] != y[i].value_ || CppAD::isnan( y[i].value_ ) )
-    {   using std::endl;
-        std::ostringstream buf;
-        buf << "A dependent variable value is not equal to "
-            << "its tape evaluation value," << endl
-            << "perhaps it is nan." << endl
-            << "Dependent variable value = "
-            <<  y[i].value_ << endl
-            << "Tape evaluation value    = "
-            <<  taylor_[dep_taddr_[i]]  << endl
-            << "Difference               = "
-            <<  y[i].value_ -  taylor_[dep_taddr_[i]]  << endl
-        ;
-        // buf.str() returns a string object with a copy of the current
-        // contents in the stream buffer.
-        std::string msg_str       = buf.str();
-        // msg_str.c_str() returns a pointer to the c-string
-        // representation of the string object's value.
-        const char* msg_char_star = msg_str.c_str();
-        CPPAD_ASSERT_KNOWN(
-            0,
-            msg_char_star
-        );
-    }
-# endif
+    for (i = 0; i < m; i++)
+        if (taylor_[dep_taddr_[i]] != y[i].value_ || CppAD::isnan(y[i].value_)) {
+            using std::endl;
+            std::ostringstream buf;
+            buf << "A dependent variable value is not equal to " << "its tape evaluation value," << endl
+                << "perhaps it is nan." << endl
+                << "Dependent variable value = " << y[i].value_ << endl
+                << "Tape evaluation value    = " << taylor_[dep_taddr_[i]] << endl
+                << "Difference               = " << y[i].value_ - taylor_[dep_taddr_[i]] << endl;
+            // buf.str() returns a string object with a copy of the current
+            // contents in the stream buffer.
+            std::string msg_str = buf.str();
+            // msg_str.c_str() returns a pointer to the c-string
+            // representation of the string object's value.
+            const char *msg_char_star = msg_str.c_str();
+            CPPAD_ASSERT_KNOWN(0, msg_char_star);
+        }
+#endif
 }
 
-} // END_CPPAD_NAMESPACE
-# endif
+}  // namespace CppAD
+#endif

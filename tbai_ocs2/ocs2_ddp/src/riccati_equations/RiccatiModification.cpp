@@ -27,9 +27,9 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 
-#include <iostream>
-
 #include "ocs2_ddp/riccati_equations/RiccatiModification.h"
+
+#include <iostream>
 
 namespace ocs2 {
 namespace riccati_modification {
@@ -37,16 +37,16 @@ namespace riccati_modification {
 /**
  * Displays all variables
  */
-void display(const Data& data) {
-  std::cerr << std::endl;
-  std::cerr << "time: " << data.time_ << "\n";
-  std::cerr << "deltaQm:\n" << data.deltaQm_ << "\n";
-  std::cerr << "deltaRm:\n" << data.deltaGm_ << "\n";
-  std::cerr << "deltaPm:\n" << data.deltaGv_.transpose() << "\n";
+void display(const Data &data) {
+    std::cerr << std::endl;
+    std::cerr << "time: " << data.time_ << "\n";
+    std::cerr << "deltaQm:\n" << data.deltaQm_ << "\n";
+    std::cerr << "deltaRm:\n" << data.deltaGm_ << "\n";
+    std::cerr << "deltaPm:\n" << data.deltaGv_.transpose() << "\n";
 
-  std::cerr << "constraintRangeProjector:\n" << data.constraintRangeProjector_ << "\n";
-  std::cerr << "constraintNullProjector: \n" << data.constraintNullProjector_ << "\n";
-  std::cerr << std::endl;
+    std::cerr << "constraintRangeProjector:\n" << data.constraintRangeProjector_ << "\n";
+    std::cerr << "constraintNullProjector: \n" << data.constraintNullProjector_ << "\n";
+    std::cerr << std::endl;
 }
 
 }  // namespace riccati_modification

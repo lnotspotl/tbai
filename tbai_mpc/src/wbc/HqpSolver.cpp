@@ -247,5 +247,5 @@ void HqpSolver::updateSolver() {
     }
 }
 
-}  // namespace wbc
+}  // namespace mpc
 }  // namespace tbai

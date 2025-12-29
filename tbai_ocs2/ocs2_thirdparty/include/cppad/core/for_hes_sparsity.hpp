@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_FOR_HES_SPARSITY_HPP
-# define CPPAD_CORE_FOR_HES_SPARSITY_HPP
+#ifndef CPPAD_CORE_FOR_HES_SPARSITY_HPP
+#define CPPAD_CORE_FOR_HES_SPARSITY_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -118,10 +118,10 @@ contains an example and test of this operation.
 $end
 -----------------------------------------------------------------------------
 */
-# include <cppad/core/ad_fun.hpp>
-# include <cppad/local/sparse_internal.hpp>
+#include <cppad/core/ad_fun.hpp>
+#include <cppad/local/sparse_internal.hpp>
 
-namespace CppAD { // BEGIN_CPPAD_NAMESPACE
+namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
 
 /*!
 Forward Hessian sparsity patterns.
@@ -157,127 +157,87 @@ and x is any argument value.
 */
 template <class Base, class RecBase>
 template <class BoolVector, class SizeVector>
-void ADFun<Base,RecBase>::for_hes_sparsity(
-    const BoolVector&            select_domain    ,
-    const BoolVector&            select_range     ,
-    bool                         internal_bool    ,
-    sparse_rc<SizeVector>&       pattern_out      )
-{
+void ADFun<Base, RecBase>::for_hes_sparsity(const BoolVector &select_domain, const BoolVector &select_range,
+                                            bool internal_bool, sparse_rc<SizeVector> &pattern_out) {
     // used to identify the RecBase type in calls to sweeps
     RecBase not_used_rec_base;
     //
-    size_t n  = Domain();
-    size_t m  = Range();
+    size_t n = Domain();
+    size_t m = Range();
     //
-    CPPAD_ASSERT_KNOWN(
-        size_t( select_domain.size() ) == n,
-        "for_hes_sparsity: size of select_domain is not equal to "
-        "number of independent variables"
-    );
-    CPPAD_ASSERT_KNOWN(
-        size_t( select_range.size() ) == m,
-        "for_hes_sparsity: size of select_range is not equal to "
-        "number of dependent variables"
-    );
+    CPPAD_ASSERT_KNOWN(size_t(select_domain.size()) == n,
+                       "for_hes_sparsity: size of select_domain is not equal to "
+                       "number of independent variables");
+    CPPAD_ASSERT_KNOWN(size_t(select_range.size()) == m,
+                       "for_hes_sparsity: size of select_range is not equal to "
+                       "number of dependent variables");
     // do not need transpose or depenency
-    bool transpose  = false;
+    bool transpose = false;
     bool dependency = false;
     //
     sparse_rc<SizeVector> pattern_tmp;
-    if( internal_bool )
-    {   // forward Jacobian sparsity pattern for independent variables
+    if (internal_bool) {  // forward Jacobian sparsity pattern for independent variables
         local::sparse_pack internal_for_jac;
-        internal_for_jac.resize(num_var_tape_, n + 1 );
-        for(size_t j = 0; j < n; j++) if( select_domain[j] )
-        {   CPPAD_ASSERT_UNKNOWN( ind_taddr_[j] < n + 1 );
-            // use add_element when only adding one element per set
-            internal_for_jac.add_element( ind_taddr_[j] , ind_taddr_[j] );
-        }
+        internal_for_jac.resize(num_var_tape_, n + 1);
+        for (size_t j = 0; j < n; j++)
+            if (select_domain[j]) {
+                CPPAD_ASSERT_UNKNOWN(ind_taddr_[j] < n + 1);
+                // use add_element when only adding one element per set
+                internal_for_jac.add_element(ind_taddr_[j], ind_taddr_[j]);
+            }
         // forward Jacobian sparsity for all variables on tape
-        local::sweep::for_jac<addr_t>(
-            &play_,
-            dependency,
-            n,
-            num_var_tape_,
-            internal_for_jac,
-            not_used_rec_base
+        local::sweep::for_jac<addr_t>(&play_, dependency, n, num_var_tape_, internal_for_jac, not_used_rec_base
 
         );
         // reverse Jacobian sparsity pattern for select_range
         local::sparse_pack internal_rev_jac;
         internal_rev_jac.resize(num_var_tape_, 1);
-        for(size_t i = 0; i < m; i++) if( select_range[i] )
-        {   CPPAD_ASSERT_UNKNOWN( dep_taddr_[i] < num_var_tape_ );
-            // use add_element when only adding one element per set
-            internal_rev_jac.add_element( dep_taddr_[i] , 0 );
-        }
+        for (size_t i = 0; i < m; i++)
+            if (select_range[i]) {
+                CPPAD_ASSERT_UNKNOWN(dep_taddr_[i] < num_var_tape_);
+                // use add_element when only adding one element per set
+                internal_rev_jac.add_element(dep_taddr_[i], 0);
+            }
         // reverse Jacobian sparsity for all variables on tape
-        local::sweep::rev_jac<addr_t>(
-            &play_,
-            dependency,
-            n,
-            num_var_tape_,
-            internal_rev_jac,
-            not_used_rec_base
-        );
+        local::sweep::rev_jac<addr_t>(&play_, dependency, n, num_var_tape_, internal_rev_jac, not_used_rec_base);
         // internal vector of sets that will hold Hessian
         local::sparse_pack internal_for_hes;
         internal_for_hes.resize(n + 1, n + 1);
         //
         // compute forward Hessian sparsity pattern
         local::sweep::for_hes<addr_t>(
-            &play_,
-            n,
-            num_var_tape_,
-            internal_for_jac,
-            internal_rev_jac,
-            internal_for_hes,
-            not_used_rec_base
+            &play_, n, num_var_tape_, internal_for_jac, internal_rev_jac, internal_for_hes, not_used_rec_base
 
         );
         //
         // put the result in pattern_tmp
-        get_internal_sparsity(
-            transpose, ind_taddr_, internal_for_hes, pattern_tmp
-        );
-    }
-    else
-    {   // forward Jacobian sparsity pattern for independent variables
+        get_internal_sparsity(transpose, ind_taddr_, internal_for_hes, pattern_tmp);
+    } else {  // forward Jacobian sparsity pattern for independent variables
         // (corresponds to D)
         local::sparse_list internal_for_jac;
-        internal_for_jac.resize(num_var_tape_, n + 1 );
-        for(size_t j = 0; j < n; j++) if( select_domain[j] )
-        {   CPPAD_ASSERT_UNKNOWN( ind_taddr_[j] < n + 1 );
-            // use add_element when only adding one element per set
-            internal_for_jac.add_element( ind_taddr_[j] , ind_taddr_[j] );
-        }
+        internal_for_jac.resize(num_var_tape_, n + 1);
+        for (size_t j = 0; j < n; j++)
+            if (select_domain[j]) {
+                CPPAD_ASSERT_UNKNOWN(ind_taddr_[j] < n + 1);
+                // use add_element when only adding one element per set
+                internal_for_jac.add_element(ind_taddr_[j], ind_taddr_[j]);
+            }
         // forward Jacobian sparsity for all variables on tape
-        local::sweep::for_jac<addr_t>(
-            &play_,
-            dependency,
-            n,
-            num_var_tape_,
-            internal_for_jac,
-            not_used_rec_base
+        local::sweep::for_jac<addr_t>(&play_, dependency, n, num_var_tape_, internal_for_jac, not_used_rec_base
 
         );
         // reverse Jacobian sparsity pattern for select_range
         // (corresponds to s)
         local::sparse_list internal_rev_jac;
         internal_rev_jac.resize(num_var_tape_, 1);
-        for(size_t i = 0; i < m; i++) if( select_range[i] )
-        {   CPPAD_ASSERT_UNKNOWN( dep_taddr_[i] < num_var_tape_ );
-            // use add_element when only adding one element per set
-            internal_rev_jac.add_element( dep_taddr_[i] , 0 );
-        }
+        for (size_t i = 0; i < m; i++)
+            if (select_range[i]) {
+                CPPAD_ASSERT_UNKNOWN(dep_taddr_[i] < num_var_tape_);
+                // use add_element when only adding one element per set
+                internal_rev_jac.add_element(dep_taddr_[i], 0);
+            }
         // reverse Jacobian sparsity for all variables on tape
-        local::sweep::rev_jac<addr_t>(
-            &play_,
-            dependency,
-            n,
-            num_var_tape_,
-            internal_rev_jac,
-            not_used_rec_base
+        local::sweep::rev_jac<addr_t>(&play_, dependency, n, num_var_tape_, internal_rev_jac, not_used_rec_base
 
         );
         // internal vector of sets that will hold Hessian
@@ -286,35 +246,27 @@ void ADFun<Base,RecBase>::for_hes_sparsity(
         //
         // compute forward Hessian sparsity pattern
         local::sweep::for_hes<addr_t>(
-            &play_,
-            n,
-            num_var_tape_,
-            internal_for_jac,
-            internal_rev_jac,
-            internal_for_hes,
-            not_used_rec_base
+            &play_, n, num_var_tape_, internal_for_jac, internal_rev_jac, internal_for_hes, not_used_rec_base
 
         );
         //
         // put the result in pattern_tmp
-        get_internal_sparsity(
-            transpose, ind_taddr_, internal_for_hes, pattern_tmp
-        );
+        get_internal_sparsity(transpose, ind_taddr_, internal_for_hes, pattern_tmp);
     }
     // subtract 1 from all column values
-    CPPAD_ASSERT_UNKNOWN( pattern_tmp.nr() == n );
-    CPPAD_ASSERT_UNKNOWN( pattern_tmp.nc() == n + 1 );
-    const SizeVector& row( pattern_tmp.row() );
-    const SizeVector& col( pattern_tmp.col() );
-    size_t nr   = n;
-    size_t nc   = n;
-    size_t nnz  = pattern_tmp.nnz();
+    CPPAD_ASSERT_UNKNOWN(pattern_tmp.nr() == n);
+    CPPAD_ASSERT_UNKNOWN(pattern_tmp.nc() == n + 1);
+    const SizeVector &row(pattern_tmp.row());
+    const SizeVector &col(pattern_tmp.col());
+    size_t nr = n;
+    size_t nc = n;
+    size_t nnz = pattern_tmp.nnz();
     pattern_out.resize(nr, nc, nnz);
-    for(size_t k = 0; k < nnz; k++)
-    {   CPPAD_ASSERT_UNKNOWN( 0 < col[k] );
+    for (size_t k = 0; k < nnz; k++) {
+        CPPAD_ASSERT_UNKNOWN(0 < col[k]);
         pattern_out.set(k, row[k], col[k] - 1);
     }
     return;
 }
-} // END_CPPAD_NAMESPACE
-# endif
+}  // namespace CppAD
+#endif

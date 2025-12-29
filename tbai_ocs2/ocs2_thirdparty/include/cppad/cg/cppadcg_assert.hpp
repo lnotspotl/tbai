@@ -15,29 +15,18 @@
  * Author: Joao Leal
  */
 
-#define CPPADCG_ASSERT_KNOWN(exp, msg)          \
-{	if( ! ( exp ) )                             \
-	CppAD::ErrorHandler::Call(                  \
-		true       ,                            \
-		__LINE__   ,                            \
- 		__FILE__   ,                            \
-		#exp       ,                            \
-		msg        );                           \
-}
-
+#define CPPADCG_ASSERT_KNOWN(exp, msg)                                              \
+    {                                                                               \
+        if (!(exp)) CppAD::ErrorHandler::Call(true, __LINE__, __FILE__, #exp, msg); \
+    }
 
 #ifdef NDEBUG
-#define CPPADCG_ASSERT_UNKNOWN(exp)      // do nothing
+#define CPPADCG_ASSERT_UNKNOWN(exp)  // do nothing
 #else
-#define CPPADCG_ASSERT_UNKNOWN(exp)             \
-{	if( ! ( exp ) )                             \
-	CppAD::ErrorHandler::Call(                  \
-		false      ,                            \
-		__LINE__   ,                            \
- 		__FILE__   ,                            \
-		#exp       ,                            \
-		""         );                           \
-}
+#define CPPADCG_ASSERT_UNKNOWN(exp)                                                 \
+    {                                                                               \
+        if (!(exp)) CppAD::ErrorHandler::Call(false, __LINE__, __FILE__, #exp, ""); \
+    }
 #endif
 
 #ifndef NDEBUG

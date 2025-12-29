@@ -25,8 +25,8 @@ constexpr int OBS_DOF_POS = GO2W_NUM_JOINTS;
 constexpr int OBS_LAST_ACTION = GO2W_NUM_JOINTS;
 
 // Total observation size per step: 3 + 3 + 3 + 16 + 16 + 16 + 16 = 73
-constexpr int OBS_SIZE_PER_STEP = OBS_ANG_VEL + OBS_GRAVITY + OBS_CMD + OBS_DOF_ERR +
-                                   OBS_DOF_VEL + OBS_DOF_POS + OBS_LAST_ACTION;
+constexpr int OBS_SIZE_PER_STEP =
+    OBS_ANG_VEL + OBS_GRAVITY + OBS_CMD + OBS_DOF_ERR + OBS_DOF_VEL + OBS_DOF_POS + OBS_LAST_ACTION;
 
 // Observation history length for DreamWaQ encoder
 constexpr int HISTORY_LENGTH = 5;

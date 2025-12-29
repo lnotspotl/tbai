@@ -1,5 +1,5 @@
-# ifndef CPPAD_UTILITY_ROSEN_34_HPP
-# define CPPAD_UTILITY_ROSEN_34_HPP
+#ifndef CPPAD_UTILITY_ROSEN_34_HPP
+#define CPPAD_UTILITY_ROSEN_34_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -277,39 +277,28 @@ $end
 --------------------------------------------------------------------------
 */
 
-# include <cstddef>
-# include <cppad/core/cppad_assert.hpp>
-# include <cppad/utility/check_simple_vector.hpp>
-# include <cppad/utility/check_numeric_type.hpp>
-# include <cppad/utility/vector.hpp>
-# include <cppad/utility/lu_factor.hpp>
-# include <cppad/utility/lu_invert.hpp>
+#include <cstddef>
+
+#include <cppad/core/cppad_assert.hpp>
+#include <cppad/utility/check_numeric_type.hpp>
+#include <cppad/utility/check_simple_vector.hpp>
+#include <cppad/utility/lu_factor.hpp>
+#include <cppad/utility/lu_invert.hpp>
+#include <cppad/utility/vector.hpp>
 
 // needed before one can use CPPAD_ASSERT_FIRST_CALL_NOT_PARALLEL
-# include <cppad/utility/thread_alloc.hpp>
+#include <cppad/utility/thread_alloc.hpp>
 
-namespace CppAD { // BEGIN CppAD namespace
+namespace CppAD {  // BEGIN CppAD namespace
 
 template <class Scalar, class Vector, class Fun>
-Vector Rosen34(
-    Fun           &F ,
-    size_t         M ,
-    const Scalar &ti ,
-    const Scalar &tf ,
-    const Vector &xi )
-{   Vector e( xi.size() );
+Vector Rosen34(Fun &F, size_t M, const Scalar &ti, const Scalar &tf, const Vector &xi) {
+    Vector e(xi.size());
     return Rosen34(F, M, ti, tf, xi, e);
 }
 
 template <class Scalar, class Vector, class Fun>
-Vector Rosen34(
-    Fun           &F ,
-    size_t         M ,
-    const Scalar &ti ,
-    const Scalar &tf ,
-    const Vector &xi ,
-    Vector       &e )
-{
+Vector Rosen34(Fun &F, size_t M, const Scalar &ti, const Scalar &tf, const Vector &xi, Vector &e) {
     CPPAD_ASSERT_FIRST_CALL_NOT_PARALLEL;
 
     // check numeric type specifications
@@ -321,61 +310,32 @@ Vector Rosen34(
     // Parameters for Shampine's Rosenbrock method
     // are static to avoid recalculation on each call and
     // do not use Vector to avoid possible memory leak
-    static Scalar a[3] = {
-        Scalar(0),
-        Scalar(1),
-        Scalar(3)   / Scalar(5)
-    };
-    static Scalar b[2 * 2] = {
-        Scalar(1),
-        Scalar(0),
-        Scalar(24)  / Scalar(25),
-        Scalar(3)   / Scalar(25)
-    };
-    static Scalar ct[4] = {
-        Scalar(1)   / Scalar(2),
-        - Scalar(3) / Scalar(2),
-        Scalar(121) / Scalar(50),
-        Scalar(29)  / Scalar(250)
-    };
-    static Scalar cg[3 * 3] = {
-        - Scalar(4),
-        Scalar(0),
-        Scalar(0),
-        Scalar(186) / Scalar(25),
-        Scalar(6)   / Scalar(5),
-        Scalar(0),
-        - Scalar(56) / Scalar(125),
-        - Scalar(27) / Scalar(125),
-        - Scalar(1)  / Scalar(5)
-    };
-    static Scalar d3[3] = {
-        Scalar(97) / Scalar(108),
-        Scalar(11) / Scalar(72),
-        Scalar(25) / Scalar(216)
-    };
-    static Scalar d4[4] = {
-        Scalar(19)  / Scalar(18),
-        Scalar(1)   / Scalar(4),
-        Scalar(25)  / Scalar(216),
-        Scalar(125) / Scalar(216)
-    };
-    CPPAD_ASSERT_KNOWN(
-        M >= 1,
-        "Error in Rosen34: the number of steps is less than one"
-    );
-    CPPAD_ASSERT_KNOWN(
-        e.size() == xi.size(),
-        "Error in Rosen34: size of e not equal to size of xi"
-    );
-    size_t i, j, k, l, m;             // indices
+    static Scalar a[3] = {Scalar(0), Scalar(1), Scalar(3) / Scalar(5)};
+    static Scalar b[2 * 2] = {Scalar(1), Scalar(0), Scalar(24) / Scalar(25), Scalar(3) / Scalar(25)};
+    static Scalar ct[4] = {Scalar(1) / Scalar(2), -Scalar(3) / Scalar(2), Scalar(121) / Scalar(50),
+                           Scalar(29) / Scalar(250)};
+    static Scalar cg[3 * 3] = {-Scalar(4),
+                               Scalar(0),
+                               Scalar(0),
+                               Scalar(186) / Scalar(25),
+                               Scalar(6) / Scalar(5),
+                               Scalar(0),
+                               -Scalar(56) / Scalar(125),
+                               -Scalar(27) / Scalar(125),
+                               -Scalar(1) / Scalar(5)};
+    static Scalar d3[3] = {Scalar(97) / Scalar(108), Scalar(11) / Scalar(72), Scalar(25) / Scalar(216)};
+    static Scalar d4[4] = {Scalar(19) / Scalar(18), Scalar(1) / Scalar(4), Scalar(25) / Scalar(216),
+                           Scalar(125) / Scalar(216)};
+    CPPAD_ASSERT_KNOWN(M >= 1, "Error in Rosen34: the number of steps is less than one");
+    CPPAD_ASSERT_KNOWN(e.size() == xi.size(), "Error in Rosen34: size of e not equal to size of xi");
+    size_t i, j, k, l, m;  // indices
 
-    size_t  n    = xi.size();         // number of components in X(t)
-    Scalar  ns   = Scalar(double(M)); // number of steps as Scalar object
-    Scalar  h    = (tf - ti) / ns;    // step size
-    Scalar  zero = Scalar(0);         // some constants
-    Scalar  one  = Scalar(1);
-    Scalar  two  = Scalar(2);
+    size_t n = xi.size();           // number of components in X(t)
+    Scalar ns = Scalar(double(M));  // number of steps as Scalar object
+    Scalar h = (tf - ti) / ns;      // step size
+    Scalar zero = Scalar(0);        // some constants
+    Scalar one = Scalar(1);
+    Scalar two = Scalar(2);
 
     // permutation vectors needed for LU factorization routine
     CppAD::vector<size_t> ip(n), jp(n);
@@ -385,101 +345,88 @@ Vector Rosen34(
     Vector g(n * 3), x3(n), x4(n), xf(n), ftmp(n), xtmp(n), nan_vec(n);
 
     // initialize e = 0, nan_vec = nan
-    for(i = 0; i < n; i++)
-    {   e[i]       = zero;
+    for (i = 0; i < n; i++) {
+        e[i] = zero;
         nan_vec[i] = nan(zero);
     }
 
-    xf = xi;           // initialize solution
-    for(m = 0; m < M; m++)
-    {   // time at beginning of this interval
-        Scalar t = ti * (Scalar(int(M - m)) / ns)
-                 + tf * (Scalar(int(m)) / ns);
+    xf = xi;                   // initialize solution
+    for (m = 0; m < M; m++) {  // time at beginning of this interval
+        Scalar t = ti * (Scalar(int(M - m)) / ns) + tf * (Scalar(int(m)) / ns);
 
         // value of x at beginning of this interval
         x3 = x4 = xf;
 
         // evaluate partial derivatives at beginning of this interval
         F.Ode_ind(t, xf, f_t);
-        F.Ode_dep(t, xf, E);    // E = f_x
-        if( hasnan(f_t) || hasnan(E) )
-        {   e = nan_vec;
+        F.Ode_dep(t, xf, E);  // E = f_x
+        if (hasnan(f_t) || hasnan(E)) {
+            e = nan_vec;
             return nan_vec;
         }
 
         // E = I - f_x * h / 2
-        for(i = 0; i < n; i++)
-        {   for(j = 0; j < n; j++)
-                E[i * n + j] = - E[i * n + j] * h / two;
+        for (i = 0; i < n; i++) {
+            for (j = 0; j < n; j++) E[i * n + j] = -E[i * n + j] * h / two;
             E[i * n + i] += one;
         }
 
         // LU factor the matrix E
-# ifndef NDEBUG
+#ifndef NDEBUG
         int sign = LuFactor(ip, jp, E);
-# else
+#else
         LuFactor(ip, jp, E);
-# endif
-        CPPAD_ASSERT_KNOWN(
-            sign != 0,
-            "Error in Rosen34: I - f_x * h / 2 not invertible"
-        );
+#endif
+        CPPAD_ASSERT_KNOWN(sign != 0, "Error in Rosen34: I - f_x * h / 2 not invertible");
 
         // loop over integration steps
-        for(k = 0; k < 3; k++)
-        {   // set location for next function evaluation
+        for (k = 0; k < 3; k++) {  // set location for next function evaluation
             xtmp = xf;
-            for(l = 0; l < k; l++)
-            {   // loop over previous function evaluations
-                Scalar bkl = b[(k-1)*2 + l];
-                for(i = 0; i < n; i++)
-                {   // loop over elements of x
-                    xtmp[i] += bkl * g[i*3 + l] * h;
+            for (l = 0; l < k; l++) {  // loop over previous function evaluations
+                Scalar bkl = b[(k - 1) * 2 + l];
+                for (i = 0; i < n; i++) {  // loop over elements of x
+                    xtmp[i] += bkl * g[i * 3 + l] * h;
                 }
             }
             // ftmp = F(t + a[k] * h, xtmp)
             F.Ode(t + a[k] * h, xtmp, ftmp);
-            if( hasnan(ftmp) )
-            {   e = nan_vec;
+            if (hasnan(ftmp)) {
+                e = nan_vec;
                 return nan_vec;
             }
 
             // Form Eg for this integration step
-            for(i = 0; i < n; i++)
-                Eg[i] = ftmp[i] + ct[k] * f_t[i] * h;
-            for(l = 0; l < k; l++)
-            {   for(i = 0; i < n; i++)
-                    Eg[i] += cg[(k-1)*3 + l] * g[i*3 + l];
+            for (i = 0; i < n; i++) Eg[i] = ftmp[i] + ct[k] * f_t[i] * h;
+            for (l = 0; l < k; l++) {
+                for (i = 0; i < n; i++) Eg[i] += cg[(k - 1) * 3 + l] * g[i * 3 + l];
             }
 
             // Solve the equation E * g = Eg
             LuInvert(ip, jp, E, Eg);
 
             // save solution and advance x3, x4
-            for(i = 0; i < n; i++)
-            {   g[i*3 + k]  = Eg[i];
-                x3[i]      += h * d3[k] * Eg[i];
-                x4[i]      += h * d4[k] * Eg[i];
+            for (i = 0; i < n; i++) {
+                g[i * 3 + k] = Eg[i];
+                x3[i] += h * d3[k] * Eg[i];
+                x4[i] += h * d4[k] * Eg[i];
             }
         }
         // Form Eg for last update to x4 only
-        for(i = 0; i < n; i++)
-            Eg[i] = ftmp[i] + ct[3] * f_t[i] * h;
-        for(l = 0; l < 3; l++)
-        {   for(i = 0; i < n; i++)
-                Eg[i] += cg[2*3 + l] * g[i*3 + l];
+        for (i = 0; i < n; i++) Eg[i] = ftmp[i] + ct[3] * f_t[i] * h;
+        for (l = 0; l < 3; l++) {
+            for (i = 0; i < n; i++) Eg[i] += cg[2 * 3 + l] * g[i * 3 + l];
         }
 
         // Solve the equation E * g = Eg
         LuInvert(ip, jp, E, Eg);
 
         // advance x4 and accumulate error bound
-        for(i = 0; i < n; i++)
-        {   x4[i] += h * d4[3] * Eg[i];
+        for (i = 0; i < n; i++) {
+            x4[i] += h * d4[3] * Eg[i];
 
             // cant use abs because cppad.hpp may not be included
             Scalar diff = x4[i] - x3[i];
-            if( diff < zero )
+            if (diff < zero)
                 e[i] -= diff;
             else
                 e[i] += diff;
@@ -491,6 +438,6 @@ Vector Rosen34(
     return xf;
 }
 
-} // End CppAD namespace
+}  // namespace CppAD
 
-# endif
+#endif

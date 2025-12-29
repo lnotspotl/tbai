@@ -27,19 +27,18 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************/
 
+#include <ocs2_slp/Helpers.h>
+#include <ocs2_slp/SlpMpc.h>
+#include <ocs2_slp/SlpSettings.h>
+#include <ocs2_slp/SlpSolver.h>
+#include <ocs2_slp/SlpSolverStatus.h>
 #include <ocs2_slp/pipg/PipgBounds.h>
 #include <ocs2_slp/pipg/PipgSettings.h>
 #include <ocs2_slp/pipg/PipgSolver.h>
 #include <ocs2_slp/pipg/PipgSolverStatus.h>
 #include <ocs2_slp/pipg/SingleThreadPipg.h>
 
-#include <ocs2_slp/Helpers.h>
-#include <ocs2_slp/SlpMpc.h>
-#include <ocs2_slp/SlpSettings.h>
-#include <ocs2_slp/SlpSolver.h>
-#include <ocs2_slp/SlpSolverStatus.h>
-
 // dummy target for clang toolchain
 int main() {
-  return 0;
+    return 0;
 }

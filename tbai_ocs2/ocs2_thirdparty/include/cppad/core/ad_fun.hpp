@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_AD_FUN_HPP
-# define CPPAD_CORE_AD_FUN_HPP
+#ifndef CPPAD_CORE_AD_FUN_HPP
+#define CPPAD_CORE_AD_FUN_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -48,9 +48,9 @@ $childtable%
 
 $end
 */
-# include <cppad/local/subgraph/info.hpp>
+#include <cppad/local/subgraph/info.hpp>
 
-namespace CppAD { // BEGIN_CPPAD_NAMESPACE
+namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
 /*!
 \file ad_fun.hpp
 File used to define the ADFun<Base> class.
@@ -64,12 +64,13 @@ A function object has a recording of <tt>AD<Base></tt> operations.
 It does it calculations using Base operations.
 */
 
-
 template <class Base, class RecBase>
 class ADFun {
     // ADFun<Base> must be a friend of ADFun< AD<Base> > for base2ad to work.
-    template <class Base2, class RecBase2> friend class ADFun;
-private:
+    template <class Base2, class RecBase2>
+    friend class ADFun;
+
+   private:
     // ------------------------------------------------------------
     // Private member variables
     // ------------------------------------------------------------
@@ -161,156 +162,88 @@ private:
     // vector of bool version of ForSparseJac
     // (doxygen in cppad/core/for_sparse_jac.hpp)
     template <class SetVector>
-    void ForSparseJacCase(
-        bool               set_type  ,
-        bool               transpose ,
-        bool               dependency,
-        size_t             q         ,
-        const SetVector&   r         ,
-        SetVector&         s
-    );
+    void ForSparseJacCase(bool set_type, bool transpose, bool dependency, size_t q, const SetVector &r, SetVector &s);
 
     // vector of std::set<size_t> version of ForSparseJac
     // (doxygen in cppad/core/for_sparse_jac.hpp)
     template <class SetVector>
-    void ForSparseJacCase(
-        const std::set<size_t>&  set_type  ,
-        bool                     transpose ,
-        bool                     dependency,
-        size_t                   q         ,
-        const SetVector&         r         ,
-        SetVector&               s
-    );
+    void ForSparseJacCase(const std::set<size_t> &set_type, bool transpose, bool dependency, size_t q,
+                          const SetVector &r, SetVector &s);
 
     // vector of bool version of RevSparseJac
     // (doxygen in cppad/core/rev_sparse_jac.hpp)
     template <class SetVector>
-    void RevSparseJacCase(
-        bool               set_type  ,
-        bool               transpose ,
-        bool               dependency,
-        size_t             p         ,
-        const SetVector&   s         ,
-        SetVector&         r
-    );
+    void RevSparseJacCase(bool set_type, bool transpose, bool dependency, size_t p, const SetVector &s, SetVector &r);
 
     // vector of std::set<size_t> version of RevSparseJac
     // (doxygen in cppad/core/rev_sparse_jac.hpp)
     template <class SetVector>
-    void RevSparseJacCase(
-        const std::set<size_t>&  set_type  ,
-        bool                     transpose ,
-        bool                     dependency,
-        size_t                   p         ,
-        const SetVector&         s         ,
-        SetVector&               r
-    );
+    void RevSparseJacCase(const std::set<size_t> &set_type, bool transpose, bool dependency, size_t p,
+                          const SetVector &s, SetVector &r);
 
     // vector of bool version of ForSparseHes
     // (doxygen in cppad/core/for_sparse_hes.hpp)
     template <class SetVector>
-    void ForSparseHesCase(
-        bool               set_type  ,
-        const SetVector&   r         ,
-        const SetVector&   s         ,
-        SetVector&         h
-    );
+    void ForSparseHesCase(bool set_type, const SetVector &r, const SetVector &s, SetVector &h);
 
     // vector of std::set<size_t> version of ForSparseHes
     // (doxygen in cppad/core/for_sparse_hes.hpp)
     template <class SetVector>
-    void ForSparseHesCase(
-        const std::set<size_t>&  set_type  ,
-        const SetVector&         r         ,
-        const SetVector&         s         ,
-        SetVector&               h
-    );
+    void ForSparseHesCase(const std::set<size_t> &set_type, const SetVector &r, const SetVector &s, SetVector &h);
 
     // vector of bool version of RevSparseHes
     // (doxygen in cppad/core/rev_sparse_hes.hpp)
     template <class SetVector>
-    void RevSparseHesCase(
-        bool               set_type  ,
-        bool               transpose ,
-        size_t             q         ,
-        const SetVector&   s         ,
-        SetVector&         h
-    );
+    void RevSparseHesCase(bool set_type, bool transpose, size_t q, const SetVector &s, SetVector &h);
 
     // vector of std::set<size_t> version of RevSparseHes
     // (doxygen in cppad/core/rev_sparse_hes.hpp)
     template <class SetVector>
-    void RevSparseHesCase(
-        const std::set<size_t>&  set_type  ,
-        bool                     transpose ,
-        size_t                   q         ,
-        const SetVector&         s         ,
-        SetVector&               h
-    );
+    void RevSparseHesCase(const std::set<size_t> &set_type, bool transpose, size_t q, const SetVector &s, SetVector &h);
 
     // Forward mode version of SparseJacobian
     // (doxygen in cppad/core/sparse_jacobian.hpp)
     template <class BaseVector, class SetVector, class SizeVector>
-    size_t SparseJacobianFor(
-        const BaseVector&           x               ,
-              SetVector&            p_transpose     ,
-        const SizeVector&           row             ,
-        const SizeVector&           col             ,
-              BaseVector&           jac             ,
-              sparse_jacobian_work& work
-    );
+    size_t SparseJacobianFor(const BaseVector &x, SetVector &p_transpose, const SizeVector &row, const SizeVector &col,
+                             BaseVector &jac, sparse_jacobian_work &work);
 
     // Reverse mode version of SparseJacobian
     // (doxygen in cppad/core/sparse_jacobian.hpp)
     template <class BaseVector, class SetVector, class SizeVector>
-    size_t SparseJacobianRev(
-        const BaseVector&           x               ,
-              SetVector&            p               ,
-        const SizeVector&           row             ,
-        const SizeVector&           col             ,
-              BaseVector&           jac             ,
-              sparse_jacobian_work& work
-    );
+    size_t SparseJacobianRev(const BaseVector &x, SetVector &p, const SizeVector &row, const SizeVector &col,
+                             BaseVector &jac, sparse_jacobian_work &work);
 
     // combined sparse_list and sparse_pack version of SparseHessian
     // (doxygen in cppad/core/sparse_hessian.hpp)
     template <class BaseVector, class SetVector, class SizeVector>
-    size_t SparseHessianCompute(
-        const BaseVector&              x           ,
-        const BaseVector&              w           ,
-              SetVector&               sparsity    ,
-        const SizeVector&              row         ,
-        const SizeVector&              col         ,
-              BaseVector&              hes         ,
-              sparse_hessian_work&     work
-    );
+    size_t SparseHessianCompute(const BaseVector &x, const BaseVector &w, SetVector &sparsity, const SizeVector &row,
+                                const SizeVector &col, BaseVector &hes, sparse_hessian_work &work);
 
-public:
+   public:
     /// default constructor
     ADFun(void);
 
     /// copy constructor
-    ADFun(const ADFun& g);
+    ADFun(const ADFun &g);
 
     // assignment operator
     // (doxygen in cppad/core/fun_construct.hpp)
-    void operator=(const ADFun& f);
-# if CPPAD_USE_CPLUSPLUS_2011
+    void operator=(const ADFun &f);
+#if CPPAD_USE_CPLUSPLUS_2011
     // assignment operator with move semantics
-    void operator=(ADFun&& f);
-# endif
+    void operator=(ADFun &&f);
+#endif
 
     // create ADFun< AD<Base> > from this ADFun<Base>
     // (doxygen in cppad/core/base2ad.hpp)
-    ADFun< AD<Base>, RecBase > base2ad(void) const;
+    ADFun<AD<Base>, RecBase> base2ad(void) const;
 
     /// sequence constructor
     template <class ADvector>
     ADFun(const ADvector &x, const ADvector &y);
 
     /// destructor
-    ~ADFun(void)
-    { }
+    ~ADFun(void) {}
 
     /// set check_for_nan
     void check_for_nan(bool value);
@@ -324,17 +257,15 @@ public:
 
     /// new_dynamic user API
     template <class BaseVector>
-    void new_dynamic(const BaseVector& dynamic);
+    void new_dynamic(const BaseVector &dynamic);
 
     /// forward mode user API, one order multiple directions.
     template <class BaseVector>
-    BaseVector Forward(size_t q, size_t r, const BaseVector& x);
+    BaseVector Forward(size_t q, size_t r, const BaseVector &x);
 
     /// forward mode user API, multiple directions one order.
     template <class BaseVector>
-    BaseVector Forward(size_t q,
-        const BaseVector& x, std::ostream& s = std::cout
-    );
+    BaseVector Forward(size_t q, const BaseVector &x, std::ostream &s = std::cout);
 
     /// reverse mode sweep
     template <class BaseVector>
@@ -343,285 +274,175 @@ public:
     // forward Jacobian sparsity pattern
     // (doxygen in cppad/core/for_sparse_jac.hpp)
     template <class SetVector>
-    SetVector ForSparseJac(
-        size_t q, const SetVector &r, bool transpose = false,
-        bool dependency = false
-    );
+    SetVector ForSparseJac(size_t q, const SetVector &r, bool transpose = false, bool dependency = false);
 
     // reverse Jacobian sparsity pattern
     // (doxygen in cppad/core/rev_sparse_jac.hpp)
     template <class SetVector>
-    SetVector RevSparseJac(
-        size_t q, const SetVector &s, bool transpose = false,
-        bool dependency = false
-    );
+    SetVector RevSparseJac(size_t q, const SetVector &s, bool transpose = false, bool dependency = false);
 
     // subgraph_reverse: select domain
     // (doxygen in cppad/core/subgraph_reverse.hpp)
     template <class BoolVector>
-    void subgraph_reverse(
-        const BoolVector&                   select_domain
-    );
+    void subgraph_reverse(const BoolVector &select_domain);
 
     // subgraph_reverse: compute derivative
     // (doxygen in cppad/core/subgraph_reverse.hpp)
     template <class Addr, class BaseVector, class SizeVector>
-    void subgraph_reverse_helper(
-        size_t                               q         ,
-        size_t                               ell       ,
-        SizeVector&                          col       ,
-        BaseVector&                          dw
-    );
+    void subgraph_reverse_helper(size_t q, size_t ell, SizeVector &col, BaseVector &dw);
 
     // subgraph_reverse: compute derivative
     // (doxygen in cppad/core/subgraph_reverse.hpp)
     template <class BaseVector, class SizeVector>
-    void subgraph_reverse(
-        size_t                               q         ,
-        size_t                               ell       ,
-        SizeVector&                          col       ,
-        BaseVector&                          dw
-    );
+    void subgraph_reverse(size_t q, size_t ell, SizeVector &col, BaseVector &dw);
 
     // subgraph_jac_rev: compute Jacobian
     // (doxygen in cppad/core/subgraph_jac_rev.hpp)
     template <class SizeVector, class BaseVector>
-    void subgraph_jac_rev(
-        const BaseVector&                    x         ,
-        sparse_rcv<SizeVector, BaseVector>&  subset
-    );
+    void subgraph_jac_rev(const BaseVector &x, sparse_rcv<SizeVector, BaseVector> &subset);
 
     // subgraph_jac_rev: compute Jacobian
     // (doxygen missing in cppad/core/subgraph_jac_rev.hpp)
     template <class BoolVector, class SizeVector, class BaseVector>
-    void subgraph_jac_rev(
-        const BoolVector&                    select_domain ,
-        const BoolVector&                    select_range  ,
-        const BaseVector&                    x             ,
-        sparse_rcv<SizeVector, BaseVector>&  matrix_out
-    );
-
+    void subgraph_jac_rev(const BoolVector &select_domain, const BoolVector &select_range, const BaseVector &x,
+                          sparse_rcv<SizeVector, BaseVector> &matrix_out);
 
     // compute sparse Jacobian using forward mode
     // (doxygen in cppad/core/sparse_jac.hpp)
     template <class SizeVector, class BaseVector>
-    size_t sparse_jac_for(
-        size_t                               group_max ,
-        const BaseVector&                    x         ,
-        sparse_rcv<SizeVector, BaseVector>&  subset    ,
-        const sparse_rc<SizeVector>&         pattern   ,
-        const std::string&                   coloring  ,
-        sparse_jac_work&                     work
-    );
+    size_t sparse_jac_for(size_t group_max, const BaseVector &x, sparse_rcv<SizeVector, BaseVector> &subset,
+                          const sparse_rc<SizeVector> &pattern, const std::string &coloring, sparse_jac_work &work);
 
     // compute sparse Jacobian using reverse mode
     // (doxygen in cppad/core/sparse_jac.hpp)
     template <class SizeVector, class BaseVector>
-    size_t sparse_jac_rev(
-        const BaseVector&                    x        ,
-        sparse_rcv<SizeVector, BaseVector>&  subset   ,
-        const sparse_rc<SizeVector>&         pattern  ,
-        const std::string&                   coloring ,
-        sparse_jac_work&                     work
-    );
+    size_t sparse_jac_rev(const BaseVector &x, sparse_rcv<SizeVector, BaseVector> &subset,
+                          const sparse_rc<SizeVector> &pattern, const std::string &coloring, sparse_jac_work &work);
 
     // compute sparse Hessian
     // (doxygen in cppad/core/sparse_hes.hpp)
     template <class SizeVector, class BaseVector>
-    size_t sparse_hes(
-        const BaseVector&                    x        ,
-        const BaseVector&                    w        ,
-        sparse_rcv<SizeVector, BaseVector>&  subset   ,
-        const sparse_rc<SizeVector>&         pattern  ,
-        const std::string&                   coloring ,
-        sparse_hes_work&                     work
-    );
+    size_t sparse_hes(const BaseVector &x, const BaseVector &w, sparse_rcv<SizeVector, BaseVector> &subset,
+                      const sparse_rc<SizeVector> &pattern, const std::string &coloring, sparse_hes_work &work);
 
     // compute sparsity pattern using subgraphs
     // (doxygen in cppad/core/subgraph_sparsity.hpp)
     template <class BoolVector, class SizeVector>
-    void subgraph_sparsity(
-        const BoolVector&            select_domain    ,
-        const BoolVector&            select_range     ,
-        bool                         transpose        ,
-        sparse_rc<SizeVector>&       pattern_out
-    );
-
+    void subgraph_sparsity(const BoolVector &select_domain, const BoolVector &select_range, bool transpose,
+                           sparse_rc<SizeVector> &pattern_out);
 
     // forward mode Jacobian sparsity pattern
     // (doxygen in cppad/core/for_jac_sparsity.hpp)
     template <class SizeVector>
-    void for_jac_sparsity(
-        const sparse_rc<SizeVector>& pattern_in       ,
-        bool                         transpose        ,
-        bool                         dependency       ,
-        bool                         internal_bool    ,
-        sparse_rc<SizeVector>&       pattern_out
-    );
+    void for_jac_sparsity(const sparse_rc<SizeVector> &pattern_in, bool transpose, bool dependency, bool internal_bool,
+                          sparse_rc<SizeVector> &pattern_out);
 
     // reverse mode Jacobian sparsity pattern
     // (doxygen in cppad/core/for_jac_sparsity.hpp)
     template <class SizeVector>
-    void rev_jac_sparsity(
-        const sparse_rc<SizeVector>& pattern_in       ,
-        bool                         transpose        ,
-        bool                         dependency       ,
-        bool                         internal_bool    ,
-        sparse_rc<SizeVector>&       pattern_out
-    );
+    void rev_jac_sparsity(const sparse_rc<SizeVector> &pattern_in, bool transpose, bool dependency, bool internal_bool,
+                          sparse_rc<SizeVector> &pattern_out);
 
     // reverse mode Hessian sparsity pattern
     // (doxygen in cppad/core/rev_hes_sparsity.hpp)
     template <class BoolVector, class SizeVector>
-    void rev_hes_sparsity(
-        const BoolVector&            select_range     ,
-        bool                         transpose        ,
-        bool                         internal_bool    ,
-        sparse_rc<SizeVector>&       pattern_out
-    );
+    void rev_hes_sparsity(const BoolVector &select_range, bool transpose, bool internal_bool,
+                          sparse_rc<SizeVector> &pattern_out);
 
     // forward mode Hessian sparsity pattern
     // (doxygen in cppad/core/for_hes_sparsity.hpp)
     template <class BoolVector, class SizeVector>
-    void for_hes_sparsity(
-        const BoolVector&            select_domain    ,
-        const BoolVector&            select_range     ,
-        bool                         internal_bool    ,
-        sparse_rc<SizeVector>&       pattern_out
-    );
+    void for_hes_sparsity(const BoolVector &select_domain, const BoolVector &select_range, bool internal_bool,
+                          sparse_rc<SizeVector> &pattern_out);
 
     // forward mode Hessian sparsity pattern
     // (see doxygen in cppad/core/for_sparse_hes.hpp)
     template <class SetVector>
-    SetVector ForSparseHes(
-        const SetVector &r, const SetVector &s
-    );
+    SetVector ForSparseHes(const SetVector &r, const SetVector &s);
 
     // internal set sparsity version of ForSparseHes
     // (used by checkpoint functions only)
-    void ForSparseHesCheckpoint(
-        vector<bool>&                 r         ,
-        vector<bool>&                 s         ,
-        local::sparse_list&                  h
-    );
+    void ForSparseHesCheckpoint(vector<bool> &r, vector<bool> &s, local::sparse_list &h);
 
     // reverse mode Hessian sparsity pattern
     // (see doxygen in cppad/core/rev_sparse_hes.hpp)
     template <class SetVector>
-    SetVector RevSparseHes(
-        size_t q, const SetVector &s, bool transpose = false
-    );
+    SetVector RevSparseHes(size_t q, const SetVector &s, bool transpose = false);
 
     // internal set sparsity version of RevSparseHes
     // (doxygen in cppad/core/rev_sparse_hes.hpp)
     // (used by checkpoint functions only)
-    void RevSparseHesCheckpoint(
-        size_t                        q         ,
-        vector<bool>&                 s         ,
-        bool                          transpose ,
-        local::sparse_list&                  h
-    );
+    void RevSparseHesCheckpoint(size_t q, vector<bool> &s, bool transpose, local::sparse_list &h);
 
     // internal set sparsity version of RevSparseJac
     // (doxygen in cppad/core/rev_sparse_jac.hpp)
     // (used by checkpoint functions only)
-    void RevSparseJacCheckpoint(
-        size_t                        q          ,
-        const local::sparse_list&     r          ,
-        bool                          transpose  ,
-        bool                          dependency ,
-        local::sparse_list&                  s
-    );
+    void RevSparseJacCheckpoint(size_t q, const local::sparse_list &r, bool transpose, bool dependency,
+                                local::sparse_list &s);
 
     // internal set sparsity version of RevSparseJac
     // (doxygen in cppad/core/for_sparse_jac.hpp)
     // (used by checkpoint functions only)
-    void ForSparseJacCheckpoint(
-    size_t                        q          ,
-    const local::sparse_list&     r          ,
-    bool                          transpose  ,
-    bool                          dependency ,
-    local::sparse_list&                  s
-    );
+    void ForSparseJacCheckpoint(size_t q, const local::sparse_list &r, bool transpose, bool dependency,
+                                local::sparse_list &s);
 
     /// amount of memory used for boolean Jacobain sparsity pattern
-    size_t size_forward_bool(void) const
-    {   return for_jac_sparse_pack_.memory(); }
+    size_t size_forward_bool(void) const { return for_jac_sparse_pack_.memory(); }
 
     /// free memory used for Jacobain sparsity pattern
-    void size_forward_bool(size_t zero)
-    {   CPPAD_ASSERT_KNOWN(
-            zero == 0,
-            "size_forward_bool: argument not equal to zero"
-        );
+    void size_forward_bool(size_t zero) {
+        CPPAD_ASSERT_KNOWN(zero == 0, "size_forward_bool: argument not equal to zero");
         for_jac_sparse_pack_.resize(0, 0);
     }
 
     /// amount of memory used for vector of set Jacobain sparsity pattern
-    size_t size_forward_set(void) const
-    {   return for_jac_sparse_set_.memory(); }
+    size_t size_forward_set(void) const { return for_jac_sparse_set_.memory(); }
 
     /// free memory used for Jacobain sparsity pattern
-    void size_forward_set(size_t zero)
-    {   CPPAD_ASSERT_KNOWN(
-            zero == 0,
-            "size_forward_bool: argument not equal to zero"
-        );
+    void size_forward_set(size_t zero) {
+        CPPAD_ASSERT_KNOWN(zero == 0, "size_forward_bool: argument not equal to zero");
         for_jac_sparse_set_.resize(0, 0);
     }
 
     /// number of operators in the operation sequence
-    size_t size_op(void) const
-    {   return play_.num_op_rec(); }
+    size_t size_op(void) const { return play_.num_op_rec(); }
 
     /// number of operator arguments in the operation sequence
-    size_t size_op_arg(void) const
-    {   return play_.num_op_arg_rec(); }
+    size_t size_op_arg(void) const { return play_.num_op_arg_rec(); }
 
     /// amount of memory required for the operation sequence
-    size_t size_op_seq(void) const
-    {   return play_.size_op_seq(); }
+    size_t size_op_seq(void) const { return play_.size_op_seq(); }
 
     /// amount of memory currently allocated for random access
     /// of the operation sequence
-    size_t size_random(void) const
-    {   return play_.size_random(); }
+    size_t size_random(void) const { return play_.size_random(); }
 
     /// number of parameters in the operation sequence
-    size_t size_par(void) const
-    {   return play_.num_par_rec(); }
+    size_t size_par(void) const { return play_.num_par_rec(); }
 
     /// number of independent dynamic parameters
-    size_t size_dyn_ind(void) const
-    {   return play_.num_dynamic_ind(); }
+    size_t size_dyn_ind(void) const { return play_.num_dynamic_ind(); }
 
     /// number of dynamic parameters
-    size_t size_dyn_par(void) const
-    {   return play_.num_dynamic_par(); }
+    size_t size_dyn_par(void) const { return play_.num_dynamic_par(); }
 
     /// number of dynamic parameters arguments
-    size_t size_dyn_arg(void) const
-    {   return play_.num_dynamic_arg(); }
+    size_t size_dyn_arg(void) const { return play_.num_dynamic_arg(); }
 
     /// number taylor coefficient orders calculated
-    size_t size_order(void) const
-    {   return num_order_taylor_; }
+    size_t size_order(void) const { return num_order_taylor_; }
 
     /// number taylor coefficient directions calculated
-    size_t size_direction(void) const
-    {   return num_direction_taylor_; }
+    size_t size_direction(void) const { return num_direction_taylor_; }
 
     /// number of characters in the operation sequence
-    size_t size_text(void) const
-    {   return play_.num_text_rec(); }
+    size_t size_text(void) const { return play_.num_text_rec(); }
 
     /// number of variables in opertion sequence
-    size_t size_var(void) const
-    {   return num_var_tape_; }
+    size_t size_var(void) const { return num_var_tape_; }
 
     /// number of VecAD indices in the operation sequence
-    size_t size_VecAD(void) const
-    {   return play_.num_vec_ind_rec(); }
+    size_t size_VecAD(void) const { return play_.num_vec_ind_rec(); }
 
     /// set number of orders currently allocated (user API)
     void capacity_order(size_t c);
@@ -633,42 +454,34 @@ public:
     size_t number_skip(void);
 
     /// number of independent variables
-    size_t Domain(void) const
-    {   return ind_taddr_.size(); }
+    size_t Domain(void) const { return ind_taddr_.size(); }
 
     /// number of dependent variables
-    size_t Range(void) const
-    {   return dep_taddr_.size(); }
+    size_t Range(void) const { return dep_taddr_.size(); }
 
     /// is variable a parameter
-    bool Parameter(size_t i)
-    {   CPPAD_ASSERT_KNOWN(
-            i < dep_taddr_.size(),
-            "Argument to Parameter is >= dimension of range space"
-        );
+    bool Parameter(size_t i) {
+        CPPAD_ASSERT_KNOWN(i < dep_taddr_.size(), "Argument to Parameter is >= dimension of range space");
         return dep_parameter_[i];
     }
 
     /// Deprecated: number of comparison operations that changed
     /// for the previous zero order forward (than when function was recorded)
-    size_t CompareChange(void) const
-    {   return compare_change_number_; }
+    size_t CompareChange(void) const { return compare_change_number_; }
 
     /// count as which to store operator index
-    void compare_change_count(size_t count)
-    {   compare_change_count_    = count;
-        compare_change_number_   = 0;
+    void compare_change_count(size_t count) {
+        compare_change_count_ = count;
+        compare_change_number_ = 0;
         compare_change_op_index_ = 0;
     }
 
     /// number of comparison operations that changed
-    size_t compare_change_number(void) const
-    {   return compare_change_number_; }
+    size_t compare_change_number(void) const { return compare_change_number_; }
 
     /// operator index for the count-th  comparison change
-    size_t compare_change_op_index(void) const
-    {   if( has_been_optimized_ )
-            return 0;
+    size_t compare_change_op_index(void) const {
+        if (has_been_optimized_) return 0;
         return compare_change_op_index_;
     }
 
@@ -684,88 +497,47 @@ public:
 
     /// forward mode calculation of partial w.r.t one domain component
     template <class BaseVector>
-    BaseVector ForOne(
-        const BaseVector   &x ,
-        size_t              j );
+    BaseVector ForOne(const BaseVector &x, size_t j);
 
     /// reverse mode calculation of derivative of one range component
     template <class BaseVector>
-    BaseVector RevOne(
-        const BaseVector   &x ,
-        size_t              i );
+    BaseVector RevOne(const BaseVector &x, size_t i);
 
     /// forward mode calculation of a subset of second order partials
     template <class BaseVector, class SizeVector_t>
-    BaseVector ForTwo(
-        const BaseVector   &x ,
-        const SizeVector_t &J ,
-        const SizeVector_t &K );
+    BaseVector ForTwo(const BaseVector &x, const SizeVector_t &J, const SizeVector_t &K);
 
     /// reverse mode calculation of a subset of second order partials
     template <class BaseVector, class SizeVector_t>
-    BaseVector RevTwo(
-        const BaseVector   &x ,
-        const SizeVector_t &I ,
-        const SizeVector_t &J );
+    BaseVector RevTwo(const BaseVector &x, const SizeVector_t &I, const SizeVector_t &J);
 
     /// calculate sparse Jacobians
     template <class BaseVector>
-    BaseVector SparseJacobian(
-        const BaseVector &x
-    );
+    BaseVector SparseJacobian(const BaseVector &x);
     template <class BaseVector, class SetVector>
-    BaseVector SparseJacobian(
-        const BaseVector &x ,
-        const SetVector  &p
-    );
+    BaseVector SparseJacobian(const BaseVector &x, const SetVector &p);
     template <class BaseVector, class SetVector, class SizeVector>
-    size_t SparseJacobianForward(
-        const BaseVector&     x     ,
-        const SetVector&      p     ,
-        const SizeVector&     r     ,
-        const SizeVector&     c     ,
-        BaseVector&           jac   ,
-        sparse_jacobian_work& work
-    );
+    size_t SparseJacobianForward(const BaseVector &x, const SetVector &p, const SizeVector &r, const SizeVector &c,
+                                 BaseVector &jac, sparse_jacobian_work &work);
     template <class BaseVector, class SetVector, class SizeVector>
-    size_t SparseJacobianReverse(
-        const BaseVector&     x    ,
-        const SetVector&      p    ,
-        const SizeVector&     r    ,
-        const SizeVector&     c    ,
-        BaseVector&           jac  ,
-        sparse_jacobian_work& work
-    );
+    size_t SparseJacobianReverse(const BaseVector &x, const SetVector &p, const SizeVector &r, const SizeVector &c,
+                                 BaseVector &jac, sparse_jacobian_work &work);
 
     /// calculate sparse Hessians
     template <class BaseVector>
-    BaseVector SparseHessian(
-        const BaseVector&    x  ,
-        const BaseVector&    w
-    );
+    BaseVector SparseHessian(const BaseVector &x, const BaseVector &w);
     template <class BaseVector, class BoolVector>
-    BaseVector SparseHessian(
-        const BaseVector&    x  ,
-        const BaseVector&    w  ,
-        const BoolVector&    p
-    );
+    BaseVector SparseHessian(const BaseVector &x, const BaseVector &w, const BoolVector &p);
     template <class BaseVector, class SetVector, class SizeVector>
-    size_t SparseHessian(
-        const BaseVector&    x   ,
-        const BaseVector&    w   ,
-        const SetVector&     p   ,
-        const SizeVector&    r   ,
-        const SizeVector&    c   ,
-        BaseVector&          hes ,
-        sparse_hessian_work& work
-    );
+    size_t SparseHessian(const BaseVector &x, const BaseVector &w, const SetVector &p, const SizeVector &r,
+                         const SizeVector &c, BaseVector &hes, sparse_hessian_work &work);
 
     // Optimize the tape
     // (see doxygen documentation in optimize.hpp)
-    void optimize( const std::string& options = "" );
+    void optimize(const std::string &options = "");
 
     // create abs-normal representation of the function f(x)
-    void abs_normal_fun( ADFun& g, ADFun& a ) const;
+    void abs_normal_fun(ADFun &g, ADFun &a) const;
 
     // clear all subgraph information
     void clear_subgraph(void);
@@ -776,41 +548,34 @@ public:
     void Dependent(const ADvector &y);
 
     /// Deprecated: number of variables in opertion sequence
-    size_t Size(void) const
-    {   return num_var_tape_; }
+    size_t Size(void) const { return num_var_tape_; }
 
     /// Deprecated: # taylor_ coefficients currently stored
     /// (per variable,direction)
-    size_t Order(void) const
-    {   return num_order_taylor_ - 1; }
+    size_t Order(void) const { return num_order_taylor_ - 1; }
 
     /// Deprecated: amount of memory for this object
     /// Note that an approximation is used for the std::set<size_t> memory
-    size_t Memory(void) const
-    {   size_t pervar  = cap_order_taylor_ * sizeof(Base)
-        + for_jac_sparse_pack_.memory()
-        + for_jac_sparse_set_.memory();
-        size_t total   = num_var_tape_  * pervar;
-        total         += play_.size_op_seq();
-        total         += play_.size_random();
-        total         += subgraph_info_.memory();
+    size_t Memory(void) const {
+        size_t pervar = cap_order_taylor_ * sizeof(Base) + for_jac_sparse_pack_.memory() + for_jac_sparse_set_.memory();
+        size_t total = num_var_tape_ * pervar;
+        total += play_.size_op_seq();
+        total += play_.size_random();
+        total += subgraph_info_.memory();
         return total;
     }
 
     /// Deprecated: # taylor_ coefficient orderss stored
     /// (per variable,direction)
-    size_t taylor_size(void) const
-    {   return num_order_taylor_; }
+    size_t taylor_size(void) const { return num_order_taylor_; }
 
     /// Deprecated: Does this AD operation sequence use
     /// VecAD<Base>::reference operands
-    bool use_VecAD(void) const
-    {   return play_.num_vec_ind_rec() > 0; }
+    bool use_VecAD(void) const { return play_.num_vec_ind_rec() > 0; }
 
     /// Deprecated: # taylor_ coefficient orders calculated
     /// (per variable,direction)
-    size_t size_taylor(void) const
-    {   return num_order_taylor_; }
+    size_t size_taylor(void) const { return num_order_taylor_; }
 
     /// Deprecated: set number of orders currently allocated
     /// (per variable,direction)
@@ -818,30 +583,30 @@ public:
 };
 // ---------------------------------------------------------------------------
 
-} // END_CPPAD_NAMESPACE
+}  // namespace CppAD
 
 // non-user interfaces
-# include <cppad/local/sweep/forward0.hpp>
-# include <cppad/local/sweep/forward1.hpp>
-# include <cppad/local/sweep/forward2.hpp>
-# include <cppad/local/sweep/reverse.hpp>
-# include <cppad/local/sweep/for_jac.hpp>
-# include <cppad/local/sweep/rev_jac.hpp>
-# include <cppad/local/sweep/rev_hes.hpp>
-# include <cppad/local/sweep/for_hes.hpp>
+#include <cppad/local/sweep/for_hes.hpp>
+#include <cppad/local/sweep/for_jac.hpp>
+#include <cppad/local/sweep/forward0.hpp>
+#include <cppad/local/sweep/forward1.hpp>
+#include <cppad/local/sweep/forward2.hpp>
+#include <cppad/local/sweep/rev_hes.hpp>
+#include <cppad/local/sweep/rev_jac.hpp>
+#include <cppad/local/sweep/reverse.hpp>
 
 // user interfaces
-# include <cppad/core/parallel_ad.hpp>
-# include <cppad/core/independent.hpp>
-# include <cppad/core/dependent.hpp>
-# include <cppad/core/fun_construct.hpp>
-# include <cppad/core/base2ad.hpp>
-# include <cppad/core/abort_recording.hpp>
-# include <cppad/core/fun_eval.hpp>
-# include <cppad/core/drivers.hpp>
-# include <cppad/core/fun_check.hpp>
-# include <cppad/core/omp_max_thread.hpp>
-# include <cppad/core/optimize.hpp>
-# include <cppad/core/abs_normal_fun.hpp>
+#include <cppad/core/abort_recording.hpp>
+#include <cppad/core/abs_normal_fun.hpp>
+#include <cppad/core/base2ad.hpp>
+#include <cppad/core/dependent.hpp>
+#include <cppad/core/drivers.hpp>
+#include <cppad/core/fun_check.hpp>
+#include <cppad/core/fun_construct.hpp>
+#include <cppad/core/fun_eval.hpp>
+#include <cppad/core/independent.hpp>
+#include <cppad/core/omp_max_thread.hpp>
+#include <cppad/core/optimize.hpp>
+#include <cppad/core/parallel_ad.hpp>
 
-# endif
+#endif

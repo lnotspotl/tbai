@@ -34,20 +34,20 @@ namespace ocs2 {
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-Observer::Observer(vector_array_t* stateTrajectoryPtr /*= nullptr*/, scalar_array_t* timeTrajectoryPtr /*= nullptr*/)
+Observer::Observer(vector_array_t *stateTrajectoryPtr /*= nullptr*/, scalar_array_t *timeTrajectoryPtr /*= nullptr*/)
     : timeTrajectoryPtr_(timeTrajectoryPtr), stateTrajectoryPtr_(stateTrajectoryPtr) {}
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-void Observer::observe(const vector_t& state, scalar_t time) {
-  // Store data
-  if (stateTrajectoryPtr_ != nullptr) {
-    stateTrajectoryPtr_->push_back(state);
-  }
-  if (timeTrajectoryPtr_ != nullptr) {
-    timeTrajectoryPtr_->push_back(time);
-  }
+void Observer::observe(const vector_t &state, scalar_t time) {
+    // Store data
+    if (stateTrajectoryPtr_ != nullptr) {
+        stateTrajectoryPtr_->push_back(state);
+    }
+    if (timeTrajectoryPtr_ != nullptr) {
+        timeTrajectoryPtr_->push_back(time);
+    }
 }
 
 }  // namespace ocs2

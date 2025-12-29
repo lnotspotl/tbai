@@ -1,5 +1,5 @@
-# ifndef CPPAD_LOCAL_PLAY_ADDR_ENUM_HPP
-# define CPPAD_LOCAL_PLAY_ADDR_ENUM_HPP
+#ifndef CPPAD_LOCAL_PLAY_ADDR_ENUM_HPP
+#define CPPAD_LOCAL_PLAY_ADDR_ENUM_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -13,18 +13,18 @@ in the Eclipse Public License, Version 2.0 are satisfied:
 ---------------------------------------------------------------------------- */
 
 // BEGIN_CPPAD_LOCAL_PLAY_NAMESPACE
-namespace CppAD { namespace local { namespace play {
+namespace CppAD {
+namespace local {
+namespace play {
 
 /*!
 \file addr_enum.hpp
 */
 /// enum corresponding to type used for addressing iterators for a player
-enum addr_enum {
-    unsigned_short_enum  ,
-    unsigned_int_enum    ,
-    size_t_enum
-};
+enum addr_enum { unsigned_short_enum, unsigned_int_enum, size_t_enum };
 
-} } } // BEGIN_CPPAD_LOCAL_PLAY_NAMESPACE
+}  // namespace play
+}  // namespace local
+}  // namespace CppAD
 
-# endif
+#endif

@@ -28,28 +28,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************/
 
 #include <ocs2_core/loopshaping/LoopshapingPreComputation.h>
-#include <ocs2_core/loopshaping/constraint/LoopshapingStateInputConstraint.h>
-
 #include <ocs2_core/loopshaping/constraint/LoopshapingConstraintEliminatePattern.h>
 #include <ocs2_core/loopshaping/constraint/LoopshapingConstraintOutputPattern.h>
+#include <ocs2_core/loopshaping/constraint/LoopshapingStateInputConstraint.h>
 
 namespace ocs2 {
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-vector_array_t LoopshapingStateInputConstraint::getValue(scalar_t t, const vector_t& x, const vector_t& u,
-                                                         const PreComputation& preComp) const {
-  if (this->empty()) {
-    return vector_array_t();
-  }
+vector_array_t LoopshapingStateInputConstraint::getValue(scalar_t t, const vector_t &x, const vector_t &u,
+                                                         const PreComputation &preComp) const {
+    if (this->empty()) {
+        return vector_array_t();
+    }
 
-  const LoopshapingPreComputation& preCompLS = cast<LoopshapingPreComputation>(preComp);
-  const auto& x_system = preCompLS.getSystemState();
-  const auto& u_system = preCompLS.getSystemInput();
-  const auto& preComp_system = preCompLS.getSystemPreComputation();
+    const LoopshapingPreComputation &preCompLS = cast<LoopshapingPreComputation>(preComp);
+    const auto &x_system = preCompLS.getSystemState();
+    const auto &u_system = preCompLS.getSystemInput();
+    const auto &preComp_system = preCompLS.getSystemPreComputation();
 
-  return StateInputConstraintCollection::getValue(t, x_system, u_system, preComp_system);
+    return StateInputConstraintCollection::getValue(t, x_system, u_system, preComp_system);
 }
 
 }  // namespace ocs2

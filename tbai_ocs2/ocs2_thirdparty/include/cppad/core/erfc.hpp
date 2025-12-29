@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_ERFC_HPP
-# define CPPAD_CORE_ERFC_HPP
+#ifndef CPPAD_CORE_ERFC_HPP
+#define CPPAD_CORE_ERFC_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-19 Bradley M. Bell
 
@@ -60,33 +60,36 @@ contains an example and test of this function.
 $end
 -------------------------------------------------------------------------------
 */
-# include <cppad/configure.hpp>
-# if ! CPPAD_USE_CPLUSPLUS_2011
+#include <cppad/configure.hpp>
+#if !CPPAD_USE_CPLUSPLUS_2011
 
 // BEGIN CppAD namespace
 namespace CppAD {
 
 template <class Type>
-Type erfc_template(const Type &x)
-{   return Type(1) - CppAD::erf(x);
+Type erfc_template(const Type &x) {
+    return Type(1) - CppAD::erf(x);
 }
 
-inline float erfc(const float &x)
-{   return erfc_template(x); }
+inline float erfc(const float &x) {
+    return erfc_template(x);
+}
 
-inline double erfc(const double &x)
-{   return erfc_template(x); }
-
-template <class Base>
-AD<Base> erfc(const AD<Base> &x)
-{   return erfc_template(x); }
+inline double erfc(const double &x) {
+    return erfc_template(x);
+}
 
 template <class Base>
-AD<Base> erfc(const VecAD_reference<Base> &x)
-{   return erfc_template( x.ADBase() ); }
+AD<Base> erfc(const AD<Base> &x) {
+    return erfc_template(x);
+}
 
+template <class Base>
+AD<Base> erfc(const VecAD_reference<Base> &x) {
+    return erfc_template(x.ADBase());
+}
 
-} // END CppAD namespace
+}  // namespace CppAD
 
-# endif // CPPAD_USE_CPLUSPLUS_2011
-# endif // CPPAD_ERFC_INCLUDED
+#endif  // CPPAD_USE_CPLUSPLUS_2011
+#endif  // CPPAD_ERFC_INCLUDED

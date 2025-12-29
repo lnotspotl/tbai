@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_CHKPOINT_TWO_REVERSE_HPP
-# define CPPAD_CORE_CHKPOINT_TWO_REVERSE_HPP
+#ifndef CPPAD_CORE_CHKPOINT_TWO_REVERSE_HPP
+#define CPPAD_CORE_CHKPOINT_TWO_REVERSE_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -11,7 +11,7 @@ Secondary License when the conditions for such availability set forth
 in the Eclipse Public License, Version 2.0 are satisfied:
       GNU General Public License, Version 2.0 or later.
 ---------------------------------------------------------------------------- */
-namespace CppAD { // BEGIN_CPPAD_NAMESPACE
+namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
 /*!
 \file chkpoint_two/reverse.hpp
 Second generation checkpoint reverse mode.
@@ -43,39 +43,34 @@ Partials w.r.t. the y Taylor coefficients.
 See the reverse mode in user's documentation for atomic_three
 */
 template <class Base>
-bool chkpoint_two<Base>::reverse(
-    const vector<Base>&         parameter_x   ,
-    const vector<ad_type_enum>& type_x        ,
-    size_t                      order_up      ,
-    const vector<Base>&         taylor_x      ,
-    const vector<Base>&         taylor_y      ,
-    vector<Base>&               partial_x     ,
-    const vector<Base>&         partial_y     )
+bool chkpoint_two<Base>::reverse(const vector<Base> &parameter_x, const vector<ad_type_enum> &type_x, size_t order_up,
+                                 const vector<Base> &taylor_x, const vector<Base> &taylor_y, vector<Base> &partial_x,
+                                 const vector<Base> &partial_y)
 
-{   ADFun<Base>* g_ptr = &g_;
-    if( use_in_parallel_ )
-    {   size_t thread = thread_alloc::thread_num();
+{
+    ADFun<Base> *g_ptr = &g_;
+    if (use_in_parallel_) {
+        size_t thread = thread_alloc::thread_num();
         allocate_member(thread);
         g_ptr = &(member_[thread]->g_);
     }
-# ifndef NDEBUG
-    else if( thread_alloc::in_parallel() )
-    {   std::string msg = atomic_three<Base>::afun_name();
+#ifndef NDEBUG
+    else if (thread_alloc::in_parallel()) {
+        std::string msg = atomic_three<Base>::afun_name();
         msg += ": use_in_parallel is false and in_parallel() is true";
-        CPPAD_ASSERT_KNOWN(false, msg.c_str() );
+        CPPAD_ASSERT_KNOWN(false, msg.c_str());
     }
-# endif
+#endif
     // compute forward mode Taylor coefficient orders 0 through order_up
-# ifdef NDEBUG
+#ifdef NDEBUG
     g_ptr->Forward(order_up, taylor_x);
-# else
+#else
     vector<Base> check = g_ptr->Forward(order_up, taylor_x);
-    CPPAD_ASSERT_UNKNOWN( taylor_y.size() == check.size() )
-    for(size_t i = 0; i < taylor_y.size(); ++i)
-        CPPAD_ASSERT_UNKNOWN( taylor_y[i] == check[i] );
-# endif
+    CPPAD_ASSERT_UNKNOWN(taylor_y.size() == check.size())
+    for (size_t i = 0; i < taylor_y.size(); ++i) CPPAD_ASSERT_UNKNOWN(taylor_y[i] == check[i]);
+#endif
     // now can run reverse mode
-    partial_x = g_ptr->Reverse(order_up+1, partial_y);
+    partial_x = g_ptr->Reverse(order_up + 1, partial_y);
     //
     return true;
 }
@@ -106,34 +101,29 @@ Partials w.r.t. the y Taylor coefficients.
 See the reverse mode in user's documentation for atomic_three
 */
 template <class Base>
-bool chkpoint_two<Base>::reverse(
-    const vector< AD<Base> >&   aparameter_x ,
-    const vector<ad_type_enum>& type_x       ,
-    size_t                      order_up     ,
-    const vector< AD<Base> >&   ataylor_x    ,
-    const vector< AD<Base> >&   ataylor_y    ,
-    vector< AD<Base> >&         apartial_x   ,
-    const vector< AD<Base> >&   apartial_y   )
-{   ADFun< AD<Base>, Base >* ag_ptr = &ag_;
-    if( use_in_parallel_ )
-    {   size_t thread = thread_alloc::thread_num();
+bool chkpoint_two<Base>::reverse(const vector<AD<Base> > &aparameter_x, const vector<ad_type_enum> &type_x,
+                                 size_t order_up, const vector<AD<Base> > &ataylor_x,
+                                 const vector<AD<Base> > &ataylor_y, vector<AD<Base> > &apartial_x,
+                                 const vector<AD<Base> > &apartial_y) {
+    ADFun<AD<Base>, Base> *ag_ptr = &ag_;
+    if (use_in_parallel_) {
+        size_t thread = thread_alloc::thread_num();
         allocate_member(thread);
         ag_ptr = &(member_[thread]->ag_);
     }
     // compute forward mode Taylor coefficient orders 0 through order_up
-# ifdef NDEBUG
+#ifdef NDEBUG
     ag_ptr->Forward(order_up, ataylor_x);
-# else
-    vector< AD<Base> > acheck = ag_ptr->Forward(order_up, ataylor_x);
-    CPPAD_ASSERT_UNKNOWN( ataylor_y.size() == acheck.size() )
-    for(size_t i = 0; i < ataylor_y.size(); ++i)
-        CPPAD_ASSERT_UNKNOWN( ataylor_y[i] == acheck[i] );
-# endif
+#else
+    vector<AD<Base> > acheck = ag_ptr->Forward(order_up, ataylor_x);
+    CPPAD_ASSERT_UNKNOWN(ataylor_y.size() == acheck.size())
+    for (size_t i = 0; i < ataylor_y.size(); ++i) CPPAD_ASSERT_UNKNOWN(ataylor_y[i] == acheck[i]);
+#endif
     // now can run reverse mode
-    apartial_x = ag_ptr->Reverse(order_up+1, apartial_y);
+    apartial_x = ag_ptr->Reverse(order_up + 1, apartial_y);
     //
     return true;
 }
 
-} // END_CPPAD_NAMESPACE
-# endif
+}  // namespace CppAD
+#endif

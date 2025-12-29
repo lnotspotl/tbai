@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_HESSIAN_HPP
-# define CPPAD_CORE_HESSIAN_HPP
+#ifndef CPPAD_CORE_HESSIAN_HPP
+#define CPPAD_CORE_HESSIAN_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -139,26 +139,21 @@ namespace CppAD {
 
 template <class Base, class RecBase>
 template <class Vector>
-Vector ADFun<Base,RecBase>::Hessian(const Vector &x, size_t l)
-{   size_t i, m = Range();
-    CPPAD_ASSERT_KNOWN(
-        l < m,
-        "Hessian: index i is not less than range dimension for f"
-    );
+Vector ADFun<Base, RecBase>::Hessian(const Vector &x, size_t l) {
+    size_t i, m = Range();
+    CPPAD_ASSERT_KNOWN(l < m, "Hessian: index i is not less than range dimension for f");
 
     Vector w(m);
-    for(i = 0; i < m; i++)
-        w[i] = Base(0.0);
+    for (i = 0; i < m; i++) w[i] = Base(0.0);
     w[l] = Base(1.0);
 
     return Hessian(x, w);
 }
 
-
 template <class Base, class RecBase>
 template <class Vector>
-Vector ADFun<Base,RecBase>::Hessian(const Vector &x, const Vector &w)
-{   size_t j;
+Vector ADFun<Base, RecBase>::Hessian(const Vector &x, const Vector &w) {
+    size_t j;
     size_t k;
 
     size_t n = Domain();
@@ -166,14 +161,8 @@ Vector ADFun<Base,RecBase>::Hessian(const Vector &x, const Vector &w)
     // check Vector is Simple Vector class with Base type elements
     CheckSimpleVector<Base, Vector>();
 
-    CPPAD_ASSERT_KNOWN(
-        size_t(x.size()) == n,
-        "Hessian: length of x not equal domain dimension for f"
-    );
-    CPPAD_ASSERT_KNOWN(
-        size_t(w.size()) == Range(),
-        "Hessian: length of w not equal range dimension for f"
-    );
+    CPPAD_ASSERT_KNOWN(size_t(x.size()) == n, "Hessian: length of x not equal domain dimension for f");
+    CPPAD_ASSERT_KNOWN(size_t(w.size()) == Range(), "Hessian: length of w not equal range dimension for f");
 
     // point at which we are evaluating the Hessian
     Forward(0, x);
@@ -183,16 +172,13 @@ Vector ADFun<Base,RecBase>::Hessian(const Vector &x, const Vector &w)
 
     // direction vector for calls to forward
     Vector u(n);
-    for(j = 0; j < n; j++)
-        u[j] = Base(0.0);
-
+    for (j = 0; j < n; j++) u[j] = Base(0.0);
 
     // location for return values from Reverse
     Vector ddw(n * 2);
 
     // loop over forward directions
-    for(j = 0; j < n; j++)
-    {   // evaluate partials of entire function w.r.t. j-th coordinate
+    for (j = 0; j < n; j++) {  // evaluate partials of entire function w.r.t. j-th coordinate
         u[j] = Base(1.0);
         Forward(1, u);
         u[j] = Base(0.0);
@@ -201,13 +187,12 @@ Vector ADFun<Base,RecBase>::Hessian(const Vector &x, const Vector &w)
         ddw = Reverse(2, w);
 
         // return desired components
-        for(k = 0; k < n; k++)
-            hes[k * n + j] = ddw[k * 2 + 1];
+        for (k = 0; k < n; k++) hes[k * n + j] = ddw[k * 2 + 1];
     }
 
     return hes;
 }
 
-} // END CppAD namespace
+}  // namespace CppAD
 
-# endif
+#endif

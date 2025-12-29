@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_BENDER_QUAD_HPP
-# define CPPAD_CORE_BENDER_QUAD_HPP
+#ifndef CPPAD_CORE_BENDER_QUAD_HPP
+#define CPPAD_CORE_BENDER_QUAD_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -294,17 +294,11 @@ $end
 -----------------------------------------------------------------------------
 */
 
-namespace CppAD { // BEGIN CppAD namespace
+namespace CppAD {  // BEGIN CppAD namespace
 
 template <class BAvector, class Fun>
-void BenderQuad(
-    const BAvector   &x     ,
-    const BAvector   &y     ,
-    Fun               fun   ,
-    BAvector         &g     ,
-    BAvector         &gx    ,
-    BAvector         &gxx   )
-{   // determine the base type
+void BenderQuad(const BAvector &x, const BAvector &y, Fun fun, BAvector &g, BAvector &gx,
+                BAvector &gxx) {  // determine the base type
     typedef typename BAvector::value_type Base;
 
     // check that BAvector is a SimpleVector class
@@ -318,26 +312,16 @@ void BenderQuad(
     size_t m = size_t(y.size());
 
     // check the size of gx and gxx
-    CPPAD_ASSERT_KNOWN(
-        g.size() == 1,
-        "BenderQuad: size of the vector g is not equal to 1"
-    );
-    CPPAD_ASSERT_KNOWN(
-        size_t(gx.size()) == n,
-        "BenderQuad: size of the vector gx is not equal to n"
-    );
-    CPPAD_ASSERT_KNOWN(
-        size_t(gxx.size()) == n * n,
-        "BenderQuad: size of the vector gxx is not equal to n * n"
-    );
+    CPPAD_ASSERT_KNOWN(g.size() == 1, "BenderQuad: size of the vector g is not equal to 1");
+    CPPAD_ASSERT_KNOWN(size_t(gx.size()) == n, "BenderQuad: size of the vector gx is not equal to n");
+    CPPAD_ASSERT_KNOWN(size_t(gxx.size()) == n * n, "BenderQuad: size of the vector gxx is not equal to n * n");
 
     // some temporary indices
     size_t i, j;
 
     // variable versions x
     ADvector vx(n);
-    for(j = 0; j < n; j++)
-        vx[j] = x[j];
+    for (j = 0; j < n; j++) vx[j] = x[j];
 
     // declare the independent variables
     Independent(vx);
@@ -352,8 +336,7 @@ void BenderQuad(
 
     // variable version of y
     ADvector vy(m);
-    for(j = 0; j < m; j++)
-        vy[j] = y[j] + dy[j];
+    for (j = 0; j < m; j++) vy[j] = y[j] + dy[j];
 
     // evaluate G~ (x) = F [ x , y + dy(x) ]
     ADvector gtilde(1);
@@ -370,19 +353,16 @@ void BenderQuad(
 
     // initial forward direction vector as zero
     BAvector dx(n);
-    for(j = 0; j < n; j++)
-        dx[j] = Base(0.0);
+    for (j = 0; j < n; j++) dx[j] = Base(0.0);
 
     // weight, first and second order derivative values
     BAvector dg(1), w(1), ddw(2 * n);
     w[0] = 1.;
 
-
     // Jacobian and Hessian of G(x) is equal Jacobian and Hessian of Gtilde
-    for(j = 0; j < n; j++)
-    {   // compute partials in x[j] direction
+    for (j = 0; j < n; j++) {  // compute partials in x[j] direction
         dx[j] = Base(1.0);
-        dg    = Gtilde.Forward(1, dx);
+        dg = Gtilde.Forward(1, dx);
         gx[j] = dg[0];
 
         // restore the dx vector to zero
@@ -390,13 +370,12 @@ void BenderQuad(
 
         // compute second partials w.r.t x[j] and x[l]  for l = 1, n
         ddw = Gtilde.Reverse(2, w);
-        for(i = 0; i < n; i++)
-            gxx[ i * n + j ] = ddw[ i * 2 + 1 ];
+        for (i = 0; i < n; i++) gxx[i * n + j] = ddw[i * 2 + 1];
     }
 
     return;
 }
 
-} // END CppAD namespace
+}  // namespace CppAD
 
-# endif
+#endif

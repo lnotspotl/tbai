@@ -21,22 +21,18 @@ namespace CppAD {
 namespace cg {
 
 class OStreamConfigRestore {
-private:
-    std::ostream& os;
+   private:
+    std::ostream &os;
     std::ios::fmtflags f;
     std::streamsize nf;
     std::streamsize nw;
-public:
 
-    inline explicit OStreamConfigRestore(std::ostream& os) :
-        os(os),
-        f(os.flags()),
-        nf(os.precision()),
-        nw(os.width()) {
-    }
+   public:
+    inline explicit OStreamConfigRestore(std::ostream &os)
+        : os(os), f(os.flags()), nf(os.precision()), nw(os.width()) {}
 
     OStreamConfigRestore(const OStreamConfigRestore &rhs) = delete;
-    OStreamConfigRestore& operator=(const OStreamConfigRestore& rhs) = delete;
+    OStreamConfigRestore &operator=(const OStreamConfigRestore &rhs) = delete;
 
     inline ~OStreamConfigRestore() {
         os.flags(f);
@@ -45,7 +41,7 @@ public:
     }
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

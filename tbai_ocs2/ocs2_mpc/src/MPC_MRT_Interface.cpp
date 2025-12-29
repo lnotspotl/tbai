@@ -37,215 +37,218 @@ namespace ocs2 {
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-MPC_MRT_Interface::MPC_MRT_Interface(MPC_BASE& mpc, bool threaded) : mpc_(mpc), threaded_(threaded) {
-  mpcTimer_.reset();
-  if (threaded_) {
-    startMpcThread();
-  }
+MPC_MRT_Interface::MPC_MRT_Interface(MPC_BASE &mpc, bool threaded) : mpc_(mpc), threaded_(threaded) {
+    mpcTimer_.reset();
+    if (threaded_) {
+        startMpcThread();
+    }
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
 MPC_MRT_Interface::~MPC_MRT_Interface() {
-  stopMpcThread();
+    stopMpcThread();
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-void MPC_MRT_Interface::resetMpcNode(const TargetTrajectories& initTargetTrajectories) {
-  mpc_.reset();
-  mpc_.getSolverPtr()->getReferenceManager().setTargetTrajectories(initTargetTrajectories);
-  mpcTimer_.reset();
+void MPC_MRT_Interface::resetMpcNode(const TargetTrajectories &initTargetTrajectories) {
+    mpc_.reset();
+    mpc_.getSolverPtr()->getReferenceManager().setTargetTrajectories(initTargetTrajectories);
+    mpcTimer_.reset();
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-void MPC_MRT_Interface::setCurrentObservation(const SystemObservation& currentObservation) {
-  {
-    std::lock_guard<std::mutex> lock(observationMutex_);
-    currentObservation_ = currentObservation;
-  }
-
-  if (threaded_) {
-    // Notify the MPC thread that a new observation is available
+void MPC_MRT_Interface::setCurrentObservation(const SystemObservation &currentObservation) {
     {
-      std::lock_guard<std::mutex> lock(mpcMutex_);
-      newObservationAvailable_ = true;
+        std::lock_guard<std::mutex> lock(observationMutex_);
+        currentObservation_ = currentObservation;
     }
-    mpcCondition_.notify_one();
-  } else {
-    advanceMpc(); // synchronous mode
-  }
+
+    if (threaded_) {
+        // Notify the MPC thread that a new observation is available
+        {
+            std::lock_guard<std::mutex> lock(mpcMutex_);
+            newObservationAvailable_ = true;
+        }
+        mpcCondition_.notify_one();
+    } else {
+        advanceMpc();  // synchronous mode
+    }
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-void MPC_MRT_Interface::setTargetTrajectories(const TargetTrajectories& targetTrajectories) {
-  mpc_.getSolverPtr()->getReferenceManager().setTargetTrajectories(targetTrajectories);
+void MPC_MRT_Interface::setTargetTrajectories(const TargetTrajectories &targetTrajectories) {
+    mpc_.getSolverPtr()->getReferenceManager().setTargetTrajectories(targetTrajectories);
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-void MPC_MRT_Interface::setModeSchedule(const ModeSchedule& modeSchedule) {
-  mpc_.getSolverPtr()->getReferenceManager().setModeSchedule(modeSchedule);
+void MPC_MRT_Interface::setModeSchedule(const ModeSchedule &modeSchedule) {
+    mpc_.getSolverPtr()->getReferenceManager().setModeSchedule(modeSchedule);
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-ReferenceManagerInterface& MPC_MRT_Interface::getReferenceManager() {
-  return mpc_.getSolverPtr()->getReferenceManager();
+ReferenceManagerInterface &MPC_MRT_Interface::getReferenceManager() {
+    return mpc_.getSolverPtr()->getReferenceManager();
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-const ReferenceManagerInterface& MPC_MRT_Interface::getReferenceManager() const {
-  return mpc_.getSolverPtr()->getReferenceManager();
+const ReferenceManagerInterface &MPC_MRT_Interface::getReferenceManager() const {
+    return mpc_.getSolverPtr()->getReferenceManager();
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
 void MPC_MRT_Interface::advanceMpc() {
-  // measure the delay in running MPC
-  mpcTimer_.startTimer();
+    // measure the delay in running MPC
+    mpcTimer_.startTimer();
 
-  SystemObservation currentObservation;
-  {
-    std::lock_guard<std::mutex> lock(observationMutex_);
-    currentObservation = currentObservation_;
-  }
+    SystemObservation currentObservation;
+    {
+        std::lock_guard<std::mutex> lock(observationMutex_);
+        currentObservation = currentObservation_;
+    }
 
-  bool controllerIsUpdated = mpc_.run(currentObservation.time, currentObservation.state);
-  if (!controllerIsUpdated) {
-    return;
-  }
-  copyToBuffer(currentObservation);
+    bool controllerIsUpdated = mpc_.run(currentObservation.time, currentObservation.state);
+    if (!controllerIsUpdated) {
+        return;
+    }
+    copyToBuffer(currentObservation);
 
-  // measure the delay for sending ROS messages
-  mpcTimer_.endTimer();
+    // measure the delay for sending ROS messages
+    mpcTimer_.endTimer();
 
-  // check MPC delay and solution window compatibility
-  scalar_t timeWindow = mpc_.settings().solutionTimeWindow_;
-  if (mpc_.settings().solutionTimeWindow_ < 0) {
-    timeWindow = mpc_.getSolverPtr()->getFinalTime() - currentObservation.time;
-  }
-  if (timeWindow < 2.0 * mpcTimer_.getAverageInMilliseconds() * 1e-3) {
-    std::cerr << "[MPC_MRT_Interface::advanceMpc] WARNING: The solution time window might be shorter than the MPC delay!\n";
-  }
+    // check MPC delay and solution window compatibility
+    scalar_t timeWindow = mpc_.settings().solutionTimeWindow_;
+    if (mpc_.settings().solutionTimeWindow_ < 0) {
+        timeWindow = mpc_.getSolverPtr()->getFinalTime() - currentObservation.time;
+    }
+    if (timeWindow < 2.0 * mpcTimer_.getAverageInMilliseconds() * 1e-3) {
+        std::cerr << "[MPC_MRT_Interface::advanceMpc] WARNING: The solution time window might be shorter than the MPC "
+                     "delay!\n";
+    }
 
-  // measure the delay
-  if (mpc_.settings().debugPrint_) {
-    std::cerr << "\n### MPC_MRT Benchmarking";
-    std::cerr << "\n###   Maximum : " << mpcTimer_.getMaxIntervalInMilliseconds() << "[ms].";
-    std::cerr << "\n###   Average : " << mpcTimer_.getAverageInMilliseconds() << "[ms].";
-    std::cerr << "\n###   Latest  : " << mpcTimer_.getLastIntervalInMilliseconds() << "[ms]." << std::endl;
-  }
+    // measure the delay
+    if (mpc_.settings().debugPrint_) {
+        std::cerr << "\n### MPC_MRT Benchmarking";
+        std::cerr << "\n###   Maximum : " << mpcTimer_.getMaxIntervalInMilliseconds() << "[ms].";
+        std::cerr << "\n###   Average : " << mpcTimer_.getAverageInMilliseconds() << "[ms].";
+        std::cerr << "\n###   Latest  : " << mpcTimer_.getLastIntervalInMilliseconds() << "[ms]." << std::endl;
+    }
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-void MPC_MRT_Interface::copyToBuffer(const SystemObservation& mpcInitObservation) {
-  // policy
-  auto primalSolutionPtr = std::make_unique<PrimalSolution>();
-  const scalar_t startTime = mpcInitObservation.time;
-  const scalar_t finalTime =
-      (mpc_.settings().solutionTimeWindow_ < 0) ? mpc_.getSolverPtr()->getFinalTime() : startTime + mpc_.settings().solutionTimeWindow_;
-  mpc_.getSolverPtr()->getPrimalSolution(finalTime, primalSolutionPtr.get());
+void MPC_MRT_Interface::copyToBuffer(const SystemObservation &mpcInitObservation) {
+    // policy
+    auto primalSolutionPtr = std::make_unique<PrimalSolution>();
+    const scalar_t startTime = mpcInitObservation.time;
+    const scalar_t finalTime = (mpc_.settings().solutionTimeWindow_ < 0)
+                                   ? mpc_.getSolverPtr()->getFinalTime()
+                                   : startTime + mpc_.settings().solutionTimeWindow_;
+    mpc_.getSolverPtr()->getPrimalSolution(finalTime, primalSolutionPtr.get());
 
-  // command
-  auto commandPtr = std::make_unique<CommandData>();
-  commandPtr->mpcInitObservation_ = mpcInitObservation;
-  commandPtr->mpcTargetTrajectories_ = mpc_.getSolverPtr()->getReferenceManager().getTargetTrajectories();
+    // command
+    auto commandPtr = std::make_unique<CommandData>();
+    commandPtr->mpcInitObservation_ = mpcInitObservation;
+    commandPtr->mpcTargetTrajectories_ = mpc_.getSolverPtr()->getReferenceManager().getTargetTrajectories();
 
-  // performance indices
-  auto performanceIndicesPtr = std::make_unique<PerformanceIndex>();
-  *performanceIndicesPtr = mpc_.getSolverPtr()->getPerformanceIndeces();
+    // performance indices
+    auto performanceIndicesPtr = std::make_unique<PerformanceIndex>();
+    *performanceIndicesPtr = mpc_.getSolverPtr()->getPerformanceIndeces();
 
-  this->moveToBuffer(std::move(commandPtr), std::move(primalSolutionPtr), std::move(performanceIndicesPtr));
+    this->moveToBuffer(std::move(commandPtr), std::move(primalSolutionPtr), std::move(performanceIndicesPtr));
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
 matrix_t MPC_MRT_Interface::getLinearFeedbackGain(scalar_t time) {
-  auto controller = dynamic_cast<LinearController*>(this->getPolicy().controllerPtr_.get());
-  if (controller == nullptr) {
-    throw std::runtime_error("[MPC_MRT_Interface::getLinearFeedbackGain] Feedback gains only available with linear controller!");
-  }
-  matrix_t K;
-  controller->getFeedbackGain(time, K);
-  return K;
+    auto controller = dynamic_cast<LinearController *>(this->getPolicy().controllerPtr_.get());
+    if (controller == nullptr) {
+        throw std::runtime_error(
+            "[MPC_MRT_Interface::getLinearFeedbackGain] Feedback gains only available with linear controller!");
+    }
+    matrix_t K;
+    controller->getFeedbackGain(time, K);
+    return K;
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-ScalarFunctionQuadraticApproximation MPC_MRT_Interface::getValueFunction(scalar_t time, const vector_t& state) const {
-  return mpc_.getSolverPtr()->getValueFunction(time, state);
+ScalarFunctionQuadraticApproximation MPC_MRT_Interface::getValueFunction(scalar_t time, const vector_t &state) const {
+    return mpc_.getSolverPtr()->getValueFunction(time, state);
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-vector_t MPC_MRT_Interface::getStateInputEqualityConstraintLagrangian(scalar_t time, const vector_t& state) const {
-  return mpc_.getSolverPtr()->getStateInputEqualityConstraintLagrangian(time, state);
+vector_t MPC_MRT_Interface::getStateInputEqualityConstraintLagrangian(scalar_t time, const vector_t &state) const {
+    return mpc_.getSolverPtr()->getStateInputEqualityConstraintLagrangian(time, state);
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
 MultiplierCollection MPC_MRT_Interface::getIntermediateDualSolution(scalar_t time) const {
-  return mpc_.getSolverPtr()->getIntermediateDualSolution(time);
+    return mpc_.getSolverPtr()->getIntermediateDualSolution(time);
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
 void MPC_MRT_Interface::mpcWorkerThread() {
-  while (!stopMpcThread_) {
-    std::unique_lock<std::mutex> lock(mpcMutex_);
-    mpcCondition_.wait(lock, [this] { return newObservationAvailable_ || stopMpcThread_.load(); });
+    while (!stopMpcThread_) {
+        std::unique_lock<std::mutex> lock(mpcMutex_);
+        mpcCondition_.wait(lock, [this] { return newObservationAvailable_ || stopMpcThread_.load(); });
 
-    if (stopMpcThread_) {
-      break;
+        if (stopMpcThread_) {
+            break;
+        }
+
+        newObservationAvailable_ = false;
+        lock.unlock();
+
+        // Run MPC iteration
+        advanceMpc();
     }
-
-    newObservationAvailable_ = false;
-    lock.unlock();
-
-    // Run MPC iteration
-    advanceMpc();
-  }
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
 void MPC_MRT_Interface::startMpcThread() {
-  stopMpcThread_ = false;
-  mpcThread_ = std::thread(&MPC_MRT_Interface::mpcWorkerThread, this);
+    stopMpcThread_ = false;
+    mpcThread_ = std::thread(&MPC_MRT_Interface::mpcWorkerThread, this);
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
 void MPC_MRT_Interface::stopMpcThread() {
-  if (mpcThread_.joinable()) {
-    {
-      std::lock_guard<std::mutex> lock(mpcMutex_);
-      stopMpcThread_ = true;
+    if (mpcThread_.joinable()) {
+        {
+            std::lock_guard<std::mutex> lock(mpcMutex_);
+            stopMpcThread_ = true;
+        }
+        mpcCondition_.notify_one();
+        mpcThread_.join();
     }
-    mpcCondition_.notify_one();
-    mpcThread_.join();
-  }
 }
 
 }  // namespace ocs2

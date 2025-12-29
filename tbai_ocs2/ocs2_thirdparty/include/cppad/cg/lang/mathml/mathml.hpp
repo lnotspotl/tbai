@@ -17,10 +17,10 @@
 
 // ---------------------------------------------------------------------------
 // mathml source code generation
+#include <cppad/cg/lang/mathml/lang_mathml_custom_var_name_gen.hpp>
+#include <cppad/cg/lang/mathml/lang_mathml_default_var_name_gen.hpp>
 #include <cppad/cg/lang/mathml/language_mathml.hpp>
 #include <cppad/cg/lang/mathml/language_mathml_arrays.hpp>
 #include <cppad/cg/lang/mathml/language_mathml_index_patterns.hpp>
-#include <cppad/cg/lang/mathml/lang_mathml_default_var_name_gen.hpp>
-#include <cppad/cg/lang/mathml/lang_mathml_custom_var_name_gen.hpp>
 
 #endif

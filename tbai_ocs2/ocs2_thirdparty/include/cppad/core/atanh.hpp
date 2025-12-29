@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_ATANH_HPP
-# define CPPAD_CORE_ATANH_HPP
+#ifndef CPPAD_CORE_ATANH_HPP
+#define CPPAD_CORE_ATANH_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -63,33 +63,36 @@ contains an example and test of this function.
 $end
 -------------------------------------------------------------------------------
 */
-# include <cppad/configure.hpp>
-# if ! CPPAD_USE_CPLUSPLUS_2011
+#include <cppad/configure.hpp>
+#if !CPPAD_USE_CPLUSPLUS_2011
 
 // BEGIN CppAD namespace
 namespace CppAD {
 
 template <class Type>
-Type atanh_template(const Type &x)
-{   return CppAD::log( (Type(1) + x) / (Type(1) - x) ) / Type(2);
+Type atanh_template(const Type &x) {
+    return CppAD::log((Type(1) + x) / (Type(1) - x)) / Type(2);
 }
 
-inline float atanh(const float &x)
-{   return atanh_template(x); }
+inline float atanh(const float &x) {
+    return atanh_template(x);
+}
 
-inline double atanh(const double &x)
-{   return atanh_template(x); }
-
-template <class Base>
-AD<Base> atanh(const AD<Base> &x)
-{   return atanh_template(x); }
+inline double atanh(const double &x) {
+    return atanh_template(x);
+}
 
 template <class Base>
-AD<Base> atanh(const VecAD_reference<Base> &x)
-{   return atanh_template( x.ADBase() ); }
+AD<Base> atanh(const AD<Base> &x) {
+    return atanh_template(x);
+}
 
+template <class Base>
+AD<Base> atanh(const VecAD_reference<Base> &x) {
+    return atanh_template(x.ADBase());
+}
 
-} // END CppAD namespace
+}  // namespace CppAD
 
-# endif // CPPAD_USE_CPLUSPLUS_2011
-# endif // CPPAD_ATANH_INCLUDED
+#endif  // CPPAD_USE_CPLUSPLUS_2011
+#endif  // CPPAD_ATANH_INCLUDED

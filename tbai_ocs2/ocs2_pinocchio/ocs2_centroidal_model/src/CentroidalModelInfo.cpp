@@ -32,40 +32,40 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace ocs2 {
 
 std::string toString(CentroidalModelType type) {
-  switch (type) {
-    case CentroidalModelType::FullCentroidalDynamics:
-      return "FullCentroidalDynamics";
-    case CentroidalModelType::SingleRigidBodyDynamics:
-      return "SingleRigidBodyDynamics";
-    default:
-      return "Undefined CentroidalModelType!";
-  }
+    switch (type) {
+        case CentroidalModelType::FullCentroidalDynamics:
+            return "FullCentroidalDynamics";
+        case CentroidalModelType::SingleRigidBodyDynamics:
+            return "SingleRigidBodyDynamics";
+        default:
+            return "Undefined CentroidalModelType!";
+    }
 }
 
-std::ostream& operator<<(std::ostream& os, CentroidalModelType type) {
-  os << toString(type);
-  return os;
+std::ostream &operator<<(std::ostream &os, CentroidalModelType type) {
+    os << toString(type);
+    return os;
 }
 
 template <>
 template <>
 CentroidalModelInfoCppAd CentroidalModelInfo::toCppAd() const {
-  CentroidalModelInfoCppAd cppAdInfo;
+    CentroidalModelInfoCppAd cppAdInfo;
 
-  cppAdInfo.centroidalModelType = this->centroidalModelType;
-  cppAdInfo.numThreeDofContacts = this->numThreeDofContacts;
-  cppAdInfo.numSixDofContacts = this->numSixDofContacts;
-  cppAdInfo.endEffectorFrameIndices = this->endEffectorFrameIndices;
-  cppAdInfo.generalizedCoordinatesNum = this->generalizedCoordinatesNum;
-  cppAdInfo.actuatedDofNum = this->actuatedDofNum;
-  cppAdInfo.stateDim = this->stateDim;
-  cppAdInfo.inputDim = this->inputDim;
-  cppAdInfo.robotMass = ad_scalar_t(this->robotMass);
-  cppAdInfo.qPinocchioNominal = this->qPinocchioNominal.cast<ad_scalar_t>();
-  cppAdInfo.centroidalInertiaNominal = this->centroidalInertiaNominal.cast<ad_scalar_t>();
-  cppAdInfo.comToBasePositionNominal = this->comToBasePositionNominal.cast<ad_scalar_t>();
+    cppAdInfo.centroidalModelType = this->centroidalModelType;
+    cppAdInfo.numThreeDofContacts = this->numThreeDofContacts;
+    cppAdInfo.numSixDofContacts = this->numSixDofContacts;
+    cppAdInfo.endEffectorFrameIndices = this->endEffectorFrameIndices;
+    cppAdInfo.generalizedCoordinatesNum = this->generalizedCoordinatesNum;
+    cppAdInfo.actuatedDofNum = this->actuatedDofNum;
+    cppAdInfo.stateDim = this->stateDim;
+    cppAdInfo.inputDim = this->inputDim;
+    cppAdInfo.robotMass = ad_scalar_t(this->robotMass);
+    cppAdInfo.qPinocchioNominal = this->qPinocchioNominal.cast<ad_scalar_t>();
+    cppAdInfo.centroidalInertiaNominal = this->centroidalInertiaNominal.cast<ad_scalar_t>();
+    cppAdInfo.comToBasePositionNominal = this->comToBasePositionNominal.cast<ad_scalar_t>();
 
-  return cppAdInfo;
+    return cppAdInfo;
 }
 
 // explicit template instantiation

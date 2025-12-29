@@ -32,32 +32,32 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace ocs2 {
 
-std::vector<LagrangianMetrics> LoopshapingStateInputAugmentedLagrangian::getValue(scalar_t t, const vector_t& x, const vector_t& u,
-                                                                                  const std::vector<Multiplier>& termsMultiplier,
-                                                                                  const PreComputation& preComp) const {
-  if (this->empty()) {
-    return {};
-  }
+std::vector<LagrangianMetrics> LoopshapingStateInputAugmentedLagrangian::getValue(
+    scalar_t t, const vector_t &x, const vector_t &u, const std::vector<Multiplier> &termsMultiplier,
+    const PreComputation &preComp) const {
+    if (this->empty()) {
+        return {};
+    }
 
-  const LoopshapingPreComputation& preCompLS = cast<LoopshapingPreComputation>(preComp);
-  const auto& x_system = preCompLS.getSystemState();
-  const auto& u_system = preCompLS.getSystemInput();
-  const auto& preComp_system = preCompLS.getSystemPreComputation();
+    const LoopshapingPreComputation &preCompLS = cast<LoopshapingPreComputation>(preComp);
+    const auto &x_system = preCompLS.getSystemState();
+    const auto &u_system = preCompLS.getSystemInput();
+    const auto &preComp_system = preCompLS.getSystemPreComputation();
 
-  return StateInputAugmentedLagrangianCollection::getValue(t, x_system, u_system, termsMultiplier, preComp_system);
+    return StateInputAugmentedLagrangianCollection::getValue(t, x_system, u_system, termsMultiplier, preComp_system);
 }
 
-void LoopshapingStateInputAugmentedLagrangian::updateLagrangian(scalar_t t, const vector_t& x, const vector_t& u,
-                                                                std::vector<LagrangianMetrics>& termsMetrics,
-                                                                std::vector<Multiplier>& termsMultiplier) const {
-  if (this->empty()) {
-    termsMultiplier.clear();
-  }
+void LoopshapingStateInputAugmentedLagrangian::updateLagrangian(scalar_t t, const vector_t &x, const vector_t &u,
+                                                                std::vector<LagrangianMetrics> &termsMetrics,
+                                                                std::vector<Multiplier> &termsMultiplier) const {
+    if (this->empty()) {
+        termsMultiplier.clear();
+    }
 
-  const auto x_system = loopshapingDefinition_->getSystemState(x);
-  const auto u_system = loopshapingDefinition_->getSystemInput(x, u);
+    const auto x_system = loopshapingDefinition_->getSystemState(x);
+    const auto u_system = loopshapingDefinition_->getSystemInput(x, u);
 
-  StateInputAugmentedLagrangianCollection::updateLagrangian(t, x_system, u_system, termsMetrics, termsMultiplier);
+    StateInputAugmentedLagrangianCollection::updateLagrangian(t, x_system, u_system, termsMetrics, termsMultiplier);
 }
 
 }  // namespace ocs2

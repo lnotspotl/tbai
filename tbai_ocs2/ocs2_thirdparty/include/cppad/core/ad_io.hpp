@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_AD_IO_HPP
-# define CPPAD_CORE_AD_IO_HPP
+#ifndef CPPAD_CORE_AD_IO_HPP
+#define CPPAD_CORE_AD_IO_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -150,7 +150,7 @@ contains an example and test of this operation.
 $end
 ------------------------------------------------------------------------------
 */
-namespace CppAD { // BEGIN_CPPAD_NAMESPACE
+namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
 /*!
 \file ad_io.hpp
 AD<Base> input and ouput stream operators.
@@ -171,11 +171,10 @@ Upone return, x.value_ is read from the input stream
 and x.tape_is_ is zero; i.e., x is a parameter.
 */
 template <class Base>
-CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION
-std::istream& operator >> (std::istream& is, AD<Base>& x)
-{   // like assignment to a base type value
+CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION std::istream &operator>>(std::istream &is,
+                                                               AD<Base> &x) {  // like assignment to a base type value
     x.tape_id_ = 0;
-    CPPAD_ASSERT_UNKNOWN( Parameter(x) );
+    CPPAD_ASSERT_UNKNOWN(Parameter(x));
     return (is >> x.value_);
 }
 // ---------------------------------------------------------------------------
@@ -193,9 +192,9 @@ is the object that is being written to the output stream.
 This is equivalent to writing x.value_ to the output stream.
 */
 template <class Base>
-CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION
-std::ostream& operator << (std::ostream &os, const AD<Base> &x)
-{   return (os << x.value_); }
+CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION std::ostream &operator<<(std::ostream &os, const AD<Base> &x) {
+    return (os << x.value_);
+}
 // ---------------------------------------------------------------------------
 /*!
 Write a VecAD_reference<Base> object to an output stream.
@@ -211,9 +210,9 @@ is the element of the VecAD object that is being written to the output stream.
 This is equivalent to writing the corresponing Base value to the stream.
 */
 template <class Base>
-CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION
-std::ostream& operator << (std::ostream &os, const VecAD_reference<Base> &x)
-{   return (os << x.ADBase()); }
+CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION std::ostream &operator<<(std::ostream &os, const VecAD_reference<Base> &x) {
+    return (os << x.ADBase());
+}
 
-} // END_CPPAD_NAMESPACE
-# endif
+}  // namespace CppAD
+#endif

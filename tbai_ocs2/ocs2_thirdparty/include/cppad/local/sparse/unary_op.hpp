@@ -1,5 +1,5 @@
-# ifndef CPPAD_LOCAL_SPARSE_UNARY_OP_HPP
-# define CPPAD_LOCAL_SPARSE_UNARY_OP_HPP
+#ifndef CPPAD_LOCAL_SPARSE_UNARY_OP_HPP
+#define CPPAD_LOCAL_SPARSE_UNARY_OP_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-19 Bradley M. Bell
 
@@ -13,12 +13,13 @@ in the Eclipse Public License, Version 2.0 are satisfied:
 ---------------------------------------------------------------------------- */
 
 // BEGIN_CPPAD_LOCAL_SPARSE_NAMESPACE
-namespace CppAD { namespace local { namespace sparse {
+namespace CppAD {
+namespace local {
+namespace sparse {
 /*!
 \file sparse_unary_op.hpp
 Forward and reverse mode sparsity patterns for unary operators.
 */
-
 
 /*!
 Forward mode Jacobian sparsity pattern for all unary operators.
@@ -64,13 +65,9 @@ depends on.
 */
 
 template <class Vector_set>
-void for_jac_unary_op(
-    size_t            i_z           ,
-    size_t            i_x           ,
-    Vector_set&       sparsity      )
-{
+void for_jac_unary_op(size_t i_z, size_t i_x, Vector_set &sparsity) {
     // check assumptions
-    CPPAD_ASSERT_UNKNOWN( i_x < i_z );
+    CPPAD_ASSERT_UNKNOWN(i_x < i_z);
 
     sparsity.assignment(i_z, i_x, sparsity);
 }
@@ -125,13 +122,9 @@ is the sparsity bit pattern for H with respect to the variable x.
 */
 
 template <class Vector_set>
-void rev_jac_unary_op(
-    size_t     i_z                     ,
-    size_t     i_x                     ,
-    Vector_set&            sparsity    )
-{
+void rev_jac_unary_op(size_t i_z, size_t i_x, Vector_set &sparsity) {
     // check assumptions
-    CPPAD_ASSERT_UNKNOWN( i_x < i_z );
+    CPPAD_ASSERT_UNKNOWN(i_x < i_z);
 
     sparsity.binary_union(i_x, i_x, i_z, sparsity);
 
@@ -154,19 +147,13 @@ where op is a C++ binary operator and q is a parameter.
 \copydetails CppAD::local::reverse_sparse_hessian_unary_op
 */
 template <class Vector_set>
-void rev_hes_lin_unary_op(
-    size_t              i_z               ,
-    size_t              i_x               ,
-    bool*               rev_jacobian      ,
-    const Vector_set&   for_jac_sparsity  ,
-    Vector_set&         rev_hes_sparsity  )
-{
+void rev_hes_lin_unary_op(size_t i_z, size_t i_x, bool *rev_jacobian, const Vector_set &for_jac_sparsity,
+                          Vector_set &rev_hes_sparsity) {
     // check assumptions
-    CPPAD_ASSERT_UNKNOWN( i_x < i_z );
+    CPPAD_ASSERT_UNKNOWN(i_x < i_z);
 
     // check for no effect
-    if( ! rev_jacobian[i_z] )
-        return;
+    if (!rev_jacobian[i_z]) return;
 
     rev_hes_sparsity.binary_union(i_x, i_x, i_z, rev_hes_sparsity);
 
@@ -191,19 +178,13 @@ where q is a parameter.
 \copydetails CppAD::local::reverse_sparse_hessian_unary_op
 */
 template <class Vector_set>
-void rev_hes_nl_unary_op(
-    size_t              i_z               ,
-    size_t              i_x               ,
-    bool*               rev_jacobian      ,
-    const Vector_set&   for_jac_sparsity  ,
-    Vector_set&         rev_hes_sparsity  )
-{
+void rev_hes_nl_unary_op(size_t i_z, size_t i_x, bool *rev_jacobian, const Vector_set &for_jac_sparsity,
+                         Vector_set &rev_hes_sparsity) {
     // check assumptions
-    CPPAD_ASSERT_UNKNOWN( i_x < i_z );
+    CPPAD_ASSERT_UNKNOWN(i_x < i_z);
 
     // check for no effect
-    if( ! rev_jacobian[i_z] )
-        return;
+    if (!rev_jacobian[i_z]) return;
 
     rev_hes_sparsity.binary_union(i_x, i_x, i_z, rev_hes_sparsity);
     rev_hes_sparsity.binary_union(i_x, i_x, i_x, for_jac_sparsity);
@@ -284,18 +265,14 @@ $end
 */
 // BEGIN_for_hes_nl_unary_op
 template <class Vector_set>
-void for_hes_nl_unary_op(
-    size_t              np1            ,
-    size_t              numvar         ,
-    size_t              i_w            ,
-    size_t              i_v            ,
-    Vector_set&         for_sparsity   )
+void for_hes_nl_unary_op(size_t np1, size_t numvar, size_t i_w, size_t i_v, Vector_set &for_sparsity)
 // END_for_hes_nl_unary_op
-{   CPPAD_ASSERT_UNKNOWN( i_v < i_w );
-    CPPAD_ASSERT_UNKNOWN( i_w < numvar );
-    CPPAD_ASSERT_UNKNOWN( for_sparsity.end() == np1 );
-    CPPAD_ASSERT_UNKNOWN( for_sparsity.n_set() == np1 + numvar );
-    CPPAD_ASSERT_UNKNOWN( for_sparsity.number_elements(np1) == 0 );
+{
+    CPPAD_ASSERT_UNKNOWN(i_v < i_w);
+    CPPAD_ASSERT_UNKNOWN(i_w < numvar);
+    CPPAD_ASSERT_UNKNOWN(for_sparsity.end() == np1);
+    CPPAD_ASSERT_UNKNOWN(for_sparsity.n_set() == np1 + numvar);
+    CPPAD_ASSERT_UNKNOWN(for_sparsity.number_elements(np1) == 0);
 
     // set Jacobian sparsity J(i_w)
     for_sparsity.assignment(np1 + i_w, np1 + i_v, for_sparsity);
@@ -305,13 +282,14 @@ void for_hes_nl_unary_op(
 
     // loop over independent variables with non-zero partial for v
     size_t i_x = *itr;
-    while( i_x < np1 )
-    {   // N(i_x) = N(i_x) union J(i_v)
+    while (i_x < np1) {  // N(i_x) = N(i_x) union J(i_v)
         for_sparsity.binary_union(i_x, i_x, i_v + np1, for_sparsity);
         i_x = *(++itr);
     }
     return;
 }
 
-} } } // END_CPPAD_LOCAL_SPARSE_NAMESPACE
-# endif
+}  // namespace sparse
+}  // namespace local
+}  // namespace CppAD
+#endif

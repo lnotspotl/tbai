@@ -28,7 +28,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************/
 
 #include <ocs2_core/integration/TrapezoidalIntegration.h>
-
 #include <ocs2_oc/rollout/PerformanceIndicesRollout.h>
 
 namespace ocs2 {
@@ -37,38 +36,38 @@ namespace PerformanceIndicesRollout {
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-scalar_t rolloutCost(cost_wraper_t costWraper, const scalar_array_t& timeTrajectory, const vector_array_t& stateTrajectory,
-                     const vector_array_t& inputTrajectory) {
-  const size_t N = timeTrajectory.size();
-  assert(stateTrajectory.size() == N);
-  assert(inputTrajectory.size() == N);
+scalar_t rolloutCost(cost_wraper_t costWraper, const scalar_array_t &timeTrajectory,
+                     const vector_array_t &stateTrajectory, const vector_array_t &inputTrajectory) {
+    const size_t N = timeTrajectory.size();
+    assert(stateTrajectory.size() == N);
+    assert(inputTrajectory.size() == N);
 
-  scalar_array_t costTrajectory;
-  costTrajectory.reserve(N);
-  for (size_t i = 0; i < N; i++) {
-    costTrajectory.push_back(costWraper(timeTrajectory[i], stateTrajectory[i], inputTrajectory[i]));
-  }
+    scalar_array_t costTrajectory;
+    costTrajectory.reserve(N);
+    for (size_t i = 0; i < N; i++) {
+        costTrajectory.push_back(costWraper(timeTrajectory[i], stateTrajectory[i], inputTrajectory[i]));
+    }
 
-  return trapezoidalIntegration(timeTrajectory, costTrajectory, 0.0);
+    return trapezoidalIntegration(timeTrajectory, costTrajectory, 0.0);
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-scalar_t rolloutConstraint(constraints_wraper_t constraintWraper, const scalar_array_t& timeTrajectory,
-                           const vector_array_t& stateTrajectory, const vector_array_t& inputTrajectory) {
-  const size_t N = timeTrajectory.size();
-  assert(stateTrajectory.size() == N);
-  assert(inputTrajectory.size() == N);
+scalar_t rolloutConstraint(constraints_wraper_t constraintWraper, const scalar_array_t &timeTrajectory,
+                           const vector_array_t &stateTrajectory, const vector_array_t &inputTrajectory) {
+    const size_t N = timeTrajectory.size();
+    assert(stateTrajectory.size() == N);
+    assert(inputTrajectory.size() == N);
 
-  scalar_array_t constraintTrajectoryISE;
-  constraintTrajectoryISE.reserve(N);
-  for (size_t i = 0; i < N; i++) {
-    const auto constraint = constraintWraper(timeTrajectory[i], stateTrajectory[i], inputTrajectory[i]);
-    constraintTrajectoryISE.push_back(constraint.squaredNorm());
-  }
+    scalar_array_t constraintTrajectoryISE;
+    constraintTrajectoryISE.reserve(N);
+    for (size_t i = 0; i < N; i++) {
+        const auto constraint = constraintWraper(timeTrajectory[i], stateTrajectory[i], inputTrajectory[i]);
+        constraintTrajectoryISE.push_back(constraint.squaredNorm());
+    }
 
-  return trapezoidalIntegration(timeTrajectory, constraintTrajectoryISE, 0.0);
+    return trapezoidalIntegration(timeTrajectory, constraintTrajectoryISE, 0.0);
 }
 
 }  // namespace PerformanceIndicesRollout

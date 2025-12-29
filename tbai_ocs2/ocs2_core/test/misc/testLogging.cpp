@@ -27,114 +27,113 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************/
 
-#include <gtest/gtest.h>
-
 #include <array>
 #include <fstream>
 #include <sstream>
 #include <string>
 
 #include <boost/algorithm/string/predicate.hpp>
-
+#include <gtest/gtest.h>
 #include <ocs2_core/misc/Log.h>
 
 TEST(testLogging, canPrintMessage) {
-  ocs2::log::Settings settings;
+    ocs2::log::Settings settings;
 
-  settings.useLogFile = false;
-  settings.useConsole = true;
-  settings.consoleSeverity = ocs2::log::SeverityLevel::DEBUG;
+    settings.useLogFile = false;
+    settings.useConsole = true;
+    settings.consoleSeverity = ocs2::log::SeverityLevel::DEBUG;
 
-  ocs2::log::init(settings);
+    ocs2::log::init(settings);
 
-  OCS2_DEBUG << "A debug severity message";
-  OCS2_INFO << "An informational severity message";
-  OCS2_WARN << "A warning severity message";
-  OCS2_ERROR << "An error severity message";
-  OCS2_INFO << settings;
+    OCS2_DEBUG << "A debug severity message";
+    OCS2_INFO << "An informational severity message";
+    OCS2_WARN << "A warning severity message";
+    OCS2_ERROR << "An error severity message";
+    OCS2_INFO << settings;
 
-  ocs2::log::reset();
+    ocs2::log::reset();
 }
 
 TEST(testLogging, canWriteLogFile) {
-  ocs2::log::Settings settings;
+    ocs2::log::Settings settings;
 
-  settings.useConsole = false;
-  settings.useLogFile = true;
-  settings.logFileSeverity = ocs2::log::SeverityLevel::DEBUG;
-  settings.logFileName = "log/testLogging.log";
+    settings.useConsole = false;
+    settings.useLogFile = true;
+    settings.logFileSeverity = ocs2::log::SeverityLevel::DEBUG;
+    settings.logFileName = "log/testLogging.log";
 
-  ocs2::log::init(settings);
+    ocs2::log::init(settings);
 
-  OCS2_LOG(DEBUG) << "A debug severity message";
-  OCS2_LOG(INFO) << "An informational severity message";
-  OCS2_LOG(WARNING) << "A warning severity message";
-  OCS2_LOG(ERROR) << "An error severity message";
+    OCS2_LOG(DEBUG) << "A debug severity message";
+    OCS2_LOG(INFO) << "An informational severity message";
+    OCS2_LOG(WARNING) << "A warning severity message";
+    OCS2_LOG(ERROR) << "An error severity message";
 
-  ocs2::log::reset();
+    ocs2::log::reset();
 
-  std::ifstream file(settings.logFileName);
-  std::array<std::string, 4> expected = {"[   DEBUG ] A debug severity message", "[    INFO ] An informational severity message",
-                                         "[ WARNING ] A warning severity message", "[   ERROR ] An error severity message"};
+    std::ifstream file(settings.logFileName);
+    std::array<std::string, 4> expected = {
+        "[   DEBUG ] A debug severity message", "[    INFO ] An informational severity message",
+        "[ WARNING ] A warning severity message", "[   ERROR ] An error severity message"};
 
-  for (const auto& end : expected) {
-    std::string line;
-    std::getline(file, line);
-    EXPECT_TRUE(boost::algorithm::ends_with(line, end));
-  }
+    for (const auto &end : expected) {
+        std::string line;
+        std::getline(file, line);
+        EXPECT_TRUE(boost::algorithm::ends_with(line, end));
+    }
 }
 
 TEST(testLogging, writesCorrectMessageToConsole) {
-  ocs2::log::Settings settings;
+    ocs2::log::Settings settings;
 
-  settings.useLogFile = false;
-  settings.useConsole = true;
-  settings.consoleSeverity = ocs2::log::SeverityLevel::DEBUG;
+    settings.useLogFile = false;
+    settings.useConsole = true;
+    settings.consoleSeverity = ocs2::log::SeverityLevel::DEBUG;
 
-  std::ostringstream console_stream;
-  ocs2::log::init(settings, &console_stream);
+    std::ostringstream console_stream;
+    ocs2::log::init(settings, &console_stream);
 
-  OCS2_LOG(DEBUG) << "A debug severity message";
-  OCS2_LOG(INFO) << "An informational severity message";
-  OCS2_LOG(WARNING) << "A warning severity message";
-  OCS2_LOG(ERROR) << "An error severity message";
+    OCS2_LOG(DEBUG) << "A debug severity message";
+    OCS2_LOG(INFO) << "An informational severity message";
+    OCS2_LOG(WARNING) << "A warning severity message";
+    OCS2_LOG(ERROR) << "An error severity message";
 
-  const std::string expect =
-      "[   DEBUG ] A debug severity message\n"
-      "[    INFO ] An informational severity message\n"
-      "[ WARNING ] A warning severity message\n"
-      "[   ERROR ] An error severity message\n";
+    const std::string expect =
+        "[   DEBUG ] A debug severity message\n"
+        "[    INFO ] An informational severity message\n"
+        "[ WARNING ] A warning severity message\n"
+        "[   ERROR ] An error severity message\n";
 
-  EXPECT_EQ(console_stream.str(), expect);
+    EXPECT_EQ(console_stream.str(), expect);
 
-  ocs2::log::reset();
+    ocs2::log::reset();
 }
 
 TEST(testLogging, canFilterSeverity) {
-  ocs2::log::Settings settings;
+    ocs2::log::Settings settings;
 
-  settings.useLogFile = false;
-  settings.useConsole = true;
-  settings.consoleSeverity = ocs2::log::SeverityLevel::ERROR;
+    settings.useLogFile = false;
+    settings.useConsole = true;
+    settings.consoleSeverity = ocs2::log::SeverityLevel::ERROR;
 
-  std::ostringstream console_stream;
-  ocs2::log::init(settings, &console_stream);
+    std::ostringstream console_stream;
+    ocs2::log::init(settings, &console_stream);
 
-  OCS2_LOG(DEBUG) << "NOT logged";
-  OCS2_LOG(INFO) << "NOT logged";
-  OCS2_LOG(WARNING) << "NOT logged";
-  OCS2_LOG(ERROR) << "Logged";
+    OCS2_LOG(DEBUG) << "NOT logged";
+    OCS2_LOG(INFO) << "NOT logged";
+    OCS2_LOG(WARNING) << "NOT logged";
+    OCS2_LOG(ERROR) << "Logged";
 
-  EXPECT_EQ(console_stream.str(), "[   ERROR ] Logged\n");
+    EXPECT_EQ(console_stream.str(), "[   ERROR ] Logged\n");
 
-  ocs2::log::reset();
+    ocs2::log::reset();
 }
 
 TEST(testLogging, canLoadSettings) {
-  const std::string settingsFileName = "ocs2_test_log_settings.info";
+    const std::string settingsFileName = "ocs2_test_log_settings.info";
 
-  std::ofstream file(settingsFileName);
-  file << R"(
+    std::ofstream file(settingsFileName);
+    file << R"(
 ; logging settings
 log
 {
@@ -145,13 +144,13 @@ log
   logFileName       ocs2.log  ; log file name
 }
 )";
-  file.close();
+    file.close();
 
-  ocs2::log::Settings settings = ocs2::log::loadSettings(settingsFileName, "log");
+    ocs2::log::Settings settings = ocs2::log::loadSettings(settingsFileName, "log");
 
-  EXPECT_EQ(settings.useConsole, true);
-  EXPECT_EQ(settings.consoleSeverity, ocs2::log::SeverityLevel::INFO);
-  EXPECT_EQ(settings.useLogFile, true);
-  EXPECT_EQ(settings.logFileSeverity, ocs2::log::SeverityLevel::WARNING);
-  EXPECT_EQ(settings.logFileName, "ocs2.log");
+    EXPECT_EQ(settings.useConsole, true);
+    EXPECT_EQ(settings.consoleSeverity, ocs2::log::SeverityLevel::INFO);
+    EXPECT_EQ(settings.useLogFile, true);
+    EXPECT_EQ(settings.logFileSeverity, ocs2::log::SeverityLevel::WARNING);
+    EXPECT_EQ(settings.logFileName, "ocs2.log");
 }

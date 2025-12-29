@@ -20,35 +20,37 @@ namespace cg {
 
 /**
  * An operation node that marks the beginning of a loop.
- * 
+ *
  * This is a custom OperationNode class and therefore cannot be transformed
  * into any other node type (makeAlias() and setOperation() might not work).
- * 
+ *
  * @author Joao Leal
  */
-template<class Base>
+template <class Base>
 class LoopStartOperationNode : public OperationNode<Base> {
-        friend class CodeHandler<Base>;
-public:
+    friend class CodeHandler<Base>;
 
-    inline OperationNode<Base>& getIndex() const {
-        const std::vector<Argument<Base> >& args = this->getArguments();
+   public:
+    inline OperationNode<Base> &getIndex() const {
+        const std::vector<Argument<Base> > &args = this->getArguments();
         CPPADCG_ASSERT_KNOWN(!args.empty(), "Invalid number of arguments");
 
-        OperationNode<Base>* aNode = args[0].getOperation();
-        CPPADCG_ASSERT_KNOWN(aNode != nullptr && aNode->getOperationType() == CGOpCode::IndexDeclaration, "Invalid argument operation type");
+        OperationNode<Base> *aNode = args[0].getOperation();
+        CPPADCG_ASSERT_KNOWN(aNode != nullptr && aNode->getOperationType() == CGOpCode::IndexDeclaration,
+                             "Invalid argument operation type");
 
-        return static_cast<OperationNode<Base>&> (*aNode);
+        return static_cast<OperationNode<Base> &>(*aNode);
     }
 
-    inline IndexOperationNode<Base>* getIterationCountNode() const {
+    inline IndexOperationNode<Base> *getIterationCountNode() const {
         if (this->getInfo().empty()) {
             CPPADCG_ASSERT_KNOWN(this->getArguments().size() > 1, "Invalid number of arguments.");
 
-            OperationNode<Base>* aNode = this->getArguments()[1].getOperation();
-            CPPADCG_ASSERT_KNOWN(aNode != nullptr && aNode->getOperationType() == CGOpCode::Index, "Invalid argument node type");
+            OperationNode<Base> *aNode = this->getArguments()[1].getOperation();
+            CPPADCG_ASSERT_KNOWN(aNode != nullptr && aNode->getOperationType() == CGOpCode::Index,
+                                 "Invalid argument node type");
 
-            return static_cast<IndexOperationNode<Base>*> (aNode);
+            return static_cast<IndexOperationNode<Base> *>(aNode);
         }
 
         return nullptr;
@@ -61,27 +63,20 @@ public:
         return this->getInfo()[0];
     }
 
-    inline virtual ~LoopStartOperationNode() {
-    }
+    inline virtual ~LoopStartOperationNode() {}
 
-protected:
-
-    inline LoopStartOperationNode(CodeHandler<Base>* handler,
-                                  OperationNode<Base>& indexDcl,
-                                  size_t iterationCount) :
-        OperationNode<Base>(handler, CGOpCode::LoopStart, indexDcl) {
+   protected:
+    inline LoopStartOperationNode(CodeHandler<Base> *handler, OperationNode<Base> &indexDcl, size_t iterationCount)
+        : OperationNode<Base>(handler, CGOpCode::LoopStart, indexDcl) {
         this->getInfo().push_back(iterationCount);
     }
 
-    inline LoopStartOperationNode(CodeHandler<Base>* handler,
-                                  OperationNode<Base>& indexDcl,
-                                  IndexOperationNode<Base>& iterCount) :
-        OperationNode<Base>(handler, CGOpCode::LoopStart,{indexDcl, iterCount}) {
-    }
-
+    inline LoopStartOperationNode(CodeHandler<Base> *handler, OperationNode<Base> &indexDcl,
+                                  IndexOperationNode<Base> &iterCount)
+        : OperationNode<Base>(handler, CGOpCode::LoopStart, {indexDcl, iterCount}) {}
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

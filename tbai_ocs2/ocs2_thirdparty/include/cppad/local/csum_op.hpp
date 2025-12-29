@@ -1,5 +1,5 @@
-# ifndef CPPAD_LOCAL_CSUM_OP_HPP
-# define CPPAD_LOCAL_CSUM_OP_HPP
+#ifndef CPPAD_LOCAL_CSUM_OP_HPP
+#define CPPAD_LOCAL_CSUM_OP_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -12,7 +12,8 @@ in the Eclipse Public License, Version 2.0 are satisfied:
       GNU General Public License, Version 2.0 or later.
 ---------------------------------------------------------------------------- */
 
-namespace CppAD { namespace local { // BEGIN_CPPAD_LOCAL_NAMESPACE
+namespace CppAD {
+namespace local {  // BEGIN_CPPAD_LOCAL_NAMESPACE
 /*!
 \file csum_op.hpp
 Forward, reverse and sparsity calculations for cummulative summation.
@@ -88,52 +89,37 @@ for k = p , ... , q,
 is the k-th order Taylor coefficient corresponding to z.
 */
 template <class Base>
-void forward_csum_op(
-    size_t        p           ,
-    size_t        q           ,
-    size_t        i_z         ,
-    const addr_t* arg         ,
-    size_t        num_par     ,
-    const Base*   parameter   ,
-    size_t        cap_order   ,
-    Base*         taylor      )
-{   Base zero(0);
+void forward_csum_op(size_t p, size_t q, size_t i_z, const addr_t *arg, size_t num_par, const Base *parameter,
+                     size_t cap_order, Base *taylor) {
+    Base zero(0);
 
     // check assumptions
-    CPPAD_ASSERT_UNKNOWN( NumRes(CSumOp) == 1 );
-    CPPAD_ASSERT_UNKNOWN( q < cap_order );
-    CPPAD_ASSERT_UNKNOWN( p <= q );
-    CPPAD_ASSERT_UNKNOWN( size_t(arg[0]) < num_par );
-    CPPAD_ASSERT_UNKNOWN(
-        arg[arg[4]] == arg[4]
-    );
+    CPPAD_ASSERT_UNKNOWN(NumRes(CSumOp) == 1);
+    CPPAD_ASSERT_UNKNOWN(q < cap_order);
+    CPPAD_ASSERT_UNKNOWN(p <= q);
+    CPPAD_ASSERT_UNKNOWN(size_t(arg[0]) < num_par);
+    CPPAD_ASSERT_UNKNOWN(arg[arg[4]] == arg[4]);
 
     // Taylor coefficients corresponding to result
-    Base* z = taylor + i_z    * cap_order;
-    for(size_t k = p; k <= q; k++)
-        z[k] = zero;
-    if( p == 0 )
-    {   // normal parameters in the sum
-        z[p] = parameter[ arg[0] ];
+    Base *z = taylor + i_z * cap_order;
+    for (size_t k = p; k <= q; k++) z[k] = zero;
+    if (p == 0) {  // normal parameters in the sum
+        z[p] = parameter[arg[0]];
         // addition dynamic parameters
-        for(size_t i = size_t(arg[2]); i < size_t(arg[3]); ++i)
-            z[p] += parameter[ arg[i] ];
+        for (size_t i = size_t(arg[2]); i < size_t(arg[3]); ++i) z[p] += parameter[arg[i]];
         // subtraction dynamic parameters
-        for(size_t i = size_t(arg[3]); i < size_t(arg[4]); ++i)
-            z[p] -= parameter[ arg[i] ];
+        for (size_t i = size_t(arg[3]); i < size_t(arg[4]); ++i) z[p] -= parameter[arg[i]];
     }
-    Base* x;
-    for(size_t i = 5; i < size_t(arg[1]); ++i)
-    {   CPPAD_ASSERT_UNKNOWN( size_t(arg[i]) < i_z );
-        x     = taylor + size_t(arg[i]) * cap_order;
-        for(size_t k = p; k <= q; k++)
-            z[k] += x[k];
+    Base *x;
+    for (size_t i = 5; i < size_t(arg[1]); ++i) {
+        CPPAD_ASSERT_UNKNOWN(size_t(arg[i]) < i_z);
+        x = taylor + size_t(arg[i]) * cap_order;
+        for (size_t k = p; k <= q; k++) z[k] += x[k];
     }
-    for(size_t i = size_t(arg[1]); i < size_t(arg[2]); ++i)
-    {   CPPAD_ASSERT_UNKNOWN( size_t(arg[i]) < i_z );
-        x     = taylor + size_t(arg[i]) * cap_order;
-        for(size_t k = p; k <= q; k++)
-            z[k] -= x[k];
+    for (size_t i = size_t(arg[1]); i < size_t(arg[2]); ++i) {
+        CPPAD_ASSERT_UNKNOWN(size_t(arg[i]) < i_z);
+        x = taylor + size_t(arg[i]) * cap_order;
+        for (size_t k = p; k <= q; k++) z[k] -= x[k];
     }
 }
 
@@ -211,44 +197,32 @@ is the q-th order Taylor coefficient corresponding to z
 for direction ell = 0 , ... , r-1.
 */
 template <class Base>
-void forward_csum_op_dir(
-    size_t        q           ,
-    size_t        r           ,
-    size_t        i_z         ,
-    const addr_t* arg         ,
-    size_t        num_par     ,
-    const Base*   parameter   ,
-    size_t        cap_order   ,
-    Base*         taylor      )
-{   Base zero(0);
+void forward_csum_op_dir(size_t q, size_t r, size_t i_z, const addr_t *arg, size_t num_par, const Base *parameter,
+                         size_t cap_order, Base *taylor) {
+    Base zero(0);
 
     // check assumptions
-    CPPAD_ASSERT_UNKNOWN( NumRes(CSumOp) == 1 );
-    CPPAD_ASSERT_UNKNOWN( q < cap_order );
-    CPPAD_ASSERT_UNKNOWN( 0 < q );
-    CPPAD_ASSERT_UNKNOWN( size_t(arg[0]) < num_par );
-    CPPAD_ASSERT_UNKNOWN(
-        arg[arg[4]] == arg[4]
-    );
+    CPPAD_ASSERT_UNKNOWN(NumRes(CSumOp) == 1);
+    CPPAD_ASSERT_UNKNOWN(q < cap_order);
+    CPPAD_ASSERT_UNKNOWN(0 < q);
+    CPPAD_ASSERT_UNKNOWN(size_t(arg[0]) < num_par);
+    CPPAD_ASSERT_UNKNOWN(arg[arg[4]] == arg[4]);
 
     // Taylor coefficients corresponding to result
-    size_t num_taylor_per_var = (cap_order-1) * r + 1;
-    size_t m                  = (q-1)*r + 1;
-    Base* z = taylor + i_z * num_taylor_per_var + m;
-    for(size_t ell = 0; ell < r; ell++)
-        z[ell] = zero;
-    Base* x;
-    for(size_t i = 5; i < size_t(arg[1]); ++i)
-    {   CPPAD_ASSERT_UNKNOWN( size_t(arg[i]) < i_z );
+    size_t num_taylor_per_var = (cap_order - 1) * r + 1;
+    size_t m = (q - 1) * r + 1;
+    Base *z = taylor + i_z * num_taylor_per_var + m;
+    for (size_t ell = 0; ell < r; ell++) z[ell] = zero;
+    Base *x;
+    for (size_t i = 5; i < size_t(arg[1]); ++i) {
+        CPPAD_ASSERT_UNKNOWN(size_t(arg[i]) < i_z);
         x = taylor + size_t(arg[i]) * num_taylor_per_var + m;
-        for(size_t ell = 0; ell < r; ell++)
-            z[ell] += x[ell];
+        for (size_t ell = 0; ell < r; ell++) z[ell] += x[ell];
     }
-    for(size_t i = size_t(arg[1]); i < size_t(arg[2]); ++i)
-    {   CPPAD_ASSERT_UNKNOWN( size_t(arg[i]) < i_z );
+    for (size_t i = size_t(arg[1]); i < size_t(arg[2]); ++i) {
+        CPPAD_ASSERT_UNKNOWN(size_t(arg[i]) < i_z);
         x = taylor + size_t(arg[i]) * num_taylor_per_var + m;
-        for(size_t ell = 0; ell < r; ell++)
-            z[ell] -= x[ell];
+        for (size_t ell = 0; ell < r; ell++) z[ell] -= x[ell];
     }
 }
 
@@ -328,37 +302,28 @@ k-th order Taylor coefficient corresponding to y(i)
 */
 
 template <class Base>
-void reverse_csum_op(
-    size_t        d           ,
-    size_t        i_z         ,
-    const addr_t* arg         ,
-    size_t        nc_partial  ,
-    Base*         partial     )
-{
+void reverse_csum_op(size_t d, size_t i_z, const addr_t *arg, size_t nc_partial, Base *partial) {
     // check assumptions
-    CPPAD_ASSERT_UNKNOWN( NumRes(CSumOp) == 1 );
-    CPPAD_ASSERT_UNKNOWN( d < nc_partial );
+    CPPAD_ASSERT_UNKNOWN(NumRes(CSumOp) == 1);
+    CPPAD_ASSERT_UNKNOWN(d < nc_partial);
 
     // Taylor coefficients and partial derivative corresponding to result
-    Base* pz = partial + i_z * nc_partial;
-    Base* px;
+    Base *pz = partial + i_z * nc_partial;
+    Base *px;
     size_t d1 = d + 1;
-    for(size_t i = 5; i < size_t(arg[1]); ++i)
-    {   CPPAD_ASSERT_UNKNOWN( size_t(arg[i]) < i_z );
-        px    = partial + size_t(arg[i]) * nc_partial;
+    for (size_t i = 5; i < size_t(arg[1]); ++i) {
+        CPPAD_ASSERT_UNKNOWN(size_t(arg[i]) < i_z);
+        px = partial + size_t(arg[i]) * nc_partial;
         size_t k = d1;
-        while(k--)
-            px[k] += pz[k];
+        while (k--) px[k] += pz[k];
     }
-    for(size_t i = size_t(arg[1]); i < size_t(arg[2]); ++i)
-    {   CPPAD_ASSERT_UNKNOWN( size_t(arg[i]) < i_z );
-        px    = partial + size_t(arg[i]) * nc_partial;
+    for (size_t i = size_t(arg[1]); i < size_t(arg[2]); ++i) {
+        CPPAD_ASSERT_UNKNOWN(size_t(arg[i]) < i_z);
+        px = partial + size_t(arg[i]) * nc_partial;
         size_t k = d1;
-        while(k--)
-            px[k] -= pz[k];
+        while (k--) px[k] -= pz[k];
     }
 }
-
 
 /*!
 Forward mode Jacobian sparsity pattern for CSumOp operator.
@@ -417,19 +382,15 @@ depends on.
 */
 
 template <class Vector_set>
-void forward_sparse_jacobian_csum_op(
-    size_t           i_z         ,
-    const addr_t*    arg         ,
-    Vector_set&      sparsity    )
-{   sparsity.clear(i_z);
+void forward_sparse_jacobian_csum_op(size_t i_z, const addr_t *arg, Vector_set &sparsity) {
+    sparsity.clear(i_z);
 
-    for(size_t i = 5; i < size_t(arg[2]); ++i)
-    {   CPPAD_ASSERT_UNKNOWN( size_t(arg[i]) < i_z );
-        sparsity.binary_union(
-            i_z        , // index in sparsity for result
-            i_z        , // index in sparsity for left operand
-            size_t(arg[i]), // index for right operand
-            sparsity     // sparsity vector for right operand
+    for (size_t i = 5; i < size_t(arg[2]); ++i) {
+        CPPAD_ASSERT_UNKNOWN(size_t(arg[i]) < i_z);
+        sparsity.binary_union(i_z,             // index in sparsity for result
+                              i_z,             // index in sparsity for left operand
+                              size_t(arg[i]),  // index for right operand
+                              sparsity         // sparsity vector for right operand
         );
     }
 }
@@ -491,19 +452,13 @@ On input it corresponds to G and on output it is undefined.
 */
 
 template <class Vector_set>
-void reverse_sparse_jacobian_csum_op(
-    size_t           i_z         ,
-    const addr_t*    arg         ,
-    Vector_set&      sparsity    )
-{
-    for(size_t i = 5; i < size_t(arg[2]); ++i)
-    {
-        CPPAD_ASSERT_UNKNOWN( size_t(arg[i]) < i_z );
-        sparsity.binary_union(
-            size_t(arg[i]), // index in sparsity for result
-            size_t(arg[i]), // index in sparsity for left operand
-            i_z        , // index for right operand
-            sparsity     // sparsity vector for right operand
+void reverse_sparse_jacobian_csum_op(size_t i_z, const addr_t *arg, Vector_set &sparsity) {
+    for (size_t i = 5; i < size_t(arg[2]); ++i) {
+        CPPAD_ASSERT_UNKNOWN(size_t(arg[i]) < i_z);
+        sparsity.binary_union(size_t(arg[i]),  // index in sparsity for result
+                              size_t(arg[i]),  // index in sparsity for left operand
+                              i_z,             // index for right operand
+                              sparsity         // sparsity vector for right operand
         );
     }
 }
@@ -586,24 +541,18 @@ and on output it corresponds to the function H.
 */
 
 template <class Vector_set>
-void reverse_sparse_hessian_csum_op(
-    size_t           i_z                 ,
-    const addr_t*    arg                 ,
-    bool*            rev_jacobian        ,
-    Vector_set&      rev_hes_sparsity    )
-{
-    for(size_t i = 5; i < size_t(arg[2]); ++i)
-    {
-        CPPAD_ASSERT_UNKNOWN( size_t(arg[i]) < i_z );
-        rev_hes_sparsity.binary_union(
-        size_t(arg[i]), // index in sparsity for result
-        size_t(arg[i]), // index in sparsity for left operand
-        i_z                , // index for right operand
-        rev_hes_sparsity     // sparsity vector for right operand
+void reverse_sparse_hessian_csum_op(size_t i_z, const addr_t *arg, bool *rev_jacobian, Vector_set &rev_hes_sparsity) {
+    for (size_t i = 5; i < size_t(arg[2]); ++i) {
+        CPPAD_ASSERT_UNKNOWN(size_t(arg[i]) < i_z);
+        rev_hes_sparsity.binary_union(size_t(arg[i]),   // index in sparsity for result
+                                      size_t(arg[i]),   // index in sparsity for left operand
+                                      i_z,              // index for right operand
+                                      rev_hes_sparsity  // sparsity vector for right operand
         );
         rev_jacobian[arg[i]] |= rev_jacobian[i_z];
     }
 }
 
-} } // END_CPPAD_LOCAL_NAMESPACE
-# endif
+}  // namespace local
+}  // namespace CppAD
+#endif

@@ -22,41 +22,39 @@ namespace cg {
  * Generic index pattern
  */
 class IndexPattern {
-public:
-
+   public:
     virtual IndexPatternType getType() const = 0;
 
-    virtual void getSubIndexes(std::set<IndexPattern*>& indexes) const = 0;
+    virtual void getSubIndexes(std::set<IndexPattern *> &indexes) const = 0;
 
-    inline virtual ~IndexPattern() {
-    }
+    inline virtual ~IndexPattern() {}
 
     /***********************************************************************
      *   static methods
      **********************************************************************/
     /**
      * Detects the index pattern for the provided points (y = f(x))
-     * 
+     *
      * @param indexX the index of the independents (x)
      * @param x2y maps the independents to the dependents (indexes[x] = y )
      * @return the generated index pattern (must be deleted by user)
      */
-    template<class VectorSizeT>
-    static inline IndexPattern* detect(const VectorSizeT& x2y);
+    template <class VectorSizeT>
+    static inline IndexPattern *detect(const VectorSizeT &x2y);
 
     /**
      * Detects the index pattern for the provided points (y = f(x))
-     * 
+     *
      * @param indexX the index of the independents (x)
      * @param x2y maps the independents to the dependents (x,y)
      * @return the generated index pattern (must be deleted by user)
      */
-    static inline IndexPattern* detect(const std::map<size_t, size_t>& x2y);
+    static inline IndexPattern *detect(const std::map<size_t, size_t> &x2y);
 
-    static inline bool isConstant(const IndexPattern& ip);
+    static inline bool isConstant(const IndexPattern &ip);
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

@@ -1,5 +1,5 @@
-# ifndef CPPAD_SPEED_SPARSE_JAC_FUN_HPP
-# define CPPAD_SPEED_SPARSE_JAC_FUN_HPP
+#ifndef CPPAD_SPEED_SPARSE_JAC_FUN_HPP
+#define CPPAD_SPEED_SPARSE_JAC_FUN_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -161,59 +161,44 @@ $end
 ------------------------------------------------------------------------------
 */
 // BEGIN C++
-# include <cppad/core/cppad_assert.hpp>
-# include <cppad/utility/check_numeric_type.hpp>
-# include <cppad/utility/vector.hpp>
+#include <cppad/core/cppad_assert.hpp>
+#include <cppad/utility/check_numeric_type.hpp>
+#include <cppad/utility/vector.hpp>
 
 // following needed by gcc under fedora 17 so that exp(double) is defined
-# include <cppad/base_require.hpp>
+#include <cppad/base_require.hpp>
 
 namespace CppAD {
-    template <class Float, class FloatVector>
-    void sparse_jac_fun(
-        size_t                       m    ,
-        size_t                       n    ,
-        const FloatVector&           x    ,
-        const CppAD::vector<size_t>& row  ,
-        const CppAD::vector<size_t>& col  ,
-        size_t                       p    ,
-        FloatVector&                 fp   )
-    {
-        // check numeric type specifications
-        CheckNumericType<Float>();
-        // check value of p
-        CPPAD_ASSERT_KNOWN(
-            p == 0 || p == 1,
-            "sparse_jac_fun: p != 0 and p != 1"
-        );
-        size_t K = row.size();
-        CPPAD_ASSERT_KNOWN(
-            K >= m,
-            "sparse_jac_fun: row.size() < m"
-        );
-        size_t i, j, k;
+template <class Float, class FloatVector>
+void sparse_jac_fun(size_t m, size_t n, const FloatVector &x, const CppAD::vector<size_t> &row,
+                    const CppAD::vector<size_t> &col, size_t p, FloatVector &fp) {
+    // check numeric type specifications
+    CheckNumericType<Float>();
+    // check value of p
+    CPPAD_ASSERT_KNOWN(p == 0 || p == 1, "sparse_jac_fun: p != 0 and p != 1");
+    size_t K = row.size();
+    CPPAD_ASSERT_KNOWN(K >= m, "sparse_jac_fun: row.size() < m");
+    size_t i, j, k;
 
-        if( p == 0 )
-            for(i = 0; i < m; i++)
-                fp[i] = Float(0);
+    if (p == 0)
+        for (i = 0; i < m; i++) fp[i] = Float(0);
 
-        Float t;
-        for(k = 0; k < K; k++)
-        {   i    = row[k];
-            j    = col[k];
-            t    = exp( x[j] * x[j] / 2.0 );
-            switch(p)
-            {
-                case 0:
+    Float t;
+    for (k = 0; k < K; k++) {
+        i = row[k];
+        j = col[k];
+        t = exp(x[j] * x[j] / 2.0);
+        switch (p) {
+            case 0:
                 fp[i] += t;
                 break;
 
-                case 1:
+            case 1:
                 fp[k] = t * x[j];
                 break;
-            }
         }
     }
 }
+}  // namespace CppAD
 // END C++
-# endif
+#endif

@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_ABS_HPP
-# define CPPAD_CORE_ABS_HPP
+#ifndef CPPAD_CORE_ABS_HPP
+#define CPPAD_CORE_ABS_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -78,55 +78,49 @@ $end
 namespace CppAD {
 
 template <class Base>
-AD<Base> AD<Base>::abs_me (void) const
-{
+AD<Base> AD<Base>::abs_me(void) const {
     AD<Base> result;
     result.value_ = abs(value_);
-    CPPAD_ASSERT_UNKNOWN( Parameter(result) );
+    CPPAD_ASSERT_UNKNOWN(Parameter(result));
 
     // check if there is a recording in progress
-    local::ADTape<Base>* tape = AD<Base>::tape_ptr();
-    if( tape == CPPAD_NULL )
-        return result;
+    local::ADTape<Base> *tape = AD<Base>::tape_ptr();
+    if (tape == CPPAD_NULL) return result;
 
     // check if operand is a constant parameter
-    if( tape_id_ != tape->id_ )
-        return result;
+    if (tape_id_ != tape->id_) return result;
 
-    if(ad_type_ == dynamic_enum)
-    {   // dynamic paramter argument
-        result.taddr_   = tape->Rec_.put_dyn_par(
-            result.value_, local::abs_dyn, taddr_
-        );
-        result.tape_id_  = tape_id_;
-        result.ad_type_  = dynamic_enum;
-    }
-    else
-    {   // variable argument
-        CPPAD_ASSERT_UNKNOWN( local::NumRes(local::AbsOp) == 1 );
-        CPPAD_ASSERT_UNKNOWN( local::NumArg(local::AbsOp) == 1 );
+    if (ad_type_ == dynamic_enum) {  // dynamic paramter argument
+        result.taddr_ = tape->Rec_.put_dyn_par(result.value_, local::abs_dyn, taddr_);
+        result.tape_id_ = tape_id_;
+        result.ad_type_ = dynamic_enum;
+    } else {  // variable argument
+        CPPAD_ASSERT_UNKNOWN(local::NumRes(local::AbsOp) == 1);
+        CPPAD_ASSERT_UNKNOWN(local::NumArg(local::AbsOp) == 1);
 
         // corresponding operand address
         tape->Rec_.PutArg(taddr_);
 
         // put operator in the tape
-        result.taddr_    = tape->Rec_.PutOp(local::AbsOp);
+        result.taddr_ = tape->Rec_.PutOp(local::AbsOp);
 
         // make result a variable
-        result.tape_id_  = tape_id_;
-        result.ad_type_  = variable_enum;
+        result.tape_id_ = tape_id_;
+        result.ad_type_ = variable_enum;
     }
     return result;
 }
 
 template <class Base>
-AD<Base> abs(const AD<Base> &x)
-{   return x.abs_me(); }
+AD<Base> abs(const AD<Base> &x) {
+    return x.abs_me();
+}
 
 template <class Base>
-AD<Base> abs(const VecAD_reference<Base> &x)
-{   return x.ADBase().abs_me(); }
+AD<Base> abs(const VecAD_reference<Base> &x) {
+    return x.ADBase().abs_me();
+}
 
-} // END CppAD namespace
+}  // namespace CppAD
 
-# endif
+#endif

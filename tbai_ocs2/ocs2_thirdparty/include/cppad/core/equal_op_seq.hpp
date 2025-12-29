@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_EQUAL_OP_SEQ_HPP
-# define CPPAD_CORE_EQUAL_OP_SEQ_HPP
+#ifndef CPPAD_CORE_EQUAL_OP_SEQ_HPP
+#define CPPAD_CORE_EQUAL_OP_SEQ_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-17 Bradley M. Bell
 
@@ -95,24 +95,20 @@ $end
 ------------------------------------------------------------------------------
 */
 
-
 namespace CppAD {
-    template <class Base>
-    CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION
-    bool EqualOpSeq(const AD<Base> &x, const AD<Base> &y)
-    {
-        if( Parameter(x) )
-        {   if( Parameter(y) )
-                return EqualOpSeq(x.value_, y.value_);
-            else
-                return false;
-        }
-        else if( Parameter(y) )
+template <class Base>
+CPPAD_INLINE_FRIEND_TEMPLATE_FUNCTION bool EqualOpSeq(const AD<Base> &x, const AD<Base> &y) {
+    if (Parameter(x)) {
+        if (Parameter(y))
+            return EqualOpSeq(x.value_, y.value_);
+        else
             return false;
+    } else if (Parameter(y))
+        return false;
 
-        return (x.taddr_ == y.taddr_);
-    }
-
+    return (x.taddr_ == y.taddr_);
 }
 
-# endif
+}  // namespace CppAD
+
+#endif

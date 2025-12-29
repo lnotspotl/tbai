@@ -1,5 +1,5 @@
-# ifndef CPPAD_UTILITY_SET_UNION_HPP
-# define CPPAD_UTILITY_SET_UNION_HPP
+#ifndef CPPAD_UTILITY_SET_UNION_HPP
+#define CPPAD_UTILITY_SET_UNION_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -67,25 +67,17 @@ The file $cref set_union.cpp$$ contains an example and test of this
 $end
 */
 
-# include <set>
-# include <algorithm>
-# include <iterator>
+#include <algorithm>
+#include <iterator>
+#include <set>
 
 namespace CppAD {
-    template <class Element>
-    std::set<Element> set_union(
-        const std::set<Element>&     left   ,
-        const std::set<Element>&     right  )
-    {   std::set<Element> result;
-        std::set_union(
-            left.begin()              ,
-            left.end()                ,
-            right.begin()             ,
-            right.end()               ,
-            std::inserter(result, result.begin())
-        );
-        return result;
-    }
+template <class Element>
+std::set<Element> set_union(const std::set<Element> &left, const std::set<Element> &right) {
+    std::set<Element> result;
+    std::set_union(left.begin(), left.end(), right.begin(), right.end(), std::inserter(result, result.begin()));
+    return result;
 }
+}  // namespace CppAD
 
-# endif
+#endif

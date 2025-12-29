@@ -34,8 +34,9 @@ namespace ocs2 {
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-StateAugmentedLagrangian::StateAugmentedLagrangian(std::unique_ptr<StateConstraint> constraintPtr,
-                                                   std::vector<std::unique_ptr<augmented::AugmentedPenaltyBase>> penaltyPtrArray)
+StateAugmentedLagrangian::StateAugmentedLagrangian(
+    std::unique_ptr<StateConstraint> constraintPtr,
+    std::vector<std::unique_ptr<augmented::AugmentedPenaltyBase>> penaltyPtrArray)
     : constraintPtr_(std::move(constraintPtr)), penalty_(std::move(penaltyPtrArray)) {}
 
 /******************************************************************************************************/
@@ -48,73 +49,78 @@ StateAugmentedLagrangian::StateAugmentedLagrangian(std::unique_ptr<StateConstrai
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-StateAugmentedLagrangian::StateAugmentedLagrangian(const StateAugmentedLagrangian& other)
-    : StateAugmentedLagrangianInterface(other), constraintPtr_(other.constraintPtr_->clone()), penalty_(other.penalty_) {}
+StateAugmentedLagrangian::StateAugmentedLagrangian(const StateAugmentedLagrangian &other)
+    : StateAugmentedLagrangianInterface(other),
+      constraintPtr_(other.constraintPtr_->clone()),
+      penalty_(other.penalty_) {}
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-StateAugmentedLagrangian* StateAugmentedLagrangian::clone() const {
-  return new StateAugmentedLagrangian(*this);
+StateAugmentedLagrangian *StateAugmentedLagrangian::clone() const {
+    return new StateAugmentedLagrangian(*this);
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
 bool StateAugmentedLagrangian::isActive(scalar_t time) const {
-  return constraintPtr_->isActive(time);
+    return constraintPtr_->isActive(time);
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
 size_t StateAugmentedLagrangian::getNumConstraints(scalar_t time) const {
-  return constraintPtr_->getNumConstraints(time);
+    return constraintPtr_->getNumConstraints(time);
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-LagrangianMetrics StateAugmentedLagrangian::getValue(scalar_t time, const vector_t& state, const Multiplier& multiplier,
-                                                     const PreComputation& preComp) const {
-  const auto h = constraintPtr_->getValue(time, state, preComp);
-  const auto p = multiplier.penalty * penalty_.getValue(time, h, &multiplier.lagrangian);
-  return {p, h};
+LagrangianMetrics StateAugmentedLagrangian::getValue(scalar_t time, const vector_t &state, const Multiplier &multiplier,
+                                                     const PreComputation &preComp) const {
+    const auto h = constraintPtr_->getValue(time, state, preComp);
+    const auto p = multiplier.penalty * penalty_.getValue(time, h, &multiplier.lagrangian);
+    return {p, h};
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-ScalarFunctionQuadraticApproximation StateAugmentedLagrangian::getQuadraticApproximation(scalar_t time, const vector_t& state,
-                                                                                         const Multiplier& multiplier,
-                                                                                         const PreComputation& preComp) const {
-  switch (constraintPtr_->getOrder()) {
-    case ConstraintOrder::Linear:
-      return multiplier.penalty *
-             penalty_.getQuadraticApproximation(time, constraintPtr_->getLinearApproximation(time, state, preComp), &multiplier.lagrangian);
-    case ConstraintOrder::Quadratic:
-      return multiplier.penalty * penalty_.getQuadraticApproximation(time, constraintPtr_->getQuadraticApproximation(time, state, preComp),
-                                                                     &multiplier.lagrangian);
-    default:
-      throw std::runtime_error("[StateAugmentedLagrangian] Unknown constraint Order");
-  }
+ScalarFunctionQuadraticApproximation StateAugmentedLagrangian::getQuadraticApproximation(
+    scalar_t time, const vector_t &state, const Multiplier &multiplier, const PreComputation &preComp) const {
+    switch (constraintPtr_->getOrder()) {
+        case ConstraintOrder::Linear:
+            return multiplier.penalty *
+                   penalty_.getQuadraticApproximation(
+                       time, constraintPtr_->getLinearApproximation(time, state, preComp), &multiplier.lagrangian);
+        case ConstraintOrder::Quadratic:
+            return multiplier.penalty *
+                   penalty_.getQuadraticApproximation(
+                       time, constraintPtr_->getQuadraticApproximation(time, state, preComp), &multiplier.lagrangian);
+        default:
+            throw std::runtime_error("[StateAugmentedLagrangian] Unknown constraint Order");
+    }
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-std::pair<Multiplier, scalar_t> StateAugmentedLagrangian::updateLagrangian(scalar_t time, const vector_t& /*state*/,
-                                                                           const vector_t& constraint, const Multiplier& multiplier) const {
-  const Multiplier updatedMultiplier{multiplier.penalty, penalty_.updateMultipliers(time, constraint, multiplier.lagrangian)};
-  const auto penalty = updatedMultiplier.penalty * penalty_.getValue(time, constraint, &updatedMultiplier.lagrangian);
-  return {updatedMultiplier, penalty};
+std::pair<Multiplier, scalar_t> StateAugmentedLagrangian::updateLagrangian(scalar_t time, const vector_t & /*state*/,
+                                                                           const vector_t &constraint,
+                                                                           const Multiplier &multiplier) const {
+    const Multiplier updatedMultiplier{multiplier.penalty,
+                                       penalty_.updateMultipliers(time, constraint, multiplier.lagrangian)};
+    const auto penalty = updatedMultiplier.penalty * penalty_.getValue(time, constraint, &updatedMultiplier.lagrangian);
+    return {updatedMultiplier, penalty};
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
 Multiplier StateAugmentedLagrangian::initializeLagrangian(scalar_t time) const {
-  return {1.0, penalty_.initializeMultipliers(getNumConstraints(time))};
+    return {1.0, penalty_.initializeMultipliers(getNumConstraints(time))};
 }
 
 }  // namespace ocs2

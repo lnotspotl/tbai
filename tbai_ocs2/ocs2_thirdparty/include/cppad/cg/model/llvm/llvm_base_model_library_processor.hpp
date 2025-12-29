@@ -24,31 +24,27 @@ namespace cg {
  *
  * @author Joao Leal
  */
-template<class Base>
+template <class Base>
 class LlvmBaseModelLibraryProcessor : public ModelLibraryProcessor<Base> {
-public:
-
-    inline LlvmBaseModelLibraryProcessor(ModelLibraryCSourceGen<Base>& modelLibraryHelper) :
-            ModelLibraryProcessor<Base>(modelLibraryHelper) {
-    }
+   public:
+    inline LlvmBaseModelLibraryProcessor(ModelLibraryCSourceGen<Base> &modelLibraryHelper)
+        : ModelLibraryProcessor<Base>(modelLibraryHelper) {}
 
     inline virtual ~LlvmBaseModelLibraryProcessor() = default;
 
-protected:
-
-    static std::string findInternalClangCHeaders(const std::string& version,
-                                                 const std::string& resourceDir) {
+   protected:
+    static std::string findInternalClangCHeaders(const std::string &version, const std::string &resourceDir) {
         // check existing paths
         for (std::string path : explode(resourceDir, " ")) {
             if (system::isFile(system::createPath(path, system::createPath("include", "stddef.h")))) {
-                return ""; // no need to add anything
+                return "";  // no need to add anything
             }
         }
 
 #ifdef CPPAD_CG_SYSTEM_LINUX
         std::string clangHeaders = "/usr/lib/clang/" + version + "/include";
         if (system::isDirectory(clangHeaders)) {
-            return clangHeaders; // found them
+            return clangHeaders;  // found them
         }
 #endif
 
@@ -56,8 +52,7 @@ protected:
         return "";
     }
 
-    const std::set<std::string>& createBitCode(ClangCompiler<Base>& clang,
-                                               const std::string& version) {
+    const std::set<std::string> &createBitCode(ClangCompiler<Base> &clang, const std::string &version) {
         // backup output format so that it can be restored
         OStreamConfigRestore coutb(std::cout);
 
@@ -74,27 +69,28 @@ protected:
                 }
             }
             if (error) {
-                throw CGException("Expected a clang with version '", version, "' but found version '", clang.getVersion(), "'");
+                throw CGException("Expected a clang with version '", version, "' but found version '",
+                                  clang.getVersion(), "'");
             }
         }
 
-        const std::map<std::string, ModelCSourceGen<Base>*>& models = this->modelLibraryHelper_->getModels();
+        const std::map<std::string, ModelCSourceGen<Base> *> &models = this->modelLibraryHelper_->getModels();
         try {
             /**
              * generate bit code
              */
-            for (const auto& p : models) {
-                const std::map<std::string, std::string>& modelSources = this->getSources(*p.second);
+            for (const auto &p : models) {
+                const std::map<std::string, std::string> &modelSources = this->getSources(*p.second);
 
                 this->modelLibraryHelper_->startingJob("", JobTimer::COMPILING_FOR_MODEL);
                 clang.generateLLVMBitCode(modelSources, this->modelLibraryHelper_);
                 this->modelLibraryHelper_->finishedJob();
             }
 
-            const std::map<std::string, std::string>& sources = this->getLibrarySources();
+            const std::map<std::string, std::string> &sources = this->getLibrarySources();
             clang.generateLLVMBitCode(sources, this->modelLibraryHelper_);
 
-            const std::map<std::string, std::string>& customSource = this->modelLibraryHelper_->getCustomSources();
+            const std::map<std::string, std::string> &customSource = this->modelLibraryHelper_->getCustomSources();
             clang.generateLLVMBitCode(customSource, this->modelLibraryHelper_);
         } catch (...) {
             clang.cleanup();
@@ -103,10 +99,9 @@ protected:
 
         return clang.getBitCodeFiles();
     }
-
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

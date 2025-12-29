@@ -28,41 +28,40 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************/
 
 #include <gtest/gtest.h>
-
 #include <ocs2_core/constraint/LinearStateConstraint.h>
 #include <ocs2_core/constraint/LinearStateInputConstraint.h>
 
 TEST(TestLinearConstraint, testLinearStateInputConstraint) {
-  const ocs2::vector_t e = ocs2::vector_t::Random(3);
-  const ocs2::matrix_t C = ocs2::matrix_t::Random(3, 2);
-  const ocs2::matrix_t D = ocs2::matrix_t::Random(3, 1);
-  ocs2::LinearStateInputConstraint constraint(e, C, D);
+    const ocs2::vector_t e = ocs2::vector_t::Random(3);
+    const ocs2::matrix_t C = ocs2::matrix_t::Random(3, 2);
+    const ocs2::matrix_t D = ocs2::matrix_t::Random(3, 1);
+    ocs2::LinearStateInputConstraint constraint(e, C, D);
 
-  const ocs2::scalar_t t = 0.0;
-  const ocs2::vector_t x = ocs2::vector_t::Random(2);
-  const ocs2::vector_t u = ocs2::vector_t::Random(1);
+    const ocs2::scalar_t t = 0.0;
+    const ocs2::vector_t x = ocs2::vector_t::Random(2);
+    const ocs2::vector_t u = ocs2::vector_t::Random(1);
 
-  const auto value = constraint.getValue(t, x, u, ocs2::PreComputation());
-  const auto approx = constraint.getLinearApproximation(t, x, u, ocs2::PreComputation());
-  EXPECT_EQ(constraint.getNumConstraints(t), value.rows());
-  EXPECT_TRUE(value.isApprox(C * x + D * u + e));
-  EXPECT_TRUE(approx.f.isApprox(value));
-  EXPECT_TRUE(approx.dfdx.isApprox(C));
-  EXPECT_TRUE(approx.dfdu.isApprox(D));
+    const auto value = constraint.getValue(t, x, u, ocs2::PreComputation());
+    const auto approx = constraint.getLinearApproximation(t, x, u, ocs2::PreComputation());
+    EXPECT_EQ(constraint.getNumConstraints(t), value.rows());
+    EXPECT_TRUE(value.isApprox(C * x + D * u + e));
+    EXPECT_TRUE(approx.f.isApprox(value));
+    EXPECT_TRUE(approx.dfdx.isApprox(C));
+    EXPECT_TRUE(approx.dfdu.isApprox(D));
 }
 
 TEST(TestLinearConstraint, testLinearStateConstraint) {
-  const ocs2::vector_t e = ocs2::vector_t::Random(3);
-  const ocs2::matrix_t C = ocs2::matrix_t::Random(3, 2);
-  ocs2::LinearStateConstraint constraint(e, C);
+    const ocs2::vector_t e = ocs2::vector_t::Random(3);
+    const ocs2::matrix_t C = ocs2::matrix_t::Random(3, 2);
+    ocs2::LinearStateConstraint constraint(e, C);
 
-  const ocs2::scalar_t t = 0.0;
-  const ocs2::vector_t x = ocs2::vector_t::Random(2);
+    const ocs2::scalar_t t = 0.0;
+    const ocs2::vector_t x = ocs2::vector_t::Random(2);
 
-  const auto value = constraint.getValue(t, x, ocs2::PreComputation());
-  const auto approx = constraint.getLinearApproximation(t, x, ocs2::PreComputation());
-  EXPECT_EQ(constraint.getNumConstraints(t), value.rows());
-  EXPECT_TRUE(value.isApprox(C * x + e));
-  EXPECT_TRUE(approx.f.isApprox(value));
-  EXPECT_TRUE(approx.dfdx.isApprox(C));
+    const auto value = constraint.getValue(t, x, ocs2::PreComputation());
+    const auto approx = constraint.getLinearApproximation(t, x, ocs2::PreComputation());
+    EXPECT_EQ(constraint.getNumConstraints(t), value.rows());
+    EXPECT_TRUE(value.isApprox(C * x + e));
+    EXPECT_TRUE(approx.f.isApprox(value));
+    EXPECT_TRUE(approx.dfdx.isApprox(C));
 }

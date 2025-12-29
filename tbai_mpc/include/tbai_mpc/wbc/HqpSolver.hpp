@@ -94,5 +94,5 @@ class HqpSolver {
     inline void updateXstar() { xStar_ += Zp * solution.head(nDecisionVariables_); }
 };
 
-}  // namespace wbc
+}  // namespace mpc
 }  // namespace tbai

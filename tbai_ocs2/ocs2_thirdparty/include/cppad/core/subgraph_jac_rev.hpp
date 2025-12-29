@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_SUBGRAPH_JAC_REV_HPP
-# define CPPAD_CORE_SUBGRAPH_JAC_REV_HPP
+#ifndef CPPAD_CORE_SUBGRAPH_JAC_REV_HPP
+#define CPPAD_CORE_SUBGRAPH_JAC_REV_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -173,10 +173,10 @@ They returns $code true$$ for success and $code false$$ for failure.
 $end
 -----------------------------------------------------------------------------
 */
-# include <cppad/core/ad_fun.hpp>
-# include <cppad/local/subgraph/info.hpp>
+#include <cppad/core/ad_fun.hpp>
+#include <cppad/local/subgraph/info.hpp>
 
-namespace CppAD { // BEGIN_CPPAD_NAMESPACE
+namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
 
 /*!
 Subgraph sparsity patterns.
@@ -202,36 +202,26 @@ subset.nc() == n.
 */
 template <class Base, class RecBase>
 template <class SizeVector, class BaseVector>
-void ADFun<Base,RecBase>::subgraph_jac_rev(
-    const BaseVector&                   x      ,
-    sparse_rcv<SizeVector, BaseVector>& subset )
-{   size_t m = Range();
+void ADFun<Base, RecBase>::subgraph_jac_rev(const BaseVector &x, sparse_rcv<SizeVector, BaseVector> &subset) {
+    size_t m = Range();
     size_t n = Domain();
     //
-    CPPAD_ASSERT_KNOWN(
-        subset.nr() == m,
-        "subgraph_jac_rev: subset.nr() not equal range dimension for f"
-    );
-    CPPAD_ASSERT_KNOWN(
-        subset.nc() == n,
-        "subgraph_jac_rev: subset.nc() not equal domain dimension for f"
-    );
+    CPPAD_ASSERT_KNOWN(subset.nr() == m, "subgraph_jac_rev: subset.nr() not equal range dimension for f");
+    CPPAD_ASSERT_KNOWN(subset.nc() == n, "subgraph_jac_rev: subset.nc() not equal domain dimension for f");
     //
     // point at which we are evaluating Jacobian
     Forward(0, x);
     //
     // nnz and row, column, and row_major vectors for subset
     size_t nnz = subset.nnz();
-    const SizeVector& row( subset.row() );
-    const SizeVector& col( subset.col() );
+    const SizeVector &row(subset.row());
+    const SizeVector &col(subset.col());
     SizeVector row_major = subset.row_major();
     //
     // determine set of independent variabels
     local::pod_vector<bool> select_domain(n);
-    for(size_t j = 0; j < n; j++)
-        select_domain[j] = false;
-    for(size_t k = 0; k < nnz; k++)
-        select_domain[ col[k] ] = true;
+    for (size_t j = 0; j < n; j++) select_domain[j] = false;
+    for (size_t k = 0; k < nnz; k++) select_domain[col[k]] = true;
     //
     // initialize reverse mode computation on subgraphs
     subgraph_reverse(select_domain);
@@ -243,36 +233,33 @@ void ADFun<Base,RecBase>::subgraph_jac_rev(
     // initialize index in row_major
     size_t k = 0;
     Base zero(0);
-    while(k < nnz )
-    {   size_t q   = 1;
-        size_t i_dep = row[ row_major[k] ];
-        size_t i_ind = col[ row_major[k] ];
-        size_t ell   = i_dep;
+    while (k < nnz) {
+        size_t q = 1;
+        size_t i_dep = row[row_major[k]];
+        size_t i_ind = col[row_major[k]];
+        size_t ell = i_dep;
         subgraph_reverse(q, ell, dw_col, dw);
         //
         size_t c = 0;
-        while( i_dep == ell )
-        {   // row numbers match
+        while (i_dep == ell) {  // row numbers match
             //
             // advance c to possible match with column i_ind
-            while( c < size_t( dw_col.size() ) && dw_col[c] < i_ind )
-                ++c;
+            while (c < size_t(dw_col.size()) && dw_col[c] < i_ind) ++c;
             //
             // check for match with i_ind
-            if( i_ind == dw_col[c] )
-                subset.set( row_major[k], dw[i_ind] );
+            if (i_ind == dw_col[c])
+                subset.set(row_major[k], dw[i_ind]);
             else
-                subset.set( row_major[k], zero);
+                subset.set(row_major[k], zero);
             //
             // advance to next (i_dep, i_ind)
             ++k;
-            if( k == nnz )
-            {   i_dep = m;
+            if (k == nnz) {
+                i_dep = m;
                 i_ind = n;
-            }
-            else
-            {   i_dep = row[ row_major[k] ];
-                i_ind = col[ row_major[k] ];
+            } else {
+                i_dep = row[row_major[k]];
+                i_ind = col[row_major[k]];
             }
         }
     }
@@ -280,12 +267,9 @@ void ADFun<Base,RecBase>::subgraph_jac_rev(
 }
 template <class Base, class RecBase>
 template <class BoolVector, class SizeVector, class BaseVector>
-void ADFun<Base,RecBase>::subgraph_jac_rev(
-    const BoolVector&                   select_domain  ,
-    const BoolVector&                   select_range   ,
-    const BaseVector&                   x              ,
-    sparse_rcv<SizeVector, BaseVector>& matrix_out     )
-{   size_t m = Range();
+void ADFun<Base, RecBase>::subgraph_jac_rev(const BoolVector &select_domain, const BoolVector &select_range,
+                                            const BaseVector &x, sparse_rcv<SizeVector, BaseVector> &matrix_out) {
+    size_t m = Range();
     size_t n = Domain();
     //
     // point at which we are evaluating Jacobian
@@ -294,7 +278,7 @@ void ADFun<Base,RecBase>::subgraph_jac_rev(
     // nnz and row, column, and row_major vectors for subset
     local::pod_vector<size_t> row_out;
     local::pod_vector<size_t> col_out;
-    local::pod_vector_maybe<Base>   val_out;
+    local::pod_vector_maybe<Base> val_out;
     //
     // initialize reverse mode computation on subgraphs
     subgraph_reverse(select_domain);
@@ -304,48 +288,46 @@ void ADFun<Base,RecBase>::subgraph_jac_rev(
     SizeVector col;
     //
     // loop through selected independent variables
-    for(size_t i = 0; i < m; ++i) if( select_range[i] )
-    {   // compute Jacobian and sparsity for this dependent variable
-        size_t q   = 1;
-        subgraph_reverse(q, i, col, dw);
-        CPPAD_ASSERT_UNKNOWN( size_t( dw.size() ) == n );
-        //
-        // offset for this dependent variable
-        size_t index = row_out.size();
-        CPPAD_ASSERT_UNKNOWN( col_out.size() == index );
-        CPPAD_ASSERT_UNKNOWN( val_out.size() == index );
-        //
-        // extend vectors to hold results for this dependent variable
-        size_t col_size = size_t( col.size() );
-        row_out.extend( col_size );
-        col_out.extend( col_size );
-        val_out.extend( col_size );
-        //
-        // store results for this dependent variable
-        for(size_t c = 0; c < col_size; ++c)
-        {   row_out[index + c] = i;
-            col_out[index + c] = col[c];
-            val_out[index + c] = dw[ col[c] ];
+    for (size_t i = 0; i < m; ++i)
+        if (select_range[i]) {  // compute Jacobian and sparsity for this dependent variable
+            size_t q = 1;
+            subgraph_reverse(q, i, col, dw);
+            CPPAD_ASSERT_UNKNOWN(size_t(dw.size()) == n);
+            //
+            // offset for this dependent variable
+            size_t index = row_out.size();
+            CPPAD_ASSERT_UNKNOWN(col_out.size() == index);
+            CPPAD_ASSERT_UNKNOWN(val_out.size() == index);
+            //
+            // extend vectors to hold results for this dependent variable
+            size_t col_size = size_t(col.size());
+            row_out.extend(col_size);
+            col_out.extend(col_size);
+            val_out.extend(col_size);
+            //
+            // store results for this dependent variable
+            for (size_t c = 0; c < col_size; ++c) {
+                row_out[index + c] = i;
+                col_out[index + c] = col[c];
+                val_out[index + c] = dw[col[c]];
+            }
         }
-    }
     //
     // create sparsity pattern corresponding to row_out, col_out
-    size_t nr  = m;
-    size_t nc  = n;
+    size_t nr = m;
+    size_t nc = n;
     size_t nnz = row_out.size();
     sparse_rc<SizeVector> pattern(nr, nc, nnz);
-    for(size_t k = 0; k < nnz; ++k)
-        pattern.set(k, row_out[k], col_out[k]);
+    for (size_t k = 0; k < nnz; ++k) pattern.set(k, row_out[k], col_out[k]);
     //
     // create sparse matrix
     sparse_rcv<SizeVector, BaseVector> matrix(pattern);
-    for(size_t k = 0; k < nnz; ++k)
-        matrix.set(k,  val_out[k]);
+    for (size_t k = 0; k < nnz; ++k) matrix.set(k, val_out[k]);
     //
     // return matrix
     matrix_out = matrix;
     //
     return;
 }
-} // END_CPPAD_NAMESPACE
-# endif
+}  // namespace CppAD
+#endif

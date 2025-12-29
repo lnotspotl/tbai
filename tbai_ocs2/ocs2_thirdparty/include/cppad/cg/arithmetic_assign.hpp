@@ -18,13 +18,13 @@
 namespace CppAD {
 namespace cg {
 
-template<class Base>
-inline CG<Base>& CG<Base>::operator+=(const CG<Base> &right) {
+template <class Base>
+inline CG<Base> &CG<Base>::operator+=(const CG<Base> &right) {
     if (isParameter() && right.isParameter()) {
         *value_ += *right.value_;
 
     } else {
-        CodeHandler<Base>* handler;
+        CodeHandler<Base> *handler;
         if (isParameter()) {
             if (isIdenticalZero()) {
                 *this = right;
@@ -35,12 +35,12 @@ inline CG<Base>& CG<Base>::operator+=(const CG<Base> &right) {
 
         } else if (right.isParameter()) {
             if (right.isIdenticalZero()) {
-                return *this; // nothing to do
+                return *this;  // nothing to do
             }
 
             handler = node_->getCodeHandler();
 
-        } else { // both left and right hand sides are variables
+        } else {  // both left and right hand sides are variables
             CPPADCG_ASSERT_UNKNOWN(node_->getCodeHandler() == right.node_->getCodeHandler());
             handler = node_->getCodeHandler();
         }
@@ -50,30 +50,30 @@ inline CG<Base>& CG<Base>::operator+=(const CG<Base> &right) {
             value.reset(new Base(getValue() + right.getValue()));
         }
 
-        makeVariable(*handler->makeNode(CGOpCode::Add,{argument(), right.argument()}), value);
+        makeVariable(*handler->makeNode(CGOpCode::Add, {argument(), right.argument()}), value);
     }
 
     return *this;
 }
 
-template<class Base>
-inline CG<Base>& CG<Base>::operator-=(const CG<Base> &right) {
+template <class Base>
+inline CG<Base> &CG<Base>::operator-=(const CG<Base> &right) {
     if (isParameter() && right.isParameter()) {
         *value_ -= *right.value_;
 
     } else {
-        CodeHandler<Base>* handler;
+        CodeHandler<Base> *handler;
         if (isParameter()) {
             handler = right.node_->getCodeHandler();
 
         } else if (right.isParameter()) {
             if (right.isIdenticalZero()) {
-                return *this; // nothing to do
+                return *this;  // nothing to do
             }
 
             handler = node_->getCodeHandler();
 
-        } else { // both left and right hand sides are variables
+        } else {  // both left and right hand sides are variables
             CPPADCG_ASSERT_UNKNOWN(node_->getCodeHandler() == right.node_->getCodeHandler());
             handler = node_->getCodeHandler();
         }
@@ -83,22 +83,22 @@ inline CG<Base>& CG<Base>::operator-=(const CG<Base> &right) {
             value.reset(new Base(getValue() - right.getValue()));
         }
 
-        makeVariable(*handler->makeNode(CGOpCode::Sub,{argument(), right.argument()}), value);
+        makeVariable(*handler->makeNode(CGOpCode::Sub, {argument(), right.argument()}), value);
     }
 
     return *this;
 }
 
-template<class Base>
-inline CG<Base>& CG<Base>::operator*=(const CG<Base> &right) {
+template <class Base>
+inline CG<Base> &CG<Base>::operator*=(const CG<Base> &right) {
     if (isParameter() && right.isParameter()) {
         *value_ *= *right.value_;
 
     } else {
-        CodeHandler<Base>* handler;
+        CodeHandler<Base> *handler;
         if (isParameter()) {
             if (isIdenticalZero()) {
-                return *this; // nothing to do (does not consider that right might be infinity)
+                return *this;  // nothing to do (does not consider that right might be infinity)
             } else if (isIdenticalOne()) {
                 *this = right;
                 return *this;
@@ -108,10 +108,10 @@ inline CG<Base>& CG<Base>::operator*=(const CG<Base> &right) {
 
         } else if (right.isParameter()) {
             if (right.isIdenticalZero()) {
-                makeParameter(Base(0.0)); // does not consider that left might be infinity
+                makeParameter(Base(0.0));  // does not consider that left might be infinity
                 return *this;
             } else if (right.isIdenticalOne()) {
-                return *this; // nothing to do
+                return *this;  // nothing to do
             }
 
             handler = node_->getCodeHandler();
@@ -126,29 +126,29 @@ inline CG<Base>& CG<Base>::operator*=(const CG<Base> &right) {
             value.reset(new Base(getValue() * right.getValue()));
         }
 
-        makeVariable(*handler->makeNode(CGOpCode::Mul,{argument(), right.argument()}), value);
+        makeVariable(*handler->makeNode(CGOpCode::Mul, {argument(), right.argument()}), value);
     }
 
     return *this;
 }
 
-template<class Base>
-inline CG<Base>& CG<Base>::operator/=(const CG<Base> &right) {
+template <class Base>
+inline CG<Base> &CG<Base>::operator/=(const CG<Base> &right) {
     if (isParameter() && right.isParameter()) {
         *value_ /= *right.value_;
 
     } else {
-        CodeHandler<Base>* handler;
+        CodeHandler<Base> *handler;
         if (isParameter()) {
             if (isIdenticalZero()) {
-                return *this; // nothing to do (does not consider that right might be infinity or zero)
+                return *this;  // nothing to do (does not consider that right might be infinity or zero)
             }
 
             handler = right.node_->getCodeHandler();
 
         } else if (right.isParameter()) {
             if (right.isIdenticalOne()) {
-                return *this; // nothing to do
+                return *this;  // nothing to do
             }
 
             handler = node_->getCodeHandler();
@@ -163,58 +163,57 @@ inline CG<Base>& CG<Base>::operator/=(const CG<Base> &right) {
             value.reset(new Base(getValue() / right.getValue()));
         }
 
-        makeVariable(*handler->makeNode(CGOpCode::Div,{argument(), right.argument()}), value);
+        makeVariable(*handler->makeNode(CGOpCode::Div, {argument(), right.argument()}), value);
     }
 
     return *this;
 }
 
-template<class Base>
-inline CG<Base>& CG<Base>::operator+=(const Base &right) {
-    return operator+=(CG<Base> (right));
+template <class Base>
+inline CG<Base> &CG<Base>::operator+=(const Base &right) {
+    return operator+=(CG<Base>(right));
 }
 
-template<class Base>
-inline CG<Base>& CG<Base>::operator-=(const Base &right) {
-    return operator-=(CG<Base> (right));
+template <class Base>
+inline CG<Base> &CG<Base>::operator-=(const Base &right) {
+    return operator-=(CG<Base>(right));
 }
 
-template<class Base>
-inline CG<Base>& CG<Base>::operator/=(const Base &right) {
-    return operator/=(CG<Base> (right));
+template <class Base>
+inline CG<Base> &CG<Base>::operator/=(const Base &right) {
+    return operator/=(CG<Base>(right));
 }
 
-template<class Base>
-inline CG<Base>& CG<Base>::operator*=(const Base &right) {
-    return operator*=(CG<Base> (right));
+template <class Base>
+inline CG<Base> &CG<Base>::operator*=(const Base &right) {
+    return operator*=(CG<Base>(right));
 }
 
-template<class Base>
-template<class T>
-inline CG<Base>& CG<Base>::operator+=(const T &right) {
-    return operator+=(CG<Base> (right));
+template <class Base>
+template <class T>
+inline CG<Base> &CG<Base>::operator+=(const T &right) {
+    return operator+=(CG<Base>(right));
 }
 
-template<class Base>
-template<class T>
-inline CG<Base>& CG<Base>::operator-=(const T &right) {
-    return operator-=(CG<Base> (right));
+template <class Base>
+template <class T>
+inline CG<Base> &CG<Base>::operator-=(const T &right) {
+    return operator-=(CG<Base>(right));
 }
 
-template<class Base>
-template<class T>
-inline CG<Base>& CG<Base>::operator/=(const T &right) {
-    return operator/=(CG<Base> (right));
+template <class Base>
+template <class T>
+inline CG<Base> &CG<Base>::operator/=(const T &right) {
+    return operator/=(CG<Base>(right));
 }
 
-template<class Base>
-template<class T>
-inline CG<Base>& CG<Base>::operator*=(const T &right) {
-    return operator*=(CG<Base> (right));
+template <class Base>
+template <class T>
+inline CG<Base> &CG<Base>::operator*=(const T &right) {
+    return operator*=(CG<Base>(right));
 }
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif
-

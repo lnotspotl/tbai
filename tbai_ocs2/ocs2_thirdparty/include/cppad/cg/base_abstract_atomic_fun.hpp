@@ -20,43 +20,36 @@ namespace cg {
 
 /**
  * Contains some utility methods for atomic functions for the type CG
- * 
+ *
  * @author Joao Leal
  */
 template <class Base>
 class BaseAbstractAtomicFun : public atomic_base<CppAD::cg::CG<Base> > {
-public:
+   public:
     using CGB = CppAD::cg::CG<Base>;
     using Arg = Argument<Base>;
-protected:
 
+   protected:
     /**
      * Creates a new atomic function that is responsible for defining the
      * dependencies to calls of a user atomic function.
-     * 
+     *
      * @param name The atomic function name.
      */
-    BaseAbstractAtomicFun(const std::string& name) :
-        atomic_base<CGB>(name) {
+    BaseAbstractAtomicFun(const std::string &name) : atomic_base<CGB>(name) {
         CPPADCG_ASSERT_KNOWN(!name.empty(), "The atomic function name cannot be empty");
     }
 
-public:
-
+   public:
     template <class ADVector>
-    void operator()(const ADVector& ax,
-                    ADVector& ay,
-                    size_t id = 0) {
+    void operator()(const ADVector &ax, ADVector &ay, size_t id = 0) {
         this->atomic_base<CGB>::operator()(ax, ay, id);
     }
 
-    virtual ~BaseAbstractAtomicFun() {
-    }
+    virtual ~BaseAbstractAtomicFun() {}
 
-protected:
-
-    static inline void appendAsArguments(typename std::vector<Arg>::iterator begin,
-                                         const CppAD::vector<CGB>& tx) {
+   protected:
+    static inline void appendAsArguments(typename std::vector<Arg>::iterator begin, const CppAD::vector<CGB> &tx) {
         std::vector<Arg> arguments(tx.size());
         typename std::vector<Arg>::iterator it = begin;
         for (size_t i = 0; i < arguments.size(); i++, ++it) {
@@ -68,17 +61,14 @@ protected:
         }
     }
 
-    static inline OperationNode<Base>* makeArray(CodeHandler<Base>& handler,
-                                                 const CppAD::vector<CGB>& tx) {
+    static inline OperationNode<Base> *makeArray(CodeHandler<Base> &handler, const CppAD::vector<CGB> &tx) {
         std::vector<Arg> arrayArgs = asArguments(tx);
-        std::vector<size_t> info; // empty
+        std::vector<size_t> info;  // empty
 
         return handler.makeNode(CGOpCode::ArrayCreation, info, arrayArgs);
     }
 
-    static inline OperationNode<Base>* makeArray(CodeHandler<Base>& handler,
-                                                 const CppAD::vector<CGB>& tx,
-                                                 size_t p,
+    static inline OperationNode<Base> *makeArray(CodeHandler<Base> &handler, const CppAD::vector<CGB> &tx, size_t p,
                                                  size_t k) {
         CPPADCG_ASSERT_UNKNOWN(k <= p);
         size_t n = tx.size() / (p + 1);
@@ -87,33 +77,29 @@ protected:
             arrayArgs[i] = asArgument(tx[i * (p + 1) + k]);
         }
 
-        return handler.makeNode(CGOpCode::ArrayCreation,{}, arrayArgs);
+        return handler.makeNode(CGOpCode::ArrayCreation, {}, arrayArgs);
     }
 
-    static inline OperationNode<Base>* makeZeroArray(CodeHandler<Base>& handler,
-                                                     size_t size) {
+    static inline OperationNode<Base> *makeZeroArray(CodeHandler<Base> &handler, size_t size) {
         CppAD::vector<CGB> tx2(size);
         std::vector<Arg> arrayArgs = asArguments(tx2);
 
-        return handler.makeNode(CGOpCode::ArrayCreation,{}, arrayArgs);
+        return handler.makeNode(CGOpCode::ArrayCreation, {}, arrayArgs);
     }
 
-    static inline OperationNode<Base>* makeEmptySparseArray(CodeHandler<Base>& handler,
-                                                            size_t size) {
-        return handler.makeNode(CGOpCode::SparseArrayCreation,{size}, {}); //empty args
+    static inline OperationNode<Base> *makeEmptySparseArray(CodeHandler<Base> &handler, size_t size) {
+        return handler.makeNode(CGOpCode::SparseArrayCreation, {size}, {});  // empty args
     }
 
-    static inline OperationNode<Base>* makeSparseArray(CodeHandler<Base>& handler,
-                                                       const CppAD::vector<CGB>& py,
-                                                       size_t p,
-                                                       size_t k) {
+    static inline OperationNode<Base> *makeSparseArray(CodeHandler<Base> &handler, const CppAD::vector<CGB> &py,
+                                                       size_t p, size_t k) {
         size_t p1 = p + 1;
         CPPADCG_ASSERT_UNKNOWN(k < p1);
         size_t n = py.size() / p1;
 
         std::vector<Arg> arrayArgs;
         std::vector<size_t> arrayIdx(1);
-        arrayIdx[0] = n; // array size
+        arrayIdx[0] = n;  // array size
 
         arrayArgs.reserve(py.size() / 3);
         arrayIdx.reserve(1 + py.size() / 3);
@@ -128,7 +114,7 @@ protected:
         return handler.makeNode(CGOpCode::SparseArrayCreation, arrayIdx, arrayArgs);
     }
 
-    static inline bool isParameters(const CppAD::vector<CGB>& tx) {
+    static inline bool isParameters(const CppAD::vector<CGB> &tx) {
         for (size_t i = 0; i < tx.size(); i++) {
             if (!tx[i].isParameter()) {
                 return false;
@@ -137,7 +123,7 @@ protected:
         return true;
     }
 
-    static inline bool isValuesDefined(const CppAD::vector<CGB>& tx) {
+    static inline bool isValuesDefined(const CppAD::vector<CGB> &tx) {
         for (size_t i = 0; i < tx.size(); i++) {
             if (!tx[i].isValueDefined()) {
                 return false;
@@ -145,10 +131,9 @@ protected:
         }
         return true;
     }
-
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

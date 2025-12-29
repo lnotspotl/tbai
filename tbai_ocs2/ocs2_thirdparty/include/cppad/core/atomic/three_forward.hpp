@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_ATOMIC_THREE_FORWARD_HPP
-# define CPPAD_CORE_ATOMIC_THREE_FORWARD_HPP
+#ifndef CPPAD_CORE_ATOMIC_THREE_FORWARD_HPP
+#define CPPAD_CORE_ATOMIC_THREE_FORWARD_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -237,7 +237,7 @@ $end
 -----------------------------------------------------------------------------
 */
 
-namespace CppAD { // BEGIN_CPPAD_NAMESPACE
+namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
 /*!
 \file atomic/three_forward.hpp
 Third generation atomic forward mode.
@@ -270,16 +270,13 @@ See the forward mode in user's documentation for atomic_three
 */
 // BEGIN_PROTOTYPE_BASE
 template <class Base>
-bool atomic_three<Base>::forward(
-    const vector<Base>&          parameter_x ,
-    const vector<ad_type_enum>&  type_x      ,
-    size_t                       need_y      ,
-    size_t                       order_low   ,
-    size_t                       order_up    ,
-    const vector<Base>&          taylor_x    ,
-    vector<Base>&                taylor_y    )
+bool atomic_three<Base>::forward(const vector<Base> &parameter_x, const vector<ad_type_enum> &type_x, size_t need_y,
+                                 size_t order_low, size_t order_up, const vector<Base> &taylor_x,
+                                 vector<Base> &taylor_y)
 // END_PROTOTYPE_BASE
-{   return false; }
+{
+    return false;
+}
 
 /*!
 Link from atomic_three to forward mode
@@ -309,17 +306,13 @@ See the forward mode in user's documentation for base_three
 */
 // BEGIN_PROTOTYPE_AD_BASE
 template <class Base>
-bool atomic_three<Base>::forward(
-    const vector< AD<Base> >&    aparameter_x ,
-    const vector<ad_type_enum>&  type_x       ,
-    size_t                       need_y       ,
-    size_t                       order_low    ,
-    size_t                       order_up     ,
-    const vector< AD<Base> >&    ataylor_x    ,
-    vector< AD<Base> >&          ataylor_y    )
+bool atomic_three<Base>::forward(const vector<AD<Base> > &aparameter_x, const vector<ad_type_enum> &type_x,
+                                 size_t need_y, size_t order_low, size_t order_up, const vector<AD<Base> > &ataylor_x,
+                                 vector<AD<Base> > &ataylor_y)
 // END_PROTOTYPE_AD_BASE
-{   return false; }
+{
+    return false;
+}
 
-
-} // END_CPPAD_NAMESPACE
-# endif
+}  // namespace CppAD
+#endif

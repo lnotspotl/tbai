@@ -16,8 +16,8 @@
  */
 
 #include <cppad/cg/cppadcg.hpp>
-#include <cppad/cg/dae_index_reduction/dae_var_info.hpp>
 #include <cppad/cg/dae_index_reduction/dae_equation_info.hpp>
+#include <cppad/cg/dae_index_reduction/dae_var_info.hpp>
 #include <cppad/cg/dae_index_reduction/simple_logger.hpp>
 
 namespace CppAD {
@@ -27,34 +27,29 @@ namespace cg {
  * Base class for algorithms that perform automatic index reduction of
  * implicit DAEs.
  */
-template<class Base>
+template <class Base>
 class DaeIndexReduction : public SimpleLogger {
-protected:
+   protected:
     /**
      * The original model representing an implicit DAE system
      */
-    ADFun<CG<Base> >* const fun_;
-public:
+    ADFun<CG<Base>> *const fun_;
 
+   public:
     /**
      * Creates a new algorithm for index reduction of DAE systems.
-     * 
+     *
      * @param fun The original model (potentially high index)
      */
-    DaeIndexReduction(ADFun<CG<Base> >& fun) :
-        fun_(&fun) {
-    }
+    DaeIndexReduction(ADFun<CG<Base>> &fun) : fun_(&fun) {}
 
-    inline virtual ~DaeIndexReduction() {
-    }
+    inline virtual ~DaeIndexReduction() {}
 
     /**
      * Provides the original model with a representation of an implicit DAE
      * (potentially high index).
      */
-    inline ADFun<CG<Base> >& getOriginalModel() const {
-        return *fun_;
-    }
+    inline ADFun<CG<Base>> &getOriginalModel() const { return *fun_; }
 
     /**
      * Performs the DAE index reduction and creates a new reduced index model.
@@ -64,13 +59,11 @@ public:
      * @return the reduced index model
      *         (null if there was no need for index reduction)
      */
-    virtual std::unique_ptr<ADFun<CG<Base>>> reduceIndex(std::vector<DaeVarInfo>& newVarInfo,
-                                                         std::vector<DaeEquationInfo>& equationInfo) = 0;
-
+    virtual std::unique_ptr<ADFun<CG<Base>>> reduceIndex(std::vector<DaeVarInfo> &newVarInfo,
+                                                         std::vector<DaeEquationInfo> &equationInfo) = 0;
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
-#endif	
-
+#endif

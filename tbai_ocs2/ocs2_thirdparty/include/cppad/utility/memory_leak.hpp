@@ -1,5 +1,5 @@
-# ifndef CPPAD_UTILITY_MEMORY_LEAK_HPP
-# define CPPAD_UTILITY_MEMORY_LEAK_HPP
+#ifndef CPPAD_UTILITY_MEMORY_LEAK_HPP
+#define CPPAD_UTILITY_MEMORY_LEAK_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -108,13 +108,14 @@ to standard output describing the memory leak that was detected.
 
 $end
 */
-# include <iostream>
-# include <cppad/local/define.hpp>
-# include <cppad/utility/omp_alloc.hpp>
-# include <cppad/utility/thread_alloc.hpp>
-# include <cppad/utility/track_new_del.hpp>
+#include <iostream>
 
-namespace CppAD { // BEGIN_CPPAD_NAMESPACE
+#include <cppad/local/define.hpp>
+#include <cppad/utility/omp_alloc.hpp>
+#include <cppad/utility/thread_alloc.hpp>
+#include <cppad/utility/track_new_del.hpp>
+
+namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
 /*!
 \file memory_leak.hpp
 File that implements a memory check at end of a CppAD program
@@ -146,68 +147,61 @@ Any thread has available memory.
 If an error is detected, diagnostic information is printed to standard
 output.
 */
-inline bool memory_leak(size_t add_static = 0)
-{   // CPPAD_ASSERT_FIRST_CALL_NOT_PARALLEL not necessary given asserts below
-    static size_t thread_zero_static_inuse     = 0;
+inline bool memory_leak(
+    size_t add_static = 0) {  // CPPAD_ASSERT_FIRST_CALL_NOT_PARALLEL not necessary given asserts below
+    static size_t thread_zero_static_inuse = 0;
+    using CppAD::omp_alloc;
+    using CppAD::thread_alloc;
     using std::cout;
     using std::endl;
-    using CppAD::thread_alloc;
-    using CppAD::omp_alloc;
     // --------------------------------------------------------------------
-    CPPAD_ASSERT_KNOWN(
-        ! thread_alloc::in_parallel(),
-        "memory_leak: in_parallel() is true."
-    );
-    CPPAD_ASSERT_KNOWN(
-        thread_alloc::thread_num() == 0,
-        "memory_leak: thread_num() is not zero."
-    );
-    if( add_static != 0 )
-    {   thread_zero_static_inuse += add_static;
+    CPPAD_ASSERT_KNOWN(!thread_alloc::in_parallel(), "memory_leak: in_parallel() is true.");
+    CPPAD_ASSERT_KNOWN(thread_alloc::thread_num() == 0, "memory_leak: thread_num() is not zero.");
+    if (add_static != 0) {
+        thread_zero_static_inuse += add_static;
         return false;
     }
-    bool leak                 = false;
-    size_t thread             = 0;
+    bool leak = false;
+    size_t thread = 0;
 
     // check that memory in use for thread zero corresponds to statics
     size_t num_bytes = thread_alloc::inuse(thread);
-    if( num_bytes != thread_zero_static_inuse )
-    {   leak = true;
+    if (num_bytes != thread_zero_static_inuse) {
+        leak = true;
         cout << "thread zero: static inuse = " << thread_zero_static_inuse;
         cout << ", current inuse(0)= " << num_bytes << endl;
     }
     // check that no memory is currently available for this thread
     num_bytes = thread_alloc::available(thread);
-    if( num_bytes != 0 )
-    {   leak = true;
+    if (num_bytes != 0) {
+        leak = true;
         cout << "thread zero: available    = ";
         cout << num_bytes << endl;
     }
-    for(thread = 1; thread < CPPAD_MAX_NUM_THREADS; thread++)
-    {
+    for (thread = 1; thread < CPPAD_MAX_NUM_THREADS; thread++) {
         // check that no memory is currently in use for this thread
         num_bytes = thread_alloc::inuse(thread);
-        if( num_bytes != 0 )
-        {   leak = true;
+        if (num_bytes != 0) {
+            leak = true;
             cout << "thread " << thread << ": inuse(thread) = ";
             cout << num_bytes << endl;
         }
         // check that no memory is currently available for this thread
         num_bytes = thread_alloc::available(thread);
-        if( num_bytes != 0 )
-        {   leak = true;
+        if (num_bytes != 0) {
+            leak = true;
             cout << "thread " << thread << ": available(thread) = ";
             cout << num_bytes << endl;
         }
     }
     // ----------------------------------------------------------------------
     // check track_new_del
-    if( CPPAD_TRACK_COUNT() != 0 )
-    {   leak = true;
+    if (CPPAD_TRACK_COUNT() != 0) {
+        leak = true;
         CppAD::TrackElement::Print();
     }
     return leak;
 }
 
-} // END_CPPAD_NAMESPACE
-# endif
+}  // namespace CppAD
+#endif

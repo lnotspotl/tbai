@@ -25,24 +25,20 @@ namespace cg {
  *
  * @author Joao Leal
  */
-template<class Base>
+template <class Base>
 class LangCCustomVariableNameGenerator : public LangCDefaultVariableNameGenerator<Base> {
-protected:
+   protected:
     //
     const std::vector<std::string> depNames_;
     const std::vector<std::string> indepNames_;
-public:
 
-    LangCCustomVariableNameGenerator(std::vector<std::string> depNames,
-                                     std::vector<std::string> indepNames,
-                                     const std::string& depName = "y",
-                                     const std::string& indepName = "x",
-                                     const std::string& tmpName = "v",
-                                     const std::string& tmpArrayName = "array") :
-        LangCDefaultVariableNameGenerator<Base>(depName, indepName, tmpName, tmpArrayName),
-        depNames_(std::move(depNames)),
-        indepNames_(std::move(indepNames)) {
-    }
+   public:
+    LangCCustomVariableNameGenerator(std::vector<std::string> depNames, std::vector<std::string> indepNames,
+                                     const std::string &depName = "y", const std::string &indepName = "x",
+                                     const std::string &tmpName = "v", const std::string &tmpArrayName = "array")
+        : LangCDefaultVariableNameGenerator<Base>(depName, indepName, tmpName, tmpArrayName),
+          depNames_(std::move(depNames)),
+          indepNames_(std::move(indepNames)) {}
 
     inline virtual ~LangCCustomVariableNameGenerator() = default;
 
@@ -54,8 +50,7 @@ public:
         }
     }
 
-    std::string generateIndependent(const OperationNode<Base>& independent,
-                                    size_t id) override {
+    std::string generateIndependent(const OperationNode<Base> &independent, size_t id) override {
         size_t index = id - 1;
         if (index < indepNames_.size() && !indepNames_[index].empty()) {
             return indepNames_[index];
@@ -64,35 +59,30 @@ public:
         }
     }
 
-    bool isConsecutiveInIndepArray(const OperationNode<Base>& indepFirst,
-                                   size_t idFirst,
-                                   const OperationNode<Base>& indepSecond,
-                                   size_t idSecond) override {
+    bool isConsecutiveInIndepArray(const OperationNode<Base> &indepFirst, size_t idFirst,
+                                   const OperationNode<Base> &indepSecond, size_t idSecond) override {
         size_t index1 = idFirst - 1;
         size_t index2 = idSecond - 1;
 
         if ((index1 > indepNames_.size() || indepNames_[index1].empty()) &&
-                (index2 > indepNames_.size() || indepNames_[index2].empty())) {
+            (index2 > indepNames_.size() || indepNames_[index2].empty())) {
             return index1 + 1 == index2;
         } else {
-            return false; // individual names used (not elements of arrays)
+            return false;  // individual names used (not elements of arrays)
         }
     }
 
-    bool isInSameIndependentArray(const OperationNode<Base>& indep1,
-                                  size_t id1,
-                                  const OperationNode<Base>& indep2,
+    bool isInSameIndependentArray(const OperationNode<Base> &indep1, size_t id1, const OperationNode<Base> &indep2,
                                   size_t id2) override {
         size_t index1 = id1 - 1;
         size_t index2 = id2 - 1;
 
         return (index1 > indepNames_.size() || indepNames_[index1].empty()) &&
-                (index2 > indepNames_.size() || indepNames_[index2].empty());
+               (index2 > indepNames_.size() || indepNames_[index2].empty());
     }
-
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

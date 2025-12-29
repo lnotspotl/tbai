@@ -4,8 +4,8 @@
 #include <vector>
 
 #include <ocs2_mpc/SystemObservation.h>
-#include <tbai_mpc/quadruped_mpc/terrain/TerrainPlane.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_models/QuadrupedKinematics.h>
+#include <tbai_mpc/quadruped_mpc/terrain/TerrainPlane.h>
 
 namespace tbai {
 namespace mpc {
@@ -27,16 +27,16 @@ class LocalTerrainEstimator {
      * Updates the terrain estimate based on current footholds from observation
      * @param observation: The current system observation
      */
-    void updateFootholds(const ocs2::SystemObservation& observation);
+    void updateFootholds(const ocs2::SystemObservation &observation);
 
     /**
      * Gets the estimated terrain plane
      * @return The estimated terrain plane
      */
-    const switched_model::TerrainPlane& getPlane() const { return terrainPlane_; }
+    const switched_model::TerrainPlane &getPlane() const { return terrainPlane_; }
 
    private:
-    void updateLocalTerrainEstimate(const std::vector<switched_model::vector3_t>& footholds);
+    void updateLocalTerrainEstimate(const std::vector<switched_model::vector3_t> &footholds);
 
     // Local terrain estimate
     switched_model::TerrainPlane terrainPlane_;

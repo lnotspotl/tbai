@@ -39,24 +39,29 @@ namespace LoopshapingAugmentedLagrangian {
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-std::unique_ptr<StateAugmentedLagrangianCollection> create(const StateAugmentedLagrangianCollection& systemAugmentedLagrangian,
-                                                           std::shared_ptr<LoopshapingDefinition> loopshapingDefinition) {
-  return std::make_unique<LoopshapingStateAugmentedLagrangian>(systemAugmentedLagrangian, std::move(loopshapingDefinition));
+std::unique_ptr<StateAugmentedLagrangianCollection> create(
+    const StateAugmentedLagrangianCollection &systemAugmentedLagrangian,
+    std::shared_ptr<LoopshapingDefinition> loopshapingDefinition) {
+    return std::make_unique<LoopshapingStateAugmentedLagrangian>(systemAugmentedLagrangian,
+                                                                 std::move(loopshapingDefinition));
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-std::unique_ptr<StateInputAugmentedLagrangianCollection> create(const StateInputAugmentedLagrangianCollection& systemAugmentedLagrangian,
-                                                                std::shared_ptr<LoopshapingDefinition> loopshapingDefinition) {
-  switch (loopshapingDefinition->getType()) {
-    case LoopshapingType::outputpattern:
-      return std::make_unique<LoopshapingAugmentedLagrangianOutputPattern>(systemAugmentedLagrangian, std::move(loopshapingDefinition));
-    case LoopshapingType::eliminatepattern:
-      return std::make_unique<LoopshapingAugmentedLagrangianEliminatePattern>(systemAugmentedLagrangian, std::move(loopshapingDefinition));
-    default:
-      throw std::runtime_error("[LoopshapingAugmentedLagrangian::create] invalid loopshaping type");
-  }
+std::unique_ptr<StateInputAugmentedLagrangianCollection> create(
+    const StateInputAugmentedLagrangianCollection &systemAugmentedLagrangian,
+    std::shared_ptr<LoopshapingDefinition> loopshapingDefinition) {
+    switch (loopshapingDefinition->getType()) {
+        case LoopshapingType::outputpattern:
+            return std::make_unique<LoopshapingAugmentedLagrangianOutputPattern>(systemAugmentedLagrangian,
+                                                                                 std::move(loopshapingDefinition));
+        case LoopshapingType::eliminatepattern:
+            return std::make_unique<LoopshapingAugmentedLagrangianEliminatePattern>(systemAugmentedLagrangian,
+                                                                                    std::move(loopshapingDefinition));
+        default:
+            throw std::runtime_error("[LoopshapingAugmentedLagrangian::create] invalid loopshaping type");
+    }
 }
 
 }  // namespace LoopshapingAugmentedLagrangian

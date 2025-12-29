@@ -26,36 +26,28 @@ namespace cg {
  * z = f1(x) + f2(y)
  */
 class Plane2DIndexPattern : public IndexPattern {
-protected:
+   protected:
     /**
      * maps the start of the linear section (first x) to the linear pattern
      */
-    IndexPattern* pattern1_;
-    IndexPattern* pattern2_;
-public:
+    IndexPattern *pattern1_;
+    IndexPattern *pattern2_;
 
-    inline Plane2DIndexPattern(IndexPattern* pattern1,
-                               IndexPattern* pattern2) :
-        pattern1_(pattern1),
-        pattern2_(pattern2) {
+   public:
+    inline Plane2DIndexPattern(IndexPattern *pattern1, IndexPattern *pattern2)
+        : pattern1_(pattern1), pattern2_(pattern2) {
         CPPADCG_ASSERT_UNKNOWN(pattern1_ != nullptr || pattern2_ != nullptr);
     }
 
-    Plane2DIndexPattern(const Plane2DIndexPattern& orig) = delete;
+    Plane2DIndexPattern(const Plane2DIndexPattern &orig) = delete;
 
-    inline const IndexPattern* getPattern1() const {
-        return pattern1_;
-    }
+    inline const IndexPattern *getPattern1() const { return pattern1_; }
 
-    inline const IndexPattern* getPattern2() const {
-        return pattern2_;
-    }
+    inline const IndexPattern *getPattern2() const { return pattern2_; }
 
-    inline IndexPatternType getType() const override {
-        return IndexPatternType::Plane2D;
-    }
+    inline IndexPatternType getType() const override { return IndexPatternType::Plane2D; }
 
-    inline void getSubIndexes(std::set<IndexPattern*>& indexes) const override {
+    inline void getSubIndexes(std::set<IndexPattern *> &indexes) const override {
         if (pattern1_ != nullptr) {
             indexes.insert(pattern1_);
             pattern1_->getSubIndexes(indexes);
@@ -75,7 +67,7 @@ public:
      *                        static methods
      **********************************************************************/
 
-    static inline Plane2DIndexPattern* detectPlane2D(const std::map<size_t, std::map<size_t, size_t> >& x2y2z) {
+    static inline Plane2DIndexPattern *detectPlane2D(const std::map<size_t, std::map<size_t, size_t> > &x2y2z) {
         /**
          * try to fit a combination of two patterns:
          *  z = fStart(x) + flit(y);
@@ -83,7 +75,7 @@ public:
 
         if (x2y2z.size() == 1) {
             // only one x -> fit z to y
-            const std::map<size_t, size_t>& y2z = x2y2z.begin()->second;
+            const std::map<size_t, size_t> &y2z = x2y2z.begin()->second;
             return new Plane2DIndexPattern(nullptr, IndexPattern::detect(y2z));
         }
 
@@ -93,11 +85,10 @@ public:
         std::map<size_t, std::map<size_t, size_t> >::const_iterator itx2y2z;
         for (itx2y2z = x2y2z.begin(); itx2y2z != x2y2z.end(); ++itx2y2z) {
             size_t x = itx2y2z->first;
-            const std::map<size_t, size_t>& y2z = itx2y2z->second;
+            const std::map<size_t, size_t> &y2z = itx2y2z->second;
 
-            if (y2z.size() != 1 ||
-                    y != y2z.begin()->first) {
-                x2z.clear(); // not always the same y
+            if (y2z.size() != 1 || y != y2z.begin()->first) {
+                x2z.clear();  // not always the same y
                 break;
             }
 
@@ -118,7 +109,7 @@ public:
 
         for (itx2y2z = x2y2z.begin(); itx2y2z != x2y2z.end(); ++itx2y2z) {
             size_t x = itx2y2z->first;
-            const std::map<size_t, size_t>& y2z = itx2y2z->second;
+            const std::map<size_t, size_t> &y2z = itx2y2z->second;
 
             size_t zFirst = y2z.begin()->second;
             x2zStart[x] = zFirst;
@@ -132,7 +123,7 @@ public:
                 if (itY2zOffset == y2zOffset.end()) {
                     y2zOffset[y] = offset;
                 } else if (itY2zOffset->second != offset) {
-                    return nullptr; // does not fit the pattern
+                    return nullptr;  // does not fit the pattern
                 }
             }
         }
@@ -142,39 +133,39 @@ public:
          */
         std::unique_ptr<IndexPattern> fx;
 
-        std::map<size_t, IndexPattern*> startSections = SectionedIndexPattern::detectLinearSections(x2zStart, 2);
+        std::map<size_t, IndexPattern *> startSections = SectionedIndexPattern::detectLinearSections(x2zStart, 2);
         if (startSections.empty()) {
-            return nullptr; // does not fit the pattern
+            return nullptr;  // does not fit the pattern
         }
 
         // detected a pattern for the first z based on x
         if (startSections.size() == 1) {
-            fx = std::unique_ptr<IndexPattern> (startSections.begin()->second);
+            fx = std::unique_ptr<IndexPattern>(startSections.begin()->second);
         } else {
-            fx = std::unique_ptr<IndexPattern> (new SectionedIndexPattern(startSections));
+            fx = std::unique_ptr<IndexPattern>(new SectionedIndexPattern(startSections));
         }
 
         /**
          * try to detect a pattern for the following iterations
          * based on the local loop index (local index != model index)
          */
-        std::map<size_t, IndexPattern*> sections = SectionedIndexPattern::detectLinearSections(y2zOffset, 2);
+        std::map<size_t, IndexPattern *> sections = SectionedIndexPattern::detectLinearSections(y2zOffset, 2);
         if (sections.empty()) {
-            return nullptr; // does not fit the pattern
+            return nullptr;  // does not fit the pattern
         }
 
         // detected a pattern for the z offset based on y
         std::unique_ptr<IndexPattern> fy;
         if (sections.size() == 1) {
-            fy = std::unique_ptr<IndexPattern> (sections.begin()->second);
+            fy = std::unique_ptr<IndexPattern>(sections.begin()->second);
         } else {
-            fy = std::unique_ptr<IndexPattern> (new SectionedIndexPattern(sections));
+            fy = std::unique_ptr<IndexPattern>(new SectionedIndexPattern(sections));
         }
 
         // simplify when both patterns are constant
         if (fx->getType() == IndexPatternType::Linear && fy->getType() == IndexPatternType::Linear) {
-            LinearIndexPattern* ipx = static_cast<LinearIndexPattern*> (fx.get());
-            LinearIndexPattern* ipy = static_cast<LinearIndexPattern*> (fy.get());
+            LinearIndexPattern *ipx = static_cast<LinearIndexPattern *>(fx.get());
+            LinearIndexPattern *ipy = static_cast<LinearIndexPattern *>(fy.get());
 
             if (ipx->getLinearSlopeDy() == 0 && ipy->getLinearSlopeDy() == 0) {
                 /**
@@ -187,10 +178,9 @@ public:
 
         return new Plane2DIndexPattern(fx.release(), fy.release());
     }
-
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

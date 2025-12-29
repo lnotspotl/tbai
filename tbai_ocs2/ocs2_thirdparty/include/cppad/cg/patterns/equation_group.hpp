@@ -21,24 +21,25 @@ namespace cg {
 /**
  * A groups of equations which share common temporary variables
  */
-template<class Base>
+template <class Base>
 class EquationGroup {
-public:
+   public:
     /**
      * The equations in this group
      */
-    std::set<EquationPattern<Base>*> equations;
+    std::set<EquationPattern<Base> *> equations;
     /**
-     * Which dependents (equation indexes) must be evaluated at the same 
+     * Which dependents (equation indexes) must be evaluated at the same
      * time due to shared indexed temporary variables
      */
     std::vector<std::set<size_t> > linkedDependents;
     /**
-     * Which equation pattern should be evaluated at the same 
+     * Which equation pattern should be evaluated at the same
      * time due to shared non-indexed temporary variables
      */
-    std::vector<std::set<EquationPattern<Base>*> > linkedEquationsByNonIndexedRel;
-    std::set<EquationPattern<Base>*> linkedEquationsByNonIndexed; // only equation which do not have any shared indexed variables
+    std::vector<std::set<EquationPattern<Base> *> > linkedEquationsByNonIndexedRel;
+    std::set<EquationPattern<Base> *>
+        linkedEquationsByNonIndexed;  // only equation which do not have any shared indexed variables
     /**
      * The evaluated dependents in each loop iteration
      * ([iteration 1]{dep1, dep3, ...}; [iteration 2]{dep5, dep6, ...}; ...)
@@ -48,8 +49,8 @@ public:
      * Reference iteration where all equations are present
      */
     size_t refIteration;
-public:
 
+   public:
     inline void findReferenceIteration() {
         CPPADCG_ASSERT_UNKNOWN(!iterationDependents.empty());
 
@@ -66,7 +67,7 @@ public:
     inline long findIndexedLinkedDependent(size_t dep) const {
         size_t size = linkedDependents.size();
         for (size_t pos = 0; pos < size; pos++) {
-            const std::set<size_t>& sameIndex = linkedDependents[pos];
+            const std::set<size_t> &sameIndex = linkedDependents[pos];
             if (sameIndex.find(dep) != sameIndex.end()) {
                 return pos;
             }
@@ -75,11 +76,9 @@ public:
         return -1;
     }
 
-    inline size_t getLinkedEquationsByNonIndexedCount() const {
-        return linkedEquationsByNonIndexed.size();
-    }
+    inline size_t getLinkedEquationsByNonIndexedCount() const { return linkedEquationsByNonIndexed.size(); }
 
-    inline size_t findNonIndexedLinkedRel(EquationPattern<Base>* eq) const {
+    inline size_t findNonIndexedLinkedRel(EquationPattern<Base> *eq) const {
         size_t size = linkedEquationsByNonIndexedRel.size();
         for (size_t pos = 0; pos < size; pos++) {
             if (linkedEquationsByNonIndexedRel[pos].find(eq) != linkedEquationsByNonIndexedRel[pos].end()) {
@@ -90,8 +89,7 @@ public:
         return -1;
     }
 
-    inline void addLinkedEquationsByNonIndexed(EquationPattern<Base>* eq1,
-                                               EquationPattern<Base>* eq2) {
+    inline void addLinkedEquationsByNonIndexed(EquationPattern<Base> *eq1, EquationPattern<Base> *eq2) {
         linkedEquationsByNonIndexed.insert(eq1);
         linkedEquationsByNonIndexed.insert(eq2);
 
@@ -120,7 +118,8 @@ public:
         } else if (pos1 < size) {
             if (pos2 < size) {
                 // must merge
-                linkedEquationsByNonIndexedRel[pos1].insert(linkedEquationsByNonIndexedRel[pos2].begin(), linkedEquationsByNonIndexedRel[pos2].end());
+                linkedEquationsByNonIndexedRel[pos1].insert(linkedEquationsByNonIndexedRel[pos2].begin(),
+                                                            linkedEquationsByNonIndexedRel[pos2].end());
                 linkedEquationsByNonIndexedRel.erase(linkedEquationsByNonIndexedRel.begin() + pos2);
             } else {
                 linkedEquationsByNonIndexedRel[pos1].insert(eq2);
@@ -133,7 +132,7 @@ public:
     }
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

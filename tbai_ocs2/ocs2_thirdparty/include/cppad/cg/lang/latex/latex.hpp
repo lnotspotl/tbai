@@ -17,12 +17,12 @@
 
 // ---------------------------------------------------------------------------
 // latex source code generation
+#include <cppad/cg/lang/latex/lang_latex_default_var_name_gen.hpp>
 #include <cppad/cg/lang/latex/language_latex.hpp>
 #include <cppad/cg/lang/latex/language_latex_arrays.hpp>
 #include <cppad/cg/lang/latex/language_latex_index_patterns.hpp>
-#include <cppad/cg/lang/latex/lang_latex_default_var_name_gen.hpp>
-//#include <cppad/cg/lang/latex/lang_latex_default_hessian_var_name_gen.hpp>
-//#include <cppad/cg/lang/latex/lang_latex_default_reverse2_var_name_gen.hpp>
+// #include <cppad/cg/lang/latex/lang_latex_default_hessian_var_name_gen.hpp>
+// #include <cppad/cg/lang/latex/lang_latex_default_reverse2_var_name_gen.hpp>
 #include <cppad/cg/lang/latex/lang_latex_custom_var_name_gen.hpp>
 
 #endif

@@ -35,76 +35,76 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace ocs2 {
 namespace pipg {
 
-SolverStatus singleThreadPipg(const pipg::Settings& settings, const Eigen::SparseMatrix<scalar_t>& H, const vector_t& h,
-                              const Eigen::SparseMatrix<scalar_t>& G, const vector_t& g, const vector_t& EInv, const PipgBounds& pipgBounds,
-                              vector_t& stackedSolution) {
-  // Cold start
-  vector_t z = vector_t::Zero(H.cols());
-  vector_t z_old = vector_t::Zero(H.cols());
+SolverStatus singleThreadPipg(const pipg::Settings &settings, const Eigen::SparseMatrix<scalar_t> &H, const vector_t &h,
+                              const Eigen::SparseMatrix<scalar_t> &G, const vector_t &g, const vector_t &EInv,
+                              const PipgBounds &pipgBounds, vector_t &stackedSolution) {
+    // Cold start
+    vector_t z = vector_t::Zero(H.cols());
+    vector_t z_old = vector_t::Zero(H.cols());
 
-  vector_t v = vector_t::Zero(g.rows());
-  vector_t w = vector_t::Zero(g.rows());
-  vector_t constraintsViolation(g.rows());
+    vector_t v = vector_t::Zero(g.rows());
+    vector_t w = vector_t::Zero(g.rows());
+    vector_t constraintsViolation(g.rows());
 
-  // Iteration number
-  size_t k = 0;
-  bool isConverged = false;
-  scalar_t constraintsViolationInfNorm;
-  while (k < settings.maxNumIterations && !isConverged) {
-    const auto beta = pipgBounds.dualStepSize(k);
-    const auto alpha = pipgBounds.primalStepSize(k);
+    // Iteration number
+    size_t k = 0;
+    bool isConverged = false;
+    scalar_t constraintsViolationInfNorm;
+    while (k < settings.maxNumIterations && !isConverged) {
+        const auto beta = pipgBounds.dualStepSize(k);
+        const auto alpha = pipgBounds.primalStepSize(k);
 
-    z_old.swap(z);
+        z_old.swap(z);
 
-    // v = w + beta * (G * z - g);
-    v = -g;
-    v.noalias() += G * z;
-    v *= beta;
-    v += w;
+        // v = w + beta * (G * z - g);
+        v = -g;
+        v.noalias() += G * z;
+        v *= beta;
+        v += w;
 
-    // z = z_old - alpha * (H * z_old + h + G.transpose() * v);
-    z = -h;
-    z.noalias() -= (H * z_old);
-    z.noalias() -= (G.transpose() * v);
-    z *= alpha;
-    z.noalias() += z_old;
+        // z = z_old - alpha * (H * z_old + h + G.transpose() * v);
+        z = -h;
+        z.noalias() -= (H * z_old);
+        z.noalias() -= (G.transpose() * v);
+        z *= alpha;
+        z.noalias() += z_old;
 
-    // w = w + beta * (G * z - g);
-    w -= beta * g;
-    w.noalias() += beta * (G * z);
+        // w = w + beta * (G * z - g);
+        w -= beta * g;
+        w.noalias() += beta * (G * z);
 
-    if (k % settings.checkTerminationInterval == 0) {
-      const scalar_t zNorm = z.squaredNorm();
+        if (k % settings.checkTerminationInterval == 0) {
+            const scalar_t zNorm = z.squaredNorm();
 
-      constraintsViolation.noalias() = G * z;
-      constraintsViolation -= g;
-      constraintsViolation.cwiseProduct(EInv);
-      constraintsViolationInfNorm = constraintsViolation.lpNorm<Eigen::Infinity>();
+            constraintsViolation.noalias() = G * z;
+            constraintsViolation -= g;
+            constraintsViolation.cwiseProduct(EInv);
+            constraintsViolationInfNorm = constraintsViolation.lpNorm<Eigen::Infinity>();
 
-      const vector_t z_delta = z - z_old;
-      const scalar_t z_deltaNorm = z_delta.squaredNorm();
-      isConverged =
-          constraintsViolationInfNorm <= settings.absoluteTolerance &&
-          (z_deltaNorm <= settings.relativeTolerance * settings.relativeTolerance * zNorm || z_deltaNorm <= settings.absoluteTolerance);
+            const vector_t z_delta = z - z_old;
+            const scalar_t z_deltaNorm = z_delta.squaredNorm();
+            isConverged = constraintsViolationInfNorm <= settings.absoluteTolerance &&
+                          (z_deltaNorm <= settings.relativeTolerance * settings.relativeTolerance * zNorm ||
+                           z_deltaNorm <= settings.absoluteTolerance);
+        }
+
+        ++k;
+    }  // end of while loop
+
+    stackedSolution.swap(z);
+    pipg::SolverStatus status = isConverged ? pipg::SolverStatus::SUCCESS : pipg::SolverStatus::MAX_ITER;
+
+    if (settings.displayShortSummary) {
+        std::cerr << "\n+++++++++++++++++++++++++++++++++++++++++++++";
+        std::cerr << "\n++++++++++++++ PIPG +++++++++++++++++++++++++";
+        std::cerr << "\n+++++++++++++++++++++++++++++++++++++++++++++\n";
+        std::cerr << "Solver status: " << pipg::toString(status) << "\n";
+        std::cerr << "Number of Iterations: " << k << " out of " << settings.maxNumIterations << "\n";
+        std::cerr << "Norm of delta primal solution: " << (stackedSolution - z_old).norm() << "\n";
+        std::cerr << "Constraints violation : " << constraintsViolationInfNorm << "\n";
     }
 
-    ++k;
-  }  // end of while loop
-
-  stackedSolution.swap(z);
-  pipg::SolverStatus status = isConverged ? pipg::SolverStatus::SUCCESS : pipg::SolverStatus::MAX_ITER;
-
-  if (settings.displayShortSummary) {
-    std::cerr << "\n+++++++++++++++++++++++++++++++++++++++++++++";
-    std::cerr << "\n++++++++++++++ PIPG +++++++++++++++++++++++++";
-    std::cerr << "\n+++++++++++++++++++++++++++++++++++++++++++++\n";
-    std::cerr << "Solver status: " << pipg::toString(status) << "\n";
-    std::cerr << "Number of Iterations: " << k << " out of " << settings.maxNumIterations << "\n";
-    std::cerr << "Norm of delta primal solution: " << (stackedSolution - z_old).norm() << "\n";
-    std::cerr << "Constraints violation : " << constraintsViolationInfNorm << "\n";
-  }
-
-  return status;
+    return status;
 }
 
 }  // namespace pipg

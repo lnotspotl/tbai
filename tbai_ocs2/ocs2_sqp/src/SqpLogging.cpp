@@ -34,10 +34,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace ocs2 {
 namespace sqp {
 
-std::ostream& operator<<(std::ostream& stream, const LogEntry& logEntry) {
-  const std::string delim = ", ";
-  const std::string lineEnd = "\n";
-  // clang-format off
+std::ostream &operator<<(std::ostream &stream, const LogEntry &logEntry) {
+    const std::string delim = ", ";
+    const std::string lineEnd = "\n";
+    // clang-format off
   stream  << std::setprecision(16) // print decimals up to machine epsilon of double (~10^-16)
           << logEntry.problemNumber << delim
           << logEntry.time << delim
@@ -58,15 +58,15 @@ std::ostream& operator<<(std::ostream& stream, const LogEntry& logEntry) {
           << logEntry.stepInfo.performanceAfterStep.equalityConstraintsSSE << delim
           << logEntry.stepInfo.totalConstraintViolationAfterStep << delim
           << toString(logEntry.convergence) << lineEnd;
-  // clang-format on
-  return stream;
+    // clang-format on
+    return stream;
 }
 
 std::string logHeader() {
-  const std::string delim = ", ";
-  const std::string lineEnd = "\n";
-  std::stringstream stream;
-  // clang-format off
+    const std::string delim = ", ";
+    const std::string lineEnd = "\n";
+    std::stringstream stream;
+    // clang-format off
   stream  << "problemNumber" << delim
           << "time" << delim
           << "iteration" << delim
@@ -86,8 +86,8 @@ std::string logHeader() {
           << "performanceAfterStep/equalityConstraintsSSE" << delim
           << "totalConstraintViolationAfterStep" << delim
           << "convergence" << lineEnd;
-  // clang-format on
-  return stream.str();
+    // clang-format on
+    return stream.str();
 }
 
 }  // namespace sqp

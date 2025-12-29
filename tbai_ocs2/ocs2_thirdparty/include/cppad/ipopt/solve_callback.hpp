@@ -1,5 +1,5 @@
-# ifndef CPPAD_IPOPT_SOLVE_CALLBACK_HPP
-# define CPPAD_IPOPT_SOLVE_CALLBACK_HPP
+#ifndef CPPAD_IPOPT_SOLVE_CALLBACK_HPP
+#define CPPAD_IPOPT_SOLVE_CALLBACK_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-16 Bradley M. Bell
 
@@ -12,12 +12,12 @@ in the Eclipse Public License, Version 2.0 are satisfied:
       GNU General Public License, Version 2.0 or later.
 ---------------------------------------------------------------------------- */
 
-# include <cppad/cppad.hpp>
-# include <coin/IpIpoptApplication.hpp>
-# include <coin/IpTNLP.hpp>
-# include <cppad/ipopt/solve_result.hpp>
+#include <coin/IpIpoptApplication.hpp>
+#include <coin/IpTNLP.hpp>
+#include <cppad/cppad.hpp>
+#include <cppad/ipopt/solve_result.hpp>
 
-namespace CppAD { // BEGIN_CPPAD_NAMESPACE
+namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
 namespace ipopt {
 /*!
 \file solve_callback.hpp
@@ -39,80 +39,79 @@ Looking at the code, it seems to be a flag telling Ipopt to abort
 when the flag is false.
 */
 template <class Dvector, class ADvector, class FG_eval>
-class solve_callback : public Ipopt::TNLP
-{
-private:
+class solve_callback : public Ipopt::TNLP {
+   private:
     // ------------------------------------------------------------------
     // Types used by this class
     // ------------------------------------------------------------------
     /// A Scalar value used by Ipopt
-    typedef Ipopt::Number                         Number;
+    typedef Ipopt::Number Number;
     /// An index value used by Ipopt
-    typedef Ipopt::Index                          Index;
+    typedef Ipopt::Index Index;
     /// Indexing style used in Ipopt sparsity structure
-    typedef Ipopt::TNLP::IndexStyleEnum           IndexStyleEnum;
+    typedef Ipopt::TNLP::IndexStyleEnum IndexStyleEnum;
     // ------------------------------------------------------------------
     // Values directly passed in to constuctor
     // ------------------------------------------------------------------
     /// dimension of the range space for f(x).
     /// The objective is sum_i f_i (x).
     /// Note that, at this point, there is no advantage having nf_ > 1.
-    const size_t                    nf_;
+    const size_t nf_;
     /// dimension of the domain space for f(x) and g(x)
-    const size_t                    nx_;
+    const size_t nx_;
     /// dimension of the range space for g(x)
-    const size_t                    ng_;
+    const size_t ng_;
     /// initial value for x
-    const Dvector&                  xi_;
+    const Dvector &xi_;
     /// lower limit for x
-    const Dvector&                  xl_;
+    const Dvector &xl_;
     /// upper limit for x
-    const Dvector&                  xu_;
+    const Dvector &xu_;
     /// lower limit for g(x)
-    const Dvector&                  gl_;
+    const Dvector &gl_;
     /// upper limit for g(x)
-    const Dvector&                  gu_;
+    const Dvector &gu_;
     /// object that evaluates f(x) and g(x)
-    FG_eval&                        fg_eval_;
+    FG_eval &fg_eval_;
     /// should operation sequence be retaped for each new x.
-    bool                            retape_;
+    bool retape_;
     /// Should sparse methods be used to compute Jacobians and Hessians
     /// with forward mode used for Jacobian.
-    bool                            sparse_forward_;
+    bool sparse_forward_;
     /// Should sparse methods be used to compute Jacobians and Hessians
     /// with reverse mode used for Jacobian.
-    bool                            sparse_reverse_;
+    bool sparse_reverse_;
     /// final results are returned to this structure
-    solve_result<Dvector>&          solution_;
+    solve_result<Dvector> &solution_;
     // ------------------------------------------------------------------
     // Values that are initilaized by the constructor
     // ------------------------------------------------------------------
     /// AD function object that evaluates x -> [ f(x) , g(x) ]
     /// If retape is false, this object is initialzed by constructor
     /// otherwise it is set by cache_new_x each time it is called.
-    CppAD::ADFun<double>            adfun_;
+    CppAD::ADFun<double> adfun_;
     /// value of x corresponding to previous new_x
-    Dvector                         x0_;
+    Dvector x0_;
     /// value of fg corresponding to previous new_x
-    Dvector                         fg0_;
+    Dvector fg0_;
     // ----------------------------------------------------------------------
     // Jacobian information
     // ----------------------------------------------------------------------
     /// Sparsity pattern for Jacobian of [f(x), g(x) ].
     /// If sparse is true, this pattern set by constructor and does not change.
     /// Otherwise this vector has size zero.
-    CppAD::vectorBool               pattern_jac_;
+    CppAD::vectorBool pattern_jac_;
     /// Row indices of [f(x), g(x)] for Jacobian of g(x) in row order.
     /// (Set by constructor and not changed.)
-    CppAD::vector<size_t>           row_jac_;
+    CppAD::vector<size_t> row_jac_;
     /// Column indices for Jacobian of g(x), same order as row_jac_.
     /// (Set by constructor and not changed.)
-    CppAD::vector<size_t>           col_jac_;
+    CppAD::vector<size_t> col_jac_;
     /// col_order_jac_ sorts row_jac_ and col_jac_ in column order.
     /// (Set by constructor and not changed.)
-    CppAD::vector<size_t>           col_order_jac_;
+    CppAD::vector<size_t> col_order_jac_;
     /// Work vector used by SparseJacobian, stored here to avoid recalculation.
-    CppAD::sparse_jacobian_work     work_jac_;
+    CppAD::sparse_jacobian_work work_jac_;
     // ----------------------------------------------------------------------
     // Hessian information
     // ----------------------------------------------------------------------
@@ -120,15 +119,15 @@ private:
     /// \f[ L(x) = \sigma \sum_i f_i (x) + \sum_i \lambda_i  g_i (x) \f]
     /// If sparse is true, this pattern set by constructor and does not change.
     /// Otherwise this vector has size zero.
-    CppAD::vectorBool               pattern_hes_;
+    CppAD::vectorBool pattern_hes_;
     /// Row indices of Hessian lower left triangle in row order.
     /// (Set by constructor and not changed.)
-    CppAD::vector<size_t>           row_hes_;
+    CppAD::vector<size_t> row_hes_;
     /// Column indices of Hessian left triangle in same order as row_hes_.
     /// (Set by constructor and not changed.)
-    CppAD::vector<size_t>           col_hes_;
+    CppAD::vector<size_t> col_hes_;
     /// Work vector used by SparseJacobian, stored here to avoid recalculation.
-    CppAD::sparse_hessian_work      work_hes_;
+    CppAD::sparse_hessian_work work_hes_;
     // ------------------------------------------------------------------
     // Private member functions
     // ------------------------------------------------------------------
@@ -151,27 +150,24 @@ private:
     The zero order Taylor coefficients for this function are set
     so they correspond to the argument x.
     */
-    void cache_new_x(const Number* x)
-    {   size_t i;
-        if( retape_ )
-        {   // make adfun_, as well as x0_ and fg0_ correspond to this x
+    void cache_new_x(const Number *x) {
+        size_t i;
+        if (retape_) {  // make adfun_, as well as x0_ and fg0_ correspond to this x
             ADvector a_x(nx_), a_fg(nf_ + ng_);
-            for(i = 0; i < nx_; i++)
-            {   x0_[i] = x[i];
+            for (i = 0; i < nx_; i++) {
+                x0_[i] = x[i];
                 a_x[i] = x[i];
             }
             CppAD::Independent(a_x);
             fg_eval_(a_fg, a_x);
             adfun_.Dependent(a_x, a_fg);
-        }
-        else
-        {   // make x0_ and fg0_ correspond to this x
-            for(i = 0; i < nx_; i++)
-                x0_[i] = x[i];
+        } else {  // make x0_ and fg0_ correspond to this x
+            for (i = 0; i < nx_; i++) x0_[i] = x[i];
         }
         fg0_ = adfun_.Forward(0, x0_);
     }
-public:
+
+   public:
     // ----------------------------------------------------------------------
     /*!
     Constructor for the interface between ipopt::solve and Ipopt
@@ -218,34 +214,23 @@ public:
     \param solution
     object where final results are stored.
     */
-    solve_callback(
-        size_t                 nf              ,
-        size_t                 nx              ,
-        size_t                 ng              ,
-        const Dvector&         xi              ,
-        const Dvector&         xl              ,
-        const Dvector&         xu              ,
-        const Dvector&         gl              ,
-        const Dvector&         gu              ,
-        FG_eval&               fg_eval         ,
-        bool                   retape          ,
-        bool                   sparse_forward  ,
-        bool                   sparse_reverse  ,
-        solve_result<Dvector>& solution ) :
-    nf_ ( nf ),
-    nx_ ( nx ),
-    ng_ ( ng ),
-    xi_ ( xi ),
-    xl_ ( xl ),
-    xu_ ( xu ),
-    gl_ ( gl ),
-    gu_ ( gu ),
-    fg_eval_ ( fg_eval ),
-    retape_ ( retape ),
-    sparse_forward_ ( sparse_forward ),
-    sparse_reverse_ ( sparse_reverse ),
-    solution_ ( solution )
-    {   CPPAD_ASSERT_UNKNOWN( ! ( sparse_forward_ & sparse_reverse_ ) );
+    solve_callback(size_t nf, size_t nx, size_t ng, const Dvector &xi, const Dvector &xl, const Dvector &xu,
+                   const Dvector &gl, const Dvector &gu, FG_eval &fg_eval, bool retape, bool sparse_forward,
+                   bool sparse_reverse, solve_result<Dvector> &solution)
+        : nf_(nf),
+          nx_(nx),
+          ng_(ng),
+          xi_(xi),
+          xl_(xl),
+          xu_(xu),
+          gl_(gl),
+          gu_(gu),
+          fg_eval_(fg_eval),
+          retape_(retape),
+          sparse_forward_(sparse_forward),
+          sparse_reverse_(sparse_reverse),
+          solution_(solution) {
+        CPPAD_ASSERT_UNKNOWN(!(sparse_forward_ & sparse_reverse_));
 
         size_t i, j;
         size_t nfg = nf_ + ng_;
@@ -253,31 +238,26 @@ public:
         // initialize x0_ and fg0_ wih proper dimensions and value nan
         x0_.resize(nx);
         fg0_.resize(nfg);
-        for(i = 0; i < nx_; i++)
-            x0_[i] = CppAD::nan(0.0);
-        for(i = 0; i < nfg; i++)
-            fg0_[i] = CppAD::nan(0.0);
+        for (i = 0; i < nx_; i++) x0_[i] = CppAD::nan(0.0);
+        for (i = 0; i < nfg; i++) fg0_[i] = CppAD::nan(0.0);
 
-        if( ! retape_ )
-        {   // make adfun_ correspond to x -> [ f(x), g(x) ]
+        if (!retape_) {  // make adfun_ correspond to x -> [ f(x), g(x) ]
             ADvector a_x(nx_), a_fg(nfg);
-            for(i = 0; i < nx_; i++)
-                a_x[i] = xi_[i];
+            for (i = 0; i < nx_; i++) a_x[i] = xi_[i];
             CppAD::Independent(a_x);
             fg_eval_(a_fg, a_x);
             adfun_.Dependent(a_x, a_fg);
             // optimize because we will make repeated use of this tape
             adfun_.optimize();
         }
-        if( sparse_forward_ | sparse_reverse_ )
-        {   CPPAD_ASSERT_UNKNOWN( ! retape );
+        if (sparse_forward_ | sparse_reverse_) {
+            CPPAD_ASSERT_UNKNOWN(!retape);
             size_t m = nf_ + ng_;
             //
             // -----------------------------------------------------------
             // Jacobian
-            pattern_jac_.resize( m * nx_ );
-            if( nx_ <= m )
-            {   // use forward mode to compute sparsity
+            pattern_jac_.resize(m * nx_);
+            if (nx_ <= m) {  // use forward mode to compute sparsity
 
                 // number of bits that are packed into one unit in vectorBool
                 size_t n_column = vectorBool::bit_per_unit();
@@ -287,29 +267,23 @@ public:
 
                 // compute the sparsity pattern n_column columns at a time
                 size_t n_loop = (nx_ - 1) / n_column + 1;
-                for(size_t i_loop = 0; i_loop < n_loop; i_loop++)
-                {   // starting column index for this iteration
+                for (size_t i_loop = 0; i_loop < n_loop; i_loop++) {  // starting column index for this iteration
                     size_t i_column = i_loop * n_column;
 
                     // pattern that picks out the appropriate columns
-                    for(i = 0; i < nx_; i++)
-                    {   for(j = 0; j < n_column; j++)
-                            r[i * n_column + j] = (i == i_column + j);
+                    for (i = 0; i < nx_; i++) {
+                        for (j = 0; j < n_column; j++) r[i * n_column + j] = (i == i_column + j);
                     }
                     s = adfun_.ForSparseJac(n_column, r);
 
                     // fill in the corresponding columns of total_sparsity
-                    for(i = 0; i < m; i++)
-                    {   for(j = 0; j < n_column; j++)
-                        {   if( i_column + j < nx_ )
-                                pattern_jac_[i * nx_ + i_column + j] =
-                                    s[i * n_column + j];
+                    for (i = 0; i < m; i++) {
+                        for (j = 0; j < n_column; j++) {
+                            if (i_column + j < nx_) pattern_jac_[i * nx_ + i_column + j] = s[i * n_column + j];
                         }
                     }
                 }
-            }
-            else
-            {   // use reverse mode to compute sparsity
+            } else {  // use reverse mode to compute sparsity
 
                 // number of bits that are packed into one unit in vectorBool
                 size_t n_row = vectorBool::bit_per_unit();
@@ -319,23 +293,19 @@ public:
 
                 // compute the sparsity pattern n_row row at a time
                 size_t n_loop = (m - 1) / n_row + 1;
-                for(size_t i_loop = 0; i_loop < n_loop; i_loop++)
-                {   // starting row index for this iteration
+                for (size_t i_loop = 0; i_loop < n_loop; i_loop++) {  // starting row index for this iteration
                     size_t i_row = i_loop * n_row;
 
                     // pattern that picks out the appropriate rows
-                    for(i = 0; i < n_row; i++)
-                    {   for(j = 0; j < m; j++)
-                            r[i * m + j] = (i_row + i ==  j);
+                    for (i = 0; i < n_row; i++) {
+                        for (j = 0; j < m; j++) r[i * m + j] = (i_row + i == j);
                     }
                     s = adfun_.RevSparseJac(n_row, r);
 
                     // fill in correspoding rows of total sparsity
-                    for(i = 0; i < n_row; i++)
-                    {   for(j = 0; j < nx_; j++)
-                            if( i_row + i < m )
-                                pattern_jac_[ (i_row + i) * nx_ + j ] =
-                                    s[ i  * nx_ + j];
+                    for (i = 0; i < n_row; i++) {
+                        for (j = 0; j < nx_; j++)
+                            if (i_row + i < m) pattern_jac_[(i_row + i) * nx_ + j] = s[i * nx_ + j];
                     }
                 }
             }
@@ -351,10 +321,10 @@ public:
             */
             // Set row and column indices in Jacoian of [f(x), g(x)]
             // for Jacobian of g(x). These indices are in row major order.
-            for(i = nf_; i < nfg; i++)
-            {   for(j = 0; j < nx_; j++)
-                {   if( pattern_jac_[ i * nx_ + j ] )
-                    {   row_jac_.push_back(i);
+            for (i = nf_; i < nfg; i++) {
+                for (j = 0; j < nx_; j++) {
+                    if (pattern_jac_[i * nx_ + j]) {
+                        row_jac_.push_back(i);
                         col_jac_.push_back(j);
                     }
                 }
@@ -373,19 +343,16 @@ public:
 
             // sparsity pattern for range space of function
             vectorBool s(m);
-            for(i = 0; i < m; i++)
-                s[i] = true;
+            for (i = 0; i < m; i++) s[i] = true;
 
             // compute the sparsity pattern n_column columns at a time
             size_t n_loop = (nx_ - 1) / n_column + 1;
-            for(size_t i_loop = 0; i_loop < n_loop; i_loop++)
-            {   // starting column index for this iteration
+            for (size_t i_loop = 0; i_loop < n_loop; i_loop++) {  // starting column index for this iteration
                 size_t i_column = i_loop * n_column;
 
                 // pattern that picks out the appropriate columns
-                for(i = 0; i < nx_; i++)
-                {   for(j = 0; j < n_column; j++)
-                        r[i * n_column + j] = (i == i_column + j);
+                for (i = 0; i < nx_; i++) {
+                    for (j = 0; j < n_column; j++) r[i * n_column + j] = (i == i_column + j);
                 }
                 adfun_.ForSparseJac(n_column, r);
 
@@ -395,48 +362,44 @@ public:
                 h = adfun_.RevSparseHes(n_column, s, transpose);
 
                 // fill in the corresponding columns of total_sparsity
-                for(i = 0; i < nx_; i++)
-                {   for(j = 0; j < n_column; j++)
-                    {   if( i_column + j < nx_ )
-                            pattern_hes_[i * nx_ + i_column + j] =
-                                h[i * n_column + j];
+                for (i = 0; i < nx_; i++) {
+                    for (j = 0; j < n_column; j++) {
+                        if (i_column + j < nx_) pattern_hes_[i * nx_ + i_column + j] = h[i * n_column + j];
                     }
                 }
             }
             // Set row and column indices for Lower triangle of Hessian
             // of Lagragian.  These indices are in row major order.
-            for(i = 0; i < nx_; i++)
-            {   for(j = 0; j < nx_; j++)
-                {   if( pattern_hes_[ i * nx_ + j ] )
-                    if( j <= i )
-                    {   row_hes_.push_back(i);
-                        col_hes_.push_back(j);
-                    }
+            for (i = 0; i < nx_; i++) {
+                for (j = 0; j < nx_; j++) {
+                    if (pattern_hes_[i * nx_ + j])
+                        if (j <= i) {
+                            row_hes_.push_back(i);
+                            col_hes_.push_back(j);
+                        }
                 }
             }
-        }
-        else
-        {   // Set row and column indices in Jacoian of [f(x), g(x)]
+        } else {  // Set row and column indices in Jacoian of [f(x), g(x)]
             // for Jacobian of g(x). These indices are in row major order.
-            for(i = nf_; i < nfg; i++)
-            {   for(j = 0; j < nx_; j++)
-                {   row_jac_.push_back(i);
+            for (i = nf_; i < nfg; i++) {
+                for (j = 0; j < nx_; j++) {
+                    row_jac_.push_back(i);
                     col_jac_.push_back(j);
                 }
             }
             // Set row and column indices for lower triangle of Hessian.
             // These indices are in row major order.
-            for(i = 0; i < nx_; i++)
-            {   for(j = 0; j <= i; j++)
-                {   row_hes_.push_back(i);
+            for (i = 0; i < nx_; i++) {
+                for (j = 0; j <= i; j++) {
+                    row_hes_.push_back(i);
                     col_hes_.push_back(j);
                 }
             }
         }
 
         // Column order indirect sort of the Jacobian indices
-        col_order_jac_.resize( col_jac_.size() );
-        index_sort( col_jac_, col_order_jac_ );
+        col_order_jac_.resize(col_jac_.size());
+        index_sort(col_jac_, col_order_jac_);
     }
     // -----------------------------------------------------------------------
     /*!
@@ -458,27 +421,21 @@ public:
     is set to C_STYLE; i.e., zeoro based indexing is used in the
     information passed to Ipopt.
     */
-    virtual bool get_nlp_info(
-        Index&          n            ,
-        Index&          m            ,
-        Index&          nnz_jac_g    ,
-        Index&          nnz_h_lag    ,
-        IndexStyleEnum& index_style  )
-    {
-        n         = static_cast<Index>(nx_);
-        m         = static_cast<Index>(ng_);
+    virtual bool get_nlp_info(Index &n, Index &m, Index &nnz_jac_g, Index &nnz_h_lag, IndexStyleEnum &index_style) {
+        n = static_cast<Index>(nx_);
+        m = static_cast<Index>(ng_);
         nnz_jac_g = static_cast<Index>(row_jac_.size());
         nnz_h_lag = static_cast<Index>(row_hes_.size());
 
-# ifndef NDEBUG
-        if( ! (sparse_forward_ | sparse_reverse_) )
-        {   size_t nnz = static_cast<size_t>(nnz_jac_g);
-            CPPAD_ASSERT_UNKNOWN( nnz == ng_ * nx_);
+#ifndef NDEBUG
+        if (!(sparse_forward_ | sparse_reverse_)) {
+            size_t nnz = static_cast<size_t>(nnz_jac_g);
+            CPPAD_ASSERT_UNKNOWN(nnz == ng_ * nx_);
             //
             nnz = static_cast<size_t>(nnz_h_lag);
-            CPPAD_ASSERT_UNKNOWN( nnz == (nx_ * (nx_ + 1)) / 2 );
+            CPPAD_ASSERT_UNKNOWN(nnz == (nx_ * (nx_ + 1)) / 2);
         }
-# endif
+#endif
 
         // use the fortran index style for row/col entries
         index_style = C_STYLE;
@@ -519,25 +476,19 @@ public:
     The input value of its elements does not matter.
     On output, it is a copy of the upper bound for \f$ g(x) \f$; i.e, gu_.
     */
-    virtual bool get_bounds_info(
-        Index       n        ,
-        Number*     x_l      ,
-        Number*     x_u      ,
-        Index       m        ,
-        Number*     g_l      ,
-        Number*     g_u      )
-    {   size_t i;
+    virtual bool get_bounds_info(Index n, Number *x_l, Number *x_u, Index m, Number *g_l, Number *g_u) {
+        size_t i;
         // here, the n and m we gave IPOPT in get_nlp_info are passed back
         CPPAD_ASSERT_UNKNOWN(static_cast<size_t>(n) == nx_);
         CPPAD_ASSERT_UNKNOWN(static_cast<size_t>(m) == ng_);
 
         // pass back bounds
-        for(i = 0; i < nx_; i++)
-        {   x_l[i] = xl_[i];
+        for (i = 0; i < nx_; i++) {
+            x_l[i] = xl_[i];
             x_u[i] = xu_[i];
         }
-        for(i = 0; i < ng_; i++)
-        {   g_l[i] = gl_[i];
+        for (i = 0; i < ng_; i++) {
+            g_l[i] = gl_[i];
             g_u[i] = gu_[i];
         }
 
@@ -578,26 +529,17 @@ public:
     \param lambda
     is not used.
     */
-    virtual bool get_starting_point(
-        Index           n            ,
-        bool            init_x       ,
-        Number*         x            ,
-        bool            init_z       ,
-        Number*         z_L          ,
-        Number*         z_U          ,
-        Index           m            ,
-        bool            init_lambda  ,
-        Number*         lambda       )
-    {   size_t j;
+    virtual bool get_starting_point(Index n, bool init_x, Number *x, bool init_z, Number *z_L, Number *z_U, Index m,
+                                    bool init_lambda, Number *lambda) {
+        size_t j;
 
-        CPPAD_ASSERT_UNKNOWN(static_cast<size_t>(n) == nx_ );
-        CPPAD_ASSERT_UNKNOWN(static_cast<size_t>(m) == ng_ );
+        CPPAD_ASSERT_UNKNOWN(static_cast<size_t>(n) == nx_);
+        CPPAD_ASSERT_UNKNOWN(static_cast<size_t>(m) == ng_);
         CPPAD_ASSERT_UNKNOWN(init_x == true);
         CPPAD_ASSERT_UNKNOWN(init_z == false);
         CPPAD_ASSERT_UNKNOWN(init_lambda == false);
 
-        for(j = 0; j < nx_; j++)
-            x[j] = xi_[j];
+        for (j = 0; j < nx_; j++) x[j] = xi_[j];
 
         return true;
     }
@@ -622,18 +564,12 @@ public:
     \return
     The return value is always true; see \ref Evaluation_Methods.
     */
-    virtual bool eval_f(
-        Index          n           ,
-        const Number*  x           ,
-        bool           new_x       ,
-        Number&        obj_value   )
-    {   size_t i;
-        if( new_x )
-            cache_new_x(x);
+    virtual bool eval_f(Index n, const Number *x, bool new_x, Number &obj_value) {
+        size_t i;
+        if (new_x) cache_new_x(x);
         //
         double sum = 0.0;
-        for(i = 0; i < nf_; i++)
-            sum += fg0_[i];
+        for (i = 0; i < nf_; i++) sum += fg0_[i];
         obj_value = static_cast<Number>(sum);
         return true;
     }
@@ -661,23 +597,15 @@ public:
     \return
     The return value is always true; see \ref Evaluation_Methods.
     */
-    virtual bool eval_grad_f(
-        Index           n        ,
-        const Number*   x        ,
-        bool            new_x    ,
-        Number*         grad_f   )
-    {   size_t i;
-        if( new_x )
-            cache_new_x(x);
+    virtual bool eval_grad_f(Index n, const Number *x, bool new_x, Number *grad_f) {
+        size_t i;
+        if (new_x) cache_new_x(x);
         //
         Dvector w(nf_ + ng_), dw(nx_);
-        for(i = 0; i < nf_; i++)
-            w[i] = 1.0;
-        for(i = 0; i < ng_; i++)
-            w[nf_ + i] = 0.0;
+        for (i = 0; i < nf_; i++) w[i] = 1.0;
+        for (i = 0; i < ng_; i++) w[nf_ + i] = 0.0;
         dw = adfun_.Reverse(1, w);
-        for(i = 0; i < nx_; i++)
-            grad_f[i] = dw[i];
+        for (i = 0; i < nx_; i++) grad_f[i] = dw[i];
         return true;
     }
     // -----------------------------------------------------------------------
@@ -707,18 +635,11 @@ public:
     \return
     The return value is always true; see \ref Evaluation_Methods.
     */
-    virtual bool eval_g(
-        Index   n            ,
-        const   Number* x    ,
-        bool    new_x        ,
-        Index   m            ,
-        Number* g            )
-    {   size_t i;
-        if( new_x )
-            cache_new_x(x);
+    virtual bool eval_g(Index n, const Number *x, bool new_x, Index m, Number *g) {
+        size_t i;
+        if (new_x) cache_new_x(x);
         //
-        for(i = 0; i < ng_; i++)
-            g[i] = fg0_[nf_ + i];
+        for (i = 0; i < ng_; i++) g[i] = fg0_[nf_ + i];
         return true;
     }
     // -----------------------------------------------------------------------
@@ -778,96 +699,72 @@ public:
     \return
     The return value is always true; see \ref Evaluation_Methods.
     */
-    virtual bool eval_jac_g(
-        Index n,
-        const Number* x,
-        bool new_x,
+    virtual bool eval_jac_g(Index n, const Number *x, bool new_x,
 
-        Index m,
-        Index nele_jac,
-        Index* iRow,
-        Index *jCol,
+                            Index m, Index nele_jac, Index *iRow, Index *jCol,
 
-        Number* values)
-    {   size_t i, j, k, ell;
-        CPPAD_ASSERT_UNKNOWN(static_cast<size_t>(m)         == ng_ );
-        CPPAD_ASSERT_UNKNOWN(static_cast<size_t>(n)         == nx_ );
+                            Number *values) {
+        size_t i, j, k, ell;
+        CPPAD_ASSERT_UNKNOWN(static_cast<size_t>(m) == ng_);
+        CPPAD_ASSERT_UNKNOWN(static_cast<size_t>(n) == nx_);
         //
         size_t nk = row_jac_.size();
-        CPPAD_ASSERT_UNKNOWN( static_cast<size_t>(nele_jac) == nk );
+        CPPAD_ASSERT_UNKNOWN(static_cast<size_t>(nele_jac) == nk);
         //
-        if( new_x )
-            cache_new_x(x);
+        if (new_x) cache_new_x(x);
 
-        if( values == NULL )
-        {   for(k = 0; k < nk; k++)
-            {   i = row_jac_[k];
+        if (values == NULL) {
+            for (k = 0; k < nk; k++) {
+                i = row_jac_[k];
                 j = col_jac_[k];
-                CPPAD_ASSERT_UNKNOWN( i >= nf_ );
+                CPPAD_ASSERT_UNKNOWN(i >= nf_);
                 iRow[k] = static_cast<Index>(i - nf_);
                 jCol[k] = static_cast<Index>(j);
             }
             return true;
         }
         //
-        if( nk == 0 )
-            return true;
+        if (nk == 0) return true;
         //
-        if( sparse_forward_ )
-        {   Dvector jac(nk);
-            adfun_.SparseJacobianForward(
-                x0_ , pattern_jac_, row_jac_, col_jac_, jac, work_jac_
-            );
-            for(k = 0; k < nk; k++)
-                values[k] = jac[k];
-        }
-        else if( sparse_reverse_ )
-        {   Dvector jac(nk);
-            adfun_.SparseJacobianReverse(
-                x0_ , pattern_jac_, row_jac_, col_jac_, jac, work_jac_
-            );
-            for(k = 0; k < nk; k++)
-                values[k] = jac[k];
-        }
-        else if( nx_ < ng_ )
-        {   // use forward mode
+        if (sparse_forward_) {
+            Dvector jac(nk);
+            adfun_.SparseJacobianForward(x0_, pattern_jac_, row_jac_, col_jac_, jac, work_jac_);
+            for (k = 0; k < nk; k++) values[k] = jac[k];
+        } else if (sparse_reverse_) {
+            Dvector jac(nk);
+            adfun_.SparseJacobianReverse(x0_, pattern_jac_, row_jac_, col_jac_, jac, work_jac_);
+            for (k = 0; k < nk; k++) values[k] = jac[k];
+        } else if (nx_ < ng_) {  // use forward mode
             Dvector x1(nx_), fg1(nf_ + ng_);
-            for(j = 0; j < nx_; j++)
-                x1[j] = 0.0;
+            for (j = 0; j < nx_; j++) x1[j] = 0.0;
             // index in col_order_jac_ of next entry
             ell = 0;
-            k   = col_order_jac_[ell];
-            for(j = 0; j < nx_; j++)
-            {   // compute j-th column of Jacobian of g(x)
+            k = col_order_jac_[ell];
+            for (j = 0; j < nx_; j++) {  // compute j-th column of Jacobian of g(x)
                 x1[j] = 1.0;
                 fg1 = adfun_.Forward(1, x1);
-                while( ell < nk && col_jac_[k] <= j )
-                {   CPPAD_ASSERT_UNKNOWN( col_jac_[k] == j );
+                while (ell < nk && col_jac_[k] <= j) {
+                    CPPAD_ASSERT_UNKNOWN(col_jac_[k] == j);
                     i = row_jac_[k];
-                    CPPAD_ASSERT_UNKNOWN( i >= nf_ )
+                    CPPAD_ASSERT_UNKNOWN(i >= nf_)
                     values[k] = fg1[i];
                     ell++;
-                    if( ell < nk )
-                        k = col_order_jac_[ell];
+                    if (ell < nk) k = col_order_jac_[ell];
                 }
                 x1[j] = 0.0;
             }
-        }
-        else
-        {   // user reverse mode
+        } else {  // user reverse mode
             size_t nfg = nf_ + ng_;
             // user reverse mode
             Dvector w(nfg), dw(nx_);
-            for(i = 0; i < nfg; i++)
-                w[i] = 0.0;
+            for (i = 0; i < nfg; i++) w[i] = 0.0;
             // index in row_jac_ of next entry
             k = 0;
-            for(i = nf_; i < nfg; i++)
-            {   // compute i-th row of Jacobian of g(x)
+            for (i = nf_; i < nfg; i++) {  // compute i-th row of Jacobian of g(x)
                 w[i] = 1.0;
                 dw = adfun_.Reverse(1, w);
-                while( k < nk && row_jac_[k] <= i )
-                {   CPPAD_ASSERT_UNKNOWN( row_jac_[k] == i );
+                while (k < nk && row_jac_[k] <= i) {
+                    CPPAD_ASSERT_UNKNOWN(row_jac_[k] == i);
                     j = col_jac_[k];
                     values[k] = dw[j];
                     k++;
@@ -957,31 +854,20 @@ public:
     \return
     The return value is always true; see \ref Evaluation_Methods.
     */
-    virtual bool eval_h(
-        Index         n              ,
-        const Number* x              ,
-        bool          new_x          ,
-        Number        obj_factor     ,
-        Index         m              ,
-        const Number* lambda         ,
-        bool          new_lambda     ,
-        Index         nele_hess      ,
-        Index*        iRow           ,
-        Index*        jCol           ,
-        Number*       values         )
-    {   size_t i, j, k;
-        CPPAD_ASSERT_UNKNOWN(static_cast<size_t>(m) == ng_ );
-        CPPAD_ASSERT_UNKNOWN(static_cast<size_t>(n) == nx_ );
+    virtual bool eval_h(Index n, const Number *x, bool new_x, Number obj_factor, Index m, const Number *lambda,
+                        bool new_lambda, Index nele_hess, Index *iRow, Index *jCol, Number *values) {
+        size_t i, j, k;
+        CPPAD_ASSERT_UNKNOWN(static_cast<size_t>(m) == ng_);
+        CPPAD_ASSERT_UNKNOWN(static_cast<size_t>(n) == nx_);
         //
         size_t nk = row_hes_.size();
-        CPPAD_ASSERT_UNKNOWN( static_cast<size_t>(nele_hess) == nk );
+        CPPAD_ASSERT_UNKNOWN(static_cast<size_t>(nele_hess) == nk);
         //
-        if( new_x )
-            cache_new_x(x);
+        if (new_x) cache_new_x(x);
         //
-        if( values == NULL )
-        {   for(k = 0; k < nk; k++)
-            {   i = row_hes_[k];
+        if (values == NULL) {
+            for (k = 0; k < nk; k++) {
+                i = row_hes_[k];
                 j = col_hes_[k];
                 iRow[k] = static_cast<Index>(i);
                 jCol[k] = static_cast<Index>(j);
@@ -989,29 +875,22 @@ public:
             return true;
         }
         //
-        if( nk == 0 )
-            return true;
+        if (nk == 0) return true;
 
         // weigting vector for Lagragian
         Dvector w(nf_ + ng_);
-        for(i = 0; i < nf_; i++)
-            w[i] = obj_factor;
-        for(i = 0; i < ng_; i++)
-            w[i + nf_] = lambda[i];
+        for (i = 0; i < nf_; i++) w[i] = obj_factor;
+        for (i = 0; i < ng_; i++) w[i + nf_] = lambda[i];
         //
-        if( sparse_forward_ | sparse_reverse_ )
-        {   Dvector hes(nk);
-            adfun_.SparseHessian(
-                x0_, w, pattern_hes_, row_hes_, col_hes_, hes, work_hes_
-            );
-            for(k = 0; k < nk; k++)
-                values[k] = hes[k];
-        }
-        else
-        {   Dvector hes(nx_ * nx_);
+        if (sparse_forward_ | sparse_reverse_) {
+            Dvector hes(nk);
+            adfun_.SparseHessian(x0_, w, pattern_hes_, row_hes_, col_hes_, hes, work_hes_);
+            for (k = 0; k < nk; k++) values[k] = hes[k];
+        } else {
+            Dvector hes(nx_ * nx_);
             hes = adfun_.Hessian(x0_, w);
-            for(k = 0; k < nk; k++)
-            {   i = row_hes_[k];
+            for (k = 0; k < nk; k++) {
+                i = row_hes_[k];
                 j = col_hes_[k];
                 values[k] = hes[i * nx_ + j];
             }
@@ -1088,97 +967,75 @@ public:
     The results are stored here
     (see documentation above).
     */
-    virtual void finalize_solution(
-        Ipopt::SolverReturn               status    ,
-        Index                             n         ,
-        const Number*                     x         ,
-        const Number*                     z_L       ,
-        const Number*                     z_U       ,
-        Index                             m         ,
-        const Number*                     g         ,
-        const Number*                     lambda    ,
-        Number                            obj_value ,
-        const Ipopt::IpoptData*           ip_data   ,
-        Ipopt::IpoptCalculatedQuantities* ip_cq
-    )
-    {   size_t i, j;
+    virtual void finalize_solution(Ipopt::SolverReturn status, Index n, const Number *x, const Number *z_L,
+                                   const Number *z_U, Index m, const Number *g, const Number *lambda, Number obj_value,
+                                   const Ipopt::IpoptData *ip_data, Ipopt::IpoptCalculatedQuantities *ip_cq) {
+        size_t i, j;
 
-        CPPAD_ASSERT_UNKNOWN(static_cast<size_t>(n) == nx_ );
-        CPPAD_ASSERT_UNKNOWN(static_cast<size_t>(m) == ng_ );
+        CPPAD_ASSERT_UNKNOWN(static_cast<size_t>(n) == nx_);
+        CPPAD_ASSERT_UNKNOWN(static_cast<size_t>(m) == ng_);
 
-        switch(status)
-        {   // convert status from Ipopt enum to solve_result<Dvector> enum
+        switch (status) {  // convert status from Ipopt enum to solve_result<Dvector> enum
             case Ipopt::SUCCESS:
-            solution_.status = solve_result<Dvector>::success;
-            break;
+                solution_.status = solve_result<Dvector>::success;
+                break;
 
             case Ipopt::MAXITER_EXCEEDED:
-            solution_.status =
-                solve_result<Dvector>::maxiter_exceeded;
-            break;
+                solution_.status = solve_result<Dvector>::maxiter_exceeded;
+                break;
 
             case Ipopt::STOP_AT_TINY_STEP:
-            solution_.status =
-                solve_result<Dvector>::stop_at_tiny_step;
-            break;
+                solution_.status = solve_result<Dvector>::stop_at_tiny_step;
+                break;
 
             case Ipopt::STOP_AT_ACCEPTABLE_POINT:
-            solution_.status =
-                solve_result<Dvector>::stop_at_acceptable_point;
-            break;
+                solution_.status = solve_result<Dvector>::stop_at_acceptable_point;
+                break;
 
             case Ipopt::LOCAL_INFEASIBILITY:
-            solution_.status =
-                solve_result<Dvector>::local_infeasibility;
-            break;
+                solution_.status = solve_result<Dvector>::local_infeasibility;
+                break;
 
             case Ipopt::USER_REQUESTED_STOP:
-            solution_.status =
-                solve_result<Dvector>::user_requested_stop;
-            break;
+                solution_.status = solve_result<Dvector>::user_requested_stop;
+                break;
 
             case Ipopt::DIVERGING_ITERATES:
-            solution_.status =
-                solve_result<Dvector>::diverging_iterates;
-            break;
+                solution_.status = solve_result<Dvector>::diverging_iterates;
+                break;
 
             case Ipopt::RESTORATION_FAILURE:
-            solution_.status =
-                solve_result<Dvector>::restoration_failure;
-            break;
+                solution_.status = solve_result<Dvector>::restoration_failure;
+                break;
 
             case Ipopt::ERROR_IN_STEP_COMPUTATION:
-            solution_.status =
-                solve_result<Dvector>::error_in_step_computation;
-            break;
+                solution_.status = solve_result<Dvector>::error_in_step_computation;
+                break;
 
             case Ipopt::INVALID_NUMBER_DETECTED:
-            solution_.status =
-                solve_result<Dvector>::invalid_number_detected;
-            break;
+                solution_.status = solve_result<Dvector>::invalid_number_detected;
+                break;
 
             case Ipopt::INTERNAL_ERROR:
-            solution_.status =
-                solve_result<Dvector>::internal_error;
-            break;
+                solution_.status = solve_result<Dvector>::internal_error;
+                break;
 
             default:
-            solution_.status =
-                solve_result<Dvector>::unknown;
+                solution_.status = solve_result<Dvector>::unknown;
         }
 
         solution_.x.resize(nx_);
         solution_.zl.resize(nx_);
         solution_.zu.resize(nx_);
-        for(j = 0; j < nx_; j++)
-        {   solution_.x[j]   = x[j];
-            solution_.zl[j]  = z_L[j];
-            solution_.zu[j]  = z_U[j];
+        for (j = 0; j < nx_; j++) {
+            solution_.x[j] = x[j];
+            solution_.zl[j] = z_L[j];
+            solution_.zu[j] = z_U[j];
         }
         solution_.g.resize(ng_);
         solution_.lambda.resize(ng_);
-        for(i = 0; i < ng_; i++)
-        {   solution_.g[i]      = g[i];
+        for (i = 0; i < ng_; i++) {
+            solution_.g[i] = g[i];
             solution_.lambda[i] = lambda[i];
         }
         solution_.obj_value = obj_value;
@@ -1186,7 +1043,7 @@ public:
     }
 };
 
-} // end namespace ipopt
-} // END_CPPAD_NAMESPACE
+}  // end namespace ipopt
+}  // namespace CppAD
 
-# endif
+#endif

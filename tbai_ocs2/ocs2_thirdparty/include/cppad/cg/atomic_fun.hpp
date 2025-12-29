@@ -26,13 +26,13 @@ namespace cg {
  */
 template <class Base>
 class CGAtomicFun : public CGAbstractAtomicFun<Base> {
-protected:
+   protected:
     using CGB = CG<Base>;
-protected:
-    atomic_base<Base>& atomicFun_;
-    const CppAD::vector<Base> xSparsity_; // independent vector used to determine sparsity patterns
-public:
 
+   protected:
+    atomic_base<Base> &atomicFun_;
+    const CppAD::vector<Base> xSparsity_;  // independent vector used to determine sparsity patterns
+   public:
     /**
      * Creates a new atomic function wrapper that is responsible for
      * defining the dependencies to calls of a user atomic function.
@@ -47,144 +47,96 @@ public:
      *                   dependent variables (ty) and the previous
      *                   evaluation of other forward/reverse modes.
      */
-    CGAtomicFun(atomic_base<Base>& atomicFun,
-                const CppAD::vector<Base>& xSparsity,
-                bool standAlone = false) :
-        CGAbstractAtomicFun<Base>(atomicFun.afun_name(), standAlone),
-        atomicFun_(atomicFun),
-        xSparsity_(xSparsity) {
-    }
+    CGAtomicFun(atomic_base<Base> &atomicFun, const CppAD::vector<Base> &xSparsity, bool standAlone = false)
+        : CGAbstractAtomicFun<Base>(atomicFun.afun_name(), standAlone), atomicFun_(atomicFun), xSparsity_(xSparsity) {}
 
-    CGAtomicFun(atomic_base<Base>& atomicFun,
-                ArrayView<const Base> xSparsity,
-                bool standAlone = false) :
-            CGAtomicFun(atomicFun, values(xSparsity), standAlone) {
-    }
+    CGAtomicFun(atomic_base<Base> &atomicFun, ArrayView<const Base> xSparsity, bool standAlone = false)
+        : CGAtomicFun(atomicFun, values(xSparsity), standAlone) {}
 
-    CGAtomicFun(atomic_base<Base>& atomicFun,
-                ArrayView<const CppAD::AD<Base>> xSparsity,
-                bool standAlone = false) :
-            CGAtomicFun(atomicFun, values(xSparsity), standAlone) {
-    }
+    CGAtomicFun(atomic_base<Base> &atomicFun, ArrayView<const CppAD::AD<Base>> xSparsity, bool standAlone = false)
+        : CGAtomicFun(atomicFun, values(xSparsity), standAlone) {}
 
     virtual ~CGAtomicFun() = default;
 
     template <class ADVector>
-    void operator()(const ADVector& ax,
-                    ADVector& ay,
-                    size_t id = 0) {
+    void operator()(const ADVector &ax, ADVector &ay, size_t id = 0) {
         this->CGAbstractAtomicFun<Base>::operator()(ax, ay, id);
     }
 
-    bool for_sparse_jac(size_t q,
-                        const CppAD::vector<std::set<size_t> >& r,
-                        CppAD::vector<std::set<size_t> >& s,
-                        const CppAD::vector<CGB>& x) override {
+    bool for_sparse_jac(size_t q, const CppAD::vector<std::set<size_t>> &r, CppAD::vector<std::set<size_t>> &s,
+                        const CppAD::vector<CGB> &x) override {
         return atomicFun_.for_sparse_jac(q, r, s, sparsityIndeps(x));
     }
 
-    bool for_sparse_jac(size_t q,
-                        const CppAD::vector<std::set<size_t> >& r,
-                        CppAD::vector<std::set<size_t> >& s) override {
+    bool for_sparse_jac(size_t q, const CppAD::vector<std::set<size_t>> &r,
+                        CppAD::vector<std::set<size_t>> &s) override {
         return atomicFun_.for_sparse_jac(q, r, s);
     }
 
-    bool for_sparse_jac(size_t q,
-                        const CppAD::vector<bool>& r,
-                        CppAD::vector<bool>& s,
-                        const CppAD::vector<CGB>& x) override {
+    bool for_sparse_jac(size_t q, const CppAD::vector<bool> &r, CppAD::vector<bool> &s,
+                        const CppAD::vector<CGB> &x) override {
         return atomicFun_.for_sparse_jac(q, r, s, sparsityIndeps(x));
     }
 
-    bool for_sparse_jac(size_t q,
-                        const CppAD::vector<bool>& r,
-                        CppAD::vector<bool>& s) override {
+    bool for_sparse_jac(size_t q, const CppAD::vector<bool> &r, CppAD::vector<bool> &s) override {
         return atomicFun_.for_sparse_jac(q, r, s);
     }
 
-    bool rev_sparse_jac(size_t q,
-                        const CppAD::vector<std::set<size_t> >& rt,
-                        CppAD::vector<std::set<size_t> >& st,
-                        const CppAD::vector<CGB>& x) override {
+    bool rev_sparse_jac(size_t q, const CppAD::vector<std::set<size_t>> &rt, CppAD::vector<std::set<size_t>> &st,
+                        const CppAD::vector<CGB> &x) override {
         return atomicFun_.rev_sparse_jac(q, rt, st, sparsityIndeps(x));
     }
 
-    bool rev_sparse_jac(size_t q,
-                        const CppAD::vector<std::set<size_t> >& rt,
-                        CppAD::vector<std::set<size_t> >& st) override {
+    bool rev_sparse_jac(size_t q, const CppAD::vector<std::set<size_t>> &rt,
+                        CppAD::vector<std::set<size_t>> &st) override {
         return atomicFun_.rev_sparse_jac(q, rt, st);
     }
 
-    bool rev_sparse_jac(size_t q,
-                        const CppAD::vector<bool>& rt,
-                        CppAD::vector<bool>& st,
-                        const CppAD::vector<CGB>& x) override {
+    bool rev_sparse_jac(size_t q, const CppAD::vector<bool> &rt, CppAD::vector<bool> &st,
+                        const CppAD::vector<CGB> &x) override {
         return atomicFun_.rev_sparse_jac(q, rt, st, sparsityIndeps(x));
     }
 
-    bool rev_sparse_jac(size_t q,
-                        const CppAD::vector<bool>& rt,
-                        CppAD::vector<bool>& st) override {
+    bool rev_sparse_jac(size_t q, const CppAD::vector<bool> &rt, CppAD::vector<bool> &st) override {
         return atomicFun_.rev_sparse_jac(q, rt, st);
     }
 
-    bool rev_sparse_hes(const CppAD::vector<bool>& vx,
-                        const CppAD::vector<bool>& s,
-                        CppAD::vector<bool>& t,
-                        size_t q,
-                        const CppAD::vector<std::set<size_t> >& r,
-                        const CppAD::vector<std::set<size_t> >& u,
-                        CppAD::vector<std::set<size_t> >& v,
-                        const CppAD::vector<CGB>& x) override {
+    bool rev_sparse_hes(const CppAD::vector<bool> &vx, const CppAD::vector<bool> &s, CppAD::vector<bool> &t, size_t q,
+                        const CppAD::vector<std::set<size_t>> &r, const CppAD::vector<std::set<size_t>> &u,
+                        CppAD::vector<std::set<size_t>> &v, const CppAD::vector<CGB> &x) override {
         return atomicFun_.rev_sparse_hes(vx, s, t, q, r, u, v, sparsityIndeps(x));
     }
 
-    bool rev_sparse_hes(const CppAD::vector<bool>& vx,
-                        const CppAD::vector<bool>& s,
-                        CppAD::vector<bool>& t,
-                        size_t q,
-                        const CppAD::vector<std::set<size_t> >& r,
-                        const CppAD::vector<std::set<size_t> >& u,
-                        CppAD::vector<std::set<size_t> >& v) override {
+    bool rev_sparse_hes(const CppAD::vector<bool> &vx, const CppAD::vector<bool> &s, CppAD::vector<bool> &t, size_t q,
+                        const CppAD::vector<std::set<size_t>> &r, const CppAD::vector<std::set<size_t>> &u,
+                        CppAD::vector<std::set<size_t>> &v) override {
         return atomicFun_.rev_sparse_hes(vx, s, t, q, r, u, v);
     }
 
-    bool rev_sparse_hes(const CppAD::vector<bool>& vx,
-                        const CppAD::vector<bool>& s,
-                        CppAD::vector<bool>& t,
-                        size_t q,
-                        const CppAD::vector<bool>& r,
-                        const CppAD::vector<bool>& u,
-                        CppAD::vector<bool>& v,
-                        const CppAD::vector<CGB>& x) override {
+    bool rev_sparse_hes(const CppAD::vector<bool> &vx, const CppAD::vector<bool> &s, CppAD::vector<bool> &t, size_t q,
+                        const CppAD::vector<bool> &r, const CppAD::vector<bool> &u, CppAD::vector<bool> &v,
+                        const CppAD::vector<CGB> &x) override {
         return atomicFun_.rev_sparse_hes(vx, s, t, q, r, u, v, sparsityIndeps(x));
     }
 
-    bool rev_sparse_hes(const CppAD::vector<bool>& vx,
-                        const CppAD::vector<bool>& s,
-                        CppAD::vector<bool>& t,
-                        size_t q,
-                        const CppAD::vector<bool>& r,
-                        const CppAD::vector<bool>& u,
-                        CppAD::vector<bool>& v) override {
+    bool rev_sparse_hes(const CppAD::vector<bool> &vx, const CppAD::vector<bool> &s, CppAD::vector<bool> &t, size_t q,
+                        const CppAD::vector<bool> &r, const CppAD::vector<bool> &u, CppAD::vector<bool> &v) override {
         return atomicFun_.rev_sparse_hes(vx, s, t, q, r, u, v);
     }
 
-protected:
-
-    void zeroOrderDependency(const CppAD::vector<bool>& vx,
-                             CppAD::vector<bool>& vy,
-                             const CppAD::vector<CGB>& x) override {
+   protected:
+    void zeroOrderDependency(const CppAD::vector<bool> &vx, CppAD::vector<bool> &vy,
+                             const CppAD::vector<CGB> &x) override {
         using CppAD::vector;
 
         size_t m = vy.size();
         size_t n = vx.size();
 
-        vector<std::set<size_t> > rt(m);
+        vector<std::set<size_t>> rt(m);
         for (size_t j = 0; j < m; j++) {
             rt[j].insert(j);
         }
-        vector<std::set<size_t> > st(n);
+        vector<std::set<size_t>> st(n);
 
         rev_sparse_jac(m, rt, st, x);
 
@@ -197,24 +149,18 @@ protected:
         }
     }
 
-    bool atomicForward(size_t q,
-                       size_t p,
-                       const CppAD::vector<Base>& tx,
-                       CppAD::vector<Base>& ty) override {
+    bool atomicForward(size_t q, size_t p, const CppAD::vector<Base> &tx, CppAD::vector<Base> &ty) override {
         CppAD::vector<bool> vx, vy;
         return atomicFun_.forward(q, p, vx, vy, tx, ty);
     }
 
-    bool atomicReverse(size_t p,
-                       const CppAD::vector<Base>& tx,
-                       const CppAD::vector<Base>& ty,
-                       CppAD::vector<Base>& px,
-                       const CppAD::vector<Base>& py) override {
+    bool atomicReverse(size_t p, const CppAD::vector<Base> &tx, const CppAD::vector<Base> &ty, CppAD::vector<Base> &px,
+                       const CppAD::vector<Base> &py) override {
         return atomicFun_.reverse(p, tx, ty, px, py);
     }
 
-private:
-    inline CppAD::vector<Base> sparsityIndeps(const CppAD::vector<CGB>& x) const {
+   private:
+    inline CppAD::vector<Base> sparsityIndeps(const CppAD::vector<CGB> &x) const {
         CPPADCG_ASSERT_UNKNOWN(x.size() == xSparsity_.size());
 
         size_t n = x.size();
@@ -248,7 +194,7 @@ private:
     }
 };
 
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

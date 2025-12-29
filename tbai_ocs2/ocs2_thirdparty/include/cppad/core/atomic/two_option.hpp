@@ -1,5 +1,5 @@
-# ifndef CPPAD_CORE_ATOMIC_TWO_OPTION_HPP
-# define CPPAD_CORE_ATOMIC_TWO_OPTION_HPP
+#ifndef CPPAD_CORE_ATOMIC_TWO_OPTION_HPP
+#define CPPAD_CORE_ATOMIC_TWO_OPTION_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -79,7 +79,7 @@ $end
 ------------------------------------------------------------------------------
 */
 
-namespace CppAD { // BEGIN_CPPAD_NAMESPACE
+namespace CppAD {  // BEGIN_CPPAD_NAMESPACE
 /*!
 \file atomic/two_option.hpp
 Setting atomic_base options.
@@ -92,22 +92,19 @@ Setting atomic_base options.
 new option value.
 */
 template <class Base>
-void atomic_base<Base>::option(enum option_enum option_value)
-{   switch( option_value )
-    {   case pack_sparsity_enum:
+void atomic_base<Base>::option(enum option_enum option_value) {
+    switch (option_value) {
+        case pack_sparsity_enum:
         case bool_sparsity_enum:
         case set_sparsity_enum:
-        sparsity_ = option_value;
-        break;
+            sparsity_ = option_value;
+            break;
 
         default:
-        CPPAD_ASSERT_KNOWN(
-            false,
-            "atoic_base::option: option_value is not valid"
-        );
+            CPPAD_ASSERT_KNOWN(false, "atoic_base::option: option_value is not valid");
     }
     return;
 }
 
-} // END_CPPAD_NAMESPACE
-# endif
+}  // namespace CppAD
+#endif

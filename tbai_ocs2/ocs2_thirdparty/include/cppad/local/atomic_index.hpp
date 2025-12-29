@@ -1,5 +1,5 @@
-# ifndef CPPAD_LOCAL_ATOMIC_INDEX_HPP
-# define CPPAD_LOCAL_ATOMIC_INDEX_HPP
+#ifndef CPPAD_LOCAL_ATOMIC_INDEX_HPP
+#define CPPAD_LOCAL_ATOMIC_INDEX_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -59,51 +59,43 @@ If index is zero, the return value is the index
 corresponding to type, *name, and ptr (and is not zero).
 Otherwise, the return value is zero.
 */
-namespace CppAD { namespace local { // BEGIN_CPPAD_LOCAL_NAMESPACE
+namespace CppAD {
+namespace local {  // BEGIN_CPPAD_LOCAL_NAMESPACE
 /*!
 \file atomic_index.hpp
 Map indices to atomic function information
 */
 
 struct atomic_index_info {
-    size_t      type;
+    size_t type;
     std::string name;
-    void*       ptr;
+    void *ptr;
 };
 
 template <class Base>
-size_t atomic_index(
-    bool               set_null      ,
-    const size_t&      index         ,
-    size_t&            type          ,
-    std::string*       name          ,
-    void*&             ptr           )
-{   //
+size_t atomic_index(bool set_null, const size_t &index, size_t &type, std::string *name,
+                    void *&ptr) {  //
     // information for each index
     static std::vector<atomic_index_info> vec;
-# ifndef NDEBUG
-    if( index == 0 || set_null )
-    {   CPPAD_ASSERT_KNOWN( ! thread_alloc::in_parallel(),
-        "calling atomic function constructor or destructor in parallel mode"
-        );
+#ifndef NDEBUG
+    if (index == 0 || set_null) {
+        CPPAD_ASSERT_KNOWN(!thread_alloc::in_parallel(),
+                           "calling atomic function constructor or destructor in parallel mode");
     }
-# endif
-    if( set_null & (index == 0) )
-        return vec.size();
+#endif
+    if (set_null & (index == 0)) return vec.size();
     //
     // case were we are retreving informaiton for an atomic function
-    if( 0 < index )
-    {   CPPAD_ASSERT_UNKNOWN( index <= vec.size() )
+    if (0 < index) {
+        CPPAD_ASSERT_UNKNOWN(index <= vec.size())
         //
         // case where we are setting the pointer to null
-        if( set_null )
-            vec[index-1].ptr = CPPAD_NULL;
+        if (set_null) vec[index - 1].ptr = CPPAD_NULL;
         //
-        atomic_index_info& entry = vec[index - 1];
+        atomic_index_info &entry = vec[index - 1];
         type = entry.type;
-        ptr  = entry.ptr;
-        if( name != CPPAD_NULL )
-            *name  = entry.name;
+        ptr = entry.ptr;
+        if (name != CPPAD_NULL) *name = entry.name;
         return 0;
     }
     //
@@ -111,12 +103,13 @@ size_t atomic_index(
     atomic_index_info entry;
     entry.type = type;
     entry.name = *name;
-    entry.ptr  = ptr;
+    entry.ptr = ptr;
     vec.push_back(entry);
     //
     return vec.size();
 }
 
-} } // END_CPPAD_LOCAL_NAMESPACE
+}  // namespace local
+}  // namespace CppAD
 
-# endif
+#endif

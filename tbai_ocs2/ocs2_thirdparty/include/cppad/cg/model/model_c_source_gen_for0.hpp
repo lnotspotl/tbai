@@ -18,7 +18,7 @@
 namespace CppAD {
 namespace cg {
 
-template<class Base>
+template <class Base>
 void ModelCSourceGen<Base>::generateZeroSource() {
     const std::string jobName = "model (zero-order forward)";
 
@@ -60,8 +60,7 @@ void ModelCSourceGen<Base>::generateZeroSource() {
     handler.generateCode(code, langC, dep, *nameGen, _atomicFunctions, jobName);
 }
 
-
-} // END cg namespace
-} // END CppAD namespace
+}  // namespace cg
+}  // namespace CppAD
 
 #endif

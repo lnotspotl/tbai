@@ -71,7 +71,7 @@ OptimalControlProblem::OptimalControlProblem()
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-OptimalControlProblem::OptimalControlProblem(const OptimalControlProblem& other)
+OptimalControlProblem::OptimalControlProblem(const OptimalControlProblem &other)
     : /* Cost */
       costPtr(other.costPtr->clone()),
       stateCostPtr(other.stateCostPtr->clone()),
@@ -104,64 +104,64 @@ OptimalControlProblem::OptimalControlProblem(const OptimalControlProblem& other)
       /* Misc. */
       preComputationPtr(other.preComputationPtr->clone()),
       targetTrajectoriesPtr(other.targetTrajectoriesPtr) {
-  if (other.dynamicsPtr != nullptr) {
-    dynamicsPtr.reset(other.dynamicsPtr->clone());
-  }
+    if (other.dynamicsPtr != nullptr) {
+        dynamicsPtr.reset(other.dynamicsPtr->clone());
+    }
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-OptimalControlProblem& OptimalControlProblem::operator=(const OptimalControlProblem& rhs) {
-  OptimalControlProblem tmp(rhs);
-  swap(tmp);
-  return *this;
+OptimalControlProblem &OptimalControlProblem::operator=(const OptimalControlProblem &rhs) {
+    OptimalControlProblem tmp(rhs);
+    swap(tmp);
+    return *this;
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-void OptimalControlProblem::swap(OptimalControlProblem& other) noexcept {
-  /* Cost */
-  costPtr.swap(other.costPtr);
-  stateCostPtr.swap(other.stateCostPtr);
-  preJumpCostPtr.swap(other.preJumpCostPtr);
-  finalCostPtr.swap(other.finalCostPtr);
+void OptimalControlProblem::swap(OptimalControlProblem &other) noexcept {
+    /* Cost */
+    costPtr.swap(other.costPtr);
+    stateCostPtr.swap(other.stateCostPtr);
+    preJumpCostPtr.swap(other.preJumpCostPtr);
+    finalCostPtr.swap(other.finalCostPtr);
 
-  /* Soft constraints */
-  softConstraintPtr.swap(other.softConstraintPtr);
-  stateSoftConstraintPtr.swap(other.stateSoftConstraintPtr);
-  preJumpSoftConstraintPtr.swap(other.preJumpSoftConstraintPtr);
-  finalSoftConstraintPtr.swap(other.finalSoftConstraintPtr);
+    /* Soft constraints */
+    softConstraintPtr.swap(other.softConstraintPtr);
+    stateSoftConstraintPtr.swap(other.stateSoftConstraintPtr);
+    preJumpSoftConstraintPtr.swap(other.preJumpSoftConstraintPtr);
+    finalSoftConstraintPtr.swap(other.finalSoftConstraintPtr);
 
-  /* Equality constraints */
-  equalityConstraintPtr.swap(other.equalityConstraintPtr);
-  stateEqualityConstraintPtr.swap(other.stateEqualityConstraintPtr);
-  preJumpEqualityConstraintPtr.swap(other.preJumpEqualityConstraintPtr);
-  finalEqualityConstraintPtr.swap(other.finalEqualityConstraintPtr);
+    /* Equality constraints */
+    equalityConstraintPtr.swap(other.equalityConstraintPtr);
+    stateEqualityConstraintPtr.swap(other.stateEqualityConstraintPtr);
+    preJumpEqualityConstraintPtr.swap(other.preJumpEqualityConstraintPtr);
+    finalEqualityConstraintPtr.swap(other.finalEqualityConstraintPtr);
 
-  /* Inequality constraints */
-  inequalityConstraintPtr.swap(other.inequalityConstraintPtr);
-  stateInequalityConstraintPtr.swap(other.stateInequalityConstraintPtr);
-  preJumpInequalityConstraintPtr.swap(other.preJumpInequalityConstraintPtr);
-  finalInequalityConstraintPtr.swap(other.finalInequalityConstraintPtr);
+    /* Inequality constraints */
+    inequalityConstraintPtr.swap(other.inequalityConstraintPtr);
+    stateInequalityConstraintPtr.swap(other.stateInequalityConstraintPtr);
+    preJumpInequalityConstraintPtr.swap(other.preJumpInequalityConstraintPtr);
+    finalInequalityConstraintPtr.swap(other.finalInequalityConstraintPtr);
 
-  /* Lagrangians */
-  equalityLagrangianPtr.swap(other.equalityLagrangianPtr);
-  stateEqualityLagrangianPtr.swap(other.stateEqualityLagrangianPtr);
-  inequalityLagrangianPtr.swap(other.inequalityLagrangianPtr);
-  stateInequalityLagrangianPtr.swap(other.stateInequalityLagrangianPtr);
-  preJumpEqualityLagrangianPtr.swap(other.preJumpEqualityLagrangianPtr);
-  preJumpInequalityLagrangianPtr.swap(other.preJumpInequalityLagrangianPtr);
-  finalEqualityLagrangianPtr.swap(other.finalEqualityLagrangianPtr);
-  finalInequalityLagrangianPtr.swap(other.finalInequalityLagrangianPtr);
+    /* Lagrangians */
+    equalityLagrangianPtr.swap(other.equalityLagrangianPtr);
+    stateEqualityLagrangianPtr.swap(other.stateEqualityLagrangianPtr);
+    inequalityLagrangianPtr.swap(other.inequalityLagrangianPtr);
+    stateInequalityLagrangianPtr.swap(other.stateInequalityLagrangianPtr);
+    preJumpEqualityLagrangianPtr.swap(other.preJumpEqualityLagrangianPtr);
+    preJumpInequalityLagrangianPtr.swap(other.preJumpInequalityLagrangianPtr);
+    finalEqualityLagrangianPtr.swap(other.finalEqualityLagrangianPtr);
+    finalInequalityLagrangianPtr.swap(other.finalInequalityLagrangianPtr);
 
-  /* Dynamics */
-  dynamicsPtr.swap(other.dynamicsPtr);
+    /* Dynamics */
+    dynamicsPtr.swap(other.dynamicsPtr);
 
-  /* Misc. */
-  preComputationPtr.swap(other.preComputationPtr);
-  std::swap(targetTrajectoriesPtr, other.targetTrajectoriesPtr);
+    /* Misc. */
+    preComputationPtr.swap(other.preComputationPtr);
+    std::swap(targetTrajectoriesPtr, other.targetTrajectoriesPtr);
 }
 
 }  // namespace ocs2

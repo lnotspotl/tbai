@@ -34,16 +34,18 @@ namespace ocs2 {
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-LoopshapingReferenceManager::LoopshapingReferenceManager(std::shared_ptr<ReferenceManagerInterface> referenceManagerPtr,
-                                                         std::shared_ptr<LoopshapingDefinition> loopshapingDefinitionPtr)
-    : ReferenceManagerDecorator(std::move(referenceManagerPtr)), loopshapingDefinitionPtr_(std::move(loopshapingDefinitionPtr)) {}
+LoopshapingReferenceManager::LoopshapingReferenceManager(
+    std::shared_ptr<ReferenceManagerInterface> referenceManagerPtr,
+    std::shared_ptr<LoopshapingDefinition> loopshapingDefinitionPtr)
+    : ReferenceManagerDecorator(std::move(referenceManagerPtr)),
+      loopshapingDefinitionPtr_(std::move(loopshapingDefinitionPtr)) {}
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-void LoopshapingReferenceManager::preSolverRun(scalar_t initTime, scalar_t finalTime, const vector_t& initState) {
-  const vector_t systemState = loopshapingDefinitionPtr_->getSystemState(initState);
-  referenceManagerPtr_->preSolverRun(initTime, finalTime, systemState);
+void LoopshapingReferenceManager::preSolverRun(scalar_t initTime, scalar_t finalTime, const vector_t &initState) {
+    const vector_t systemState = loopshapingDefinitionPtr_->getSystemState(initState);
+    referenceManagerPtr_->preSolverRun(initTime, finalTime, systemState);
 };
 
 }  // namespace ocs2

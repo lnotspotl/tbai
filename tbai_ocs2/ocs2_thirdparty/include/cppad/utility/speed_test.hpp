@@ -1,5 +1,5 @@
-# ifndef CPPAD_UTILITY_SPEED_TEST_HPP
-# define CPPAD_UTILITY_SPEED_TEST_HPP
+#ifndef CPPAD_UTILITY_SPEED_TEST_HPP
+#define CPPAD_UTILITY_SPEED_TEST_HPP
 /* --------------------------------------------------------------------------
 CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 
@@ -143,48 +143,43 @@ $end
 -----------------------------------------------------------------------
 */
 
-# include <cstddef>
-# include <cmath>
+#include <cmath>
+#include <cstddef>
 
-# include <cppad/utility/check_simple_vector.hpp>
-# include <cppad/utility/elapsed_seconds.hpp>
+#include <cppad/utility/check_simple_vector.hpp>
+#include <cppad/utility/elapsed_seconds.hpp>
 
-
-namespace CppAD { // BEGIN CppAD namespace
+namespace CppAD {  // BEGIN CppAD namespace
 
 // implemented as an inline so that can include in multiple link modules
 // with this same file
 template <class Vector>
-Vector speed_test(
-    void test(size_t size, size_t repeat),
-    const Vector& size_vec               ,
-    double time_min                      )
-{
+Vector speed_test(void test(size_t size, size_t repeat), const Vector &size_vec, double time_min) {
     // check that size_vec is a simple vector with size_t elements
     CheckSimpleVector<size_t, Vector>();
 
-    size_t   n = size_vec.size();
+    size_t n = size_vec.size();
     Vector rate_vec(n);
     size_t i;
-    for(i = 0; i < n; i++)
-    {   size_t size   = size_vec[i];
+    for (i = 0; i < n; i++) {
+        size_t size = size_vec[i];
         size_t repeat = 1;
-        double s0     = elapsed_seconds();
-        double s1     = elapsed_seconds();
-        while( s1 - s0 < time_min )
-        {   repeat = 2 * repeat;
-            s0     = elapsed_seconds();
+        double s0 = elapsed_seconds();
+        double s1 = elapsed_seconds();
+        while (s1 - s0 < time_min) {
+            repeat = 2 * repeat;
+            s0 = elapsed_seconds();
             test(size, repeat);
-            s1     = elapsed_seconds();
+            s1 = elapsed_seconds();
         }
         double rate = .5 + double(repeat) / (s1 - s0);
         // first convert to float to avoid warning with g++ -Wconversion
-        rate_vec[i] = static_cast<size_t>( static_cast<float>(rate) );
+        rate_vec[i] = static_cast<size_t>(static_cast<float>(rate));
     }
     return rate_vec;
 }
 
-} // END CppAD namespace
+}  // namespace CppAD
 
 /*
 $begin SpeedTest$$
@@ -338,102 +333,85 @@ $end
 */
 // BEGIN C++
 
+#include <iomanip>
+#include <iostream>
+#include <string>
 
-# include <string>
-# include <iostream>
-# include <iomanip>
-# include <cppad/core/cppad_assert.hpp>
+#include <cppad/core/cppad_assert.hpp>
 
-namespace CppAD { // BEGIN CppAD namespace
+namespace CppAD {  // BEGIN CppAD namespace
 
-inline void SpeedTestNdigit(size_t value, size_t &ndigit, size_t &pow10)
-{   pow10 = 10;
-    ndigit       = 1;
-    while( pow10 <= value )
-    {   pow10  *= 10;
+inline void SpeedTestNdigit(size_t value, size_t &ndigit, size_t &pow10) {
+    pow10 = 10;
+    ndigit = 1;
+    while (pow10 <= value) {
+        pow10 *= 10;
         ndigit += 1;
     }
 }
 
 // implemented as an inline so that can include in multiple link modules
 // with this same file
-inline void SpeedTest(
-    std::string Test(size_t size, size_t repeat),
-    size_t first,
-    int    inc,
-    size_t last
-)
-{
-
+inline void SpeedTest(std::string Test(size_t size, size_t repeat), size_t first, int inc, size_t last) {
     using std::cout;
     using std::endl;
 
-    size_t    size;
-    size_t    repeat;
-    size_t    rate;
-    size_t    digit;
-    size_t    ndigit;
-    size_t    pow10;
-    size_t    maxSize;
-    size_t    maxSizeDigit;
+    size_t size;
+    size_t repeat;
+    size_t rate;
+    size_t digit;
+    size_t ndigit;
+    size_t pow10;
+    size_t maxSize;
+    size_t maxSizeDigit;
 
-    double    s0;
-    double    s1;
+    double s0;
+    double s1;
 
     std::string name;
 
-    CPPAD_ASSERT_KNOWN(
-        inc != 0 && first != 0 && last != 0,
-        "inc, first, or last is zero in call to SpeedTest"
-    );
-    CPPAD_ASSERT_KNOWN(
-        (inc > 0 && first <= last) || (inc < 0 && first >= last),
-        "SpeedTest: increment is positive and first > last or "
-        "increment is negative and first < last"
-    );
+    CPPAD_ASSERT_KNOWN(inc != 0 && first != 0 && last != 0, "inc, first, or last is zero in call to SpeedTest");
+    CPPAD_ASSERT_KNOWN((inc > 0 && first <= last) || (inc < 0 && first >= last),
+                       "SpeedTest: increment is positive and first > last or "
+                       "increment is negative and first < last");
 
     // compute maxSize
     maxSize = size = first;
-    while(  (inc > 0 && size <= last) || (inc < 0 && size >= last) )
-    {
-        if( size > maxSize )
-            maxSize = size;
+    while ((inc > 0 && size <= last) || (inc < 0 && size >= last)) {
+        if (size > maxSize) maxSize = size;
 
         // next size
-        if( int(size) + inc > 0 )
-            size = size_t( int(size) + inc );
+        if (int(size) + inc > 0)
+            size = size_t(int(size) + inc);
         else
-            size  = 0;
+            size = 0;
     }
     SpeedTestNdigit(maxSize, maxSizeDigit, pow10);
 
     size = first;
-    while(  (inc > 0 && size <= last) || (inc < 0 && size >= last) )
-    {
+    while ((inc > 0 && size <= last) || (inc < 0 && size >= last)) {
         repeat = 1;
-        s0     = elapsed_seconds();
-        s1     = elapsed_seconds();
-        while( s1 - s0 < 1. )
-        {   repeat = 2 * repeat;
-            s0     = elapsed_seconds();
-            name   = Test(size, repeat);
-            s1     = elapsed_seconds();
+        s0 = elapsed_seconds();
+        s1 = elapsed_seconds();
+        while (s1 - s0 < 1.) {
+            repeat = 2 * repeat;
+            s0 = elapsed_seconds();
+            name = Test(size, repeat);
+            s1 = elapsed_seconds();
         }
         double r = .5 + double(repeat) / (s1 - s0);
         // first convert to float to avoid warning with g++ -Wconversion
-        rate     = static_cast<size_t>( static_cast<float>( r ) );
+        rate = static_cast<size_t>(static_cast<float>(r));
 
-        if( size == first && name != "" )
-            cout << name << endl;
+        if (size == first && name != "") cout << name << endl;
 
-        if( first != last )
-        {
+        if (first != last) {
             // convert int(size_t) to avoid warning on _MSC_VER sys
-            std::cout << "size = "  << int(size);
+            std::cout << "size = " << int(size);
 
             SpeedTestNdigit(size, ndigit, pow10);
-            while( ndigit < maxSizeDigit )
-            {   cout << " ";
+            while (ndigit < maxSizeDigit) {
+                cout << " ";
                 ndigit++;
             }
             cout << " ";
@@ -441,32 +419,30 @@ inline void SpeedTest(
 
         cout << "rate = ";
         SpeedTestNdigit(rate, ndigit, pow10);
-        while( ndigit > 0 )
-        {
+        while (ndigit > 0) {
             pow10 /= 10;
-            digit  = rate / pow10;
+            digit = rate / pow10;
 
             // convert int(size_t) to avoid warning on _MSC_VER sys
             std::cout << int(digit);
 
-            rate    = rate % pow10;
+            rate = rate % pow10;
             ndigit -= 1;
 
-            if( (ndigit > 0) && (ndigit % 3 == 0) )
-                cout << ",";
+            if ((ndigit > 0) && (ndigit % 3 == 0)) cout << ",";
         }
         cout << endl;
 
         // next size
-        if( int(size) + inc > 0 )
-            size = size_t( int(size) + inc );
+        if (int(size) + inc > 0)
+            size = size_t(int(size) + inc);
         else
-            size  = 0;
+            size = 0;
     }
     return;
 }
 
-} // END CppAD namespace
+}  // namespace CppAD
 
 // END C++
-# endif
+#endif

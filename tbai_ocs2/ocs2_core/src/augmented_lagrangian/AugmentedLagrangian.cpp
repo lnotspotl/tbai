@@ -34,9 +34,10 @@ namespace ocs2 {
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-std::unique_ptr<StateAugmentedLagrangian> create(std::unique_ptr<StateConstraint> constraintPtr,
-                                                 std::vector<std::unique_ptr<augmented::AugmentedPenaltyBase>> penaltyPtrArray) {
-  return std::make_unique<StateAugmentedLagrangian>(std::move(constraintPtr), std::move(penaltyPtrArray));
+std::unique_ptr<StateAugmentedLagrangian> create(
+    std::unique_ptr<StateConstraint> constraintPtr,
+    std::vector<std::unique_ptr<augmented::AugmentedPenaltyBase>> penaltyPtrArray) {
+    return std::make_unique<StateAugmentedLagrangian>(std::move(constraintPtr), std::move(penaltyPtrArray));
 }
 
 /******************************************************************************************************/
@@ -44,15 +45,16 @@ std::unique_ptr<StateAugmentedLagrangian> create(std::unique_ptr<StateConstraint
 /******************************************************************************************************/
 std::unique_ptr<StateAugmentedLagrangian> create(std::unique_ptr<StateConstraint> constraintPtr,
                                                  std::unique_ptr<augmented::AugmentedPenaltyBase> penaltyPtr) {
-  return std::make_unique<StateAugmentedLagrangian>(std::move(constraintPtr), std::move(penaltyPtr));
+    return std::make_unique<StateAugmentedLagrangian>(std::move(constraintPtr), std::move(penaltyPtr));
 }
 
 /******************************************************************************************************/
 /******************************************************************************************************/
 /******************************************************************************************************/
-std::unique_ptr<StateInputAugmentedLagrangian> create(std::unique_ptr<StateInputConstraint> constraintPtr,
-                                                      std::vector<std::unique_ptr<augmented::AugmentedPenaltyBase>> penaltyPtrArray) {
-  return std::make_unique<StateInputAugmentedLagrangian>(std::move(constraintPtr), std::move(penaltyPtrArray));
+std::unique_ptr<StateInputAugmentedLagrangian> create(
+    std::unique_ptr<StateInputConstraint> constraintPtr,
+    std::vector<std::unique_ptr<augmented::AugmentedPenaltyBase>> penaltyPtrArray) {
+    return std::make_unique<StateInputAugmentedLagrangian>(std::move(constraintPtr), std::move(penaltyPtrArray));
 }
 
 /******************************************************************************************************/
@@ -60,7 +62,7 @@ std::unique_ptr<StateInputAugmentedLagrangian> create(std::unique_ptr<StateInput
 /******************************************************************************************************/
 std::unique_ptr<StateInputAugmentedLagrangian> create(std::unique_ptr<StateInputConstraint> constraintPtr,
                                                       std::unique_ptr<augmented::AugmentedPenaltyBase> penaltyPtr) {
-  return std::make_unique<StateInputAugmentedLagrangian>(std::move(constraintPtr), std::move(penaltyPtr));
+    return std::make_unique<StateInputAugmentedLagrangian>(std::move(constraintPtr), std::move(penaltyPtr));
 }
 
 }  // namespace ocs2
