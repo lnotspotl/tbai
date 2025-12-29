@@ -32,14 +32,6 @@ std::unique_ptr<switched_model::QuadrupedInterface> getAnymalInterface(const std
       *kin, *kinAd, *com, *comAd, invKin.get(), std::move(settings), std::move(jointNames), std::move(baseName)));
 }
 
-std::string getConfigFolder(const std::string& configName) {
-  return "/home/kb/Documents/ros/src/tbai_ros/dependencies/ocs2/ocs2_robotic_examples/ocs2_perceptive_anymal/ocs2_anymal_mpc/config/c_series";
-}
-
-std::string getTaskFilePath(const std::string& configName) {
-  return getConfigFolder(configName) + "/task.info";
-}
-
 std::unique_ptr<switched_model::QuadrupedInterface> getGo2Interface(const std::string& urdf, const std::string& taskFolder) {
   std::cerr << "Loading task file from: " << taskFolder << std::endl;
 
