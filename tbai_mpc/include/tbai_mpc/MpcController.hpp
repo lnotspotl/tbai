@@ -36,7 +36,7 @@ class MpcController : public tbai::Controller {
     MpcController(const std::string &robotName, const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
                   std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> velocityGeneratorPtr);
 
-    virtual ~MpcController() = default;
+    virtual ~MpcController();
 
     std::vector<MotorCommand> getMotorCommands(scalar_t currentTime, scalar_t dt) override;
 

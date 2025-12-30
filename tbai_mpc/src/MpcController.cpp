@@ -35,17 +35,29 @@ MpcController::MpcController(const std::string &robotName,
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
+MpcController::~MpcController() {
+    stopReferenceThread();
+}
+
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
 void MpcController::initialize(const std::string &urdfString, const std::string &taskSettingsFile,
                                const std::string &frameDeclarationFile, const std::string &controllerConfigFile,
                                const std::string &targetCommandFile, scalar_t trajdt, size_t trajKnots) {
     // Create quadruped interface
-    // quadrupedInterfacePtr_ =
-    //     anymal::getAnymalInterface(urdfString, switched_model::loadQuadrupedSettings(taskSettingsFile),
-    //                                anymal::frameDeclarationFromFile(frameDeclarationFile));
+    if (robotName_ == "anymal_d" || robotName_ == "anymal_b" || robotName_ == "anymal_c") {
+        quadrupedInterfacePtr_ =
+            anymal::getAnymalInterface(urdfString, switched_model::loadQuadrupedSettings(taskSettingsFile),
+                                       anymal::frameDeclarationFromFile(frameDeclarationFile));
+    } else if (robotName_ == "go2" || robotName_ == "spot") {
+        quadrupedInterfacePtr_ =
+            anymal::getGo2Interface(urdfString, switched_model::loadQuadrupedSettings(taskSettingsFile),
+                                    anymal::frameDeclarationFromFile(frameDeclarationFile));
+    } else {
+        TBAI_THROW("Robot {} not implemented. Available robots: anymal_d, anymal_b, anymal_c, go2, spot", robotName_);
+    }
 
-    quadrupedInterfacePtr_ =
-        anymal::getGo2Interface(urdfString, switched_model::loadQuadrupedSettings(taskSettingsFile),
-                                anymal::frameDeclarationFromFile(frameDeclarationFile));
     // Create WBC
     wbcPtr_ =
         tbai::mpc::getWbcUnique(controllerConfigFile, urdfString, quadrupedInterfacePtr_->getComModel(),
