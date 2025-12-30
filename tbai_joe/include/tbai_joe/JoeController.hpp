@@ -1,0 +1,276 @@
+#pragma once
+
+#include <atomic>
+#include <cstdint>
+#include <functional>
+#include <memory>
+#include <string>
+#include <thread>
+#include <vector>
+
+#include <ocs2_centroidal_model/CentroidalModelPinocchioMapping.h>
+#include <ocs2_centroidal_model/CentroidalModelRbdConversions.h>
+#include <ocs2_centroidal_model/PinocchioCentroidalDynamics.h>
+#include <ocs2_core/reference/TargetTrajectories.h>
+#include <ocs2_mpc/MPC_BASE.h>
+#include <ocs2_mpc/MPC_MRT_Interface.h>
+#include <ocs2_mpc/MRT_BASE.h>
+#include <ocs2_mpc/SystemObservation.h>
+#include <ocs2_pinocchio_interface/PinocchioEndEffectorKinematics.h>
+#include <ocs2_pinocchio_interface/PinocchioInterface.h>
+#include <pinocchio/algorithm/frames.hpp>
+#include <pinocchio/algorithm/kinematics.hpp>
+#include <pinocchio/multibody/data.hpp>
+#include <pinocchio/multibody/model.hpp>
+#include <tbai_core/Logging.hpp>
+#include <tbai_core/Rotations.hpp>
+#include <tbai_core/Types.hpp>
+#include <tbai_core/Utils.hpp>
+#include <tbai_core/control/Controllers.hpp>
+#include <tbai_core/control/Subscribers.hpp>
+#include <tbai_mpc/quadruped_mpc/QuadrupedMpc.h>
+#include <tbai_mpc/quadruped_mpc/core/MotionPhaseDefinition.h>
+#include <tbai_mpc/quadruped_mpc/quadruped_commands/ReferenceExtrapolation.h>
+#include <tbai_mpc/quadruped_mpc/quadruped_interfaces/Interfaces.h>
+#include <tbai_mpc/quadruped_mpc/quadruped_models/FrameDeclaration.h>
+#include <tbai_reference/ReferenceVelocityGenerator.hpp>
+#include <torch/script.h>
+
+// This is a bit hacky :/
+#define private public
+#define protected public
+#include <tbai_mpc/quadruped_mpc/quadruped_models/QuadrupedCom.h>
+#undef private
+#undef protected
+
+namespace tbai {
+namespace joe {
+
+using ocs2::SystemObservation;
+using ocs2::TargetTrajectories;
+using switched_model::BaseReferenceCommand;
+using switched_model::BaseReferenceHorizon;
+using switched_model::BaseReferenceState;
+using switched_model::contact_flag_t;
+using switched_model::TerrainPlane;
+
+/**
+ * Interface for terrain/gridmap height lookup (used in perceptive mode).
+ */
+class TerrainInterface {
+   public:
+    virtual ~TerrainInterface() = default;
+    virtual scalar_t atPosition(scalar_t x, scalar_t y) const = 0;
+    virtual bool isInitialized() const = 0;
+    virtual void waitTillInitialized() = 0;
+    virtual TargetTrajectories generateTargetTrajectories(scalar_t currentTime, const BaseReferenceHorizon &horizon,
+                                                          const BaseReferenceState &state,
+                                                          const BaseReferenceCommand &command,
+                                                          const switched_model::QuadrupedInterface &quadrupedInterface) = 0;
+};
+
+/**
+ * ROS-independent JOE controller base class.
+ * Uses MPC_MRT_Interface by default (direct MPC, no ROS communication).
+ * Override createMrtInterface() for ROS-based MPC communication.
+ */
+class JoeController : public tbai::Controller {
+   public:
+    JoeController(const std::string &robotName, const std::shared_ptr<tbai::StateSubscriber> &stateSubscriber,
+                  std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> velocityGenerator,
+                  std::function<scalar_t()> getCurrentTimeFunction);
+
+    virtual ~JoeController();
+
+    std::vector<MotorCommand> getMotorCommands(scalar_t currentTime, scalar_t dt) override;
+
+    void postStep(scalar_t currentTime, scalar_t dt) override;
+
+    void changeController(const std::string &controllerType, scalar_t currentTime) override;
+
+    bool isSupported(const std::string &controllerType) override;
+
+    void stopController() override { stopReferenceThread(); }
+
+    scalar_t getRate() const override { return 50.0; }
+
+    void startReferenceThread();
+    void stopReferenceThread();
+
+    bool checkStability() const override;
+
+    void preStep(scalar_t currentTime, scalar_t dt) override { state_ = stateSubscriberPtr_->getLatestState(); }
+
+    void waitTillInitialized() override { stateSubscriberPtr_->waitTillInitialized(); }
+
+    std::string getName() const override { return "JoeController"; }
+
+    /**
+     * Factory method to create the MRT interface.
+     * Default implementation creates MPC_MRT_Interface (direct MPC).
+     * Override this in ROS version to create MRT_ROS_Interface.
+     */
+    virtual std::unique_ptr<ocs2::MRT_BASE> createMrtInterface();
+
+    /**
+     * Factory method to create the MPC interface.
+     * Override this in ROS version to create MPC_ROS_Interface.
+     */
+    virtual std::unique_ptr<ocs2::MPC_BASE> createMpcInterface();
+
+    /**
+     * Set terrain interface for perceptive mode.
+     * If not set, controller runs in blind mode.
+     */
+    void setTerrainInterface(std::unique_ptr<TerrainInterface> terrain) { terrain_ = std::move(terrain); }
+
+    bool isBlind() const { return terrain_ == nullptr; }
+
+   protected:
+    /**
+     * Initialize the controller.
+     */
+    void initialize(const std::string &urdfString, const std::string &taskSettingsFile,
+                    const std::string &frameDeclarationFile, const std::string &joeModelPath);
+
+    virtual void resetMpc();
+    virtual void referenceThreadLoop();
+    void setObservation();
+    ocs2::SystemObservation generateSystemObservation();
+
+    /**
+     * Publish reference trajectory (override in ROS version for ROS publishing).
+     */
+    virtual void publishReference(const TargetTrajectories &targetTrajectories) {}
+
+    // Helper functions
+    inline vector_t getRpyAngles(const vector_t &state) const {
+        vector_t rpyocs2 = state.head<3>();
+        return tbai::mat2rpy(tbai::ocs2rpy2quat(rpyocs2).toRotationMatrix());
+    }
+    inline vector_t getOcs2ZyxEulerAngles(const vector_t &state) {
+        vector_t rpy = getRpyAngles(state);
+        rpy(2) = tbai::moduloAngleWithReference(rpy(2), yawLast_);
+        yawLast_ = rpy(2);
+        return rpy.reverse();
+    }
+    inline matrix3_t getRotationMatrixWorldBase(const vector_t &state) const {
+        return tbai::ocs2rpy2quat(state.head<3>()).toRotationMatrix();
+    }
+    inline matrix3_t getRotationMatrixBaseWorld(const vector_t &state) const {
+        return getRotationMatrixWorldBase(state).transpose();
+    }
+    inline matrix3_t getRotationMatrixWorldBaseYaw(const vector_t &state) const {
+        vector_t rpy = getRpyAngles(state);
+        rpy.head<2>().setZero();
+        return tbai::rpy2mat(rpy);
+    }
+    inline matrix3_t getRotationMatrixBaseWorldYaw(const vector_t &state) const {
+        return getRotationMatrixWorldBaseYaw(state).transpose();
+    }
+    inline quaternion_t getQuaternionFromEulerAnglesZyx(const vector3_t &eulerAnglesZyx) const {
+        return angleaxis_t(eulerAnglesZyx(0), vector3_t::UnitZ()) *
+               angleaxis_t(eulerAnglesZyx(1), vector3_t::UnitY()) *
+               angleaxis_t(eulerAnglesZyx(2), vector3_t::UnitX());
+    }
+
+    // Observation helpers
+    contact_flag_t getDesiredContactFlags(scalar_t currentTime, scalar_t dt);
+    vector_t getTimeLeftInPhase(scalar_t currentTime, scalar_t dt);
+    TargetTrajectories generateTargetTrajectories(scalar_t currentTime, scalar_t dt, const vector3_t &command);
+    std::vector<vector3_t> getCurrentFeetPositions(scalar_t currentTime, scalar_t dt);
+    std::vector<vector3_t> getCurrentFeetVelocities(scalar_t currentTime, scalar_t dt);
+    std::vector<vector3_t> getDesiredFeetPositions(scalar_t currentTime, scalar_t dt);
+    std::vector<vector3_t> getDesiredFeetVelocities(scalar_t currentTime, scalar_t dt);
+    void computeBaseKinematicsAndDynamics(scalar_t currentTime, scalar_t dt, vector3_t &basePos,
+                                          vector_t &baseOrientation, vector3_t &baseLinearVelocity,
+                                          vector3_t &baseAngularVelocity, vector3_t &baseLinearAcceleration,
+                                          vector3_t &baseAngularAcceleration);
+
+    // Observation functions
+    vector3_t getLinearVelocityObservation(scalar_t currentTime, scalar_t dt) const;
+    vector3_t getAngularVelocityObservation(scalar_t currentTime, scalar_t dt) const;
+    vector3_t getProjectedGravityObservation(scalar_t currentTime, scalar_t dt) const;
+    vector3_t getCommandObservation(scalar_t currentTime, scalar_t dt);
+    vector_t getDofPosObservation(scalar_t currentTime, scalar_t dt) const;
+    vector_t getDofVelObservation(scalar_t currentTime, scalar_t dt) const;
+    vector_t getPastActionObservation(scalar_t currentTime, scalar_t dt) const;
+    vector_t getPlanarFootholdsObservation(scalar_t currentTime, scalar_t dt);
+    vector_t getDesiredJointAnglesObservation(scalar_t currentTime, scalar_t dt);
+    vector_t getCurrentDesiredJointAnglesObservation(scalar_t currentTime, scalar_t dt);
+    vector_t getDesiredContactsObservation(scalar_t currentTime, scalar_t dt);
+    vector_t getTimeLeftInPhaseObservation(scalar_t currentTime, scalar_t dt);
+    vector_t getDesiredBasePosObservation(scalar_t currentTime, scalar_t dt);
+    vector_t getOrientationDiffObservation(scalar_t currentTime, scalar_t dt);
+    vector_t getDesiredBaseLinVelObservation(scalar_t currentTime, scalar_t dt);
+    vector_t getDesiredBaseAngVelObservation(scalar_t currentTime, scalar_t dt);
+    vector_t getDesiredBaseLinAccObservation(scalar_t currentTime, scalar_t dt);
+    vector_t getDesiredBaseAngAccObservation(scalar_t currentTime, scalar_t dt);
+    vector_t getCpgObservation(scalar_t currentTime, scalar_t dt);
+    vector_t getDesiredFootPositionsObservation(scalar_t currentTime, scalar_t dt);
+    vector_t getDesiredFootVelocitiesObservation(scalar_t currentTime, scalar_t dt);
+    vector_t getHeightSamplesObservation(scalar_t currentTime, scalar_t dt);
+
+    BaseReferenceHorizon getBaseReferenceHorizon(scalar_t time) { return {0.1, 10}; }
+    BaseReferenceState getBaseReferenceState(scalar_t time);
+    BaseReferenceCommand getBaseReferenceCommand(scalar_t time, const vector_t &command);
+
+    std::shared_ptr<tbai::StateSubscriber> stateSubscriberPtr_;
+    std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> refVelGen_;
+    std::function<scalar_t()> getCurrentTimeFunction_;
+
+    // Torchscript model
+    torch::jit::script::Module joeModel_;
+
+    State state_;
+
+    std::unique_ptr<ocs2::MRT_BASE> mrt_;
+    std::shared_ptr<ocs2::MPC_BASE> mpc_;
+    bool mrt_initialized_ = false;
+
+    std::string robotName_;
+
+    vector_t defaultJointAngles_;
+    std::vector<std::string> jointNames_;
+
+    vector_t pastAction_;
+    std::unique_ptr<TargetTrajectories> lastTargetTrajectories_;
+
+    scalar_t yawLast_ = 0.0;
+    scalar_t initTime_;
+    scalar_t horizon_;
+    scalar_t mpcRate_ = 30.0;
+    scalar_t timeSinceLastMpcUpdate_ = 1e5;
+
+    // Reference thread
+    std::thread referenceThread_;
+    std::atomic<bool> stopReferenceThread_{true};
+    scalar_t referenceThreadRate_ = 5.0;
+
+    std::unique_ptr<TerrainInterface> terrain_;
+    std::unique_ptr<switched_model::QuadrupedInterface> quadrupedInterface_;
+    std::unique_ptr<switched_model::ComModelBase<scalar_t>> comModel_;
+    std::unique_ptr<switched_model::KinematicsModelBase<scalar_t>> kinematicsModel_;
+
+    std::shared_ptr<spdlog::logger> logger_;
+
+    const scalar_t LIN_VEL_SCALE = 2.0;
+    const scalar_t ANG_VEL_SCALE = 0.25;
+    const scalar_t COMMAND_SCALE = 1.0;
+    const scalar_t GRAVITY_SCALE = 1.0;
+    const scalar_t DOF_POS_SCALE = 1.0;
+    const scalar_t DOF_VEL_SCALE = 0.05;
+    const scalar_t PAST_ACTION_SCALE = 1.0;
+    const scalar_t ISAAC_SIM_DT = 1.0 / 50.0;
+    const int64_t MODEL_INPUT_SIZE = 179;
+    const scalar_t ACTION_SCALE = 0.5;
+};
+
+// Torch <-> Eigen conversions
+vector_t torch2vector(const torch::Tensor &t);
+matrix_t torch2matrix(const torch::Tensor &t);
+torch::Tensor vector2torch(const vector_t &v);
+torch::Tensor matrix2torch(const matrix_t &m);
+
+}  // namespace joe
+}  // namespace tbai
