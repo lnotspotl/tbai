@@ -27,6 +27,7 @@ if(TBAI_BUILD_TESTS)
 endif()
 
 add_subdirectory(tbai_core)
+add_subdirectory(tbai_torch)
 add_subdirectory(tbai_reference)
 add_subdirectory(tbai_static)
 

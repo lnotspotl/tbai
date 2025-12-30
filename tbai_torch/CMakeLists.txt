@@ -3,41 +3,33 @@ cmake_minimum_required(VERSION 3.16.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project(tbai_np3o)
+project(tbai_torch)
 
 find_package(Torch REQUIRED)
 
-add_library(tbai_np3o
-    src/Np3oController.cpp
-    src/HistoryBuffer.cpp
+add_library(tbai_torch INTERFACE)
+
+target_include_directories(tbai_torch
+    INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
 )
 
-find_package(pinocchio REQUIRED)
+target_link_libraries(tbai_torch
+    INTERFACE
+        tbai_core
+        ${TORCH_LIBRARIES}
+)
 
 if(TBAI_BUILD_TESTS)
     add_subdirectory(tests)
 endif()
 
-target_include_directories(tbai_np3o
-    PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
-)
-
-target_link_libraries(tbai_np3o
-    PUBLIC
-        tbai_core
-        tbai_torch
-        tbai_reference
-        ${TORCH_LIBRARIES}
-        pinocchio::pinocchio
-)
-
 ## Installation rules
 include(GNUInstallDirs)
 
-install(TARGETS tbai_np3o
-    EXPORT tbai_np3o-targets
+install(TARGETS tbai_torch
+    EXPORT tbai_torch-targets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -46,4 +38,10 @@ install(TARGETS tbai_np3o
 
 install(DIRECTORY include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(EXPORT tbai_torch-targets
+    NAMESPACE tbai::
+    FILE tbai-torch-targets.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/tbai
 )

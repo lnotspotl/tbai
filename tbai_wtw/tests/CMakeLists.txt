@@ -12,4 +12,3 @@ function(add_tbai_test TEST_NAME)
 endfunction()
 
 add_tbai_test(test_history_buffer src/test_history_buffer.cpp)
-add_tbai_test(test_eigentorch src/test_eigentorch.cpp)

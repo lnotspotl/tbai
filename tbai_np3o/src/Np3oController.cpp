@@ -12,7 +12,7 @@
 #include <tbai_core/Rotations.hpp>
 #include <tbai_core/Utils.hpp>
 #include <tbai_core/config/Config.hpp>
-#include <tbai_np3o/EigenTorch.hpp>
+#include <tbai_torch/EigenTorch.hpp>
 #include <tbai_np3o/Np3oController.hpp>
 
 namespace tbai {
@@ -176,8 +176,8 @@ std::vector<tbai::MotorCommand> Np3oController::getMotorCommands(scalar_t curren
     tbai::vector_t obsProprioceptiveEigen = getObsProprioceptive(state, currentTime, dt);
     tbai::vector_t obsHistoryEigen = getObsHistory();
 
-    at::Tensor obsProprioceptive = tbai::np3o::vector2torch(obsProprioceptiveEigen);
-    at::Tensor obsHistory = tbai::np3o::vector2torch(obsHistoryEigen);
+    at::Tensor obsProprioceptive = tbai::torch_utils::vector2torch(obsProprioceptiveEigen);
+    at::Tensor obsHistory = tbai::torch_utils::vector2torch(obsHistoryEigen);
 
     auto t2 = std::chrono::high_resolution_clock::now();
 
@@ -187,7 +187,7 @@ std::vector<tbai::MotorCommand> Np3oController::getMotorCommands(scalar_t curren
     auto t4 = std::chrono::high_resolution_clock::now();
 
     tbai::vector_t currentAction =
-        tbai::np3o::torch2vector(out.reshape({12}) * torch::tensor({0.125, 0.25, 0.25, 0.125, 0.25, 0.25, 0.125, 0.25,
+        tbai::torch_utils::torch2vector(out.reshape({12}) * torch::tensor({0.125, 0.25, 0.25, 0.125, 0.25, 0.25, 0.125, 0.25,
                                                                     0.25, 0.125, 0.25, 0.25}));
     tbai::vector_t filteredAction;
 
@@ -199,7 +199,7 @@ std::vector<tbai::MotorCommand> Np3oController::getMotorCommands(scalar_t curren
     }
     auto ret = getMotorCommands(filteredAction + defaultJointAngles_);
 
-    lastAction_ = tbai::np3o::torch2vector(out.reshape({12}));
+    lastAction_ = tbai::torch_utils::torch2vector(out.reshape({12}));
     TBAI_LOG_DEBUG_THROTTLE(logger_, 1.0 / 30.0, "Current action: {} Last action: {} Joint angles: {}",
                             (std::stringstream() << currentAction.transpose()).str(),
                             (std::stringstream() << lastAction_.transpose()).str(),

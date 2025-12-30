@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include <tbai_np3o/EigenTorch.hpp>
+#include <tbai_torch/EigenTorch.hpp>
 
 using namespace tbai;
-using namespace tbai::np3o;
+using namespace tbai::torch_utils;
 
 TEST(EigTorch, VectorConversion) {
     // Test vector Torch -> Eigen

@@ -28,6 +28,7 @@
 #include <tbai_core/Utils.hpp>
 #include <tbai_core/control/Controllers.hpp>
 #include <tbai_core/control/Subscribers.hpp>
+#include <tbai_torch/EigenTorch.hpp>
 #include <tbai_mpc/quadruped_mpc/QuadrupedMpc.h>
 #include <tbai_mpc/quadruped_mpc/core/MotionPhaseDefinition.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_commands/ReferenceExtrapolation.h>
@@ -265,12 +266,6 @@ class JoeController : public tbai::Controller {
     const int64_t MODEL_INPUT_SIZE = 179;
     const scalar_t ACTION_SCALE = 0.5;
 };
-
-// Torch <-> Eigen conversions
-vector_t torch2vector(const torch::Tensor &t);
-matrix_t torch2matrix(const torch::Tensor &t);
-torch::Tensor vector2torch(const vector_t &v);
-torch::Tensor matrix2torch(const matrix_t &m);
 
 }  // namespace joe
 }  // namespace tbai

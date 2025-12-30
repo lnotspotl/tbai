@@ -20,6 +20,7 @@ target_include_directories(tbai_joe
 target_link_libraries(tbai_joe
     PUBLIC
         tbai_core
+        tbai_torch
         tbai_mpc
         tbai_reference
         ocs2_core

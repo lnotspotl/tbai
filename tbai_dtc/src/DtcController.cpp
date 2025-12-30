@@ -187,10 +187,10 @@ std::vector<MotorCommand> DtcController::getMotorCommands(scalar_t currentTime, 
                         heightSamplesObservation;
     // clang-format on
 
-    torch::Tensor torchObservation = vector2torch(eigenObservation).view({1, -1});
+    torch::Tensor torchObservation = tbai::torch_utils::vector2torch(eigenObservation).view({1, -1});
     torch::Tensor torchAction = dtcModel_.forward({torchObservation}).toTensor().view({-1});
 
-    pastAction_ = torch2vector(torchAction);
+    pastAction_ = tbai::torch_utils::torch2vector(torchAction);
 
     vector_t commandedJointAngles = defaultJointAngles_ + pastAction_ * ACTION_SCALE;
 
@@ -927,50 +927,6 @@ void DtcController::setObservation() {
     if (terrain_ == nullptr) {
         localTerrainEstimator_->updateFootholds(observation);
     }
-}
-
-torch::Tensor vector2torch(const vector_t &v) {
-    const int64_t rows = static_cast<int64_t>(v.rows());
-    auto out = torch::empty({rows});
-    float *data = out.data_ptr<float>();
-
-    Eigen::Map<Eigen::VectorXf> map(data, rows);
-    map = v.cast<float>();
-
-    return out;
-}
-
-torch::Tensor matrix2torch(const matrix_t &m) {
-    const int64_t rows = static_cast<int64_t>(m.rows());
-    const int64_t cols = static_cast<int64_t>(m.cols());
-    auto out = torch::empty({rows, cols});
-    float *data = out.data_ptr<float>();
-
-    Eigen::Map<Eigen::MatrixXf> map(data, cols, rows);
-    map = m.transpose().cast<float>();
-
-    return out;
-}
-
-vector_t torch2vector(const torch::Tensor &t) {
-    const size_t rows = t.size(0);
-    float *t_data = t.data_ptr<float>();
-
-    vector_t out(rows);
-    Eigen::Map<Eigen::VectorXf> map(t_data, rows);
-    out = map.cast<scalar_t>();
-    return out;
-}
-
-matrix_t torch2matrix(const torch::Tensor &t) {
-    const size_t rows = t.size(0);
-    const size_t cols = t.size(1);
-    float *t_data = t.data_ptr<float>();
-
-    matrix_t out(cols, rows);
-    Eigen::Map<Eigen::MatrixXf> map(t_data, cols, rows);
-    out = map.cast<scalar_t>();
-    return out.transpose();
 }
 
 }  // namespace dtc
