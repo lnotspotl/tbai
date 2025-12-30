@@ -29,6 +29,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+// Must be defined before any Boost headers to support larger MPL vectors
+#ifndef BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
+#define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
+#endif
+#ifndef BOOST_MPL_LIMIT_VECTOR_SIZE
+#define BOOST_MPL_LIMIT_VECTOR_SIZE 30
+#endif
+
 #include <Eigen/Dense>
 #include <iostream>
 #include <string>

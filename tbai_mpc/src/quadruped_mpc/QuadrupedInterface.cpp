@@ -2,14 +2,6 @@
 // Created by rgrandia on 17.02.20.
 //
 
-// Fix for Boost 1.82+ compatibility with multi_index
-#ifndef BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
-#define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
-#endif
-#ifndef BOOST_MPL_LIMIT_VECTOR_SIZE
-#define BOOST_MPL_LIMIT_VECTOR_SIZE 40
-#endif
-
 #include "tbai_mpc/quadruped_mpc/QuadrupedInterface.h"
 
 #include <ocs2_core/misc/Display.h>

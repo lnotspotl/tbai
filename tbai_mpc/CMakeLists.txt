@@ -110,15 +110,6 @@ target_link_libraries(tbai_mpc
         ocs2::qpoases
 )
 
-# Boost 1.82+ compatibility fix for multi_index
-target_compile_definitions(tbai_mpc
-    PUBLIC
-        BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
-        BOOST_MPL_LIMIT_VECTOR_SIZE=40
-    PRIVATE
-        TBAI_MPC_RESOURCE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/resources"
-)
-
 ## Installation rules
 include(GNUInstallDirs)
 

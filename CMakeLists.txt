@@ -18,11 +18,9 @@ option(TBAI_BUILD_MPC "Build the mpc" ON)
 option(TBAI_BUILD_DTC "Build the dtc" ON)
 option(TBAI_BUILD_JOE "Build the joe" ON)
 
-if(NOT TBAI_DEV)
-  set(CMAKE_CXX_FLAGS "-Wno-dev")
-endif()
-
 project(tbai VERSION 2.0.0)
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if(TBAI_BUILD_TESTS)
   enable_testing()

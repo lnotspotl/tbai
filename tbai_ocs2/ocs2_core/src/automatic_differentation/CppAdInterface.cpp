@@ -28,10 +28,43 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************/
 
 #include <boost/filesystem.hpp>
-#include <boost/process/search_path.hpp>
-#include <ocs2_core/automatic_differentiation/CppAdInterface.h>
 
+#define BOOST_VERSION_IS_AT_LEAST(major, minor, patch) (BOOST_VERSION >= (major * 100000 + minor * 100 + patch))
+#define USE_NEW_BOOST_PROCESS_API BOOST_VERSION_IS_AT_LEAST(1, 88, 0)
+
+#if USE_NEW_BOOST_PROCESS_API
+#include <boost/process/v1/search_path.hpp>
+#else
+#include <boost/process/search_path.hpp>
+#endif
+
+#include <ocs2_core/automatic_differentiation/CppAdInterface.h>
 namespace ocs2 {
+
+/******************************************************************************************************/
+/******************************************************************************************************/
+/******************************************************************************************************/
+static inline std::string getExecutablePath(const std::string &executableName) {
+#if USE_NEW_BOOST_PROCESS_API
+    return boost::process::v1::search_path(executableName).string();
+#else
+    return boost::process::search_path(executableName).string();
+#endif
+}
+
+/******************************************************************************************************/
+/******************************************************************************************************/
+/******************************************************************************************************/
+static std::string getGccCompilerPath() {
+    return getExecutablePath("gcc");
+}
+
+/******************************************************************************************************/
+/******************************************************************************************************/
+/******************************************************************************************************/
+static std::string getClangCompilerPath() {
+    return getExecutablePath("clang");
+}
 
 /******************************************************************************************************/
 /******************************************************************************************************/
@@ -96,8 +129,7 @@ void CppAdInterface::createModels(ApproximationOrder approximationOrder, bool ve
 
     // Compiler objects, compile to temporary shared library file to avoid interference between processes
     CppAD::cg::ModelLibraryCSourceGen<scalar_t> libraryCSourceGen(sourceGen);
-    std::string gccCompilerPath = boost::process::search_path("gcc")
-                                      .string();  // TODO(lnotspotl): use some env variable to enable users to use llvm
+    std::string gccCompilerPath = getGccCompilerPath();
     CppAD::cg::GccCompiler<scalar_t> gccCompiler(gccCompilerPath);
     CppAD::cg::DynamicModelLibraryProcessor<scalar_t> libraryProcessor(libraryCSourceGen, libraryName_ + tmpName_);
     setCompilerOptions(gccCompiler);

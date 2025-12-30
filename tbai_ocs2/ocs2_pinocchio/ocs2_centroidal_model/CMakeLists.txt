@@ -18,7 +18,6 @@ set(FLAGS
   ${OCS2_CXX_FLAGS}
   ${pinocchio_CFLAGS_OTHER}
   -Wno-ignored-attributes
-  -Wno-invalid-partial-specialization
   -DPINOCCHIO_URDFDOM_TYPEDEF_SHARED_PTR
   -DPINOCCHIO_URDFDOM_USE_STD_SHARED_PTR
 )
@@ -79,21 +78,3 @@ install(TARGETS ${PROJECT_NAME}
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
 )
-
-#############
-## Testing ##
-#############
-
-# Tests require ocs2_robotic_assets which is not included
-# if(OCS2_BUILD_TESTS)
-#   add_executable(${PROJECT_NAME}_test
-#     test/testAnymalCentroidalModel.cpp
-#   )
-#   target_include_directories(${PROJECT_NAME}_test PRIVATE test/include)
-#   target_link_libraries(${PROJECT_NAME}_test
-#     ${PROJECT_NAME}
-#     GTest::gtest_main
-#   )
-#   target_compile_options(${PROJECT_NAME}_test PRIVATE ${FLAGS})
-#   gtest_discover_tests(${PROJECT_NAME}_test)
-# endif()

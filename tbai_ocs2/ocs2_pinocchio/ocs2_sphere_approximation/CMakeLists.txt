@@ -18,7 +18,6 @@ set(FLAGS
   ${OCS2_CXX_FLAGS}
   ${pinocchio_CFLAGS_OTHER}
   -Wno-ignored-attributes
-  -Wno-invalid-partial-specialization
   -DPINOCCHIO_URDFDOM_TYPEDEF_SHARED_PTR
   -DPINOCCHIO_URDFDOM_USE_STD_SHARED_PTR
 )
@@ -76,19 +75,3 @@ install(TARGETS ${PROJECT_NAME}
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
 )
-
-#############
-## Testing ##
-#############
-
-# Tests require ocs2_robotic_assets which is not included
-# if(OCS2_BUILD_TESTS)
-#   add_executable(PinocchioSphereKinematicsTest
-#     test/testPinocchioSphereKinematics.cpp
-#   )
-#   target_link_libraries(PinocchioSphereKinematicsTest
-#     ${PROJECT_NAME}
-#     GTest::gtest_main
-#   )
-#   gtest_discover_tests(PinocchioSphereKinematicsTest)
-# endif()

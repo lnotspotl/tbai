@@ -7,8 +7,6 @@
 #include <iostream>
 #include <unordered_map>
 
-#include <boost/property_tree/info_parser.hpp>
-#include <boost/property_tree/ptree.hpp>
 #include <ocs2_core/misc/LoadData.h>
 
 namespace switched_model {
