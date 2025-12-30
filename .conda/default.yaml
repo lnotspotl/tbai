@@ -14,4 +14,6 @@ dependencies:
 - yaml-cpp *
 - pinocchio 3.7.*
 - cmake 3.30.*
+- just >=1.42.4,<2
+- glpk 5.0.*
 

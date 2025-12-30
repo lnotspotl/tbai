@@ -1,9 +1,9 @@
 [workspace]
 authors = ["lnotspotl <lnotspotl@gmail.com>"]
 channels = ["conda-forge"]
-name = "tbai2"
+name = "tbai"
 platforms = ["linux-64", "linux-aarch64"]
-version = "0.0.5"
+version = "0.1.0"
 
 [dependencies]
 gxx = "13.3.*"
@@ -18,3 +18,4 @@ yaml-cpp="*"
 pinocchio="3.7.*"
 cmake="3.30.*"
 just = ">=1.42.4,<2"
+glpk="5.0.*"

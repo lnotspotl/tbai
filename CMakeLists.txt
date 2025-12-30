@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.16.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+option(TBAI_DEV "Build in development mode" OFF)
 option(TBAI_BUILD_TESTS "Build the tests" OFF)
 option(TBAI_BUILD_BOB "Build the bob" ON)
 option(TBAI_BUILD_WTW "Build the wtw" ON)
@@ -12,8 +13,14 @@ option(TBAI_BUILD_PYTHON "Build the Python bindings" OFF)
 option(TBAI_BUILD_DEPLOY_GO2 "Build the deploy go2" ON)
 option(TBAI_BUILD_DEPLOY_GO2W "Build the deploy go2w (wheeled)" ON)
 option(TBAI_BUILD_DEPLOY_G1 "Build the deploy g1" ON)
+option(TBAI_BUILD_OCS2 "Build the ocs2" ON)
+option(TBAI_BUILD_MPC "Build the mpc" ON)
+option(TBAI_BUILD_DTC "Build the dtc" ON)
+option(TBAI_BUILD_JOE "Build the joe" ON)
 
 project(tbai VERSION 2.0.0)
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if(TBAI_BUILD_TESTS)
   enable_testing()
@@ -63,6 +70,14 @@ endif()
 
 if(TBAI_BUILD_DEPLOY_G1)
   add_subdirectory(tbai_deploy_g1)
+endif()
+
+if(TBAI_BUILD_OCS2)
+  add_subdirectory(tbai_ocs2)
+endif()
+
+if(TBAI_BUILD_MPC)
+  add_subdirectory(tbai_mpc)
 endif()
 
 include(CMakePackageConfigHelpers)
