@@ -24,7 +24,8 @@ namespace mpc {
 /*********************************************************************************************************************/
 MpcController::MpcController(const std::string &robotName,
                              const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
-                             std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> velocityGeneratorPtr, std::function<scalar_t()> getCurrentTimeFunction)
+                             std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> velocityGeneratorPtr,
+                             std::function<scalar_t()> getCurrentTimeFunction)
     : robotName_(robotName),
       stateSubscriberPtr_(stateSubscriberPtr),
       velocityGeneratorPtr_(std::move(velocityGeneratorPtr)),
