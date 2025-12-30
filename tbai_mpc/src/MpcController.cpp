@@ -24,10 +24,11 @@ namespace mpc {
 /*********************************************************************************************************************/
 MpcController::MpcController(const std::string &robotName,
                              const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
-                             std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> velocityGeneratorPtr)
+                             std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> velocityGeneratorPtr, std::function<scalar_t()> getCurrentTimeFunction)
     : robotName_(robotName),
       stateSubscriberPtr_(stateSubscriberPtr),
-      velocityGeneratorPtr_(std::move(velocityGeneratorPtr)) {
+      velocityGeneratorPtr_(std::move(velocityGeneratorPtr)),
+      getCurrentTimeFunction_(getCurrentTimeFunction) {
     logger_ = tbai::getLogger("mpc_controller");
     initTime_ = tbai::readInitTime();
 }
@@ -102,7 +103,7 @@ std::vector<MotorCommand> MpcController::getMotorCommands(scalar_t currentTime, 
     mrtPtr_->spinMRT();
     mrtPtr_->updatePolicy();
 
-    tNow_ = currentTime - initTime_;
+    tNow_ = getCurrentTimeFunction_() - initTime_;
 
     auto observation = generateSystemObservation();
 

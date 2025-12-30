@@ -34,7 +34,7 @@ class MpcController : public tbai::Controller {
      * @param velocityGeneratorPtr: Reference velocity generator
      */
     MpcController(const std::string &robotName, const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr,
-                  std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> velocityGeneratorPtr);
+                  std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> velocityGeneratorPtr, std::function<scalar_t()> getCurrentTimeFunction);
 
     virtual ~MpcController();
 
@@ -119,6 +119,8 @@ class MpcController : public tbai::Controller {
     State state_;
 
     std::string robotName_;
+
+    std::function<scalar_t()> getCurrentTimeFunction_;
 
     std::shared_ptr<spdlog::logger> logger_;
 
