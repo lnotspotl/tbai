@@ -43,7 +43,7 @@ target_include_directories(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME} SYSTEM
   PUBLIC
-    ${pinocchio_INCLUDE_DIRS}
+    $<BUILD_INTERFACE:${pinocchio_INCLUDE_DIRS}>
 )
 
 target_link_directories(${PROJECT_NAME}
