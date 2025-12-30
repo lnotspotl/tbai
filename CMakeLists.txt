@@ -84,6 +84,10 @@ if(TBAI_BUILD_DTC)
   add_subdirectory(tbai_dtc)
 endif()
 
+if(TBAI_BUILD_JOE)
+  add_subdirectory(tbai_joe)
+endif()
+
 include(CMakePackageConfigHelpers)
 
 write_basic_package_version_file(
