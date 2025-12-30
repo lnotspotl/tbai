@@ -25,6 +25,7 @@ target_link_libraries(tbai_dtc
         ocs2_core
         ocs2_mpc
         ocs2_sqp
+	ocs2_centroidal_model
         ocs2_pinocchio_interface
         ${TORCH_LIBRARIES}
 )

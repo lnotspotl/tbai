@@ -31,4 +31,4 @@ install:
 
 # Run tests (moved from pixi.toml)
 test:
-    cmake -Bbuild -S. -DTBAI_BUILD_TESTS=ON -DTBAI_BUILD_PYTHON=OFF -DTBAI_BUILD_DEPLOY_GO2=OFF && cd build && make -j8 && ctest --output-on-failure
+    cmake -Bbuild -S. -DTBAI_BUILD_TESTS=ON -DTBAI_BUILD_PYTHON=OFF -DTBAI_BUILD_DEPLOY_GO2=OFF -DTBAI_BUILD_DTC=OFF -DTBAI_BUILD_MPC=OFF -DTBAI_BUILD_JOE=OFF -DTBAI_BUILD_OCS2=OFF && cd build && make -j8 && ctest --output-on-failure
