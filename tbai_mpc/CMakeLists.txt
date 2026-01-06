@@ -141,7 +141,7 @@ target_link_libraries(tbai_franka_mpc
 ## Installation rules
 include(GNUInstallDirs)
 
-install(TARGETS tbai_quadruped_mpc tbai_franka_mpc
+install(TARGETS tbai_quadruped_mpc
     EXPORT tbai_quadruped_mpc-targets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -156,5 +156,19 @@ install(DIRECTORY include/
 install(EXPORT tbai_quadruped_mpc-targets
     NAMESPACE tbai::
     FILE tbai-quadruped-mpc-targets.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/tbai
+)
+
+install(TARGETS tbai_franka_mpc
+    EXPORT tbai_franka_mpc-targets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(EXPORT tbai_franka_mpc-targets
+    NAMESPACE tbai::
+    FILE tbai-franka-mpc-targets.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/tbai
 )

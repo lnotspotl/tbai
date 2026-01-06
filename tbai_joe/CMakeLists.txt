@@ -21,7 +21,7 @@ target_link_libraries(tbai_joe
     PUBLIC
         tbai_core
         tbai_torch
-        tbai_mpc
+        tbai_quadruped_mpc
         tbai_reference
         ocs2_core
         ocs2_mpc
