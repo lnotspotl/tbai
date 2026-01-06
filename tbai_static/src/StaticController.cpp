@@ -99,6 +99,7 @@ void StaticController::loadSettings() {
     sitJointAngles_ = tbai::fromGlobalConfig<vector_t>("static_controller/sit_controller/joint_angles");
     jointNames_ = tbai::fromGlobalConfig<std::vector<std::string>>("joint_names");
     interpolationTime_ = tbai::fromGlobalConfig<scalar_t>("static_controller/interpolation_time");
+    fixedBase_ = tbai::fromGlobalConfig<bool>("fixed_base", false);
 }
 
 /*********************************************************************************************************************/

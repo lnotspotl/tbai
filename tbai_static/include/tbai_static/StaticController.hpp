@@ -20,7 +20,8 @@ class StaticController : public tbai::Controller {
     // Default implementation - extracts joint angles based on number of joints configured
     virtual vector_t jointAnglesFromState(const State &state) {
         const size_t numJoints = jointNames_.size();
-        return state.x.segment(3 + 3 + 3 + 3, numJoints);
+        const size_t offset = fixedBase_ ? 0 : (3 + 3 + 3 + 3);
+        return state.x.segment(offset, numJoints);
     }
 
     void stopController() override {}
@@ -84,6 +85,9 @@ class StaticController : public tbai::Controller {
     std::shared_ptr<spdlog::logger> logger_;
 
     bool first_;
+
+    /** Whether the robot has a fixed base */
+    bool fixedBase_;
 
     State state_;
 };
