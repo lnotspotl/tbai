@@ -112,10 +112,36 @@ target_link_libraries(tbai_quadruped_mpc
         ocs2::qpoases
 )
 
+## Franka MPC library
+add_library(tbai_franka_mpc
+    src/franka_mpc/FactoryFunctions.cpp
+    src/franka_mpc/MobileManipulatorPinocchioMapping.cpp
+    src/franka_mpc/MobileManipulatorPreComputation.cpp
+    src/franka_mpc/MobileManipulatorInterface.cpp
+    src/franka_mpc/dynamics/DefaultManipulatorDynamics.cpp
+    src/franka_mpc/constraint/EndEffectorConstraint.cpp
+)
+add_library(tbai::franka_mpc ALIAS tbai_franka_mpc)
+
+target_include_directories(tbai_franka_mpc
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
+
+target_link_libraries(tbai_franka_mpc
+    PUBLIC
+        ocs2_core
+        ocs2_ddp
+        ocs2_mpc
+        ocs2_pinocchio_interface
+        ocs2_robotic_tools
+)
+
 ## Installation rules
 include(GNUInstallDirs)
 
-install(TARGETS tbai_quadruped_mpc
+install(TARGETS tbai_quadruped_mpc tbai_franka_mpc
     EXPORT tbai_quadruped_mpc-targets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
