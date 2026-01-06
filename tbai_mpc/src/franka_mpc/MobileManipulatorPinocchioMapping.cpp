@@ -37,35 +37,35 @@ MobileManipulatorPinocchioMappingTpl<SCALAR>::MobileManipulatorPinocchioMappingT
     : modelInfo_(std::move(info)) {}
 
 template <typename SCALAR>
-MobileManipulatorPinocchioMappingTpl<SCALAR>* MobileManipulatorPinocchioMappingTpl<SCALAR>::clone() const {
-  return new MobileManipulatorPinocchioMappingTpl<SCALAR>(*this);
+MobileManipulatorPinocchioMappingTpl<SCALAR> *MobileManipulatorPinocchioMappingTpl<SCALAR>::clone() const {
+    return new MobileManipulatorPinocchioMappingTpl<SCALAR>(*this);
 }
 
 template <typename SCALAR>
-auto MobileManipulatorPinocchioMappingTpl<SCALAR>::getPinocchioJointPosition(const vector_t& state) const -> vector_t {
-  return state;
+auto MobileManipulatorPinocchioMappingTpl<SCALAR>::getPinocchioJointPosition(const vector_t &state) const -> vector_t {
+    return state;
 }
 
 template <typename SCALAR>
-auto MobileManipulatorPinocchioMappingTpl<SCALAR>::getPinocchioJointVelocity(const vector_t& state, const vector_t& input) const
-    -> vector_t {
-  switch (modelInfo_.manipulatorModelType) {
-    case ManipulatorModelType::DefaultManipulator:
-      return input;
-    default:
-      throw std::runtime_error("The chosen manipulator model type is not supported!");
-  }
+auto MobileManipulatorPinocchioMappingTpl<SCALAR>::getPinocchioJointVelocity(const vector_t &state,
+                                                                             const vector_t &input) const -> vector_t {
+    switch (modelInfo_.manipulatorModelType) {
+        case ManipulatorModelType::DefaultManipulator:
+            return input;
+        default:
+            throw std::runtime_error("The chosen manipulator model type is not supported!");
+    }
 }
 
 template <typename SCALAR>
-auto MobileManipulatorPinocchioMappingTpl<SCALAR>::getOcs2Jacobian(const vector_t& state, const matrix_t& Jq, const matrix_t& Jv) const
-    -> std::pair<matrix_t, matrix_t> {
-  switch (modelInfo_.manipulatorModelType) {
-    case ManipulatorModelType::DefaultManipulator:
-      return {Jq, Jv};
-    default:
-      throw std::runtime_error("The chosen manipulator model type is not supported!");
-  }
+auto MobileManipulatorPinocchioMappingTpl<SCALAR>::getOcs2Jacobian(
+    const vector_t &state, const matrix_t &Jq, const matrix_t &Jv) const -> std::pair<matrix_t, matrix_t> {
+    switch (modelInfo_.manipulatorModelType) {
+        case ManipulatorModelType::DefaultManipulator:
+            return {Jq, Jv};
+        default:
+            throw std::runtime_error("The chosen manipulator model type is not supported!");
+    }
 }
 
 // explicit template instantiation

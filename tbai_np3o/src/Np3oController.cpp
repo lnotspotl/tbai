@@ -12,8 +12,8 @@
 #include <tbai_core/Rotations.hpp>
 #include <tbai_core/Utils.hpp>
 #include <tbai_core/config/Config.hpp>
-#include <tbai_torch/EigenTorch.hpp>
 #include <tbai_np3o/Np3oController.hpp>
+#include <tbai_torch/EigenTorch.hpp>
 
 namespace tbai {
 
@@ -187,8 +187,8 @@ std::vector<tbai::MotorCommand> Np3oController::getMotorCommands(scalar_t curren
     auto t4 = std::chrono::high_resolution_clock::now();
 
     tbai::vector_t currentAction =
-        tbai::torch_utils::torch2vector(out.reshape({12}) * torch::tensor({0.125, 0.25, 0.25, 0.125, 0.25, 0.25, 0.125, 0.25,
-                                                                    0.25, 0.125, 0.25, 0.25}));
+        tbai::torch_utils::torch2vector(out.reshape({12}) * torch::tensor({0.125, 0.25, 0.25, 0.125, 0.25, 0.25, 0.125,
+                                                                           0.25, 0.25, 0.125, 0.25, 0.25}));
     tbai::vector_t filteredAction;
 
     if (useActionFilter_) {

@@ -7,10 +7,10 @@
 #include <ocs2_pinocchio_interface/urdf.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_models/AnymalModels.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_models/Go2InverseKinematics.h>
-#include <tbai_mpc/quadruped_mpc/quadruped_models/SpotInverseKinematics.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_models/QuadrupedCom.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_models/QuadrupedInverseKinematics.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_models/QuadrupedKinematics.h>
+#include <tbai_mpc/quadruped_mpc/quadruped_models/SpotInverseKinematics.h>
 
 namespace anymal {
 

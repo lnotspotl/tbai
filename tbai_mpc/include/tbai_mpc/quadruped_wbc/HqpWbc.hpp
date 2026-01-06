@@ -8,8 +8,8 @@
 #include <tbai_mpc/quadruped_mpc/core/SwitchedModel.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_models/QuadrupedCom.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_models/QuadrupedKinematics.h>
-#include <tbai_mpc/wbc/HqpSolver.hpp>
 #include <tbai_mpc/quadruped_wbc/WbcBase.hpp>
+#include <tbai_mpc/wbc/HqpSolver.hpp>
 
 namespace tbai {
 namespace mpc {

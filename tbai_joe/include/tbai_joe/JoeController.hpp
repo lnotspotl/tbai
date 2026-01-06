@@ -28,13 +28,13 @@
 #include <tbai_core/Utils.hpp>
 #include <tbai_core/control/Controllers.hpp>
 #include <tbai_core/control/Subscribers.hpp>
-#include <tbai_torch/EigenTorch.hpp>
 #include <tbai_mpc/quadruped_mpc/QuadrupedMpc.h>
 #include <tbai_mpc/quadruped_mpc/core/MotionPhaseDefinition.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_commands/ReferenceExtrapolation.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_interfaces/Interfaces.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_models/FrameDeclaration.h>
 #include <tbai_reference/ReferenceVelocityGenerator.hpp>
+#include <tbai_torch/EigenTorch.hpp>
 #include <torch/script.h>
 
 // This is a bit hacky :/
@@ -64,10 +64,9 @@ class TerrainInterface {
     virtual scalar_t atPosition(scalar_t x, scalar_t y) const = 0;
     virtual bool isInitialized() const = 0;
     virtual void waitTillInitialized() = 0;
-    virtual TargetTrajectories generateTargetTrajectories(scalar_t currentTime, const BaseReferenceHorizon &horizon,
-                                                          const BaseReferenceState &state,
-                                                          const BaseReferenceCommand &command,
-                                                          const switched_model::QuadrupedInterface &quadrupedInterface) = 0;
+    virtual TargetTrajectories generateTargetTrajectories(
+        scalar_t currentTime, const BaseReferenceHorizon &horizon, const BaseReferenceState &state,
+        const BaseReferenceCommand &command, const switched_model::QuadrupedInterface &quadrupedInterface) = 0;
 };
 
 /**
@@ -170,8 +169,7 @@ class JoeController : public tbai::Controller {
         return getRotationMatrixWorldBaseYaw(state).transpose();
     }
     inline quaternion_t getQuaternionFromEulerAnglesZyx(const vector3_t &eulerAnglesZyx) const {
-        return angleaxis_t(eulerAnglesZyx(0), vector3_t::UnitZ()) *
-               angleaxis_t(eulerAnglesZyx(1), vector3_t::UnitY()) *
+        return angleaxis_t(eulerAnglesZyx(0), vector3_t::UnitZ()) * angleaxis_t(eulerAnglesZyx(1), vector3_t::UnitY()) *
                angleaxis_t(eulerAnglesZyx(2), vector3_t::UnitX());
     }
 

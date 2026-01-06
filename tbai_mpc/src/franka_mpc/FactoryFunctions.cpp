@@ -29,78 +29,76 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "tbai_mpc/franka_mpc/FactoryFunctions.h"
 
+#include <boost/property_tree/info_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <ocs2_core/misc/LoadData.h>
+#include <ocs2_pinocchio_interface/urdf.h>
 #include <pinocchio/fwd.hpp>
 #include <pinocchio/multibody/joint/joint-composite.hpp>
 #include <pinocchio/multibody/model.hpp>
 
-#include <boost/property_tree/info_parser.hpp>
-#include <boost/property_tree/ptree.hpp>
-
-#include <ocs2_core/misc/LoadData.h>
-#include <ocs2_pinocchio_interface/urdf.h>
-
 namespace ocs2 {
 namespace mobile_manipulator {
 
-PinocchioInterface createPinocchioInterface(const std::string& robotUrdfPath, const ManipulatorModelType& type) {
-  switch (type) {
-    case ManipulatorModelType::DefaultManipulator:
-      return getPinocchioInterfaceFromUrdfFile(robotUrdfPath);
-    default:
-      throw std::invalid_argument("Invalid manipulator model type provided.");
-  }
-}
-
-PinocchioInterface createPinocchioInterface(const std::string& robotUrdfPath, const ManipulatorModelType& type,
-                                            const std::vector<std::string>& jointNames) {
-  using joint_pair_t = std::pair<const std::string, std::shared_ptr<::urdf::Joint>>;
-
-  const auto urdfTree = ::urdf::parseURDFFile(robotUrdfPath);
-  ::urdf::ModelInterfaceSharedPtr newModel = std::make_shared<::urdf::ModelInterface>(*urdfTree);
-  for (joint_pair_t& jointPair : newModel->joints_) {
-    if (std::find(jointNames.begin(), jointNames.end(), jointPair.first) != jointNames.end()) {
-      jointPair.second->type = urdf::Joint::FIXED;
+PinocchioInterface createPinocchioInterface(const std::string &robotUrdfPath, const ManipulatorModelType &type) {
+    switch (type) {
+        case ManipulatorModelType::DefaultManipulator:
+            return getPinocchioInterfaceFromUrdfFile(robotUrdfPath);
+        default:
+            throw std::invalid_argument("Invalid manipulator model type provided.");
     }
-  }
-
-  switch (type) {
-    case ManipulatorModelType::DefaultManipulator:
-      return getPinocchioInterfaceFromUrdfModel(newModel);
-    default:
-      throw std::invalid_argument("Invalid manipulator model type provided.");
-  }
 }
 
-ManipulatorModelInfo createManipulatorModelInfo(const PinocchioInterface& interface, const ManipulatorModelType& type,
-                                                const std::string& baseFrame, const std::string& eeFrame) {
-  const auto& model = interface.getModel();
+PinocchioInterface createPinocchioInterface(const std::string &robotUrdfPath, const ManipulatorModelType &type,
+                                            const std::vector<std::string> &jointNames) {
+    using joint_pair_t = std::pair<const std::string, std::shared_ptr<::urdf::Joint>>;
 
-  ManipulatorModelInfo info;
-  info.manipulatorModelType = type;
-  info.stateDim = model.nq;
+    const auto urdfTree = ::urdf::parseURDFFile(robotUrdfPath);
+    ::urdf::ModelInterfaceSharedPtr newModel = std::make_shared<::urdf::ModelInterface>(*urdfTree);
+    for (joint_pair_t &jointPair : newModel->joints_) {
+        if (std::find(jointNames.begin(), jointNames.end(), jointPair.first) != jointNames.end()) {
+            jointPair.second->type = urdf::Joint::FIXED;
+        }
+    }
 
-  switch (type) {
-    case ManipulatorModelType::DefaultManipulator:
-      info.inputDim = info.stateDim;
-      info.armDim = info.inputDim;
-      break;
-    default:
-      throw std::invalid_argument("Invalid manipulator model type provided.");
-  }
-
-  info.eeFrame = eeFrame;
-  info.baseFrame = baseFrame;
-  const auto& jointNames = model.names;
-  info.dofNames = std::vector<std::string>(jointNames.end() - info.armDim, jointNames.end());
-
-  return info;
+    switch (type) {
+        case ManipulatorModelType::DefaultManipulator:
+            return getPinocchioInterfaceFromUrdfModel(newModel);
+        default:
+            throw std::invalid_argument("Invalid manipulator model type provided.");
+    }
 }
 
-ManipulatorModelType loadManipulatorType(const std::string& configFilePath, const std::string& fieldName) {
-  boost::property_tree::ptree pt;
-  boost::property_tree::read_info(configFilePath, pt);
-  const size_t type = pt.template get<size_t>(fieldName);
-  return static_cast<ManipulatorModelType>(type);
+ManipulatorModelInfo createManipulatorModelInfo(const PinocchioInterface &interface, const ManipulatorModelType &type,
+                                                const std::string &baseFrame, const std::string &eeFrame) {
+    const auto &model = interface.getModel();
+
+    ManipulatorModelInfo info;
+    info.manipulatorModelType = type;
+    info.stateDim = model.nq;
+
+    switch (type) {
+        case ManipulatorModelType::DefaultManipulator:
+            info.inputDim = info.stateDim;
+            info.armDim = info.inputDim;
+            break;
+        default:
+            throw std::invalid_argument("Invalid manipulator model type provided.");
+    }
+
+    info.eeFrame = eeFrame;
+    info.baseFrame = baseFrame;
+    const auto &jointNames = model.names;
+    info.dofNames = std::vector<std::string>(jointNames.end() - info.armDim, jointNames.end());
+
+    return info;
+}
+
+ManipulatorModelType loadManipulatorType(const std::string &configFilePath, const std::string &fieldName) {
+    boost::property_tree::ptree pt;
+    boost::property_tree::read_info(configFilePath, pt);
+    const size_t type = pt.template get<size_t>(fieldName);
+    return static_cast<ManipulatorModelType>(type);
 }
 
 }  // namespace mobile_manipulator

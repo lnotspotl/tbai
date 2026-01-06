@@ -28,7 +28,6 @@
 #include <tbai_core/Utils.hpp>
 #include <tbai_core/control/Controllers.hpp>
 #include <tbai_core/control/Subscribers.hpp>
-#include <tbai_torch/EigenTorch.hpp>
 #include <tbai_mpc/quadruped_mpc/QuadrupedMpc.h>
 #include <tbai_mpc/quadruped_mpc/core/MotionPhaseDefinition.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_commands/ReferenceExtrapolation.h>
@@ -36,6 +35,7 @@
 #include <tbai_mpc/quadruped_mpc/quadruped_models/FrameDeclaration.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_reference/ReferenceTrajectoryGenerator.hpp>
 #include <tbai_reference/ReferenceVelocityGenerator.hpp>
+#include <tbai_torch/EigenTorch.hpp>
 #include <torch/script.h>
 
 // This is a bit hacky :/
@@ -171,8 +171,7 @@ class DtcController : public tbai::Controller {
         return getRotationMatrixWorldBaseYaw(state).transpose();
     }
     inline quaternion_t getQuaternionFromEulerAnglesZyx(const vector3_t &eulerAnglesZyx) const {
-        return angleaxis_t(eulerAnglesZyx(0), vector3_t::UnitZ()) *
-               angleaxis_t(eulerAnglesZyx(1), vector3_t::UnitY()) *
+        return angleaxis_t(eulerAnglesZyx(0), vector3_t::UnitZ()) * angleaxis_t(eulerAnglesZyx(1), vector3_t::UnitY()) *
                angleaxis_t(eulerAnglesZyx(2), vector3_t::UnitX());
     }
 

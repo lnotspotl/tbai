@@ -62,11 +62,11 @@ std::unique_ptr<switched_model::QuadrupedInterface> getGo2Interface(
 }
 
 std::unique_ptr<switched_model::QuadrupedInterface> getSpotInterface(const std::string &urdf,
-                                                                    const std::string &taskFolder) {
+                                                                     const std::string &taskFolder) {
     std::cerr << "Loading task file from: " << taskFolder << std::endl;
 
     return getSpotInterface(urdf, switched_model::loadQuadrupedSettings(taskFolder + "/task.info"),
-                           frameDeclarationFromFile(taskFolder + "/frame_declaration.info"));
+                            frameDeclarationFromFile(taskFolder + "/frame_declaration.info"));
 }
 
 std::unique_ptr<switched_model::QuadrupedInterface> getSpotInterface(

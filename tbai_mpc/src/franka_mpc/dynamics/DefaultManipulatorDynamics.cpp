@@ -32,14 +32,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace ocs2 {
 namespace mobile_manipulator {
 
-DefaultManipulatorDynamics::DefaultManipulatorDynamics(const ManipulatorModelInfo& info, const std::string& modelName,
-                                                       const std::string& modelFolder, bool recompileLibraries, bool verbose) {
-  this->initialize(info.stateDim, info.inputDim, modelName, modelFolder, recompileLibraries, verbose);
+DefaultManipulatorDynamics::DefaultManipulatorDynamics(const ManipulatorModelInfo &info, const std::string &modelName,
+                                                       const std::string &modelFolder, bool recompileLibraries,
+                                                       bool verbose) {
+    this->initialize(info.stateDim, info.inputDim, modelName, modelFolder, recompileLibraries, verbose);
 }
 
-ad_vector_t DefaultManipulatorDynamics::systemFlowMap(ad_scalar_t time, const ad_vector_t& state, const ad_vector_t& input,
-                                                      const ad_vector_t&) const {
-  return input;
+ad_vector_t DefaultManipulatorDynamics::systemFlowMap(ad_scalar_t time, const ad_vector_t &state,
+                                                      const ad_vector_t &input, const ad_vector_t &) const {
+    return input;
 }
 
 }  // namespace mobile_manipulator

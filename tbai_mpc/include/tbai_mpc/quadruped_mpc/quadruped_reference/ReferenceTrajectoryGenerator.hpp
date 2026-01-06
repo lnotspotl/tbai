@@ -8,8 +8,8 @@
 #include <tbai_mpc/quadruped_mpc/core/SwitchedModel.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_commands/ReferenceExtrapolation.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_models/QuadrupedKinematics.h>
-#include <tbai_mpc/quadruped_mpc/terrain/TerrainPlane.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_reference/LocalTerrainEstimator.hpp>
+#include <tbai_mpc/quadruped_mpc/terrain/TerrainPlane.h>
 #include <tbai_reference/ReferenceVelocityGenerator.hpp>
 
 namespace tbai {

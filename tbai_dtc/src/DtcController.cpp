@@ -106,8 +106,9 @@ void DtcController::initialize(const std::string &urdfString, const std::string 
 
     // Initialize quadruped interface
     TBAI_LOG_INFO(logger_, "Initializing quadruped interface");
-    quadrupedInterface_ = anymal::getAnymalInterface(urdfString, switched_model::loadQuadrupedSettings(taskSettingsFile),
-                                                     anymal::frameDeclarationFromFile(frameDeclarationFile));
+    quadrupedInterface_ =
+        anymal::getAnymalInterface(urdfString, switched_model::loadQuadrupedSettings(taskSettingsFile),
+                                   anymal::frameDeclarationFromFile(frameDeclarationFile));
     auto &quadrupedInterface = *quadrupedInterface_;
     comModel_.reset(quadrupedInterface.getComModel().clone());
     kinematicsModel_.reset(quadrupedInterface.getKinematicModel().clone());
