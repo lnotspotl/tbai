@@ -1,4 +1,4 @@
-#include "tbai_mpc/wbc/WbcBase.hpp"
+#include "tbai_mpc/quadruped_wbc/WbcBase.hpp"
 
 #include <ocs2_core/misc/LoadData.h>
 #include <pinocchio/fwd.hpp>

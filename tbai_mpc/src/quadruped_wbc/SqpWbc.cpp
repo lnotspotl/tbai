@@ -2,7 +2,7 @@
 #include <pinocchio/fwd.hpp>
 // clang-format on
 
-#include "tbai_mpc/wbc/SqpWbc.hpp"
+#include "tbai_mpc/quadruped_wbc/SqpWbc.hpp"
 
 #include <ocs2_core/misc/LoadData.h>
 #include <pinocchio/multibody/data.hpp>

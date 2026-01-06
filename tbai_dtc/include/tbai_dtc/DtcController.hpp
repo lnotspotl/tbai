@@ -34,7 +34,7 @@
 #include <tbai_mpc/quadruped_mpc/quadruped_commands/ReferenceExtrapolation.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_interfaces/Interfaces.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_models/FrameDeclaration.h>
-#include <tbai_mpc/reference/ReferenceTrajectoryGenerator.hpp>
+#include <tbai_mpc/quadruped_mpc/quadruped_reference/ReferenceTrajectoryGenerator.hpp>
 #include <tbai_reference/ReferenceVelocityGenerator.hpp>
 #include <torch/script.h>
 

@@ -5,15 +5,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(tbai_mpc)
 
-add_library(tbai_mpc
-    # wbc
-    src/wbc/Factory.cpp
-    src/wbc/HqpWbc.cpp
+add_library(tbai_quadruped_mpc
+    # wbc general
     src/wbc/HqpSolver.cpp
-    src/wbc/SqpWbc.cpp
     src/wbc/SqpSolver.cpp
-    src/wbc/WbcBase.cpp
     src/wbc/Task.cpp
+
+    # wbc quadruped specific
+    src/quadruped_wbc/Factory.cpp
+    src/quadruped_wbc/HqpWbc.cpp
+    src/quadruped_wbc/SqpWbc.cpp
+    src/quadruped_wbc/WbcBase.cpp
 
     # mpc
     src/quadruped_mpc/QuadrupedInterface.cpp
@@ -81,24 +83,24 @@ add_library(tbai_mpc
     src/quadruped_mpc/terrain/TerrainPlane.cpp
 
     # reference trajectory generator
-    src/reference/LocalTerrainEstimator.cpp
-    src/reference/ReferenceTrajectoryGenerator.cpp
+    src/quadruped_mpc/quadruped_reference/LocalTerrainEstimator.cpp
+    src/quadruped_mpc/quadruped_reference/ReferenceTrajectoryGenerator.cpp
 
     # quadruped commands
     src/quadruped_mpc/quadruped_commands/ReferenceExtrapolation.cpp
     src/quadruped_mpc/quadruped_commands/TerrainAdaptation.cpp
 
     # controller
-    src/MpcController.cpp
+    src/quadruped_mpc/MpcController.cpp
 )
 
-target_include_directories(tbai_mpc
+target_include_directories(tbai_quadruped_mpc
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(tbai_mpc
+target_link_libraries(tbai_quadruped_mpc
     PUBLIC
         tbai_core
         tbai_reference
@@ -113,8 +115,8 @@ target_link_libraries(tbai_mpc
 ## Installation rules
 include(GNUInstallDirs)
 
-install(TARGETS tbai_mpc
-    EXPORT tbai_mpc-targets
+install(TARGETS tbai_quadruped_mpc
+    EXPORT tbai_quadruped_mpc-targets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -125,8 +127,8 @@ install(DIRECTORY include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-install(EXPORT tbai_mpc-targets
+install(EXPORT tbai_quadruped_mpc-targets
     NAMESPACE tbai::
-    FILE tbai-wbc-targets.cmake
+    FILE tbai-quadruped-mpc-targets.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/tbai
 )

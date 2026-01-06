@@ -1,4 +1,4 @@
-#include "tbai_mpc/wbc/Factory.hpp"
+#include "tbai_mpc/quadruped_wbc/Factory.hpp"
 
 #include <tbai_core/config/Config.hpp>
 

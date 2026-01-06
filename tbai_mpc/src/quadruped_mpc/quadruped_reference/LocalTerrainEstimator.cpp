@@ -1,4 +1,4 @@
-#include "tbai_mpc/reference/LocalTerrainEstimator.hpp"
+#include "tbai_mpc/quadruped_mpc/quadruped_reference/LocalTerrainEstimator.hpp"
 
 #include <tbai_mpc/quadruped_mpc/core/MotionPhaseDefinition.h>
 #include <tbai_mpc/quadruped_mpc/core/SwitchedModel.h>

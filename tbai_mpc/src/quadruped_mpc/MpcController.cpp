@@ -2,7 +2,7 @@
 #include <pinocchio/fwd.hpp>
 // clang-format on
 
-#include "tbai_mpc/MpcController.hpp"
+#include "tbai_mpc/quadruped_mpc/MpcController.hpp"
 
 #include <ocs2_ddp/DDP_Settings.h>
 #include <ocs2_mpc/MPC_BASE.h>
@@ -14,7 +14,7 @@
 #include <tbai_mpc/quadruped_mpc/QuadrupedMpc.h>
 #include <tbai_mpc/quadruped_mpc/core/MotionPhaseDefinition.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_interfaces/Interfaces.h>
-#include <tbai_mpc/wbc/Factory.hpp>
+#include <tbai_mpc/quadruped_wbc/Factory.hpp>
 
 namespace tbai {
 namespace mpc {

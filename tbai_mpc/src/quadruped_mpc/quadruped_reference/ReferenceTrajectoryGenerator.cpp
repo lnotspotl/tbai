@@ -1,4 +1,4 @@
-#include "tbai_mpc/reference/ReferenceTrajectoryGenerator.hpp"
+#include "tbai_mpc/quadruped_mpc/quadruped_reference/ReferenceTrajectoryGenerator.hpp"
 
 #include <ocs2_core/misc/LoadData.h>
 #include <tbai_mpc/quadruped_mpc/core/Rotations.h>

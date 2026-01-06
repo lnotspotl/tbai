@@ -14,8 +14,8 @@
 #include <tbai_core/control/Controllers.hpp>
 #include <tbai_core/control/Subscribers.hpp>
 #include <tbai_mpc/quadruped_mpc/QuadrupedInterface.h>
-#include <tbai_mpc/reference/ReferenceTrajectoryGenerator.hpp>
-#include <tbai_mpc/wbc/WbcBase.hpp>
+#include <tbai_mpc/quadruped_mpc/quadruped_reference/ReferenceTrajectoryGenerator.hpp>
+#include <tbai_mpc/quadruped_wbc/WbcBase.hpp>
 #include <tbai_reference/ReferenceVelocityGenerator.hpp>
 
 namespace tbai {

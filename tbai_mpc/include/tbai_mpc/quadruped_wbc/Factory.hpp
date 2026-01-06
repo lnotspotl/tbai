@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "tbai_mpc/wbc/HqpWbc.hpp"
-#include "tbai_mpc/wbc/SqpWbc.hpp"
+#include "tbai_mpc/quadruped_wbc/HqpWbc.hpp"
+#include "tbai_mpc/quadruped_wbc/SqpWbc.hpp"
 
 namespace tbai {
 namespace mpc {
