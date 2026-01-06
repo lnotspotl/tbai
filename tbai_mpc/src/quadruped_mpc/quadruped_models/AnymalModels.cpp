@@ -7,6 +7,7 @@
 #include <ocs2_pinocchio_interface/urdf.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_models/AnymalModels.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_models/Go2InverseKinematics.h>
+#include <tbai_mpc/quadruped_mpc/quadruped_models/SpotInverseKinematics.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_models/QuadrupedCom.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_models/QuadrupedInverseKinematics.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_models/QuadrupedKinematics.h>
@@ -23,6 +24,12 @@ std::unique_ptr<switched_model::InverseKinematicsModelBase> getGo2InverseKinemat
     const FrameDeclaration &frameDeclaration, const std::string &urdf) {
     return std::unique_ptr<switched_model::InverseKinematicsModelBase>(
         new Go2InverseKinematics(frameDeclaration, ocs2::getPinocchioInterfaceFromUrdfString(urdf)));
+}
+
+std::unique_ptr<switched_model::InverseKinematicsModelBase> getSpotInverseKinematics(
+    const FrameDeclaration &frameDeclaration, const std::string &urdf) {
+    return std::unique_ptr<switched_model::InverseKinematicsModelBase>(
+        new SpotInverseKinematics(frameDeclaration, ocs2::getPinocchioInterfaceFromUrdfString(urdf)));
 }
 
 std::unique_ptr<switched_model::KinematicsModelBase<ocs2::scalar_t>> getAnymalKinematics(

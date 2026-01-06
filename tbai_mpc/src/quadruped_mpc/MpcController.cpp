@@ -52,12 +52,16 @@ void MpcController::initialize(const std::string &urdfString, const std::string 
         quadrupedInterfacePtr_ =
             anymal::getAnymalInterface(urdfString, switched_model::loadQuadrupedSettings(taskSettingsFile),
                                        anymal::frameDeclarationFromFile(frameDeclarationFile));
-    } else if (robotName_ == "go2" || robotName_ == "spot") {
+    } else if (robotName_ == "go2") {
         quadrupedInterfacePtr_ =
             anymal::getGo2Interface(urdfString, switched_model::loadQuadrupedSettings(taskSettingsFile),
                                     anymal::frameDeclarationFromFile(frameDeclarationFile));
+    } else if (robotName_ == "spot" || robotName_ == "spot_arm") {
+        quadrupedInterfacePtr_ =
+            anymal::getSpotInterface(urdfString, switched_model::loadQuadrupedSettings(taskSettingsFile),
+                                    anymal::frameDeclarationFromFile(frameDeclarationFile));
     } else {
-        TBAI_THROW("Robot {} not implemented. Available robots: anymal_d, anymal_b, anymal_c, go2, spot", robotName_);
+        TBAI_THROW("Robot {} not implemented. Available robots: anymal_d, anymal_b, anymal_c, go2, spot, spot_arm", robotName_);
     }
 
     // Create WBC

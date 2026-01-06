@@ -18,6 +18,9 @@ std::unique_ptr<switched_model::InverseKinematicsModelBase> getAnymalInverseKine
 std::unique_ptr<switched_model::InverseKinematicsModelBase> getGo2InverseKinematics(const FrameDeclaration& frameDeclaration,
                                                                                        const std::string& urdf);
 
+std::unique_ptr<switched_model::InverseKinematicsModelBase> getSpotInverseKinematics(const FrameDeclaration& frameDeclaration,
+                                                                                       const std::string& urdf);
+
 std::unique_ptr<switched_model::KinematicsModelBase<ocs2::scalar_t>> getAnymalKinematics(const FrameDeclaration& frameDeclaration,
                                                                                          const std::string& urdf);
 

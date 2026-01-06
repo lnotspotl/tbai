@@ -68,6 +68,7 @@ add_library(tbai_quadruped_mpc
     src/quadruped_mpc/quadruped_models/AnymalModels.cpp
     src/quadruped_mpc/quadruped_models/FrameDeclaration.cpp
     src/quadruped_mpc/quadruped_models/Go2InverseKinematics.cpp
+    src/quadruped_mpc/quadruped_models/SpotInverseKinematics.cpp
     src/quadruped_mpc/quadruped_models/QuadrupedCom.cpp
     src/quadruped_mpc/quadruped_models/QuadrupedInverseKinematics.cpp
     src/quadruped_mpc/quadruped_models/QuadrupedKinematics.cpp
