@@ -17,8 +17,11 @@ class StaticController : public tbai::Controller {
 
     bool isSupported(const std::string &controllerType) override;
 
-    // Default implementation for tbai's quadruped robots
-    virtual vector_t jointAnglesFromState(const State &state) { return state.x.segment<12>(3 + 3 + 3 + 3); }
+    // Default implementation - extracts joint angles based on number of joints configured
+    virtual vector_t jointAnglesFromState(const State &state) {
+        const size_t numJoints = jointNames_.size();
+        return state.x.segment(3 + 3 + 3 + 3, numJoints);
+    }
 
     void stopController() override {}
 
