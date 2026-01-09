@@ -307,3 +307,47 @@ jointVelocityLimits
     }
   }
 }
+
+; Whole Body Controller settings (HQP-based)
+hqpWbc
+{
+  ; End-effector position tracking PD gains
+  eePositionKp        100.0
+  eePositionKd        20.0
+
+  ; End-effector orientation tracking PD gains
+  eeOrientationKp     50.0
+  eeOrientationKd     10.0
+
+  ; Joint torque limit [Nm] (default for Franka)
+  torqueLimit         87.0
+
+  ; Joint-level PD gains for motor commands
+  jointKp             1.0
+  jointKd             0.0
+}
+
+; Whole Body Controller settings (SQP-based)
+sqpWbc
+{
+  ; End-effector position tracking PD gains
+  eePositionKp        100.0
+  eePositionKd        20.0
+
+  ; End-effector orientation tracking PD gains
+  eeOrientationKp     50.0
+  eeOrientationKd     10.0
+
+  ; Joint torque limit [Nm] (default for Franka)
+  torqueLimit         87.0
+
+  ; Task weights for SQP cost function
+  weightEEPosition        10.0
+  weightEEOrientation     5.0
+  weightJointAcceleration 1.0
+  weightJointCentering 1.0
+
+  ; Joint-level PD gains for motor commands
+  jointKp             0.0
+  jointKd             0.0
+}

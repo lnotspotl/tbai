@@ -115,12 +115,24 @@ target_link_libraries(tbai_quadruped_mpc
 
 ## Franka MPC library
 add_library(tbai_franka_mpc
+    # franka mpc
     src/franka_mpc/FactoryFunctions.cpp
-    src/franka_mpc/MobileManipulatorPinocchioMapping.cpp
-    src/franka_mpc/MobileManipulatorPreComputation.cpp
-    src/franka_mpc/MobileManipulatorInterface.cpp
-    src/franka_mpc/dynamics/DefaultManipulatorDynamics.cpp
+    src/franka_mpc/FrankaPinocchioMapping.cpp
+    src/franka_mpc/FrankaPreComputation.cpp
+    src/franka_mpc/FrankaInterface.cpp
+    src/franka_mpc/dynamics/FrankaDynamics.cpp
     src/franka_mpc/constraint/EndEffectorConstraint.cpp
+
+    # franka wbc
+    src/franka_wbc/Factory.cpp
+    src/franka_wbc/HqpWbc.cpp
+    src/franka_wbc/SqpWbc.cpp
+    src/franka_wbc/WbcBase.cpp
+
+    # wbc solvers (shared with quadruped)
+    src/wbc/HqpSolver.cpp
+    src/wbc/SqpSolver.cpp
+    src/wbc/Task.cpp
 )
 add_library(tbai::franka_mpc ALIAS tbai_franka_mpc)
 
@@ -132,11 +144,13 @@ target_include_directories(tbai_franka_mpc
 
 target_link_libraries(tbai_franka_mpc
     PUBLIC
+        tbai_core
         ocs2_core
         ocs2_ddp
         ocs2_mpc
         ocs2_pinocchio_interface
         ocs2_robotic_tools
+        ocs2::qpoases
 )
 
 ## Installation rules

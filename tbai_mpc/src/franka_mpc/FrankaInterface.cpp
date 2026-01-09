@@ -1,41 +1,20 @@
-/******************************************************************************
-Copyright (c) 2020, Farbod Farshidian. All rights reserved.
+// Boost MPL compatibility fix
+#ifndef BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
+#define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
+#endif
+#ifndef BOOST_MPL_LIMIT_VECTOR_SIZE
+#define BOOST_MPL_LIMIT_VECTOR_SIZE 50
+#endif
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
- * Redistributions of source code must retain the above copyright notice, this
-  list of conditions and the following disclaimer.
-
- * Redistributions in binary form must reproduce the above copyright notice,
-  this list of conditions and the following disclaimer in the documentation
-  and/or other materials provided with the distribution.
-
- * Neither the name of the copyright holder nor the names of its
-  contributors may be used to endorse or promote products derived from
-  this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-******************************************************************************/
-
-#include "tbai_mpc/franka_mpc/MobileManipulatorInterface.h"
+#include "tbai_mpc/franka_mpc/FrankaInterface.h"
 
 #include <string>
 
-#include "tbai_mpc/franka_mpc/ManipulatorModelInfo.h"
-#include "tbai_mpc/franka_mpc/MobileManipulatorPreComputation.h"
+#include "tbai_mpc/franka_mpc/FrankaModelInfo.h"
+#include "tbai_mpc/franka_mpc/FrankaPreComputation.h"
 #include "tbai_mpc/franka_mpc/constraint/EndEffectorConstraint.h"
 #include "tbai_mpc/franka_mpc/cost/QuadraticInputCost.h"
-#include "tbai_mpc/franka_mpc/dynamics/DefaultManipulatorDynamics.h"
+#include "tbai_mpc/franka_mpc/dynamics/FrankaDynamics.h"
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <ocs2_core/initialization/DefaultInitializer.h>
@@ -52,33 +31,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <pinocchio/multibody/model.hpp>
 
 namespace ocs2 {
-namespace mobile_manipulator {
+namespace franka {
 
-MobileManipulatorInterface::MobileManipulatorInterface(const std::string &taskFile, const std::string &libraryFolder,
+FrankaInterface::FrankaInterface(const std::string &taskFile, const std::string &libraryFolder,
                                                        const std::string &urdfFile) {
     boost::filesystem::path taskFilePath(taskFile);
     if (boost::filesystem::exists(taskFilePath)) {
-        std::cerr << "[MobileManipulatorInterface] Loading task file: " << taskFilePath << std::endl;
+        std::cerr << "[FrankaInterface] Loading task file: " << taskFilePath << std::endl;
     } else {
-        throw std::invalid_argument("[MobileManipulatorInterface] Task file not found: " + taskFilePath.string());
+        throw std::invalid_argument("[FrankaInterface] Task file not found: " + taskFilePath.string());
     }
 
     boost::filesystem::path urdfFilePath(urdfFile);
     if (boost::filesystem::exists(urdfFilePath)) {
-        std::cerr << "[MobileManipulatorInterface] Loading Pinocchio model from: " << urdfFilePath << std::endl;
+        std::cerr << "[FrankaInterface] Loading Pinocchio model from: " << urdfFilePath << std::endl;
     } else {
-        throw std::invalid_argument("[MobileManipulatorInterface] URDF file not found: " + urdfFilePath.string());
+        throw std::invalid_argument("[FrankaInterface] URDF file not found: " + urdfFilePath.string());
     }
 
     boost::filesystem::path libraryFolderPath(libraryFolder);
     boost::filesystem::create_directories(libraryFolderPath);
-    std::cerr << "[MobileManipulatorInterface] Generated library path: " << libraryFolderPath << std::endl;
+    std::cerr << "[FrankaInterface] Generated library path: " << libraryFolderPath << std::endl;
 
     boost::property_tree::ptree pt;
     boost::property_tree::read_info(taskFile, pt);
 
-    ManipulatorModelType modelType =
-        mobile_manipulator::loadManipulatorType(taskFile, "model_information.manipulatorModelType");
     std::vector<std::string> removeJointNames;
     loadData::loadStdVector<std::string>(taskFile, "model_information.removeJoints", removeJointNames, false);
     std::string baseFrame, eeFrame;
@@ -87,7 +64,6 @@ MobileManipulatorInterface::MobileManipulatorInterface(const std::string &taskFi
 
     std::cerr << "\n #### Model Information:";
     std::cerr << "\n #### =============================================================================\n";
-    std::cerr << "\n #### model_information.manipulatorModelType: " << static_cast<int>(modelType);
     std::cerr << "\n #### model_information.removeJoints: ";
     for (const auto &name : removeJointNames) {
         std::cerr << "\"" << name << "\" ";
@@ -97,11 +73,11 @@ MobileManipulatorInterface::MobileManipulatorInterface(const std::string &taskFi
     std::cerr << " #### =============================================================================" << std::endl;
 
     pinocchioInterfacePtr_.reset(
-        new PinocchioInterface(createPinocchioInterface(urdfFile, modelType, removeJointNames)));
+        new PinocchioInterface(createPinocchioInterface(urdfFile, removeJointNames)));
     std::cerr << *pinocchioInterfacePtr_;
 
     manipulatorModelInfo_ =
-        mobile_manipulator::createManipulatorModelInfo(*pinocchioInterfacePtr_, modelType, baseFrame, eeFrame);
+        franka::createFrankaModelInfo(*pinocchioInterfacePtr_, baseFrame, eeFrame);
 
     bool usePreComputation = true;
     bool recompileLibraries = true;
@@ -115,11 +91,7 @@ MobileManipulatorInterface::MobileManipulatorInterface(const std::string &taskFi
     const int baseStateDim = manipulatorModelInfo_.stateDim - manipulatorModelInfo_.armDim;
     const int armStateDim = manipulatorModelInfo_.armDim;
 
-    if (baseStateDim > 0) {
-        vector_t initialBaseState = vector_t::Zero(baseStateDim);
-        loadData::loadEigenMatrix(taskFile, "initialState.base." + modelTypeEnumToString(modelType), initialBaseState);
-        initialState_.head(baseStateDim) = initialBaseState;
-    }
+    // Fixed-base manipulator has no base state
 
     vector_t initialArmState = vector_t::Zero(armStateDim);
     loadData::loadEigenMatrix(taskFile, "initialState.arm", initialArmState);
@@ -142,18 +114,12 @@ MobileManipulatorInterface::MobileManipulatorInterface(const std::string &taskFi
         "finalEndEffector", getEndEffectorConstraint(*pinocchioInterfacePtr_, taskFile, "finalEndEffector",
                                                      usePreComputation, libraryFolder, recompileLibraries));
 
-    switch (manipulatorModelInfo_.manipulatorModelType) {
-        case ManipulatorModelType::DefaultManipulator:
-            problem_.dynamicsPtr.reset(new DefaultManipulatorDynamics(manipulatorModelInfo_, "dynamics", libraryFolder,
-                                                                      recompileLibraries, true));
-            break;
-        default:
-            throw std::invalid_argument("Invalid manipulator model type provided.");
-    }
+    problem_.dynamicsPtr.reset(new FrankaDynamics(manipulatorModelInfo_, "dynamics", libraryFolder,
+                                                  recompileLibraries, true));
 
     if (usePreComputation) {
         problem_.preComputationPtr.reset(
-            new MobileManipulatorPreComputation(*pinocchioInterfacePtr_, manipulatorModelInfo_));
+            new FrankaPreComputation(*pinocchioInterfacePtr_, manipulatorModelInfo_));
     }
 
     const auto rolloutSettings = rollout::loadSettings(taskFile, "rollout");
@@ -162,17 +128,12 @@ MobileManipulatorInterface::MobileManipulatorInterface(const std::string &taskFi
     initializerPtr_.reset(new DefaultInitializer(manipulatorModelInfo_.inputDim));
 }
 
-std::unique_ptr<StateInputCost> MobileManipulatorInterface::getQuadraticInputCost(const std::string &taskFile) {
+std::unique_ptr<StateInputCost> FrankaInterface::getQuadraticInputCost(const std::string &taskFile) {
     matrix_t R = matrix_t::Zero(manipulatorModelInfo_.inputDim, manipulatorModelInfo_.inputDim);
     const int baseInputDim = manipulatorModelInfo_.inputDim - manipulatorModelInfo_.armDim;
     const int armStateDim = manipulatorModelInfo_.armDim;
 
-    if (baseInputDim > 0) {
-        matrix_t R_base = matrix_t::Zero(baseInputDim, baseInputDim);
-        loadData::loadEigenMatrix(
-            taskFile, "inputCost.R.base." + modelTypeEnumToString(manipulatorModelInfo_.manipulatorModelType), R_base);
-        R.topLeftCorner(baseInputDim, baseInputDim) = R_base;
-    }
+    // Fixed-base manipulator has no base input
 
     matrix_t R_arm = matrix_t::Zero(armStateDim, armStateDim);
     loadData::loadEigenMatrix(taskFile, "inputCost.R.arm", R_arm);
@@ -186,7 +147,7 @@ std::unique_ptr<StateInputCost> MobileManipulatorInterface::getQuadraticInputCos
     return std::make_unique<QuadraticInputCost>(std::move(R), manipulatorModelInfo_.stateDim);
 }
 
-std::unique_ptr<StateCost> MobileManipulatorInterface::getEndEffectorConstraint(
+std::unique_ptr<StateCost> FrankaInterface::getEndEffectorConstraint(
     const PinocchioInterface &pinocchioInterface, const std::string &taskFile, const std::string &prefix,
     bool usePreComputation, const std::string &libraryFolder, bool recompileLibraries) {
     scalar_t muPosition = 1.0;
@@ -206,12 +167,12 @@ std::unique_ptr<StateCost> MobileManipulatorInterface::getEndEffectorConstraint(
 
     std::unique_ptr<StateConstraint> constraint;
     if (usePreComputation) {
-        MobileManipulatorPinocchioMapping pinocchioMapping(manipulatorModelInfo_);
+        FrankaPinocchioMapping pinocchioMapping(manipulatorModelInfo_);
         PinocchioEndEffectorKinematics eeKinematics(pinocchioInterface, pinocchioMapping,
                                                     {manipulatorModelInfo_.eeFrame});
         constraint.reset(new EndEffectorConstraint(eeKinematics, *referenceManagerPtr_));
     } else {
-        MobileManipulatorPinocchioMappingCppAd pinocchioMappingCppAd(manipulatorModelInfo_);
+        FrankaPinocchioMappingCppAd pinocchioMappingCppAd(manipulatorModelInfo_);
         PinocchioEndEffectorKinematicsCppAd eeKinematics(
             pinocchioInterface, pinocchioMappingCppAd, {manipulatorModelInfo_.eeFrame}, manipulatorModelInfo_.stateDim,
             manipulatorModelInfo_.inputDim, "end_effector_kinematics", libraryFolder, recompileLibraries, false);
@@ -225,7 +186,7 @@ std::unique_ptr<StateCost> MobileManipulatorInterface::getEndEffectorConstraint(
     return std::make_unique<StateSoftConstraint>(std::move(constraint), std::move(penaltyArray));
 }
 
-std::unique_ptr<StateInputCost> MobileManipulatorInterface::getJointLimitSoftConstraint(
+std::unique_ptr<StateInputCost> FrankaInterface::getJointLimitSoftConstraint(
     const PinocchioInterface &pinocchioInterface, const std::string &taskFile) {
     boost::property_tree::ptree pt;
     boost::property_tree::read_info(taskFile, pt);
@@ -273,20 +234,7 @@ std::unique_ptr<StateInputCost> MobileManipulatorInterface::getJointLimitSoftCon
         scalar_t muVelocityLimits = 1e-2;
         scalar_t deltaVelocityLimits = 1e-3;
 
-        if (baseInputDim > 0) {
-            vector_t lowerBoundBase = vector_t::Zero(baseInputDim);
-            vector_t upperBoundBase = vector_t::Zero(baseInputDim);
-            loadData::loadEigenMatrix(taskFile,
-                                      "jointVelocityLimits.lowerBound.base." +
-                                          modelTypeEnumToString(manipulatorModelInfo_.manipulatorModelType),
-                                      lowerBoundBase);
-            loadData::loadEigenMatrix(taskFile,
-                                      "jointVelocityLimits.upperBound.base." +
-                                          modelTypeEnumToString(manipulatorModelInfo_.manipulatorModelType),
-                                      upperBoundBase);
-            lowerBound.head(baseInputDim) = lowerBoundBase;
-            upperBound.head(baseInputDim) = upperBoundBase;
-        }
+        // Fixed-base manipulator has no base velocity limits
 
         vector_t lowerBoundArm = vector_t::Zero(armInputDim);
         vector_t upperBoundArm = vector_t::Zero(armInputDim);
@@ -320,5 +268,5 @@ std::unique_ptr<StateInputCost> MobileManipulatorInterface::getJointLimitSoftCon
     return boxConstraints;
 }
 
-}  // namespace mobile_manipulator
+}  // namespace franka
 }  // namespace ocs2
