@@ -15,11 +15,11 @@ namespace franka {
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 std::vector<tbai::MotorCommand> HqpWbc::getMotorCommands(scalar_t currentTime, const vector_t &currentState,
-                                                          const vector_t &currentInput, const vector_t &desiredState,
-                                                          const vector_t &desiredInput,
-                                                          const vector_t &desiredJointAcceleration,
-                                                          const vector_t &desiredEEPosition,
-                                                          const vector_t &desiredEEOrientation, bool &isStable) {
+                                                         const vector_t &currentInput, const vector_t &desiredState,
+                                                         const vector_t &desiredInput,
+                                                         const vector_t &desiredJointAcceleration,
+                                                         const vector_t &desiredEEPosition,
+                                                         const vector_t &desiredEEOrientation, bool &isStable) {
     // Update measured state and compute kinematics/dynamics
     updateMeasuredState(currentState, currentInput);
 
@@ -28,7 +28,8 @@ std::vector<tbai::MotorCommand> HqpWbc::getMotorCommands(scalar_t currentTime, c
     Task task1 = createTorqueLimitTask();
 
     // Task 2: End-effector position and orientation tracking
-    Task task2 = createEndEffectorPositionTask(desiredEEPosition) + createEndEffectorOrientationTask(desiredEEOrientation);
+    Task task2 =
+        createEndEffectorPositionTask(desiredEEPosition) + createEndEffectorOrientationTask(desiredEEOrientation);
 
     // Task 3: Joint acceleration tracking + joint centering
     Task task3 = createJointAccelerationTask(desiredJointAcceleration) + createJointCenteringTask();

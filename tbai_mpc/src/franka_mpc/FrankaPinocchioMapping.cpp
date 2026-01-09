@@ -4,8 +4,7 @@ namespace ocs2 {
 namespace franka {
 
 template <typename SCALAR>
-FrankaPinocchioMappingTpl<SCALAR>::FrankaPinocchioMappingTpl(FrankaModelInfo info)
-    : modelInfo_(std::move(info)) {}
+FrankaPinocchioMappingTpl<SCALAR>::FrankaPinocchioMappingTpl(FrankaModelInfo info) : modelInfo_(std::move(info)) {}
 
 template <typename SCALAR>
 FrankaPinocchioMappingTpl<SCALAR> *FrankaPinocchioMappingTpl<SCALAR>::clone() const {
@@ -19,13 +18,13 @@ auto FrankaPinocchioMappingTpl<SCALAR>::getPinocchioJointPosition(const vector_t
 
 template <typename SCALAR>
 auto FrankaPinocchioMappingTpl<SCALAR>::getPinocchioJointVelocity(const vector_t &state,
-                                                                             const vector_t &input) const -> vector_t {
+                                                                  const vector_t &input) const -> vector_t {
     return input;
 }
 
 template <typename SCALAR>
-auto FrankaPinocchioMappingTpl<SCALAR>::getOcs2Jacobian(
-    const vector_t &state, const matrix_t &Jq, const matrix_t &Jv) const -> std::pair<matrix_t, matrix_t> {
+auto FrankaPinocchioMappingTpl<SCALAR>::getOcs2Jacobian(const vector_t &state, const matrix_t &Jq,
+                                                        const matrix_t &Jv) const -> std::pair<matrix_t, matrix_t> {
     return {Jq, Jv};
 }
 

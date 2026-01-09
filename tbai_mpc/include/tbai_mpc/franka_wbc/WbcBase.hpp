@@ -19,39 +19,30 @@ namespace franka {
 
 class WbcBase {
    public:
-
     WbcBase(const std::string &configFile, const std::string &urdfString,
             const ocs2::franka::FrankaModelInfo &frankaInfo, const std::string &configPrefix);
 
     virtual ~WbcBase() = default;
 
-   
     virtual std::vector<tbai::MotorCommand> getMotorCommands(scalar_t currentTime, const vector_t &currentState,
-                                                              const vector_t &currentInput, const vector_t &desiredState,
-                                                              const vector_t &desiredInput,
-                                                              const vector_t &desiredJointAcceleration,
-                                                              const vector_t &desiredEEPosition,
-                                                              const vector_t &desiredEEOrientation, bool &isStable) = 0;
+                                                             const vector_t &currentInput, const vector_t &desiredState,
+                                                             const vector_t &desiredInput,
+                                                             const vector_t &desiredJointAcceleration,
+                                                             const vector_t &desiredEEPosition,
+                                                             const vector_t &desiredEEOrientation, bool &isStable) = 0;
 
    protected:
-
     Task createDynamicsTask();
-
 
     Task createEndEffectorPositionTask(const vector_t &desiredEEPosition);
 
-
     Task createEndEffectorOrientationTask(const vector_t &desiredEEOrientation);
-
 
     Task createJointAccelerationTask(const vector_t &desiredJointAcceleration);
 
-
     Task createJointCenteringTask();
 
-
     Task createTorqueLimitTask();
-
 
     void updateMeasuredState(const vector_t &currentState, const vector_t &currentInput);
 

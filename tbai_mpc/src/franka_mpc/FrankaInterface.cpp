@@ -34,7 +34,7 @@ namespace ocs2 {
 namespace franka {
 
 FrankaInterface::FrankaInterface(const std::string &taskFile, const std::string &libraryFolder,
-                                                       const std::string &urdfFile) {
+                                 const std::string &urdfFile) {
     boost::filesystem::path taskFilePath(taskFile);
     if (boost::filesystem::exists(taskFilePath)) {
         std::cerr << "[FrankaInterface] Loading task file: " << taskFilePath << std::endl;
@@ -72,12 +72,10 @@ FrankaInterface::FrankaInterface(const std::string &taskFile, const std::string 
     std::cerr << "\n #### model_information.eeFrame: \"" << eeFrame << "\"" << std::endl;
     std::cerr << " #### =============================================================================" << std::endl;
 
-    pinocchioInterfacePtr_.reset(
-        new PinocchioInterface(createPinocchioInterface(urdfFile, removeJointNames)));
+    pinocchioInterfacePtr_.reset(new PinocchioInterface(createPinocchioInterface(urdfFile, removeJointNames)));
     std::cerr << *pinocchioInterfacePtr_;
 
-    manipulatorModelInfo_ =
-        franka::createFrankaModelInfo(*pinocchioInterfacePtr_, baseFrame, eeFrame);
+    manipulatorModelInfo_ = franka::createFrankaModelInfo(*pinocchioInterfacePtr_, baseFrame, eeFrame);
 
     bool usePreComputation = true;
     bool recompileLibraries = true;
@@ -114,12 +112,11 @@ FrankaInterface::FrankaInterface(const std::string &taskFile, const std::string 
         "finalEndEffector", getEndEffectorConstraint(*pinocchioInterfacePtr_, taskFile, "finalEndEffector",
                                                      usePreComputation, libraryFolder, recompileLibraries));
 
-    problem_.dynamicsPtr.reset(new FrankaDynamics(manipulatorModelInfo_, "dynamics", libraryFolder,
-                                                  recompileLibraries, true));
+    problem_.dynamicsPtr.reset(
+        new FrankaDynamics(manipulatorModelInfo_, "dynamics", libraryFolder, recompileLibraries, true));
 
     if (usePreComputation) {
-        problem_.preComputationPtr.reset(
-            new FrankaPreComputation(*pinocchioInterfacePtr_, manipulatorModelInfo_));
+        problem_.preComputationPtr.reset(new FrankaPreComputation(*pinocchioInterfacePtr_, manipulatorModelInfo_));
     }
 
     const auto rolloutSettings = rollout::loadSettings(taskFile, "rollout");
@@ -147,9 +144,11 @@ std::unique_ptr<StateInputCost> FrankaInterface::getQuadraticInputCost(const std
     return std::make_unique<QuadraticInputCost>(std::move(R), manipulatorModelInfo_.stateDim);
 }
 
-std::unique_ptr<StateCost> FrankaInterface::getEndEffectorConstraint(
-    const PinocchioInterface &pinocchioInterface, const std::string &taskFile, const std::string &prefix,
-    bool usePreComputation, const std::string &libraryFolder, bool recompileLibraries) {
+std::unique_ptr<StateCost> FrankaInterface::getEndEffectorConstraint(const PinocchioInterface &pinocchioInterface,
+                                                                     const std::string &taskFile,
+                                                                     const std::string &prefix, bool usePreComputation,
+                                                                     const std::string &libraryFolder,
+                                                                     bool recompileLibraries) {
     scalar_t muPosition = 1.0;
     scalar_t muOrientation = 1.0;
 

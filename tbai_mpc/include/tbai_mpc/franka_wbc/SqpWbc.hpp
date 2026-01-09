@@ -15,7 +15,6 @@ namespace franka {
 
 class SqpWbc : public WbcBase {
    public:
-
     SqpWbc(const std::string &configFile, const std::string &urdfString,
            const ocs2::franka::FrankaModelInfo &frankaInfo)
         : WbcBase(configFile, urdfString, frankaInfo, "sqpWbc.") {
@@ -23,11 +22,11 @@ class SqpWbc : public WbcBase {
     }
 
     std::vector<tbai::MotorCommand> getMotorCommands(scalar_t currentTime, const vector_t &currentState,
-                                                      const vector_t &currentInput, const vector_t &desiredState,
-                                                      const vector_t &desiredInput,
-                                                      const vector_t &desiredJointAcceleration,
-                                                      const vector_t &desiredEEPosition,
-                                                      const vector_t &desiredEEOrientation, bool &isStable) override;
+                                                     const vector_t &currentInput, const vector_t &desiredState,
+                                                     const vector_t &desiredInput,
+                                                     const vector_t &desiredJointAcceleration,
+                                                     const vector_t &desiredEEPosition,
+                                                     const vector_t &desiredEEOrientation, bool &isStable) override;
 
    private:
     void loadSettings(const std::string &configFile);

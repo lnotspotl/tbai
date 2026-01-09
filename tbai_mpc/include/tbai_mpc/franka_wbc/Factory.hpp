@@ -11,11 +11,10 @@ namespace mpc {
 namespace franka {
 
 std::unique_ptr<WbcBase> getWbcUnique(const std::string &controllerConfigFile, const std::string &urdfString,
-                                       const ocs2::franka::FrankaModelInfo &frankaInfo);
-
+                                      const ocs2::franka::FrankaModelInfo &frankaInfo);
 
 std::shared_ptr<WbcBase> getWbcShared(const std::string &controllerConfigFile, const std::string &urdfString,
-                                       const ocs2::franka::FrankaModelInfo &frankaInfo);
+                                      const ocs2::franka::FrankaModelInfo &frankaInfo);
 
 }  // namespace franka
 }  // namespace mpc

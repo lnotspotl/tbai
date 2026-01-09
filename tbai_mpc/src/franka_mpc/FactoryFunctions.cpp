@@ -38,8 +38,8 @@ PinocchioInterface createPinocchioInterface(const std::string &robotUrdfPath,
     return getPinocchioInterfaceFromUrdfModel(newModel);
 }
 
-FrankaModelInfo createFrankaModelInfo(const PinocchioInterface &interface,
-                                      const std::string &baseFrame, const std::string &eeFrame) {
+FrankaModelInfo createFrankaModelInfo(const PinocchioInterface &interface, const std::string &baseFrame,
+                                      const std::string &eeFrame) {
     const auto &model = interface.getModel();
 
     FrankaModelInfo info;

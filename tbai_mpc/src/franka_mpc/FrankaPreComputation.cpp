@@ -8,8 +8,7 @@
 namespace ocs2 {
 namespace franka {
 
-FrankaPreComputation::FrankaPreComputation(PinocchioInterface pinocchioInterface,
-                                                                 const FrankaModelInfo &info)
+FrankaPreComputation::FrankaPreComputation(PinocchioInterface pinocchioInterface, const FrankaModelInfo &info)
     : pinocchioInterface_(std::move(pinocchioInterface)), pinocchioMapping_(info) {}
 
 FrankaPreComputation *FrankaPreComputation::clone() const {

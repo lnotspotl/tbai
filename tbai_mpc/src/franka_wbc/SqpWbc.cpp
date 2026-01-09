@@ -15,11 +15,11 @@ namespace franka {
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 std::vector<tbai::MotorCommand> SqpWbc::getMotorCommands(scalar_t currentTime, const vector_t &currentState,
-                                                          const vector_t &currentInput, const vector_t &desiredState,
-                                                          const vector_t &desiredInput,
-                                                          const vector_t &desiredJointAcceleration,
-                                                          const vector_t &desiredEEPosition,
-                                                          const vector_t &desiredEEOrientation, bool &isStable) {
+                                                         const vector_t &currentInput, const vector_t &desiredState,
+                                                         const vector_t &desiredInput,
+                                                         const vector_t &desiredJointAcceleration,
+                                                         const vector_t &desiredEEPosition,
+                                                         const vector_t &desiredEEOrientation, bool &isStable) {
     // Update measured state and compute kinematics/dynamics
     updateMeasuredState(currentState, currentInput);
 
@@ -27,11 +27,10 @@ std::vector<tbai::MotorCommand> SqpWbc::getMotorCommands(scalar_t currentTime, c
     Task constraints = createTorqueLimitTask();
 
     // Build weighted cost function
-    Task weightedTasks =
-        createEndEffectorPositionTask(desiredEEPosition) * weightEEPosition_ +
-        createEndEffectorOrientationTask(desiredEEOrientation) * weightEEOrientation_ +
-        createJointAccelerationTask(desiredJointAcceleration) * weightJointAcceleration_ +
-        createJointCenteringTask() * weightJointCentering_;
+    Task weightedTasks = createEndEffectorPositionTask(desiredEEPosition) * weightEEPosition_ +
+                         createEndEffectorOrientationTask(desiredEEOrientation) * weightEEOrientation_ +
+                         createJointAccelerationTask(desiredJointAcceleration) * weightJointAcceleration_ +
+                         createJointCenteringTask() * weightJointCentering_;
 
     // Solve SQP
     vector_t sqpSolution = sqpSolver_.solveSqp(weightedTasks, constraints, isStable);
@@ -80,7 +79,8 @@ void SqpWbc::loadSettings(const std::string &configFile) {
     weightJointCentering_ = 0.1;
     try {
         loadCppDataType<scalar_t>(configFile, prefix + "weightJointCentering", weightJointCentering_);
-    } catch (...) {}
+    } catch (...) {
+    }
 
     loadCppDataType<scalar_t>(configFile, prefix + "jointKp", jointKp_);
     loadCppDataType<scalar_t>(configFile, prefix + "jointKd", jointKd_);

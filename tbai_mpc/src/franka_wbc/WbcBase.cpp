@@ -23,8 +23,7 @@ namespace franka {
 /*********************************************************************************************************************/
 WbcBase::WbcBase(const std::string &configFile, const std::string &urdfString,
                  const ocs2::franka::FrankaModelInfo &frankaInfo, const std::string &configPrefix)
-    : pinocchioInterface_(ocs2::getPinocchioInterfaceFromUrdfString(urdfString)),
-      frankaInfo_(frankaInfo) {
+    : pinocchioInterface_(ocs2::getPinocchioInterfaceFromUrdfString(urdfString)), frankaInfo_(frankaInfo) {
     const auto &model = pinocchioInterface_.getModel();
 
     // Number of joints (DOF)
@@ -277,10 +276,12 @@ void WbcBase::loadSettings(const std::string &configFile, const std::string &con
     jointCenteringKd_ = 2.0;
     try {
         loadCppDataType<scalar_t>(configFile, configPrefix + "jointCenteringKp", jointCenteringKp_);
-    } catch (...) {}
+    } catch (...) {
+    }
     try {
         loadCppDataType<scalar_t>(configFile, configPrefix + "jointCenteringKd", jointCenteringKd_);
-    } catch (...) {}
+    } catch (...) {
+    }
 
     // Joint home position (Franka default home configuration)
     jointHomePosition_ = vector_t(nJoints_);

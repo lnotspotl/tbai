@@ -7,7 +7,7 @@ namespace mpc {
 namespace franka {
 
 std::unique_ptr<WbcBase> getWbcUnique(const std::string &controllerConfigFile, const std::string &urdfString,
-                                       const ocs2::franka::FrankaModelInfo &frankaInfo) {
+                                      const ocs2::franka::FrankaModelInfo &frankaInfo) {
     auto wbcType = tbai::fromGlobalConfig<std::string>("mpc_controller/wbc_type");
 
     if (wbcType == "hqp") {
@@ -22,7 +22,7 @@ std::unique_ptr<WbcBase> getWbcUnique(const std::string &controllerConfigFile, c
 }
 
 std::shared_ptr<WbcBase> getWbcShared(const std::string &controllerConfigFile, const std::string &urdfString,
-                                       const ocs2::franka::FrankaModelInfo &frankaInfo) {
+                                      const ocs2::franka::FrankaModelInfo &frankaInfo) {
     return std::shared_ptr<WbcBase>(getWbcUnique(controllerConfigFile, urdfString, frankaInfo).release());
 }
 
