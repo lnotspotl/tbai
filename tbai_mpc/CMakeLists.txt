@@ -223,36 +223,35 @@ target_link_libraries(tbai_quadruped_arm_mpc
         ocs2::qpoases
 )
 
-## Franka MPC library
-add_library(tbai_franka_mpc
-    # franka mpc
-    src/franka_mpc/FactoryFunctions.cpp
-    src/franka_mpc/FrankaPinocchioMapping.cpp
-    src/franka_mpc/FrankaPreComputation.cpp
-    src/franka_mpc/FrankaInterface.cpp
-    src/franka_mpc/dynamics/FrankaDynamics.cpp
-    src/franka_mpc/constraint/EndEffectorConstraint.cpp
+add_library(tbai_arm_mpc
+    # arm mpc
+    src/arm_mpc/FactoryFunctions.cpp
+    src/arm_mpc/ArmPinocchioMapping.cpp
+    src/arm_mpc/ArmPreComputation.cpp
+    src/arm_mpc/ArmInterface.cpp
+    src/arm_mpc/dynamics/ArmDynamics.cpp
+    src/arm_mpc/constraint/EndEffectorConstraint.cpp
 
-    # franka wbc
-    src/franka_wbc/Factory.cpp
-    src/franka_wbc/HqpWbc.cpp
-    src/franka_wbc/SqpWbc.cpp
-    src/franka_wbc/WbcBase.cpp
+    # arm wbc
+    src/arm_wbc/Factory.cpp
+    src/arm_wbc/HqpWbc.cpp
+    src/arm_wbc/SqpWbc.cpp
+    src/arm_wbc/WbcBase.cpp
 
-    # wbc solvers (shared with quadruped)
+    # wbc solvers (shared with quadrupeds)
     src/wbc/HqpSolver.cpp
     src/wbc/SqpSolver.cpp
     src/wbc/Task.cpp
 )
-add_library(tbai::franka_mpc ALIAS tbai_franka_mpc)
+add_library(tbai::arm_mpc ALIAS tbai_arm_mpc)
 
-target_include_directories(tbai_franka_mpc
+target_include_directories(tbai_arm_mpc
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(tbai_franka_mpc
+target_link_libraries(tbai_arm_mpc
     PUBLIC
         tbai_core
         ocs2_core
@@ -284,17 +283,17 @@ install(EXPORT tbai_quadruped_mpc-targets
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/tbai
 )
 
-install(TARGETS tbai_franka_mpc
-    EXPORT tbai_franka_mpc-targets
+install(TARGETS tbai_arm_mpc
+    EXPORT tbai_arm_mpc-targets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-install(EXPORT tbai_franka_mpc-targets
+install(EXPORT tbai_arm_mpc-targets
     NAMESPACE tbai::
-    FILE tbai-franka-mpc-targets.cmake
+    FILE tbai-arm-mpc-targets.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/tbai
 )
 
