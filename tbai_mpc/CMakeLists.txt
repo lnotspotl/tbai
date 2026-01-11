@@ -113,6 +113,116 @@ target_link_libraries(tbai_quadruped_mpc
         ocs2::qpoases
 )
 
+## Quadruped ARM MPC library (for spot_arm with 6-DOF arm)
+add_library(tbai_quadruped_arm_mpc
+    # wbc general
+    src/wbc/HqpSolver.cpp
+    src/wbc/SqpSolver.cpp
+    src/wbc/Task.cpp
+
+    # wbc quadruped arm specific
+    src/quadruped_arm_wbc/Factory.cpp
+    src/quadruped_arm_wbc/HqpWbc.cpp
+    src/quadruped_arm_wbc/SqpWbc.cpp
+    src/quadruped_arm_wbc/WbcBase.cpp
+
+    # mpc
+    src/quadruped_arm_mpc/QuadrupedInterface.cpp
+    src/quadruped_arm_mpc/QuadrupedMpc.cpp
+    src/quadruped_arm_mpc/QuadrupedPointfootInterface.cpp
+
+    src/quadruped_arm_mpc/analytical_inverse_kinematics/AnalyticalInverseKinematics.cpp
+    src/quadruped_arm_mpc/analytical_inverse_kinematics/LegInverseKinematicParameters.cpp
+
+    src/quadruped_arm_mpc/constraint/EndEffectorVelocityConstraint.cpp
+    src/quadruped_arm_mpc/constraint/FootNormalConstraint.cpp
+    src/quadruped_arm_mpc/constraint/FrictionConeConstraint.cpp
+    src/quadruped_arm_mpc/constraint/ZeroForceConstraint.cpp
+
+    src/quadruped_arm_mpc/core/ComModelBase.cpp
+    src/quadruped_arm_mpc/core/KinematicsModelBase.cpp
+    src/quadruped_arm_mpc/core/ModelSettings.cpp
+    src/quadruped_arm_mpc/core/SwitchedModelPrecomputation.cpp
+    src/quadruped_arm_mpc/core/TorqueApproximation.cpp
+
+    src/quadruped_arm_mpc/cost/CollisionAvoidanceCost.cpp
+    src/quadruped_arm_mpc/cost/FootPlacementCost.cpp
+    src/quadruped_arm_mpc/cost/FrictionConeCost.cpp
+    src/quadruped_arm_mpc/cost/LinearStateInequalitySoftConstraint.cpp
+    src/quadruped_arm_mpc/cost/MotionTrackingCost.cpp
+    src/quadruped_arm_mpc/cost/MotionTrackingTerminalCost.cpp
+    src/quadruped_arm_mpc/cost/TorqueLimitsSoftConstraint.cpp
+
+    src/quadruped_arm_mpc/dynamics/ComKinoDynamicsParameters.cpp
+    src/quadruped_arm_mpc/dynamics/ComKinoSystemDynamicsAd.cpp
+
+    src/quadruped_arm_mpc/foot_planner/CubicSpline.cpp
+    src/quadruped_arm_mpc/foot_planner/FootPhase.cpp
+    src/quadruped_arm_mpc/foot_planner/KinematicFootPlacementPenalty.cpp
+    src/quadruped_arm_mpc/foot_planner/QuinticSplineSwing.cpp
+    src/quadruped_arm_mpc/foot_planner/SplineCpg.cpp
+    src/quadruped_arm_mpc/foot_planner/SwingSpline3d.cpp
+    src/quadruped_arm_mpc/foot_planner/SwingTrajectoryPlanner.cpp
+
+    src/quadruped_arm_mpc/initialization/ComKinoInitializer.cpp
+
+    src/quadruped_arm_mpc/logic/DynamicsParametersSynchronizedModule.cpp
+    src/quadruped_arm_mpc/logic/Gait.cpp
+    src/quadruped_arm_mpc/logic/GaitAdaptation.cpp
+    src/quadruped_arm_mpc/logic/GaitSchedule.cpp
+    src/quadruped_arm_mpc/logic/ModeSequenceTemplate.cpp
+    src/quadruped_arm_mpc/logic/SingleLegLogic.cpp
+    src/quadruped_arm_mpc/logic/SwitchedModelModeScheduleManager.cpp
+
+    src/quadruped_arm_mpc/quadruped_models/AnymalModels.cpp
+    src/quadruped_arm_mpc/quadruped_models/FrameDeclaration.cpp
+    src/quadruped_arm_mpc/quadruped_models/Go2InverseKinematics.cpp
+    src/quadruped_arm_mpc/quadruped_models/SpotInverseKinematics.cpp
+    src/quadruped_arm_mpc/quadruped_models/QuadrupedCom.cpp
+    src/quadruped_arm_mpc/quadruped_models/QuadrupedInverseKinematics.cpp
+    src/quadruped_arm_mpc/quadruped_models/QuadrupedKinematics.cpp
+    src/quadruped_arm_mpc/quadruped_models/QuadrupedPinocchioMapping.cpp
+
+    # concrete interfaces
+    src/quadruped_arm_mpc/quadruped_interfaces/Interfaces.cpp
+
+    # terrain
+    src/quadruped_arm_mpc/terrain/PlaneFitting.cpp
+    src/quadruped_arm_mpc/terrain/PlanarSignedDistanceField.cpp
+    src/quadruped_arm_mpc/terrain/PlanarTerrainModel.cpp
+    src/quadruped_arm_mpc/terrain/TerrainPlane.cpp
+
+    # reference trajectory generator
+    src/quadruped_arm_mpc/quadruped_reference/LocalTerrainEstimator.cpp
+    src/quadruped_arm_mpc/quadruped_reference/ReferenceTrajectoryGenerator.cpp
+
+    # quadruped commands
+    src/quadruped_arm_mpc/quadruped_commands/ReferenceExtrapolation.cpp
+    src/quadruped_arm_mpc/quadruped_commands/TerrainAdaptation.cpp
+
+    # controller
+    src/quadruped_arm_mpc/MpcController.cpp
+)
+add_library(tbai::quadruped_arm_mpc ALIAS tbai_quadruped_arm_mpc)
+
+target_include_directories(tbai_quadruped_arm_mpc
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
+
+target_link_libraries(tbai_quadruped_arm_mpc
+    PUBLIC
+        tbai_core
+        tbai_reference
+        ocs2_core
+        ocs2_ddp
+        ocs2_sqp
+        ocs2_mpc
+        ocs2_pinocchio_interface
+        ocs2::qpoases
+)
+
 ## Franka MPC library
 add_library(tbai_franka_mpc
     # franka mpc
@@ -185,5 +295,19 @@ install(TARGETS tbai_franka_mpc
 install(EXPORT tbai_franka_mpc-targets
     NAMESPACE tbai::
     FILE tbai-franka-mpc-targets.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/tbai
+)
+
+install(TARGETS tbai_quadruped_arm_mpc
+    EXPORT tbai_quadruped_arm_mpc-targets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(EXPORT tbai_quadruped_arm_mpc-targets
+    NAMESPACE tbai::
+    FILE tbai-quadruped-arm-mpc-targets.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/tbai
 )
