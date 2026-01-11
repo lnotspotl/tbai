@@ -1,6 +1,6 @@
 #include "tbai_mpc/quadruped_mpc/logic/DynamicsParametersSynchronizedModule.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 DynamicsParametersSynchronizedModule::DynamicsParametersSynchronizedModule()
     : activeDynamicsParameters_(),
@@ -14,4 +14,4 @@ void DynamicsParametersSynchronizedModule::preSolverRun(scalar_t initTime, scala
     activeDynamicsParameters_ = *lockedDynamicsParameterPtr;  // Copy external parameters to the active parameter set
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

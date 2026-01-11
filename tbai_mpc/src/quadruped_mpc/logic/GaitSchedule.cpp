@@ -7,7 +7,7 @@
 #include "tbai_mpc/quadruped_mpc/core/MotionPhaseDefinition.h"
 #include "tbai_mpc/quadruped_mpc/logic/GaitSwitching.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 GaitSchedule::GaitSchedule(scalar_t time, Gait gait) : time_(time), phase_(0.0), gaitSchedule_{std::move(gait)} {}
 
@@ -97,7 +97,7 @@ void GaitSchedule::adaptCurrentGait(const std::function<void(scalar_t &currentPh
 }
 
 ocs2::ModeSchedule GaitSchedule::getModeSchedule(scalar_t timeHorizon) const {
-    return ::switched_model::getModeSchedule(phase_, time_, timeHorizon, gaitSchedule_.begin(), gaitSchedule_.end());
+    return ::tbai::mpc::quadruped::getModeSchedule(phase_, time_, timeHorizon, gaitSchedule_.begin(), gaitSchedule_.end());
 }
 
 void GaitSchedule::rolloutGaitScheduleTillTime(scalar_t time) {
@@ -127,4 +127,4 @@ bool isStanding(const GaitSchedule &gaitSchedule) {
                        [](size_t mode) { return mode == ModeNumber::STANCE; });
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

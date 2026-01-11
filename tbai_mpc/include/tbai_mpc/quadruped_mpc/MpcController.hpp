@@ -18,8 +18,7 @@
 #include <tbai_mpc/quadruped_wbc/WbcBase.hpp>
 #include <tbai_reference/ReferenceVelocityGenerator.hpp>
 
-namespace tbai {
-namespace mpc {
+namespace tbai::mpc::quadruped {
 
 /**
  * ROS-independent MPC controller base class.
@@ -101,8 +100,8 @@ class MpcController : public tbai::Controller {
     std::shared_ptr<tbai::StateSubscriber> stateSubscriberPtr_;
     std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> velocityGeneratorPtr_;
 
-    std::unique_ptr<switched_model::QuadrupedInterface> quadrupedInterfacePtr_;
-    std::unique_ptr<tbai::mpc::WbcBase> wbcPtr_;
+    std::unique_ptr<tbai::mpc::quadruped::QuadrupedInterface> quadrupedInterfacePtr_;
+    std::unique_ptr<tbai::mpc::quadruped::WbcBase> wbcPtr_;
     std::unique_ptr<ocs2::MRT_BASE> mrtPtr_;
     std::shared_ptr<ocs2::MPC_BASE> mpcPtr_;
     std::unique_ptr<reference::ReferenceTrajectoryGenerator> referenceTrajectoryGeneratorPtr_;
@@ -131,5 +130,4 @@ class MpcController : public tbai::Controller {
     scalar_t referenceThreadRate_ = 5.0;
 };
 
-}  // namespace mpc
-}  // namespace tbai
+}  // namespace tbai::mpc::quadruped

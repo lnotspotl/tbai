@@ -10,27 +10,27 @@
 
 #include "tbai_mpc/quadruped_mpc/quadruped_models/FrameDeclaration.h"
 
-namespace anymal {
+namespace tbai::mpc::quadruped {
 
-std::unique_ptr<switched_model::InverseKinematicsModelBase> getAnymalInverseKinematics(const FrameDeclaration& frameDeclaration,
+std::unique_ptr<tbai::mpc::quadruped::InverseKinematicsModelBase> getAnymalInverseKinematics(const FrameDeclaration& frameDeclaration,
                                                                                        const std::string& urdf);
 
-std::unique_ptr<switched_model::InverseKinematicsModelBase> getGo2InverseKinematics(const FrameDeclaration& frameDeclaration,
+std::unique_ptr<tbai::mpc::quadruped::InverseKinematicsModelBase> getGo2InverseKinematics(const FrameDeclaration& frameDeclaration,
                                                                                        const std::string& urdf);
 
-std::unique_ptr<switched_model::InverseKinematicsModelBase> getSpotInverseKinematics(const FrameDeclaration& frameDeclaration,
+std::unique_ptr<tbai::mpc::quadruped::InverseKinematicsModelBase> getSpotInverseKinematics(const FrameDeclaration& frameDeclaration,
                                                                                        const std::string& urdf);
 
-std::unique_ptr<switched_model::KinematicsModelBase<ocs2::scalar_t>> getAnymalKinematics(const FrameDeclaration& frameDeclaration,
+std::unique_ptr<tbai::mpc::quadruped::KinematicsModelBase<ocs2::scalar_t>> getAnymalKinematics(const FrameDeclaration& frameDeclaration,
                                                                                          const std::string& urdf);
 
-std::unique_ptr<switched_model::KinematicsModelBase<ocs2::ad_scalar_t>> getAnymalKinematicsAd(const FrameDeclaration& frameDeclaration,
+std::unique_ptr<tbai::mpc::quadruped::KinematicsModelBase<ocs2::ad_scalar_t>> getAnymalKinematicsAd(const FrameDeclaration& frameDeclaration,
                                                                                               const std::string& urdf);
 
-std::unique_ptr<switched_model::ComModelBase<ocs2::scalar_t>> getAnymalComModel(const FrameDeclaration& frameDeclaration,
+std::unique_ptr<tbai::mpc::quadruped::ComModelBase<ocs2::scalar_t>> getAnymalComModel(const FrameDeclaration& frameDeclaration,
                                                                                 const std::string& urdf);
 
-std::unique_ptr<switched_model::ComModelBase<ocs2::ad_scalar_t>> getAnymalComModelAd(const FrameDeclaration& frameDeclaration,
+std::unique_ptr<tbai::mpc::quadruped::ComModelBase<ocs2::ad_scalar_t>> getAnymalComModelAd(const FrameDeclaration& frameDeclaration,
                                                                                      const std::string& urdf);
 
-}  // namespace anymal
+}  // namespace tbai::mpc::quadruped

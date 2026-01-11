@@ -7,7 +7,7 @@
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModelPrecomputation.h"
 #include "tbai_mpc/quadruped_mpc/core/TorqueApproximation.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 TorqueLimitsSoftConstraint::TorqueLimitsSoftConstraint(const joint_coordinate_t &torqueLimits,
                                                        ocs2::RelaxedBarrierPenalty::Config settings,
@@ -99,4 +99,4 @@ ScalarFunctionQuadraticApproximation TorqueLimitsSoftConstraint::getQuadraticApp
     return cost;
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

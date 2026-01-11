@@ -8,7 +8,7 @@
 
 #include "tbai_mpc/quadruped_mpc/foot_planner/SwingTrajectoryPlanner.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 class MotionTrackingTerminalCost final : public ocs2::StateCost {
  public:
@@ -34,4 +34,4 @@ class MotionTrackingTerminalCost final : public ocs2::StateCost {
   matrix_t Q_;
 };
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

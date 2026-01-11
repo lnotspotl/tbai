@@ -6,7 +6,7 @@
 
 #include <tbai_mpc/quadruped_mpc/terrain/TerrainPlane.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 struct BaseReferenceHorizon {
   double dt;
@@ -49,7 +49,7 @@ Base2dReferenceTrajectory generate2DExtrapolatedBaseReference(const BaseReferenc
 
 BaseReferenceTrajectory generateExtrapolatedBaseReference(const BaseReferenceHorizon& horizon, const BaseReferenceState& initialState,
                                                           const BaseReferenceCommand& command,
-                                                          const switched_model::TerrainPlane& projectedHeadingFrame);
+                                                          const tbai::mpc::quadruped::TerrainPlane& projectedHeadingFrame);
 
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

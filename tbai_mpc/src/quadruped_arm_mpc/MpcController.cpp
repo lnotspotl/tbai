@@ -16,8 +16,7 @@
 #include <tbai_mpc/quadruped_arm_mpc/quadruped_interfaces/Interfaces.h>
 #include <tbai_mpc/quadruped_arm_wbc/Factory.hpp>
 
-namespace tbai {
-namespace mpc {
+namespace tbai::mpc::quadruped_arm {
 
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
@@ -50,16 +49,16 @@ void MpcController::initialize(const std::string &urdfString, const std::string 
     // Create quadruped interface
     if (robotName_ == "anymal_d" || robotName_ == "anymal_b" || robotName_ == "anymal_c") {
         quadrupedInterfacePtr_ =
-            tbai::mpc::quadruped_arm::getAnymalInterface(urdfString, tbai::mpc::quadruped_arm::loadQuadrupedSettings(taskSettingsFile),
-                                       tbai::mpc::quadruped_arm::frameDeclarationFromFile(frameDeclarationFile));
+            getAnymalInterface(urdfString, loadQuadrupedSettings(taskSettingsFile),
+                                       frameDeclarationFromFile(frameDeclarationFile));
     } else if (robotName_ == "go2") {
         quadrupedInterfacePtr_ =
-            tbai::mpc::quadruped_arm::getGo2Interface(urdfString, tbai::mpc::quadruped_arm::loadQuadrupedSettings(taskSettingsFile),
-                                    tbai::mpc::quadruped_arm::frameDeclarationFromFile(frameDeclarationFile));
+            getGo2Interface(urdfString, loadQuadrupedSettings(taskSettingsFile),
+                                    frameDeclarationFromFile(frameDeclarationFile));
     } else if (robotName_ == "spot" || robotName_ == "spot_arm") {
         quadrupedInterfacePtr_ =
-            tbai::mpc::quadruped_arm::getSpotInterface(urdfString, tbai::mpc::quadruped_arm::loadQuadrupedSettings(taskSettingsFile),
-                                     tbai::mpc::quadruped_arm::frameDeclarationFromFile(frameDeclarationFile));
+            getSpotInterface(urdfString, loadQuadrupedSettings(taskSettingsFile),
+                                     frameDeclarationFromFile(frameDeclarationFile));
     } else {
         TBAI_THROW("Robot {} not implemented. Available robots: anymal_d, anymal_b, anymal_c, go2, spot, spot_arm",
                    robotName_);
@@ -67,11 +66,11 @@ void MpcController::initialize(const std::string &urdfString, const std::string 
 
     // Create WBC (arm version - jointNames are stored internally in WbcBase)
     wbcPtr_ =
-        tbai::mpc::getWbcUnique(controllerConfigFile, urdfString, quadrupedInterfacePtr_->getComModel(),
+        tbai::mpc::quadruped_arm::getWbcUnique(controllerConfigFile, urdfString, quadrupedInterfacePtr_->getComModel(),
                                 quadrupedInterfacePtr_->getKinematicModel());
 
     // Create reference trajectory generator
-    auto kinematicsPtr = std::shared_ptr<tbai::mpc::quadruped_arm::KinematicsModelBase<scalar_t>>(
+    auto kinematicsPtr = std::shared_ptr<KinematicsModelBase<scalar_t>>(
         quadrupedInterfacePtr_->getKinematicModel().clone());
     referenceTrajectoryGeneratorPtr_ = std::make_unique<reference::ReferenceTrajectoryGenerator>(
         targetCommandFile, velocityGeneratorPtr_, std::move(kinematicsPtr), trajdt, trajKnots);
@@ -125,15 +124,15 @@ std::vector<MotorCommand> MpcController::getMotorCommands(scalar_t currentTime, 
     mrtPtr_->evaluatePolicy(tNow_ + time_eps, observation.state, dummyState, dummyInput, dummyMode);
 
     // Compute joint accelerations for all 18 joints (12 leg + 6 arm)
-    constexpr size_t numJoints = tbai::mpc::quadruped_arm::JOINT_COORDINATE_SIZE;  // 18
+    constexpr size_t numJoints = JOINT_COORDINATE_SIZE;  // 18
     ocs2::vector_t joint_accelerations = (dummyInput.tail(numJoints) - desiredInput.tail(numJoints)) / time_eps;
 
     // Extract desired arm EE position and orientation from MPC solution
     // For now, use the desired state to compute arm EE targets via forward kinematics
     // In a full implementation, these would come from a dedicated arm task reference
-    const auto basePose = tbai::mpc::quadruped_arm::getBasePose(desiredState);
-    const auto legJointPositions = tbai::mpc::quadruped_arm::getLegJointPositions(desiredState);
-    const auto armJointPositions = tbai::mpc::quadruped_arm::getArmJointPositions(desiredState);
+    const auto basePose = getBasePose(desiredState);
+    const auto legJointPositions = getLegJointPositions(desiredState);
+    const auto armJointPositions = getArmJointPositions(desiredState);
 
     // Compute desired arm EE position from forward kinematics
     ocs2::vector_t desiredArmEEPosition =
@@ -304,14 +303,14 @@ ocs2::SystemObservation MpcController::generateSystemObservation() const {
     // Set mode
     const std::vector<bool> &contactFlags = state.contactFlags;
     std::array<bool, 4> contactFlagsArray = {contactFlags[0], contactFlags[1], contactFlags[2], contactFlags[3]};
-    observation.mode = tbai::mpc::quadruped_arm::stanceLeg2ModeNumber(contactFlagsArray);
+    observation.mode = stanceLeg2ModeNumber(contactFlagsArray);
 
     // State: 30D = 12 (base) + 12 (leg joints) + 6 (arm joints)
     // rbdState layout: [euler(3), pos(3), angvel(3), linvel(3), leg_joints(12), arm_joints(6), leg_vels(12), arm_vels(6)]
-    constexpr size_t numLegJoints = tbai::mpc::quadruped_arm::LEG_JOINT_COORDINATE_SIZE;  // 12
-    constexpr size_t numArmJoints = tbai::mpc::quadruped_arm::NUM_ARM_JOINTS;             // 6
-    constexpr size_t stateSize = tbai::mpc::quadruped_arm::STATE_DIM;                     // 30
-    constexpr size_t inputSize = tbai::mpc::quadruped_arm::INPUT_DIM;                     // 30
+    constexpr size_t numLegJoints = LEG_JOINT_COORDINATE_SIZE;  // 12
+    constexpr size_t numArmJoints = NUM_ARM_JOINTS;             // 6
+    constexpr size_t stateSize = STATE_DIM;                     // 30
+    constexpr size_t inputSize = INPUT_DIM;                     // 30
 
     // Set state: [euler(3), pos(3), angvel(3), linvel(3), leg_joints(12), arm_joints(6)]
     observation.state.resize(stateSize);
@@ -339,5 +338,4 @@ ocs2::SystemObservation MpcController::generateSystemObservation() const {
     return observation;
 }
 
-}  // namespace mpc
-}  // namespace tbai
+}  // namespace tbai::mpc::quadruped_arm

@@ -6,7 +6,7 @@
 
 #include "tbai_mpc/quadruped_mpc/core/MotionPhaseDefinition.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 SwitchedModelModeScheduleManager::SwitchedModelModeScheduleManager(
     std::unique_ptr<GaitSchedule> gaitSchedule, std::unique_ptr<SwingTrajectoryPlanner> swingTrajectory,
@@ -42,4 +42,4 @@ void SwitchedModelModeScheduleManager::modifyReferences(scalar_t initTime, scala
     swingTrajectoryPtr_->updateSwingMotions(initTime, finalTime, initState, targetTrajectories, modeSchedule);
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

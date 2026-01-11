@@ -24,7 +24,7 @@
 #include <tbai_mpc/quadruped_mpc/logic/ModeSequenceTemplate.h>
 #include <tbai_mpc/quadruped_mpc/terrain/PlanarTerrainModel.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 QuadrupedInterface::QuadrupedInterface(const kinematic_model_t &kinematicModel,
                                        const ad_kinematic_model_t &adKinematicModel, const com_model_t &comModel,
@@ -176,4 +176,4 @@ QuadrupedInterface::Settings loadQuadrupedSettings(const std::string &pathToConf
     return settings;
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

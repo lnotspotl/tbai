@@ -9,7 +9,7 @@
 
 #include "tbai_mpc/quadruped_mpc/foot_planner/CubicSpline.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 class SplineCpg {
  public:
@@ -33,4 +33,4 @@ class SplineCpg {
   CubicSpline rightSpline_;
 };
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

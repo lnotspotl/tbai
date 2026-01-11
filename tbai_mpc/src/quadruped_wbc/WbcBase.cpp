@@ -14,28 +14,30 @@
 
 namespace tbai {
 namespace mpc {
+namespace quadruped {
+
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 WbcBase::WbcBase(const std::string &configFile, const std::string &urdfString,
-                 const switched_model::ComModelBase<scalar_t> &comModel,
-                 const switched_model::KinematicsModelBase<scalar_t> &kinematics, const std::string &configPrefix)
-    : pinocchioInterfaceMeasured_(anymal::createQuadrupedPinocchioInterfaceFromUrdfString(urdfString)),
+                 const tbai::mpc::quadruped::ComModelBase<scalar_t> &comModel,
+                 const tbai::mpc::quadruped::KinematicsModelBase<scalar_t> &kinematics, const std::string &configPrefix)
+    : pinocchioInterfaceMeasured_(tbai::mpc::quadruped::createQuadrupedPinocchioInterfaceFromUrdfString(urdfString)),
       comModelPtr_(comModel.clone()),
       kinematicsPtr_(kinematics.clone()) {
     // Base angular + linear velocity, joint velocities
-    nGeneralizedCoordinates_ = 6 + switched_model::JOINT_COORDINATE_SIZE;
+    nGeneralizedCoordinates_ = 6 + tbai::mpc::quadruped::JOINT_COORDINATE_SIZE;
 
     // Base angular + linear acceleration, joint accelerations, contact forces
-    nDecisionVariables_ = nGeneralizedCoordinates_ + 3 * switched_model::NUM_CONTACT_POINTS;
+    nDecisionVariables_ = nGeneralizedCoordinates_ + 3 * tbai::mpc::quadruped::NUM_CONTACT_POINTS;
 
     qMeasured_ = vector_t(nGeneralizedCoordinates_ + 1);  // quaternion
     vMeasured_ = vector_t(nGeneralizedCoordinates_);
 
     footNames_ = {"LF_FOOT", "RF_FOOT", "LH_FOOT", "RH_FOOT"};
 
-    Jcontact_ = matrix_t(3 * switched_model::NUM_CONTACT_POINTS, nGeneralizedCoordinates_);
-    dJcontactdt_ = matrix_t(3 * switched_model::NUM_CONTACT_POINTS, nGeneralizedCoordinates_);
+    Jcontact_ = matrix_t(3 * tbai::mpc::quadruped::NUM_CONTACT_POINTS, nGeneralizedCoordinates_);
+    dJcontactdt_ = matrix_t(3 * tbai::mpc::quadruped::NUM_CONTACT_POINTS, nGeneralizedCoordinates_);
 
     loadSettings(configFile, configPrefix);
 }
@@ -53,7 +55,7 @@ Task WbcBase::createDynamicsTask() {
     const vector_t h = data.nle.head<6>();
 
     // // Contact jacobians affecting the base
-    const matrix_t Jcontact_base = Jcontact_.block(0, 0, switched_model::NUM_CONTACT_POINTS * 3, 6);
+    const matrix_t Jcontact_base = Jcontact_.block(0, 0, tbai::mpc::quadruped::NUM_CONTACT_POINTS * 3, 6);
 
     matrix_t A(6, nDecisionVariables_);
     A << Mb, -Jcontact_base.transpose();
@@ -68,7 +70,7 @@ Task WbcBase::createDynamicsTask() {
 /*********************************************************************************************************************/
 Task WbcBase::createContactForceTask() {
     // Create equality constraint matrix and vector
-    const size_t Arows = 3 * (switched_model::NUM_CONTACT_POINTS - nContacts_);
+    const size_t Arows = 3 * (tbai::mpc::quadruped::NUM_CONTACT_POINTS - nContacts_);
     matrix_t A = matrix_t::Zero(Arows, nDecisionVariables_);
     vector_t b = vector_t::Zero(Arows);
 
@@ -82,7 +84,7 @@ Task WbcBase::createContactForceTask() {
 
     // If foot is in contact, apply friction cone constraints
     // If foot is NOT in contact, the contact force is zero
-    for (size_t i = 0; i < switched_model::NUM_CONTACT_POINTS; ++i) {
+    for (size_t i = 0; i < tbai::mpc::quadruped::NUM_CONTACT_POINTS; ++i) {
         if (contactFlags_[i]) {
             D.block<4, 3>(4 * Di, nGeneralizedCoordinates_ + 3 * i) = muMatrix_;
             ++Di;
@@ -106,7 +108,7 @@ Task WbcBase::createStanceFootNoMotionTask() {
     size_t Ai = 0;
 
     // dpdt = Jcontact * dqdt -> ddpdtdt = dJcontact * dqdt + Jcontact * dqddt = 0
-    for (size_t i = 0; i < switched_model::NUM_CONTACT_POINTS; ++i) {
+    for (size_t i = 0; i < tbai::mpc::quadruped::NUM_CONTACT_POINTS; ++i) {
         if (contactFlags_[i]) {
             A.block(3 * Ai, 0, 3, nGeneralizedCoordinates_) = Jcontact_.block(3 * i, 0, 3, nGeneralizedCoordinates_);
             b.segment<3>(3 * Ai) = -dJcontactdt_.block(3 * i, 0, 3, nGeneralizedCoordinates_) * vMeasured_;
@@ -124,30 +126,30 @@ Task WbcBase::createTorqueLimitTask() {
     auto &data = pinocchioInterfaceMeasured_.getData();
 
     // torques = Mj * udot + hj - JjT * Fext;
-    const matrix_t &Mj = data.M.block<switched_model::JOINT_COORDINATE_SIZE, 18>(6, 0);
-    const vector_t &hj = data.nle.segment<switched_model::JOINT_COORDINATE_SIZE>(6);
-    const matrix_t &JjT = Jcontact_.block(0, 6, 12, switched_model::JOINT_COORDINATE_SIZE).transpose();
+    const matrix_t &Mj = data.M.block<tbai::mpc::quadruped::JOINT_COORDINATE_SIZE, 18>(6, 0);
+    const vector_t &hj = data.nle.segment<tbai::mpc::quadruped::JOINT_COORDINATE_SIZE>(6);
+    const matrix_t &JjT = Jcontact_.block(0, 6, 12, tbai::mpc::quadruped::JOINT_COORDINATE_SIZE).transpose();
 
-    const size_t Drows = 2 * switched_model::JOINT_COORDINATE_SIZE;
+    const size_t Drows = 2 * tbai::mpc::quadruped::JOINT_COORDINATE_SIZE;
     matrix_t D = matrix_t::Zero(Drows, nDecisionVariables_);
 
     // upper bound
-    D.block(0, 0, switched_model::JOINT_COORDINATE_SIZE, nDecisionVariables_) << Mj, -JjT;
+    D.block(0, 0, tbai::mpc::quadruped::JOINT_COORDINATE_SIZE, nDecisionVariables_) << Mj, -JjT;
 
     // lower bound
-    D.block(switched_model::JOINT_COORDINATE_SIZE, 0, switched_model::JOINT_COORDINATE_SIZE, nDecisionVariables_)
+    D.block(tbai::mpc::quadruped::JOINT_COORDINATE_SIZE, 0, tbai::mpc::quadruped::JOINT_COORDINATE_SIZE, nDecisionVariables_)
         << -Mj,
         JjT;
 
     vector_t f = vector_t::Ones(Drows);
 
     // upper bound
-    f.head<switched_model::JOINT_COORDINATE_SIZE>() *= torqueLimit_;
-    f.head<switched_model::JOINT_COORDINATE_SIZE>() -= hj;
+    f.head<tbai::mpc::quadruped::JOINT_COORDINATE_SIZE>() *= torqueLimit_;
+    f.head<tbai::mpc::quadruped::JOINT_COORDINATE_SIZE>() -= hj;
 
     // lower bound
-    f.tail<switched_model::JOINT_COORDINATE_SIZE>() *= torqueLimit_;
-    f.tail<switched_model::JOINT_COORDINATE_SIZE>() += hj;
+    f.tail<tbai::mpc::quadruped::JOINT_COORDINATE_SIZE>() *= torqueLimit_;
+    f.tail<tbai::mpc::quadruped::JOINT_COORDINATE_SIZE>() += hj;
 
     return Task(matrix_t(), vector_t(), D, f);
 }
@@ -159,8 +161,8 @@ Task WbcBase::createBaseAccelerationTask(const vector_t &stateCurrent, const vec
                                          const vector_t &inputDesired, const vector_t &desiredJointAcceleration) {
     const vector_t &basePose = stateDesired.head<6>();
     const vector_t &baseVelocity = stateDesired.segment<6>(6);
-    const vector_t &jointPositions = stateDesired.tail<switched_model::JOINT_COORDINATE_SIZE>();
-    const vector_t &jointVelocities = inputDesired.tail<switched_model::JOINT_COORDINATE_SIZE>();
+    const vector_t &jointPositions = stateDesired.tail<tbai::mpc::quadruped::JOINT_COORDINATE_SIZE>();
+    const vector_t &jointVelocities = inputDesired.tail<tbai::mpc::quadruped::JOINT_COORDINATE_SIZE>();
     const vector_t &jointAccelerations = desiredJointAcceleration;
 
     // forcesOnBaseInBaseFrame = [torque (3); force (3)]
@@ -189,7 +191,7 @@ Task WbcBase::createBaseAccelerationTask(const vector_t &stateCurrent, const vec
     /* Base orientation error*/
     vector3_t eulerCurrent = stateCurrent.head<3>();
     vector3_t eulerDesired = stateDesired.head<3>();
-    auto eulerError = switched_model::rotationErrorInLocalEulerXYZ(eulerCurrent, eulerDesired);
+    auto eulerError = tbai::mpc::quadruped::rotationErrorInLocalEulerXYZ(eulerCurrent, eulerDesired);
 
     /* Base angular velocity error */
     vector3_t w_current = stateCurrent.segment<3>(6);
@@ -219,8 +221,8 @@ Task WbcBase::createSwingFootAccelerationTask(const vector_t &stateCurrent, cons
                                               const vector_t &stateDesired, const vector_t &inputDesired) {
     const vector_t &basePoseDesired = stateDesired.head<6>();
     const vector_t &baseVelocityDesired = stateDesired.segment<6>(6);
-    const vector_t &jointPositionsDesired = stateDesired.tail<switched_model::JOINT_COORDINATE_SIZE>();
-    const vector_t &jointVelocitiesDesired = inputDesired.tail<switched_model::JOINT_COORDINATE_SIZE>();
+    const vector_t &jointPositionsDesired = stateDesired.tail<tbai::mpc::quadruped::JOINT_COORDINATE_SIZE>();
+    const vector_t &jointVelocitiesDesired = inputDesired.tail<tbai::mpc::quadruped::JOINT_COORDINATE_SIZE>();
 
     // Desired feet positions
     auto footPositionsDesired = kinematicsPtr_->feetPositionsInOriginFrame(basePoseDesired, jointPositionsDesired);
@@ -231,8 +233,8 @@ Task WbcBase::createSwingFootAccelerationTask(const vector_t &stateCurrent, cons
 
     const vector_t &basePoseCurrent = stateCurrent.head<6>();
     const vector_t &baseVelocityCurrent = stateCurrent.segment<6>(6);
-    const vector_t &jointPositionsCurrent = stateCurrent.tail<switched_model::JOINT_COORDINATE_SIZE>();
-    const vector_t &jointVelocitiesCurrent = inputCurrent.tail<switched_model::JOINT_COORDINATE_SIZE>();
+    const vector_t &jointPositionsCurrent = stateCurrent.tail<tbai::mpc::quadruped::JOINT_COORDINATE_SIZE>();
+    const vector_t &jointVelocitiesCurrent = inputCurrent.tail<tbai::mpc::quadruped::JOINT_COORDINATE_SIZE>();
 
     // Measured feet positions
     auto footPositionsMeasured = kinematicsPtr_->feetPositionsInOriginFrame(basePoseCurrent, jointPositionsCurrent);
@@ -241,13 +243,13 @@ Task WbcBase::createSwingFootAccelerationTask(const vector_t &stateCurrent, cons
     auto footVelocitiesMeasured = kinematicsPtr_->feetVelocitiesInOriginFrame(
         basePoseCurrent, baseVelocityCurrent, jointPositionsCurrent, jointVelocitiesCurrent);
 
-    const size_t Arows = 3 * (stanceAsConstraint_ ? switched_model::NUM_CONTACT_POINTS - nContacts_
-                                                  : switched_model::NUM_CONTACT_POINTS);
+    const size_t Arows = 3 * (stanceAsConstraint_ ? tbai::mpc::quadruped::NUM_CONTACT_POINTS - nContacts_
+                                                  : tbai::mpc::quadruped::NUM_CONTACT_POINTS);
     matrix_t A = matrix_t::Zero(Arows, nDecisionVariables_);
     vector_t b = vector_t::Zero(Arows);
 
     size_t j = 0;
-    for (size_t i = 0; i < switched_model::NUM_CONTACT_POINTS; ++i) {
+    for (size_t i = 0; i < tbai::mpc::quadruped::NUM_CONTACT_POINTS; ++i) {
         if (!contactFlags_[i] || !stanceAsConstraint_) {
             const vector_t &posDesired = footPositionsDesired[i];
             const vector_t &velDesired = footVelocitiesDesired[i];
@@ -275,7 +277,7 @@ Task WbcBase::createContactForceMinimizationTask(const vector_t &inputDesired) {
     vector_t b = vector_t::Zero(Arows);
 
     size_t Ai = 0;
-    for (size_t i = 0; i < switched_model::NUM_CONTACT_POINTS; ++i) {
+    for (size_t i = 0; i < tbai::mpc::quadruped::NUM_CONTACT_POINTS; ++i) {
         if (contactFlags_[i]) {
             A.block<3, 3>(3 * Ai, nGeneralizedCoordinates_ + 3 * i) = matrix_t::Identity(3, 3);
             ++Ai;
@@ -294,11 +296,11 @@ void WbcBase::updateMeasuredState(const vector_t &stateMeasured, const vector_t 
 
     // base orientation quaternion - base to world
     const vector3_t &eulerXYZ = stateMeasured.head<3>();
-    qMeasured_.segment<4>(3) = switched_model::quaternionBaseToOrigin(eulerXYZ).coeffs();
+    qMeasured_.segment<4>(3) = tbai::mpc::quadruped::quaternionBaseToOrigin(eulerXYZ).coeffs();
 
     // joint angles: LF, RF, LH, RH
-    qMeasured_.tail<switched_model::JOINT_COORDINATE_SIZE>() =
-        stateMeasured.tail<switched_model::JOINT_COORDINATE_SIZE>();
+    qMeasured_.tail<tbai::mpc::quadruped::JOINT_COORDINATE_SIZE>() =
+        stateMeasured.tail<tbai::mpc::quadruped::JOINT_COORDINATE_SIZE>();
 
     // flip lh and rf
     std::swap(qMeasured_[10], qMeasured_[13]);
@@ -306,7 +308,7 @@ void WbcBase::updateMeasuredState(const vector_t &stateMeasured, const vector_t 
     std::swap(qMeasured_[12], qMeasured_[15]);
 
     // Rotation matrix: base -> world
-    rMeasured_ = switched_model::rotationMatrixBaseToOrigin(eulerXYZ);
+    rMeasured_ = tbai::mpc::quadruped::rotationMatrixBaseToOrigin(eulerXYZ);
 
     // base linear velocity - expressed in base frame
     vMeasured_.head<3>() = stateMeasured.segment<3>(9);
@@ -315,8 +317,8 @@ void WbcBase::updateMeasuredState(const vector_t &stateMeasured, const vector_t 
     vMeasured_.segment<3>(3) = stateMeasured.segment<3>(6);
 
     // joint velocities: LF, RF, LH, RH
-    vMeasured_.tail<switched_model::JOINT_COORDINATE_SIZE>() =
-        inputMeasured.tail<switched_model::JOINT_COORDINATE_SIZE>();
+    vMeasured_.tail<tbai::mpc::quadruped::JOINT_COORDINATE_SIZE>() =
+        inputMeasured.tail<tbai::mpc::quadruped::JOINT_COORDINATE_SIZE>();
     std::swap(vMeasured_[9], vMeasured_[12]);
     std::swap(vMeasured_[10], vMeasured_[13]);
     std::swap(vMeasured_[11], vMeasured_[14]);
@@ -345,7 +347,7 @@ void WbcBase::updateKinematicsAndDynamicsCurrent() {
 
     // Contact jacobians
     matrix_t jac_temp;
-    for (size_t i = 0; i < switched_model::NUM_CONTACT_POINTS; ++i) {
+    for (size_t i = 0; i < tbai::mpc::quadruped::NUM_CONTACT_POINTS; ++i) {
         size_t frameIndex = model.getBodyId(footNames_[i]);
         jac_temp.setZero(6, nGeneralizedCoordinates_);
         pinocchio::getFrameJacobian(model, data, frameIndex, pinocchio::LOCAL_WORLD_ALIGNED, jac_temp);
@@ -355,7 +357,7 @@ void WbcBase::updateKinematicsAndDynamicsCurrent() {
     // Contact jacobian time derivatives
     matrix_t djac_temp;
     pinocchio::computeJointJacobiansTimeVariation(model, data, qMeasured_, vMeasured_);
-    for (size_t i = 0; i < switched_model::NUM_CONTACT_POINTS; ++i) {
+    for (size_t i = 0; i < tbai::mpc::quadruped::NUM_CONTACT_POINTS; ++i) {
         size_t frameIndex = model.getBodyId(footNames_[i]);
         djac_temp.setZero(6, nGeneralizedCoordinates_);
         pinocchio::getFrameJacobianTimeVariation(model, data, frameIndex, pinocchio::LOCAL_WORLD_ALIGNED, djac_temp);
@@ -375,7 +377,7 @@ void WbcBase::updateDesiredState(const vector_t &stateDesired, const vector_t &i
 /*********************************************************************************************************************/
 void WbcBase::updateKinematicsAndDynamicsDesired(const vector_t &stateDesired, const vector_t &inputDesired) {
     const vector3_t &eulerXYZ = stateDesired.head<3>();
-    rDesired_ = switched_model::rotationMatrixBaseToOrigin(eulerXYZ);
+    rDesired_ = tbai::mpc::quadruped::rotationMatrixBaseToOrigin(eulerXYZ);
 }
 
 /*********************************************************************************************************************/
@@ -383,7 +385,7 @@ void WbcBase::updateKinematicsAndDynamicsDesired(const vector_t &stateDesired, c
 /*********************************************************************************************************************/
 void WbcBase::updateContactFlags(const size_t modeCurrent, const size_t modeDesired) {
     // Desired contact flags
-    contactFlags_ = switched_model::modeNumber2StanceLeg(modeDesired);
+    contactFlags_ = tbai::mpc::quadruped::modeNumber2StanceLeg(modeDesired);
     nContacts_ = std::accumulate(contactFlags_.begin(), contactFlags_.end(), 0);
 }
 /*********************************************************************************************************************/
@@ -429,5 +431,6 @@ void WbcBase::loadSettings(const std::string &configFile, const std::string &con
     loadCppDataType<bool>(configFile, configPrefix + "stanceAsConstraint", stanceAsConstraint_);
 }
 
+}  // namespace quadruped
 }  // namespace mpc
 }  // namespace tbai

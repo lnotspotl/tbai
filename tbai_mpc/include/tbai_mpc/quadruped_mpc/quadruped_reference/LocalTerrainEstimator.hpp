@@ -21,7 +21,7 @@ class LocalTerrainEstimator {
      * Constructor
      * @param kinematicsPtr: Shared pointer to the kinematics model
      */
-    explicit LocalTerrainEstimator(std::shared_ptr<switched_model::KinematicsModelBase<ocs2::scalar_t>> kinematicsPtr);
+    explicit LocalTerrainEstimator(std::shared_ptr<tbai::mpc::quadruped::KinematicsModelBase<ocs2::scalar_t>> kinematicsPtr);
 
     /**
      * Updates the terrain estimate based on current footholds from observation
@@ -33,19 +33,19 @@ class LocalTerrainEstimator {
      * Gets the estimated terrain plane
      * @return The estimated terrain plane
      */
-    const switched_model::TerrainPlane &getPlane() const { return terrainPlane_; }
+    const tbai::mpc::quadruped::TerrainPlane &getPlane() const { return terrainPlane_; }
 
    private:
-    void updateLocalTerrainEstimate(const std::vector<switched_model::vector3_t> &footholds);
+    void updateLocalTerrainEstimate(const std::vector<tbai::mpc::quadruped::vector3_t> &footholds);
 
     // Local terrain estimate
-    switched_model::TerrainPlane terrainPlane_;
+    tbai::mpc::quadruped::TerrainPlane terrainPlane_;
 
     // Last footholds
-    std::vector<switched_model::vector3_t> lastFootholds_;
+    std::vector<tbai::mpc::quadruped::vector3_t> lastFootholds_;
 
     // Kinematics model
-    std::shared_ptr<switched_model::KinematicsModelBase<ocs2::scalar_t>> kinematicsPtr_;
+    std::shared_ptr<tbai::mpc::quadruped::KinematicsModelBase<ocs2::scalar_t>> kinematicsPtr_;
 };
 
 }  // namespace reference

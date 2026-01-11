@@ -9,7 +9,7 @@
 
 namespace tbai {
 namespace mpc {
-
+namespace quadruped_arm {
 std::vector<tbai::MotorCommand> HqpWbc::getMotorCommands(scalar_t currentTime, const vector_t &currentState,
                                                          const vector_t &currentInput, const size_t currentMode,
                                                          const vector_t &desiredState, const vector_t &desiredInput,
@@ -136,6 +136,6 @@ void HqpWbc::loadSettings(const std::string &configFile) {
     loadCppDataType<scalar_t>(configFile, prefix + "jointStanceKp", jointStanceKp_);
     loadCppDataType<scalar_t>(configFile, prefix + "jointStanceKd", jointStanceKd_);
 }
-
+}  // namespace quadruped_arm
 }  // namespace mpc
 }  // namespace tbai

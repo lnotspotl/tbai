@@ -8,7 +8,7 @@
 #include <pinocchio/multibody/model.hpp>
 #include <pinocchio/parsers/urdf.hpp>
 
-namespace anymal {
+namespace tbai::mpc::quadruped {
 namespace tpl {
 
 template <typename SCALAR_T>
@@ -16,8 +16,8 @@ QuadrupedKinematics<SCALAR_T>::QuadrupedKinematics(const FrameDeclaration &frame
                                                    const ocs2::PinocchioInterface &pinocchioInterface)
     : pinocchioInterfacePtr_(new PinocchioInterface_s_t(castPinocchioInterface(pinocchioInterface))),
       pinocchioMapping_(frameDeclaration, pinocchioInterface) {
-    for (size_t footIndex = 0; footIndex < switched_model::NUM_CONTACT_POINTS; ++footIndex) {
-        switched_model::joint_coordinate_s_t<SCALAR_T> zeroConfiguration;
+    for (size_t footIndex = 0; footIndex < tbai::mpc::quadruped::NUM_CONTACT_POINTS; ++footIndex) {
+        tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T> zeroConfiguration;
         zeroConfiguration.setZero();
         baseToLegRootInBaseFrame_[footIndex] =
             relativeTranslationInBaseFrame(zeroConfiguration, pinocchioMapping_.getHipFrameId(footIndex));
@@ -36,13 +36,13 @@ QuadrupedKinematics<SCALAR_T> *QuadrupedKinematics<SCALAR_T>::clone() const {
 }
 
 template <typename SCALAR_T>
-switched_model::vector3_s_t<SCALAR_T> QuadrupedKinematics<SCALAR_T>::baseToLegRootInBaseFrame(size_t footIndex) const {
+tbai::mpc::quadruped::vector3_s_t<SCALAR_T> QuadrupedKinematics<SCALAR_T>::baseToLegRootInBaseFrame(size_t footIndex) const {
     return baseToLegRootInBaseFrame_[footIndex];
 }
 
 template <typename SCALAR_T>
-switched_model::vector3_s_t<SCALAR_T> QuadrupedKinematics<SCALAR_T>::positionBaseToFootInBaseFrame(
-    size_t footIndex, const switched_model::joint_coordinate_s_t<SCALAR_T> &jointPositions) const {
+tbai::mpc::quadruped::vector3_s_t<SCALAR_T> QuadrupedKinematics<SCALAR_T>::positionBaseToFootInBaseFrame(
+    size_t footIndex, const tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T> &jointPositions) const {
     pinocchio::FrameIndex frameId = pinocchioMapping_.getFootFrameId(footIndex);
     const auto pinocchioJointPositions = pinocchioMapping_.getPinocchioJointVector(jointPositions);
     return relativeTranslationInBaseFrame(pinocchioJointPositions, frameId);
@@ -51,7 +51,7 @@ switched_model::vector3_s_t<SCALAR_T> QuadrupedKinematics<SCALAR_T>::positionBas
 template <typename SCALAR_T>
 auto QuadrupedKinematics<SCALAR_T>::baseToFootJacobianBlockInBaseFrame(
     std::size_t footIndex,
-    const switched_model::joint_coordinate_s_t<SCALAR_T> &jointPositions) const -> joint_jacobian_block_t {
+    const tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T> &jointPositions) const -> joint_jacobian_block_t {
     auto &data = pinocchioInterfacePtr_->getData();
     const auto &model = pinocchioInterfacePtr_->getModel();
 
@@ -73,17 +73,17 @@ auto QuadrupedKinematics<SCALAR_T>::baseToFootJacobianBlockInBaseFrame(
 }
 
 template <typename SCALAR_T>
-switched_model::matrix3_s_t<SCALAR_T> QuadrupedKinematics<SCALAR_T>::footOrientationInBaseFrame(
-    size_t footIndex, const switched_model::joint_coordinate_s_t<SCALAR_T> &jointPositions) const {
+tbai::mpc::quadruped::matrix3_s_t<SCALAR_T> QuadrupedKinematics<SCALAR_T>::footOrientationInBaseFrame(
+    size_t footIndex, const tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T> &jointPositions) const {
     pinocchio::FrameIndex frameId = pinocchioMapping_.getFootFrameId(footIndex);
     const auto pinocchioJointPositions = pinocchioMapping_.getPinocchioJointVector(jointPositions);
     return relativeOrientationInBaseFrame(pinocchioJointPositions, frameId);
 }
 
 template <typename SCALAR_T>
-switched_model::vector3_s_t<SCALAR_T> QuadrupedKinematics<SCALAR_T>::footVelocityRelativeToBaseInBaseFrame(
-    size_t footIndex, const switched_model::joint_coordinate_s_t<SCALAR_T> &jointPositions,
-    const switched_model::joint_coordinate_s_t<SCALAR_T> &jointVelocities) const {
+tbai::mpc::quadruped::vector3_s_t<SCALAR_T> QuadrupedKinematics<SCALAR_T>::footVelocityRelativeToBaseInBaseFrame(
+    size_t footIndex, const tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T> &jointPositions,
+    const tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T> &jointVelocities) const {
     auto &data = pinocchioInterfacePtr_->getData();
     const auto &model = pinocchioInterfacePtr_->getModel();
 
@@ -99,7 +99,7 @@ switched_model::vector3_s_t<SCALAR_T> QuadrupedKinematics<SCALAR_T>::footVelocit
 
 template <typename SCALAR_T>
 auto QuadrupedKinematics<SCALAR_T>::collisionSpheresInBaseFrame(
-    const switched_model::joint_coordinate_s_t<SCALAR_T> &jointPositions) const -> std::vector<CollisionSphere> {
+    const tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T> &jointPositions) const -> std::vector<CollisionSphere> {
     auto &data = pinocchioInterfacePtr_->getData();
     const auto &model = pinocchioInterfacePtr_->getModel();
     const auto pinocchioJointPositions = pinocchioMapping_.getPinocchioJointVector(jointPositions);
@@ -112,7 +112,7 @@ auto QuadrupedKinematics<SCALAR_T>::collisionSpheresInBaseFrame(
     collisionSpheres.reserve(linkFrames.size());
     for (int i = 0; i < linkFrames.size(); ++i) {
         const auto &transformation = pinocchio::updateFramePlacement(model, data, linkFrames[i]);
-        const switched_model::vector3_s_t<SCALAR_T> offset = decl[i].offset.cast<SCALAR_T>();
+        const tbai::mpc::quadruped::vector3_s_t<SCALAR_T> offset = decl[i].offset.cast<SCALAR_T>();
         collisionSpheres.push_back({transformation.act(offset), SCALAR_T(decl[i].radius)});
     }
 
@@ -120,8 +120,8 @@ auto QuadrupedKinematics<SCALAR_T>::collisionSpheresInBaseFrame(
 }
 
 template <typename SCALAR_T>
-switched_model::vector3_s_t<SCALAR_T> QuadrupedKinematics<SCALAR_T>::relativeTranslationInBaseFrame(
-    const switched_model::joint_coordinate_s_t<SCALAR_T> &jointPositions, pinocchio::FrameIndex frame) const {
+tbai::mpc::quadruped::vector3_s_t<SCALAR_T> QuadrupedKinematics<SCALAR_T>::relativeTranslationInBaseFrame(
+    const tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T> &jointPositions, pinocchio::FrameIndex frame) const {
     auto &data = pinocchioInterfacePtr_->getData();
     const auto &model = pinocchioInterfacePtr_->getModel();
     pinocchio::forwardKinematics(model, data, jointPositions);
@@ -130,8 +130,8 @@ switched_model::vector3_s_t<SCALAR_T> QuadrupedKinematics<SCALAR_T>::relativeTra
 }
 
 template <typename SCALAR_T>
-switched_model::matrix3_s_t<SCALAR_T> QuadrupedKinematics<SCALAR_T>::relativeOrientationInBaseFrame(
-    const switched_model::joint_coordinate_s_t<SCALAR_T> &jointPositions, pinocchio::FrameIndex frame) const {
+tbai::mpc::quadruped::matrix3_s_t<SCALAR_T> QuadrupedKinematics<SCALAR_T>::relativeOrientationInBaseFrame(
+    const tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T> &jointPositions, pinocchio::FrameIndex frame) const {
     auto &data = pinocchioInterfacePtr_->getData();
     const auto &model = pinocchioInterfacePtr_->getModel();
     pinocchio::forwardKinematics(model, data, jointPositions);
@@ -140,8 +140,8 @@ switched_model::matrix3_s_t<SCALAR_T> QuadrupedKinematics<SCALAR_T>::relativeOri
 }
 
 }  // namespace tpl
-}  // namespace anymal
+}  // namespace tbai::mpc::quadruped
 
 // Explicit instantiation
-template class anymal::tpl::QuadrupedKinematics<ocs2::scalar_t>;
-template class anymal::tpl::QuadrupedKinematics<ocs2::ad_scalar_t>;
+template class tbai::mpc::quadruped::tpl::QuadrupedKinematics<ocs2::scalar_t>;
+template class tbai::mpc::quadruped::tpl::QuadrupedKinematics<ocs2::ad_scalar_t>;

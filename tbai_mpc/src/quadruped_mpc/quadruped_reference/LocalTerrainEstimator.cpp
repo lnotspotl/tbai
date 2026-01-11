@@ -8,13 +8,13 @@ namespace tbai {
 namespace mpc {
 namespace reference {
 
-using namespace switched_model;
+using namespace tbai::mpc::quadruped;
 
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 LocalTerrainEstimator::LocalTerrainEstimator(
-    std::shared_ptr<switched_model::KinematicsModelBase<ocs2::scalar_t>> kinematicsPtr)
+    std::shared_ptr<tbai::mpc::quadruped::KinematicsModelBase<ocs2::scalar_t>> kinematicsPtr)
     : kinematicsPtr_(std::move(kinematicsPtr)) {
     lastFootholds_.resize(4);
     for (size_t i = 0; i < 4; i++) {

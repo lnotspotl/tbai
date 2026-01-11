@@ -4,7 +4,7 @@
 
 #include "tbai_mpc/quadruped_mpc/terrain/PlanarSignedDistanceField.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 PlanarSignedDistanceField::PlanarSignedDistanceField(TerrainPlane terrainPlane)
     : terrainPlane_(std::move(terrainPlane)) {}
@@ -24,4 +24,4 @@ std::pair<scalar_t, vector3_t> PlanarSignedDistanceField::valueAndDerivative(con
     return {value(position), derivative(position)};
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

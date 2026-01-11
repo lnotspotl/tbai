@@ -4,11 +4,11 @@
 #include <pinocchio/multibody/data.hpp>
 #include <pinocchio/multibody/model.hpp>
 
-namespace anymal {
+namespace tbai::mpc::quadruped {
 
 QuadrupedPinocchioMapping::QuadrupedPinocchioMapping(const FrameDeclaration &frameDeclaration,
                                                      const ocs2::PinocchioInterface &pinocchioInterface) {
-    for (int i = 0; i < switched_model::NUM_CONTACT_POINTS; ++i) {
+    for (int i = 0; i < tbai::mpc::quadruped::NUM_CONTACT_POINTS; ++i) {
         hipFrameIds_[i] = getBodyId(frameDeclaration.legs[i].root, pinocchioInterface);
         footFrameIds_[i] = getBodyId(frameDeclaration.legs[i].tip, pinocchioInterface);
     }
@@ -24,10 +24,10 @@ QuadrupedPinocchioMapping::QuadrupedPinocchioMapping(const FrameDeclaration &fra
 
 namespace {
 template <typename SCALAR_T>
-switched_model::joint_coordinate_s_t<SCALAR_T> getPinocchioJointVectorImpl(
-    const switched_model::joint_coordinate_s_t<SCALAR_T> &jointPositions,
-    const switched_model::feet_array_t<size_t> &mapFeetOrderOcs2ToPinocchio) {
-    switched_model::joint_coordinate_s_t<SCALAR_T> pinocchioJointPositions;
+tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T> getPinocchioJointVectorImpl(
+    const tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T> &jointPositions,
+    const tbai::mpc::quadruped::feet_array_t<size_t> &mapFeetOrderOcs2ToPinocchio) {
+    tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T> pinocchioJointPositions;
     // OCS2 LF
     pinocchioJointPositions.template segment<3>(3 * mapFeetOrderOcs2ToPinocchio[0]) =
         jointPositions.template segment<3>(0);
@@ -45,13 +45,13 @@ switched_model::joint_coordinate_s_t<SCALAR_T> getPinocchioJointVectorImpl(
 }
 }  // namespace
 
-switched_model::joint_coordinate_t QuadrupedPinocchioMapping::getPinocchioJointVector(
-    const switched_model::joint_coordinate_t &jointPositions) const {
+tbai::mpc::quadruped::joint_coordinate_t QuadrupedPinocchioMapping::getPinocchioJointVector(
+    const tbai::mpc::quadruped::joint_coordinate_t &jointPositions) const {
     return getPinocchioJointVectorImpl(jointPositions, mapFeetOrderOcs2ToPinocchio_);
 }
 
-switched_model::joint_coordinate_ad_t QuadrupedPinocchioMapping::getPinocchioJointVector(
-    const switched_model::joint_coordinate_ad_t &jointPositions) const {
+tbai::mpc::quadruped::joint_coordinate_ad_t QuadrupedPinocchioMapping::getPinocchioJointVector(
+    const tbai::mpc::quadruped::joint_coordinate_ad_t &jointPositions) const {
     return getPinocchioJointVectorImpl(jointPositions, mapFeetOrderOcs2ToPinocchio_);
 }
 
@@ -92,7 +92,7 @@ void QuadrupedPinocchioMapping::extractPinocchioJointNames(const ocs2::Pinocchio
 }
 
 void QuadrupedPinocchioMapping::extractFeetOrdering(const ocs2::PinocchioInterface &pinocchioInterface) {
-    for (int i = 0; i < switched_model::NUM_CONTACT_POINTS; ++i) {
+    for (int i = 0; i < tbai::mpc::quadruped::NUM_CONTACT_POINTS; ++i) {
         size_t jointMapping =
             std::find(pinocchioJointNames_.begin(), pinocchioJointNames_.end(), ocs2JointNames_[3 * i]) -
             pinocchioJointNames_.begin();
@@ -102,4 +102,4 @@ void QuadrupedPinocchioMapping::extractFeetOrdering(const ocs2::PinocchioInterfa
     }
 }
 
-}  // namespace anymal
+}  // namespace tbai::mpc::quadruped

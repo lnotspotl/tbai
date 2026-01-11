@@ -9,14 +9,14 @@ namespace tbai {
 namespace mpc {
 namespace reference {
 
-using namespace switched_model;
+using namespace tbai::mpc::quadruped;
 
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 ReferenceTrajectoryGenerator::ReferenceTrajectoryGenerator(
     const std::string &configFile, std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> velocityGeneratorPtr,
-    std::shared_ptr<switched_model::KinematicsModelBase<ocs2::scalar_t>> kinematicsPtr, ocs2::scalar_t trajdt,
+    std::shared_ptr<tbai::mpc::quadruped::KinematicsModelBase<ocs2::scalar_t>> kinematicsPtr, ocs2::scalar_t trajdt,
     size_t trajKnots)
     : velocityGeneratorPtr_(std::move(velocityGeneratorPtr)),
       terrainEstimator_(std::move(kinematicsPtr)),
@@ -50,7 +50,7 @@ ocs2::TargetTrajectories ReferenceTrajectoryGenerator::generateReferenceTrajecto
         // base orientation
         state.head<3>() = baseReferenceTrajectory.eulerXyz[i];
 
-        auto Rt = switched_model::rotationMatrixOriginToBase(baseReferenceTrajectory.eulerXyz[i]);
+        auto Rt = tbai::mpc::quadruped::rotationMatrixOriginToBase(baseReferenceTrajectory.eulerXyz[i]);
 
         // base position
         state.segment<3>(3) = baseReferenceTrajectory.positionInWorld[i];
@@ -87,7 +87,7 @@ void ReferenceTrajectoryGenerator::updateObservation(const ocs2::SystemObservati
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
-void ReferenceTrajectoryGenerator::setTerrainPlane(const switched_model::TerrainPlane &plane) {
+void ReferenceTrajectoryGenerator::setTerrainPlane(const tbai::mpc::quadruped::TerrainPlane &plane) {
     useExternalTerrain_ = true;
     externalTerrainPlane_ = plane;
 }
@@ -95,7 +95,7 @@ void ReferenceTrajectoryGenerator::setTerrainPlane(const switched_model::Terrain
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
-const switched_model::TerrainPlane &ReferenceTrajectoryGenerator::getTerrainPlane() const {
+const tbai::mpc::quadruped::TerrainPlane &ReferenceTrajectoryGenerator::getTerrainPlane() const {
     if (useExternalTerrain_) {
         return externalTerrainPlane_;
     }

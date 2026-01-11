@@ -2,7 +2,7 @@
 
 #include <Eigen/Core>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 namespace analytical_inverse_kinematics {
 
 /**
@@ -47,4 +47,4 @@ class LegInverseKinematicParameters {
 };
 
 }  // namespace analytical_inverse_kinematics
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

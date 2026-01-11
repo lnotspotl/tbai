@@ -12,7 +12,7 @@
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModel.h"
 #include "tbai_mpc/quadruped_mpc/logic/SwitchedModelModeScheduleManager.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * Defines a cost over tracking base and feet references
@@ -63,4 +63,4 @@ class MotionTrackingCost final : public ocs2::StateInputCostGaussNewtonAd {
 
 MotionTrackingCost::Weights loadWeightsFromFile(const std::string& filename, const std::string& fieldname, bool verbose = true);
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

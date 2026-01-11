@@ -4,7 +4,7 @@
 
 #include "tbai_mpc/quadruped_mpc/foot_planner/CubicSpline.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 CubicSpline::CubicSpline(Node start, Node end) {
     assert(start.time < end.time);
@@ -61,4 +61,4 @@ scalar_t CubicSpline::normalizedTime(scalar_t t) const {
     return (t - t0_) / dt_;
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

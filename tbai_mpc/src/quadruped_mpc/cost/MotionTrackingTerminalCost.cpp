@@ -6,7 +6,7 @@
 
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModelPrecomputation.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 MotionTrackingTerminalCost::MotionTrackingTerminalCost(matrix_t Q) : Q_(std::move(Q)) {}
 
@@ -41,4 +41,4 @@ vector_t MotionTrackingTerminalCost::getStateDeviation(const vector_t &state,
     return state - switchedModelPreComp.getStateReference();
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

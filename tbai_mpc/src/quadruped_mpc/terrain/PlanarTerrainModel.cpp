@@ -4,7 +4,7 @@
 
 #include "tbai_mpc/quadruped_mpc/terrain/PlanarTerrainModel.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 PlanarTerrainModel::PlanarTerrainModel(TerrainPlane terrainPlane)
     : terrainPlane_(terrainPlane), sdf_(std::move(terrainPlane)) {}
@@ -37,4 +37,4 @@ std::vector<vector2_t> PlanarTerrainModel::getHeightProfileAlongLine(const vecto
     return {{0.0, projection1.z()}, {0.5, 0.5 * (projection1.z() + projection2.z())}, {1.0, projection2.z()}};
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

@@ -4,7 +4,7 @@
 
 #include "tbai_mpc/quadruped_mpc/dynamics/ComKinoDynamicsParameters.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 template <typename SCALAR_T>
 ComKinoSystemDynamicsParameters<SCALAR_T>::ComKinoSystemDynamicsParameters(
@@ -23,4 +23,4 @@ Eigen::Matrix<SCALAR_T, Eigen::Dynamic, 1> ComKinoSystemDynamicsParameters<SCALA
 template class ComKinoSystemDynamicsParameters<scalar_t>;
 template class ComKinoSystemDynamicsParameters<ad_scalar_t>;
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

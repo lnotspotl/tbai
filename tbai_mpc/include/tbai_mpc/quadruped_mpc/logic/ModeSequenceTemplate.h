@@ -9,7 +9,7 @@
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModel.h"
 #include "tbai_mpc/quadruped_mpc/logic/Gait.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * ModeSequenceTemplate describes a periodic sequence of modes. It is defined by
@@ -93,4 +93,4 @@ ModeSequenceTemplate loadModeSequenceTemplate(const std::string& filename, const
  */
 ocs2::ModeSchedule loadModeSchedule(const std::string& filename, const std::string& topicName, bool verbose);
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

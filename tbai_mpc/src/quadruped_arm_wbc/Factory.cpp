@@ -4,7 +4,7 @@
 
 namespace tbai {
 namespace mpc {
-
+namespace quadruped_arm {
 std::unique_ptr<WbcBase> getWbcUnique(const std::string &controllerConfigFile, const std::string &urdfString,
                                       const tbai::mpc::quadruped_arm::ComModelBase<scalar_t> &comModel,
                                       const tbai::mpc::quadruped_arm::KinematicsModelBase<scalar_t> &kinematics) {
@@ -27,6 +27,6 @@ std::shared_ptr<WbcBase> getWbcShared(const std::string &controllerConfigFile, c
     return std::shared_ptr<WbcBase>(
         getWbcUnique(controllerConfigFile, urdfString, comModel, kinematics).release());
 }
-
+}  // namespace quadruped_arm
 }  // namespace mpc
 }  // namespace tbai

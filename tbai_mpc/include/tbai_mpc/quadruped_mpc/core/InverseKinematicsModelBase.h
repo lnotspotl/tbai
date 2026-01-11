@@ -6,7 +6,7 @@
 
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModel.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 class InverseKinematicsModelBase {
  public:
@@ -27,4 +27,4 @@ class InverseKinematicsModelBase {
   virtual InverseKinematicsModelBase* clone() const = 0;
 };
 
-};  // namespace switched_model
+};  // namespace tbai::mpc::quadruped

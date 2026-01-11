@@ -6,7 +6,7 @@
 
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModel.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 struct SwingNode {
   scalar_t time;
@@ -126,4 +126,4 @@ class QuinticSwing {
   std::vector<QuinticSpline> splines;
 };
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

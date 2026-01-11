@@ -9,7 +9,7 @@
 
 #include <tbai_mpc/quadruped_mpc/core/Rotations.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 comkino_input_t weightCompensatingInputs(const ComModelBase<scalar_t> &comModel, const contact_flag_t &contactFlags,
                                          const vector3_t &baseOrientation) {
@@ -39,4 +39,4 @@ comkino_input_t weightCompensatingInputs(scalar_t mass, const contact_flag_t &co
 template class ComModelBase<scalar_t>;
 template class ComModelBase<ocs2::CppAdInterface::ad_scalar_t>;
 
-}  // end of namespace switched_model
+}  // end of namespace tbai::mpc::quadruped

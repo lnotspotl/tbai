@@ -4,7 +4,7 @@
 
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModel.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 enum class Algorithm { DDP, SQP };
 std::string toAlgorithmName(Algorithm type);
@@ -51,4 +51,4 @@ struct ModelSettings {
 
 ModelSettings loadModelSettings(const std::string& filename, bool verbose = true);
 
-}  // end of namespace switched_model
+}  // end of namespace tbai::mpc::quadruped

@@ -12,7 +12,7 @@
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModel.h"
 #include "tbai_mpc/quadruped_mpc/logic/Gait.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 class GaitSchedule {
  public:
@@ -78,4 +78,4 @@ bool isStandingDuringTimeHorizon(scalar_t timeHorizon, const GaitSchedule& gaitS
 
 bool isStanding(const GaitSchedule& gaitSchedule);
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

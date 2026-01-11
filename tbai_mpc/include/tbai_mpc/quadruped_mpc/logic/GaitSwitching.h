@@ -9,7 +9,7 @@
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModel.h"
 #include "tbai_mpc/quadruped_mpc/logic/Gait.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * Selects the next gait from iterators. Repeating the final gait when the final gait is reached.
@@ -83,4 +83,4 @@ ocs2::ModeSchedule getModeSchedule(scalar_t phase, scalar_t t0, scalar_t timeHor
   return {evenTimes, modeSchedule};
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

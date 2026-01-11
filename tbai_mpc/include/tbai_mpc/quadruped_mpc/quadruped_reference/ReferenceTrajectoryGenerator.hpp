@@ -16,9 +16,9 @@ namespace tbai {
 namespace mpc {
 namespace reference {
 
-using switched_model::BaseReferenceCommand;
-using switched_model::BaseReferenceHorizon;
-using switched_model::BaseReferenceState;
+using tbai::mpc::quadruped::BaseReferenceCommand;
+using tbai::mpc::quadruped::BaseReferenceHorizon;
+using tbai::mpc::quadruped::BaseReferenceState;
 
 /**
  * ROS-independent reference trajectory generator.
@@ -36,7 +36,7 @@ class ReferenceTrajectoryGenerator {
      */
     ReferenceTrajectoryGenerator(const std::string &configFile,
                                  std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> velocityGeneratorPtr,
-                                 std::shared_ptr<switched_model::KinematicsModelBase<ocs2::scalar_t>> kinematicsPtr,
+                                 std::shared_ptr<tbai::mpc::quadruped::KinematicsModelBase<ocs2::scalar_t>> kinematicsPtr,
                                  ocs2::scalar_t trajdt = 0.1, size_t trajKnots = 20);
 
     virtual ~ReferenceTrajectoryGenerator() = default;
@@ -60,13 +60,13 @@ class ReferenceTrajectoryGenerator {
      * Sets an external terrain plane (bypasses internal estimation)
      * @param plane: The terrain plane to use
      */
-    void setTerrainPlane(const switched_model::TerrainPlane &plane);
+    void setTerrainPlane(const tbai::mpc::quadruped::TerrainPlane &plane);
 
     /**
      * Gets the current terrain plane
      * @return The current terrain plane
      */
-    const switched_model::TerrainPlane &getTerrainPlane() const;
+    const tbai::mpc::quadruped::TerrainPlane &getTerrainPlane() const;
 
     /**
      * Gets the latest observation
@@ -105,7 +105,7 @@ class ReferenceTrajectoryGenerator {
 
     // External terrain plane (if set, bypasses internal estimation)
     bool useExternalTerrain_ = false;
-    switched_model::TerrainPlane externalTerrainPlane_;
+    tbai::mpc::quadruped::TerrainPlane externalTerrainPlane_;
 };
 
 }  // namespace reference

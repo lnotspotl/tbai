@@ -6,7 +6,7 @@
 
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModelPrecomputation.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 EndEffectorVelocityConstraint::EndEffectorVelocityConstraint(
     int legNumber, const SwitchedModelModeScheduleManager &modeScheduleManager)
@@ -52,4 +52,4 @@ VectorFunctionLinearApproximation EndEffectorVelocityConstraint::getLinearApprox
     return constraint;
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

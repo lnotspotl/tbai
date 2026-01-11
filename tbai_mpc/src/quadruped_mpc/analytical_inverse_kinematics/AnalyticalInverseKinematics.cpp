@@ -1,9 +1,9 @@
 #include "tbai_mpc/quadruped_mpc/analytical_inverse_kinematics/AnalyticalInverseKinematics.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 namespace analytical_inverse_kinematics {
 
-namespace anymal {
+namespace tbai::mpc::quadruped {
 
 void getLimbJointPositionsFromPositionBaseToFootInBaseFrame(Eigen::Vector3d &legJoints,
                                                             const Eigen::Vector3d &positionBaseToFootInBaseFrame,
@@ -70,7 +70,7 @@ void getLimbJointPositionsFromPositionBaseToFootInBaseFrame(Eigen::Vector3d &leg
     }
     legJoints[2] = qKFE;
 }
-}  // namespace anymal
+}  // namespace tbai::mpc::quadruped
 
 namespace go2 {
 
@@ -207,4 +207,4 @@ void getLimbJointPositionsFromPositionBaseToFootInBaseFrame(Eigen::Vector3d &leg
 }  // namespace spot
 
 }  // namespace analytical_inverse_kinematics
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

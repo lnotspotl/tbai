@@ -13,12 +13,12 @@
 
 namespace tbai {
 namespace mpc {
-
+namespace quadruped {
 class SqpWbc : public WbcBase {
    public:
     SqpWbc(const std::string &configFile, const std::string &urdfString,
-           const switched_model::ComModelBase<scalar_t> &comModel,
-           const switched_model::KinematicsModelBase<scalar_t> &kinematics, const std::vector<std::string> &jointNames)
+           const tbai::mpc::quadruped::ComModelBase<scalar_t> &comModel,
+           const tbai::mpc::quadruped::KinematicsModelBase<scalar_t> &kinematics, const std::vector<std::string> &jointNames)
         : WbcBase(configFile, urdfString, comModel, kinematics, "sqpWbc."), jointNames_(jointNames) {
         loadSettings(configFile);
     }
@@ -49,5 +49,6 @@ class SqpWbc : public WbcBase {
     std::vector<std::string> jointNames_;
 };
 
+}  // namespace quadruped
 }  // namespace mpc
 }  // namespace tbai

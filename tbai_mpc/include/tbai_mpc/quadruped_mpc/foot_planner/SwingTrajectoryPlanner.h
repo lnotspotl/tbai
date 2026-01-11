@@ -16,7 +16,7 @@
 #include "tbai_mpc/quadruped_mpc/terrain/TerrainModel.h"
 #include "tbai_mpc/quadruped_mpc/terrain/TerrainPlane.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 struct SwingTrajectoryPlannerSettings {
   scalar_t liftOffVelocity = 0.0;
@@ -129,4 +129,4 @@ class SwingTrajectoryPlanner {
   ocs2::TargetTrajectories targetTrajectories_;
 };
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

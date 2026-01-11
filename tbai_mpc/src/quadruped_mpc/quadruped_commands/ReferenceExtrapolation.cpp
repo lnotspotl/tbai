@@ -7,7 +7,7 @@
 #include <tbai_mpc/quadruped_mpc/core/Rotations.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_commands/TerrainAdaptation.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 namespace {
 void addVelocitiesFromFiniteDifference(BaseReferenceTrajectory &baseRef) {
@@ -97,4 +97,4 @@ BaseReferenceTrajectory generateExtrapolatedBaseReference(const BaseReferenceHor
     return baseRef;
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

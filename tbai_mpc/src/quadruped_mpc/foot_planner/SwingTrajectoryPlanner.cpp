@@ -10,7 +10,7 @@
 #include <ocs2_core/misc/LinearInterpolation.h>
 #include <ocs2_core/misc/Lookup.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 SwingTrajectoryPlanner::SwingTrajectoryPlanner(SwingTrajectoryPlannerSettings settings,
                                                const KinematicsModelBase<scalar_t> &kinematicsModel,
@@ -651,4 +651,4 @@ SwingTrajectoryPlannerSettings loadSwingTrajectorySettings(const std::string &fi
     return settings;
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

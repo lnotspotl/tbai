@@ -6,7 +6,7 @@
 
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModel.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * This abstract class defines the interface for a signed distance field.
@@ -24,4 +24,4 @@ class SignedDistanceField {
   virtual std::pair<scalar_t, vector3_t> valueAndDerivative(const vector3_t& position) const = 0;
 };
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

@@ -7,7 +7,7 @@
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModelPrecomputation.h"
 #include "tbai_mpc/quadruped_mpc/cost/LinearStateInequalitySoftconstraint.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 FootPlacementCost::FootPlacementCost(ocs2::RelaxedBarrierPenalty::Config settings)
     : polygonPenalty_(new ocs2::RelaxedBarrierPenalty(settings)) {}
@@ -36,7 +36,7 @@ scalar_t FootPlacementCost::getValue(scalar_t time, const vector_t &state,
             linearStateInequalitySoftConstraint.h = constraintMatrixPtr->b;
             linearStateInequalitySoftConstraint.h.noalias() += constraintMatrixPtr->A * footPosition;
 
-            cost += switched_model::getValue(linearStateInequalitySoftConstraint, footPosition);
+            cost += tbai::mpc::quadruped::getValue(linearStateInequalitySoftConstraint, footPosition);
         }
     }
 
@@ -65,7 +65,7 @@ ScalarFunctionQuadraticApproximation FootPlacementCost::getQuadraticApproximatio
             linearStateInequalitySoftConstraint.h = constraintMatrixPtr->b;
             linearStateInequalitySoftConstraint.h.noalias() += constraintMatrixPtr->A * footPosition;
 
-            const auto targetcost = switched_model::getQuadraticApproximation(linearStateInequalitySoftConstraint,
+            const auto targetcost = tbai::mpc::quadruped::getQuadraticApproximation(linearStateInequalitySoftConstraint,
                                                                               footPosition, footJacobian);
             cost.f += targetcost.f;
             cost.dfdx += targetcost.dfdx;
@@ -76,4 +76,4 @@ ScalarFunctionQuadraticApproximation FootPlacementCost::getQuadraticApproximatio
     return cost;
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

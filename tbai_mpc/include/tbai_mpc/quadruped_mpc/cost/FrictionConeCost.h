@@ -10,7 +10,7 @@
 #include "tbai_mpc/quadruped_mpc/constraint/FrictionConeConstraint.h"
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModel.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * Implements the conversion of the friction cone constraint of all legs into a penalty cost.
@@ -40,4 +40,4 @@ class FrictionConeCost final : public ocs2::StateInputCost {
   std::unique_ptr<ocs2::PenaltyBase> penalty_;
 };
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

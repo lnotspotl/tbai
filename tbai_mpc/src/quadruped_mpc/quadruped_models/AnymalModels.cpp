@@ -12,48 +12,48 @@
 #include <tbai_mpc/quadruped_mpc/quadruped_models/QuadrupedKinematics.h>
 #include <tbai_mpc/quadruped_mpc/quadruped_models/SpotInverseKinematics.h>
 
-namespace anymal {
+namespace tbai::mpc::quadruped {
 
-std::unique_ptr<switched_model::InverseKinematicsModelBase> getAnymalInverseKinematics(
+std::unique_ptr<tbai::mpc::quadruped::InverseKinematicsModelBase> getAnymalInverseKinematics(
     const FrameDeclaration &frameDeclaration, const std::string &urdf) {
-    return std::unique_ptr<switched_model::InverseKinematicsModelBase>(
+    return std::unique_ptr<tbai::mpc::quadruped::InverseKinematicsModelBase>(
         new QuadrupedInverseKinematics(frameDeclaration, ocs2::getPinocchioInterfaceFromUrdfString(urdf)));
 }
 
-std::unique_ptr<switched_model::InverseKinematicsModelBase> getGo2InverseKinematics(
+std::unique_ptr<tbai::mpc::quadruped::InverseKinematicsModelBase> getGo2InverseKinematics(
     const FrameDeclaration &frameDeclaration, const std::string &urdf) {
-    return std::unique_ptr<switched_model::InverseKinematicsModelBase>(
+    return std::unique_ptr<tbai::mpc::quadruped::InverseKinematicsModelBase>(
         new Go2InverseKinematics(frameDeclaration, ocs2::getPinocchioInterfaceFromUrdfString(urdf)));
 }
 
-std::unique_ptr<switched_model::InverseKinematicsModelBase> getSpotInverseKinematics(
+std::unique_ptr<tbai::mpc::quadruped::InverseKinematicsModelBase> getSpotInverseKinematics(
     const FrameDeclaration &frameDeclaration, const std::string &urdf) {
-    return std::unique_ptr<switched_model::InverseKinematicsModelBase>(
+    return std::unique_ptr<tbai::mpc::quadruped::InverseKinematicsModelBase>(
         new SpotInverseKinematics(frameDeclaration, ocs2::getPinocchioInterfaceFromUrdfString(urdf)));
 }
 
-std::unique_ptr<switched_model::KinematicsModelBase<ocs2::scalar_t>> getAnymalKinematics(
+std::unique_ptr<tbai::mpc::quadruped::KinematicsModelBase<ocs2::scalar_t>> getAnymalKinematics(
     const FrameDeclaration &frameDeclaration, const std::string &urdf) {
-    return std::unique_ptr<switched_model::KinematicsModelBase<ocs2::scalar_t>>(
+    return std::unique_ptr<tbai::mpc::quadruped::KinematicsModelBase<ocs2::scalar_t>>(
         new QuadrupedKinematics(frameDeclaration, ocs2::getPinocchioInterfaceFromUrdfString(urdf)));
 }
 
-std::unique_ptr<switched_model::KinematicsModelBase<ocs2::ad_scalar_t>> getAnymalKinematicsAd(
+std::unique_ptr<tbai::mpc::quadruped::KinematicsModelBase<ocs2::ad_scalar_t>> getAnymalKinematicsAd(
     const FrameDeclaration &frameDeclaration, const std::string &urdf) {
-    return std::unique_ptr<switched_model::KinematicsModelBase<ocs2::ad_scalar_t>>(
+    return std::unique_ptr<tbai::mpc::quadruped::KinematicsModelBase<ocs2::ad_scalar_t>>(
         new QuadrupedKinematicsAd(frameDeclaration, ocs2::getPinocchioInterfaceFromUrdfString(urdf)));
 }
 
-std::unique_ptr<switched_model::ComModelBase<ocs2::scalar_t>> getAnymalComModel(
+std::unique_ptr<tbai::mpc::quadruped::ComModelBase<ocs2::scalar_t>> getAnymalComModel(
     const FrameDeclaration &frameDeclaration, const std::string &urdf) {
-    return std::unique_ptr<switched_model::ComModelBase<ocs2::scalar_t>>(
+    return std::unique_ptr<tbai::mpc::quadruped::ComModelBase<ocs2::scalar_t>>(
         new QuadrupedCom(frameDeclaration, createQuadrupedPinocchioInterfaceFromUrdfString(urdf)));
 }
 
-std::unique_ptr<switched_model::ComModelBase<ocs2::ad_scalar_t>> getAnymalComModelAd(
+std::unique_ptr<tbai::mpc::quadruped::ComModelBase<ocs2::ad_scalar_t>> getAnymalComModelAd(
     const FrameDeclaration &frameDeclaration, const std::string &urdf) {
-    return std::unique_ptr<switched_model::ComModelBase<ocs2::ad_scalar_t>>(
+    return std::unique_ptr<tbai::mpc::quadruped::ComModelBase<ocs2::ad_scalar_t>>(
         new QuadrupedComAd(frameDeclaration, createQuadrupedPinocchioInterfaceFromUrdfString(urdf)));
 }
 
-}  // namespace anymal
+}  // namespace tbai::mpc::quadruped

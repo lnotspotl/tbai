@@ -11,7 +11,7 @@
 #include <pinocchio/multibody/data.hpp>
 #include <pinocchio/multibody/model.hpp>
 
-namespace anymal {
+namespace tbai::mpc::quadruped {
 
 ocs2::PinocchioInterface createQuadrupedPinocchioInterfaceFromUrdfString(const std::string &urdfString) {
     // add 6 DoF for the floating base
@@ -40,20 +40,20 @@ QuadrupedCom<SCALAR_T> *QuadrupedCom<SCALAR_T>::clone() const {
 }
 
 template <typename SCALAR_T>
-switched_model::vector3_s_t<SCALAR_T> QuadrupedCom<SCALAR_T>::centerOfMassInBaseFrame(
-    const switched_model::joint_coordinate_s_t<SCALAR_T> &jointPositions) const {
+tbai::mpc::quadruped::vector3_s_t<SCALAR_T> QuadrupedCom<SCALAR_T>::centerOfMassInBaseFrame(
+    const tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T> &jointPositions) const {
     auto &data = pinocchioInterfacePtr_->getData();
     const auto &model = pinocchioInterfacePtr_->getModel();
     const auto configuration =
-        getPinnochioConfiguration(switched_model::base_coordinate_s_t<SCALAR_T>::Zero(), jointPositions);
+        getPinnochioConfiguration(tbai::mpc::quadruped::base_coordinate_s_t<SCALAR_T>::Zero(), jointPositions);
     pinocchio::centerOfMass(model, data, configuration);
     return data.com[1];  // CoM of the full robot in the free-flyer frame, i.e. base frame.
 }
 
 template <typename SCALAR_T>
-switched_model::vector3_s_t<SCALAR_T> QuadrupedCom<SCALAR_T>::centerOfMassInWorldFrame(
-    const switched_model::base_coordinate_s_t<SCALAR_T> &basePose,
-    const switched_model::joint_coordinate_s_t<SCALAR_T> &jointPositions) const {
+tbai::mpc::quadruped::vector3_s_t<SCALAR_T> QuadrupedCom<SCALAR_T>::centerOfMassInWorldFrame(
+    const tbai::mpc::quadruped::base_coordinate_s_t<SCALAR_T> &basePose,
+    const tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T> &jointPositions) const {
     auto &data = pinocchioInterfacePtr_->getData();
     const auto &model = pinocchioInterfacePtr_->getModel();
     const auto configuration = getPinnochioConfiguration(basePose, jointPositions);
@@ -61,13 +61,13 @@ switched_model::vector3_s_t<SCALAR_T> QuadrupedCom<SCALAR_T>::centerOfMassInWorl
 }
 
 template <typename SCALAR_T>
-switched_model::base_coordinate_s_t<SCALAR_T> QuadrupedCom<SCALAR_T>::calculateBaseLocalAccelerations(
-    const switched_model::base_coordinate_s_t<SCALAR_T> &basePose,
-    const switched_model::base_coordinate_s_t<SCALAR_T> &baseLocalVelocities,
-    const switched_model::joint_coordinate_s_t<SCALAR_T> &jointPositions,
-    const switched_model::joint_coordinate_s_t<SCALAR_T> &jointVelocities,
-    const switched_model::joint_coordinate_s_t<SCALAR_T> &jointAccelerations,
-    const switched_model::base_coordinate_s_t<SCALAR_T> &forcesOnBaseInBaseFrame) const {
+tbai::mpc::quadruped::base_coordinate_s_t<SCALAR_T> QuadrupedCom<SCALAR_T>::calculateBaseLocalAccelerations(
+    const tbai::mpc::quadruped::base_coordinate_s_t<SCALAR_T> &basePose,
+    const tbai::mpc::quadruped::base_coordinate_s_t<SCALAR_T> &baseLocalVelocities,
+    const tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T> &jointPositions,
+    const tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T> &jointVelocities,
+    const tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T> &jointAccelerations,
+    const tbai::mpc::quadruped::base_coordinate_s_t<SCALAR_T> &forcesOnBaseInBaseFrame) const {
     using vector_t = Eigen::Matrix<SCALAR_T, Eigen::Dynamic, 1>;
 
     auto &data = pinocchioInterfacePtr_->getData();
@@ -93,18 +93,18 @@ switched_model::base_coordinate_s_t<SCALAR_T> QuadrupedCom<SCALAR_T>::calculateB
 
     const vector_t dynamicBias = pinocchio::nonLinearEffects(model, data, configuration, velocity);
 
-    switched_model::base_coordinate_s_t<SCALAR_T> pinocchioBaseForces;
+    tbai::mpc::quadruped::base_coordinate_s_t<SCALAR_T> pinocchioBaseForces;
     // Force
     pinocchioBaseForces.template head<3>() = forcesOnBaseInBaseFrame.template tail<3>();
     // Wrench
     pinocchioBaseForces.template tail<3>() = forcesOnBaseInBaseFrame.template head<3>();
 
-    switched_model::vector6_s_t<SCALAR_T> baseForcesInBaseFrame = pinocchioBaseForces - dynamicBias.head(6);
+    tbai::mpc::quadruped::vector6_s_t<SCALAR_T> baseForcesInBaseFrame = pinocchioBaseForces - dynamicBias.head(6);
     baseForcesInBaseFrame.noalias() -=
         data.M.template block<6, 12>(0, 6) * pinocchioMapping_.getPinocchioJointVector(jointAccelerations);
 
     // M are symmetric but pinocchio only fills in the upper triangle.
-    switched_model::matrix6_s_t<SCALAR_T> Mb = data.M.topLeftCorner(6, 6).template selfadjointView<Eigen::Upper>();
+    tbai::mpc::quadruped::matrix6_s_t<SCALAR_T> Mb = data.M.topLeftCorner(6, 6).template selfadjointView<Eigen::Upper>();
     vector_t baseAcceleration = inertiaTensorSolveLinearAngular(Mb, baseForcesInBaseFrame);
 
     vector_t ocs2baseAcceleration(6);
@@ -118,44 +118,44 @@ switched_model::base_coordinate_s_t<SCALAR_T> QuadrupedCom<SCALAR_T>::calculateB
 
 template <typename SCALAR_T>
 Eigen::Matrix<SCALAR_T, Eigen::Dynamic, 1> QuadrupedCom<SCALAR_T>::getPinnochioConfiguration(
-    const switched_model::base_coordinate_s_t<SCALAR_T> &basePose,
-    const switched_model::joint_coordinate_s_t<SCALAR_T> &jointPositions) const {
+    const tbai::mpc::quadruped::base_coordinate_s_t<SCALAR_T> &basePose,
+    const tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T> &jointPositions) const {
     const auto &model = pinocchioInterfacePtr_->getModel();
 
     Eigen::Matrix<SCALAR_T, Eigen::Dynamic, 1> configuration(model.nq);
     // basePost
-    configuration.template head<3>() = switched_model::getPositionInOrigin(basePose);
+    configuration.template head<3>() = tbai::mpc::quadruped::getPositionInOrigin(basePose);
     // baseQuad
     const Eigen::Quaternion<SCALAR_T> baseQuat =
-        switched_model::quaternionBaseToOrigin<SCALAR_T>(switched_model::getOrientation(basePose));
+        tbai::mpc::quadruped::quaternionBaseToOrigin<SCALAR_T>(tbai::mpc::quadruped::getOrientation(basePose));
     configuration.template segment<4>(3) = baseQuat.coeffs();
     // JointsPos
-    configuration.template segment<switched_model::JOINT_COORDINATE_SIZE>(7) =
+    configuration.template segment<tbai::mpc::quadruped::JOINT_COORDINATE_SIZE>(7) =
         pinocchioMapping_.getPinocchioJointVector(jointPositions);
     return configuration;
 }
 
 template <typename SCALAR_T>
 Eigen::Matrix<SCALAR_T, Eigen::Dynamic, 1> QuadrupedCom<SCALAR_T>::getPinnochioVelocity(
-    const switched_model::base_coordinate_s_t<SCALAR_T> &baseLocalVelocities,
-    const switched_model::joint_coordinate_s_t<SCALAR_T> &jointVelocities) const {
+    const tbai::mpc::quadruped::base_coordinate_s_t<SCALAR_T> &baseLocalVelocities,
+    const tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T> &jointVelocities) const {
     const auto &model = pinocchioInterfacePtr_->getModel();
 
     Eigen::Matrix<SCALAR_T, Eigen::Dynamic, 1> velocity(model.nv);
     // Base linear velocity in Base frame
-    velocity.template head<3>() = switched_model::getLinearVelocity(baseLocalVelocities);
+    velocity.template head<3>() = tbai::mpc::quadruped::getLinearVelocity(baseLocalVelocities);
     // Base angular velocity in Base frame
-    velocity.template segment<3>(3) = switched_model::getAngularVelocity(baseLocalVelocities);
+    velocity.template segment<3>(3) = tbai::mpc::quadruped::getAngularVelocity(baseLocalVelocities);
     // Joint velocity
-    velocity.template segment<switched_model::JOINT_COORDINATE_SIZE>(6) =
+    velocity.template segment<tbai::mpc::quadruped::JOINT_COORDINATE_SIZE>(6) =
         pinocchioMapping_.getPinocchioJointVector(jointVelocities);
 
     return velocity;
 }
 
 }  // namespace tpl
-}  // namespace anymal
+}  // namespace tbai::mpc::quadruped
 
 // Explicit instantiation
-template class anymal::tpl::QuadrupedCom<ocs2::scalar_t>;
-template class anymal::tpl::QuadrupedCom<ocs2::ad_scalar_t>;
+template class tbai::mpc::quadruped::tpl::QuadrupedCom<ocs2::scalar_t>;
+template class tbai::mpc::quadruped::tpl::QuadrupedCom<ocs2::ad_scalar_t>;

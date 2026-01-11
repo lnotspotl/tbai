@@ -4,7 +4,7 @@
 
 #pragma once
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 template <typename SCALAR_T>
 struct CostElements {
@@ -44,4 +44,4 @@ struct CostElements {
   }
 };
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

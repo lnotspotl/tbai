@@ -4,7 +4,7 @@
 #include "tbai_mpc/quadruped_mpc/terrain/SignedDistanceField.h"
 #include "tbai_mpc/quadruped_mpc/terrain/TerrainModel.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * Implements a flat terrain signed distance field
@@ -31,4 +31,4 @@ class PlanarSignedDistanceField : public SignedDistanceField {
   TerrainPlane terrainPlane_;
 };
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

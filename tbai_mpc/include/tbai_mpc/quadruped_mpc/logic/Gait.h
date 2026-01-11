@@ -9,7 +9,7 @@
 
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModel.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * A gait is a periodic mode schedule parameterized by a "phase" variable.
@@ -58,4 +58,4 @@ scalar_t timeLeftInMode(scalar_t phase, const Gait& gait);
 /** Print gait */
 std::ostream& operator<<(std::ostream& stream, const Gait& gait);
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

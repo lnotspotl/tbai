@@ -9,7 +9,7 @@
 
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModel.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * Implements the collision avoidance penalty function for all collision spheres given by the precomputation.
@@ -34,4 +34,4 @@ class CollisionAvoidanceCost final : public ocs2::StateCost {
   std::unique_ptr<ocs2::RelaxedBarrierPenalty> penalty_;
 };
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

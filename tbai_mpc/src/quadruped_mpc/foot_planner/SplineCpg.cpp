@@ -4,7 +4,7 @@
 
 #include "tbai_mpc/quadruped_mpc/foot_planner/SplineCpg.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 SplineCpg::SplineCpg(CubicSpline::Node liftOff, scalar_t midHeight, CubicSpline::Node touchDown)
     : SplineCpg(liftOff, CubicSpline::Node{(liftOff.time + touchDown.time) / 2.0, midHeight, 0.0}, touchDown) {}
@@ -40,4 +40,4 @@ scalar_t SplineCpg::finalTimeDerivative(scalar_t time) const {
     }
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

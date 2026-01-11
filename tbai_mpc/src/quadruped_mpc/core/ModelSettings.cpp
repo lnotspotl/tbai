@@ -9,7 +9,7 @@
 
 #include <ocs2_core/misc/LoadData.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 std::string toAlgorithmName(Algorithm type) {
     static const std::unordered_map<Algorithm, std::string> map{{Algorithm::DDP, "DDP"}, {Algorithm::SQP, "SQP"}};
@@ -80,4 +80,4 @@ ModelSettings loadModelSettings(const std::string &filename, bool verbose) {
     return modelSettings;
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

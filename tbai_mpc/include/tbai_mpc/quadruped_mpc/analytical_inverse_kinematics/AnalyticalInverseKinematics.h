@@ -2,10 +2,10 @@
 
 #include "tbai_mpc/quadruped_mpc/analytical_inverse_kinematics/LegInverseKinematicParameters.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 namespace analytical_inverse_kinematics {
 
-namespace anymal {
+namespace tbai::mpc::quadruped {
 
 /**
  * Computes the inverse kinematics for a single leg given the position in base frame
@@ -19,7 +19,7 @@ void getLimbJointPositionsFromPositionBaseToFootInBaseFrame(Eigen::Vector3d &leg
                                                             const LegInverseKinematicParameters &parameters,
                                                             size_t limb);
 
-}  // namespace anymal
+}  // namespace tbai::mpc::quadruped
 
 namespace go2 {
 
@@ -54,4 +54,4 @@ void getLimbJointPositionsFromPositionBaseToFootInBaseFrame(Eigen::Vector3d &leg
 }  // namespace spot
 
 }  // namespace analytical_inverse_kinematics
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

@@ -3,7 +3,7 @@
 #include <tbai_mpc/quadruped_mpc/core/ComModelBase.h>
 #include <tbai_mpc/quadruped_mpc/core/KinematicsModelBase.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 template <typename Constraint>
 int evaluateConstraint(ComModelBase<ocs2::CppAdInterface::ad_scalar_t>& comModel,
@@ -67,4 +67,4 @@ int evaluateConstraint(ComModelBase<ocs2::CppAdInterface::ad_scalar_t>& comModel
   return true;
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

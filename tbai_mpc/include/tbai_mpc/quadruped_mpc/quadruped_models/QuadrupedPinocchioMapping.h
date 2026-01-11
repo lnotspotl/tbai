@@ -6,7 +6,7 @@
 
 #include <tbai_mpc/quadruped_mpc/quadruped_models//FrameDeclaration.h>
 
-namespace anymal {
+namespace tbai::mpc::quadruped {
 
 /**
  * Used to map joint configuration space from OCS2 to Pinocchio. In OCS2, the feet order is {LF, RF, LH, RH}. But in Pinocchio, the feet
@@ -16,9 +16,9 @@ class QuadrupedPinocchioMapping {
  public:
   QuadrupedPinocchioMapping(const FrameDeclaration& frameDeclaration, const ocs2::PinocchioInterface& pinocchioInterface);
 
-  switched_model::joint_coordinate_t getPinocchioJointVector(const switched_model::joint_coordinate_t& jointPositions) const;
+  tbai::mpc::quadruped::joint_coordinate_t getPinocchioJointVector(const tbai::mpc::quadruped::joint_coordinate_t& jointPositions) const;
 
-  switched_model::joint_coordinate_ad_t getPinocchioJointVector(const switched_model::joint_coordinate_ad_t& jointPositions) const;
+  tbai::mpc::quadruped::joint_coordinate_ad_t getPinocchioJointVector(const tbai::mpc::quadruped::joint_coordinate_ad_t& jointPositions) const;
 
   size_t getPinocchioFootIndex(size_t ocs2FootIdx) const { return mapFeetOrderOcs2ToPinocchio_[ocs2FootIdx]; }
 
@@ -40,20 +40,20 @@ class QuadrupedPinocchioMapping {
   void extractFeetOrdering(const ocs2::PinocchioInterface& pinocchioInterface);
 
   // Frame Ids
-  switched_model::feet_array_t<size_t> hipFrameIds_;
-  switched_model::feet_array_t<size_t> footFrameIds_;
+  tbai::mpc::quadruped::feet_array_t<size_t> hipFrameIds_;
+  tbai::mpc::quadruped::feet_array_t<size_t> footFrameIds_;
 
   // Collisions
   std::vector<size_t> collisionLinkFrameIds_;
   std::vector<CollisionDeclaration> collisionDeclaration_;
 
   // Feet ordering
-  switched_model::feet_array_t<size_t> mapFeetOrderOcs2ToPinocchio_;
-  switched_model::feet_array_t<size_t> mapFeetOrderPinocchioToOcs2_;
+  tbai::mpc::quadruped::feet_array_t<size_t> mapFeetOrderOcs2ToPinocchio_;
+  tbai::mpc::quadruped::feet_array_t<size_t> mapFeetOrderPinocchioToOcs2_;
 
   // Frame names
   std::vector<std::string> ocs2JointNames_;
   std::vector<std::string> pinocchioJointNames_;
 };
 
-}  // namespace anymal
+}  // namespace tbai::mpc::quadruped

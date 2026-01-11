@@ -6,7 +6,7 @@
 
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModelPrecomputation.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 namespace {
 
@@ -97,4 +97,4 @@ VectorFunctionLinearApproximation FootNormalConstraint::getLinearApproximation(
     return constraint;
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

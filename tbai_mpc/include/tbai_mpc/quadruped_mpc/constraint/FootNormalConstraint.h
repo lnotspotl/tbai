@@ -8,7 +8,7 @@
 
 #include <tbai_mpc/quadruped_mpc/core/SwitchedModel.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * Implements the swing motion equality constraint in the normal direction of the terrain.
@@ -39,4 +39,4 @@ class FootNormalConstraint : public ocs2::StateInputConstraint {
   const scalar_t positionGain_;
 };
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

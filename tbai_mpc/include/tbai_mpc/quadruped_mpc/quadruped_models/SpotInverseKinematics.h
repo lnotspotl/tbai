@@ -13,9 +13,9 @@
 
 #include "tbai_mpc/quadruped_mpc/quadruped_models/QuadrupedPinocchioMapping.h"
 
-namespace anymal {
+namespace tbai::mpc::quadruped {
 
-class SpotInverseKinematics final : public switched_model::InverseKinematicsModelBase {
+class SpotInverseKinematics final : public tbai::mpc::quadruped::InverseKinematicsModelBase {
  public:
   SpotInverseKinematics(const FrameDeclaration& frameDeclaration, const ocs2::PinocchioInterface& pinocchioInterface);
 
@@ -23,17 +23,17 @@ class SpotInverseKinematics final : public switched_model::InverseKinematicsMode
 
   SpotInverseKinematics* clone() const override;
 
-  switched_model::vector3_t getLimbJointPositionsFromPositionBaseToFootInBaseFrame(
-      size_t footIndex, const switched_model::vector3_t& positionBaseToFootInBaseFrame) const override;
+  tbai::mpc::quadruped::vector3_t getLimbJointPositionsFromPositionBaseToFootInBaseFrame(
+      size_t footIndex, const tbai::mpc::quadruped::vector3_t& positionBaseToFootInBaseFrame) const override;
 
-  switched_model::vector3_t getLimbVelocitiesFromFootVelocityRelativeToBaseInBaseFrame(
-      size_t footIndex, const switched_model::vector3_t& footVelocityRelativeToBaseInBaseFrame,
-      const joint_jacobian_block_t& jointJacobian, switched_model::scalar_t damping) const override;
+  tbai::mpc::quadruped::vector3_t getLimbVelocitiesFromFootVelocityRelativeToBaseInBaseFrame(
+      size_t footIndex, const tbai::mpc::quadruped::vector3_t& footVelocityRelativeToBaseInBaseFrame,
+      const joint_jacobian_block_t& jointJacobian, tbai::mpc::quadruped::scalar_t damping) const override;
 
  private:
   SpotInverseKinematics(const SpotInverseKinematics& other) = default;
 
-  switched_model::feet_array_t<switched_model::analytical_inverse_kinematics::LegInverseKinematicParameters> parameters_;
+  tbai::mpc::quadruped::feet_array_t<tbai::mpc::quadruped::analytical_inverse_kinematics::LegInverseKinematicParameters> parameters_;
 };
 
-};  // namespace anymal
+};  // namespace tbai::mpc::quadruped

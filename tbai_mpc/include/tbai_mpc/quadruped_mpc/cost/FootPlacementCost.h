@@ -9,7 +9,7 @@
 
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModel.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * Implements footplacement penalty function for a provided polygon.
@@ -34,4 +34,4 @@ class FootPlacementCost final : public ocs2::StateCost {
   std::unique_ptr<ocs2::RelaxedBarrierPenalty> polygonPenalty_;
 };
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

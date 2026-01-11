@@ -13,6 +13,7 @@
 
 namespace tbai {
 namespace mpc {
+namespace quadruped_arm {
 
 class HqpWbc : public WbcBase {
    public:
@@ -28,8 +29,7 @@ class HqpWbc : public WbcBase {
                                                      const vector_t &desiredState, const vector_t &desiredInput,
                                                      const size_t desiredMode, const vector_t &desiredJointAcceleration,
                                                      const vector_t &desiredArmEEPosition,
-                                                     const vector_t &desiredArmEEOrientation,
-                                                     bool &isStable) override;
+                                                     const vector_t &desiredArmEEOrientation, bool &isStable) override;
 
    private:
     void loadSettings(const std::string &configFile);
@@ -45,5 +45,6 @@ class HqpWbc : public WbcBase {
     HqpSolver hqpSolver_;
 };
 
+}  // namespace quadruped_arm
 }  // namespace mpc
 }  // namespace tbai

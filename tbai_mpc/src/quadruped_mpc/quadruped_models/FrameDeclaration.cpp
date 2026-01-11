@@ -7,7 +7,7 @@
 #include <ocs2_core/misc/LoadData.h>
 #include <ocs2_core/misc/LoadStdVectorOfPair.h>
 
-namespace anymal {
+namespace tbai::mpc::quadruped {
 
 std::vector<std::string> getJointNames(const FrameDeclaration &frameDeclaration) {
     std::vector<std::string> jointNames;
@@ -51,4 +51,4 @@ FrameDeclaration frameDeclarationFromFile(const std::string &file) {
     return decl;
 }
 
-}  // namespace anymal
+}  // namespace tbai::mpc::quadruped

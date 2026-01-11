@@ -4,7 +4,7 @@
 
 #include "tbai_mpc/quadruped_mpc/terrain/PlaneFitting.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 NormalAndPosition estimatePlane(const std::vector<vector3_t> &regressionPoints) {
     // Fit a plane that minimizes the normal distance to the provided regression points. Assumes at least 3 points are
@@ -43,4 +43,4 @@ NormalAndPosition estimatePlane(const std::vector<vector3_t> &regressionPoints) 
     }
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

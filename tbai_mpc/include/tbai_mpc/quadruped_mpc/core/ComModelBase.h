@@ -2,7 +2,7 @@
 
 #include <tbai_mpc/quadruped_mpc/core/SwitchedModel.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * CoM Model Base Class
@@ -43,7 +43,7 @@ class ComModelBase {
       const base_coordinate_s_t<SCALAR_T>& basePose, const base_coordinate_s_t<SCALAR_T>& baseLocalVelocities,
       const joint_coordinate_s_t<SCALAR_T>& jointPositions, const joint_coordinate_s_t<SCALAR_T>& jointVelocities,
       const joint_coordinate_s_t<SCALAR_T>& jointAccelerations,
-      const switched_model::base_coordinate_s_t<SCALAR_T>& forcesOnBaseInBaseFrame) const = 0;
+      const tbai::mpc::quadruped::base_coordinate_s_t<SCALAR_T>& forcesOnBaseInBaseFrame) const = 0;
 };
 
 extern template class ComModelBase<scalar_t>;
@@ -59,4 +59,4 @@ comkino_input_t weightCompensatingInputs(const ComModelBase<scalar_t>& comModel,
 
 comkino_input_t weightCompensatingInputs(scalar_t mass, const contact_flag_t& contactFlags, const vector3_t& baseOrientation);
 
-}  // end of namespace switched_model
+}  // end of namespace tbai::mpc::quadruped

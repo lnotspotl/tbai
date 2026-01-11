@@ -9,6 +9,7 @@
 
 namespace tbai {
 namespace mpc {
+namespace quadruped {
 
 std::vector<tbai::MotorCommand> SqpWbc::getMotorCommands(scalar_t currentTime, const vector_t &currentState,
                                                          const vector_t &currentInput, const size_t currentMode,
@@ -40,7 +41,7 @@ std::vector<tbai::MotorCommand> SqpWbc::getMotorCommands(scalar_t currentTime, c
     const vector_t &udot = sqpSolution.segment(0, nGeneralizedCoordinates_);
 
     // External forces, expressed in the world frame
-    const vector_t &Fext = sqpSolution.segment(nGeneralizedCoordinates_, 3 * switched_model::NUM_CONTACT_POINTS);
+    const vector_t &Fext = sqpSolution.segment(nGeneralizedCoordinates_, 3 * tbai::mpc::quadruped::NUM_CONTACT_POINTS);
 
     // Compute joint torques
     auto &data = pinocchioInterfaceMeasured_.getData();
@@ -50,8 +51,8 @@ std::vector<tbai::MotorCommand> SqpWbc::getMotorCommands(scalar_t currentTime, c
     vector_t torques = Mj * udot + hj - JjT * Fext;
 
     // Desired joint positions and velocities
-    const vector_t &qDesired = desiredState.tail<switched_model::JOINT_COORDINATE_SIZE>();
-    const vector_t &vDesired = desiredInput.tail<switched_model::JOINT_COORDINATE_SIZE>();
+    const vector_t &qDesired = desiredState.tail<tbai::mpc::quadruped::JOINT_COORDINATE_SIZE>();
+    const vector_t &vDesired = desiredInput.tail<tbai::mpc::quadruped::JOINT_COORDINATE_SIZE>();
 
     std::swap(torques(3), torques(6));
     std::swap(torques(4), torques(7));
@@ -99,5 +100,6 @@ void SqpWbc::loadSettings(const std::string &configFile) {
     loadCppDataType<scalar_t>(configFile, prefix + "jointStanceKd", jointStanceKd_);
 }
 
+}  // namespace quadruped
 }  // namespace mpc
 }  // namespace tbai

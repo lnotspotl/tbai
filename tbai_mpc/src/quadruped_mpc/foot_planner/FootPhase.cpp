@@ -7,7 +7,7 @@
 #include "tbai_mpc/quadruped_mpc/foot_planner/CubicSpline.h"
 #include <ocs2_core/misc/LinearInterpolation.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 FootTangentialConstraintMatrix tangentialConstraintsFromConvexTerrain(const ConvexTerrain &stanceTerrain,
                                                                       scalar_t margin) {
@@ -290,4 +290,4 @@ vector3_t ExternalSwingPhase::getVelocityInWorld(scalar_t time) const {
     return ocs2::LinearInterpolation::interpolate(time, timeTrajectory_, velocityTrajectory_);
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

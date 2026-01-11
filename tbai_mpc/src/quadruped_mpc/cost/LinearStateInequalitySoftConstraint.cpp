@@ -4,7 +4,7 @@
 
 #include "tbai_mpc/quadruped_mpc/cost/LinearStateInequalitySoftconstraint.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 scalar_t getValue(const LinearStateInequalitySoftConstraint &constraints, const vector_t &f) {
     scalar_t cost(0.0);
@@ -64,4 +64,4 @@ ScalarFunctionQuadraticApproximation getQuadraticApproximation(
     return cost;
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

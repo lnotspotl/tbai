@@ -15,12 +15,13 @@
 
 namespace tbai {
 namespace mpc {
+namespace quadruped {
 
 class WbcBase {
    public:
     WbcBase(const std::string &configFile, const std::string &urdfString,
-            const switched_model::ComModelBase<scalar_t> &comModel,
-            const switched_model::KinematicsModelBase<scalar_t> &kinematics, const std::string &configPrefix);
+            const tbai::mpc::quadruped::ComModelBase<scalar_t> &comModel,
+            const tbai::mpc::quadruped::KinematicsModelBase<scalar_t> &kinematics, const std::string &configPrefix);
 
     virtual ~WbcBase() = default;
 
@@ -98,7 +99,7 @@ class WbcBase {
     scalar_t torqueLimit_;
 
     /* Desired contact flags */
-    switched_model::contact_flag_t contactFlags_;
+    tbai::mpc::quadruped::contact_flag_t contactFlags_;
     size_t nContacts_;
 
     /* whether stance should be enforeced as a constraint  or as a cost (false is more robust (e.g. slips)) */
@@ -108,9 +109,10 @@ class WbcBase {
     void loadSettings(const std::string &configFile, const std::string &configPrefix);
     void generateFrictionConeMatrix(const scalar_t mu);
 
-    std::unique_ptr<switched_model::ComModelBase<scalar_t>> comModelPtr_;
-    std::unique_ptr<switched_model::KinematicsModelBase<scalar_t>> kinematicsPtr_;
+    std::unique_ptr<tbai::mpc::quadruped::ComModelBase<scalar_t>> comModelPtr_;
+    std::unique_ptr<tbai::mpc::quadruped::KinematicsModelBase<scalar_t>> kinematicsPtr_;
 };
 
+}  // namespace quadruped
 }  // namespace mpc
 }  // namespace tbai

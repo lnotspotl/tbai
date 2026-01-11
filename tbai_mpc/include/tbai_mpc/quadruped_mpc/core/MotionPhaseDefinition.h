@@ -15,7 +15,7 @@
 
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModel.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 enum ModeNumber {  // {LF, RF, LH, RH}
   FLY = 0,
@@ -144,4 +144,4 @@ inline size_t string2ModeNumber(const std::string& modeString) {
   return nameToMode[modeString];
 }
 
-}  // end of namespace switched_model
+}  // end of namespace tbai::mpc::quadruped

@@ -16,8 +16,7 @@
 #include <tbai_mpc/quadruped_mpc/quadruped_interfaces/Interfaces.h>
 #include <tbai_mpc/quadruped_wbc/Factory.hpp>
 
-namespace tbai {
-namespace mpc {
+namespace tbai::mpc::quadruped {
 
 /*********************************************************************************************************************/
 /*********************************************************************************************************************/
@@ -50,16 +49,16 @@ void MpcController::initialize(const std::string &urdfString, const std::string 
     // Create quadruped interface
     if (robotName_ == "anymal_d" || robotName_ == "anymal_b" || robotName_ == "anymal_c") {
         quadrupedInterfacePtr_ =
-            anymal::getAnymalInterface(urdfString, switched_model::loadQuadrupedSettings(taskSettingsFile),
-                                       anymal::frameDeclarationFromFile(frameDeclarationFile));
+            tbai::mpc::quadruped::getAnymalInterface(urdfString, tbai::mpc::quadruped::loadQuadrupedSettings(taskSettingsFile),
+                                       tbai::mpc::quadruped::frameDeclarationFromFile(frameDeclarationFile));
     } else if (robotName_ == "go2") {
         quadrupedInterfacePtr_ =
-            anymal::getGo2Interface(urdfString, switched_model::loadQuadrupedSettings(taskSettingsFile),
-                                    anymal::frameDeclarationFromFile(frameDeclarationFile));
+            tbai::mpc::quadruped::getGo2Interface(urdfString, tbai::mpc::quadruped::loadQuadrupedSettings(taskSettingsFile),
+                                    tbai::mpc::quadruped::frameDeclarationFromFile(frameDeclarationFile));
     } else if (robotName_ == "spot" || robotName_ == "spot_arm") {
         quadrupedInterfacePtr_ =
-            anymal::getSpotInterface(urdfString, switched_model::loadQuadrupedSettings(taskSettingsFile),
-                                     anymal::frameDeclarationFromFile(frameDeclarationFile));
+            tbai::mpc::quadruped::getSpotInterface(urdfString, tbai::mpc::quadruped::loadQuadrupedSettings(taskSettingsFile),
+                                     tbai::mpc::quadruped::frameDeclarationFromFile(frameDeclarationFile));
     } else {
         TBAI_THROW("Robot {} not implemented. Available robots: anymal_d, anymal_b, anymal_c, go2, spot, spot_arm",
                    robotName_);
@@ -67,11 +66,11 @@ void MpcController::initialize(const std::string &urdfString, const std::string 
 
     // Create WBC
     wbcPtr_ =
-        tbai::mpc::getWbcUnique(controllerConfigFile, urdfString, quadrupedInterfacePtr_->getComModel(),
+        tbai::mpc::quadruped::getWbcUnique(controllerConfigFile, urdfString, quadrupedInterfacePtr_->getComModel(),
                                 quadrupedInterfacePtr_->getKinematicModel(), quadrupedInterfacePtr_->getJointNames());
 
     // Create reference trajectory generator
-    auto kinematicsPtr = std::shared_ptr<switched_model::KinematicsModelBase<scalar_t>>(
+    auto kinematicsPtr = std::shared_ptr<KinematicsModelBase<scalar_t>>(
         quadrupedInterfacePtr_->getKinematicModel().clone());
     referenceTrajectoryGeneratorPtr_ = std::make_unique<reference::ReferenceTrajectoryGenerator>(
         targetCommandFile, velocityGeneratorPtr_, std::move(kinematicsPtr), trajdt, trajKnots);
@@ -281,7 +280,7 @@ ocs2::SystemObservation MpcController::generateSystemObservation() const {
     // Set mode
     const std::vector<bool> &contactFlags = state.contactFlags;
     std::array<bool, 4> contactFlagsArray = {contactFlags[0], contactFlags[1], contactFlags[2], contactFlags[3]};
-    observation.mode = switched_model::stanceLeg2ModeNumber(contactFlagsArray);
+    observation.mode = stanceLeg2ModeNumber(contactFlagsArray);
 
     // Set state
     observation.state = rbdState.head<3 + 3 + 3 + 3 + 12>();
@@ -303,5 +302,4 @@ ocs2::SystemObservation MpcController::generateSystemObservation() const {
     return observation;
 }
 
-}  // namespace mpc
-}  // namespace tbai
+}  // namespace tbai::mpc::quadruped

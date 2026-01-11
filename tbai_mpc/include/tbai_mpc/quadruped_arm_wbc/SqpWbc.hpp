@@ -13,7 +13,7 @@
 
 namespace tbai {
 namespace mpc {
-
+namespace quadruped_arm {
 class SqpWbc : public WbcBase {
    public:
     SqpWbc(const std::string &configFile, const std::string &urdfString,
@@ -55,5 +55,6 @@ class SqpWbc : public WbcBase {
     SqpSolver sqpSolver_;
 };
 
+}  // namespace quadruped_arm
 }  // namespace mpc
 }  // namespace tbai

@@ -10,7 +10,7 @@
 
 #include <ocs2_robotic_tools/common/RotationTransforms.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * Base to origin rotation matrix
@@ -303,4 +303,4 @@ Eigen::Matrix<SCALAR_T, 3, 1> rotationErrorInLocalEulerXYZ(const Eigen::Matrix<S
   return ocs2::rotationErrorInLocal(rotationMatrixBaseToOrigin(eulerXYZcurrent), rotationMatrixBaseToOrigin(eulerXYZreference));
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

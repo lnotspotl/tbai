@@ -11,7 +11,7 @@
 #include "tbai_mpc/quadruped_mpc/core/MotionPhaseDefinition.h"
 #include "tbai_mpc/quadruped_mpc/logic/SingleLegLogic.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 GaitAdaptation::GaitAdaptation(const GaitAdaptationSettings &settings, const contact_flag_t &measuredContactFlags)
     : timeUntilNextTouchDownPerLeg_(constantFeetArray<scalar_t>(0.0)),
@@ -40,7 +40,7 @@ void GaitAdaptation::advanceLiftoffTracking(const contact_flag_t &desiredContact
                                             const contact_flag_t &measuredContactFlags) {
     // Lift off tracking resets to false whenever there is a planned + measured contact. The flag changes to true any
     // time there is a measured swing phase since then.
-    for (size_t leg = 0; leg < switched_model::NUM_CONTACT_POINTS; ++leg) {
+    for (size_t leg = 0; leg < tbai::mpc::quadruped::NUM_CONTACT_POINTS; ++leg) {
         if (desiredContactFlags[leg] && measuredContactFlags[leg]) {
             hasLiftedSinceLastContact_[leg] = false;
         } else if (!measuredContactFlags[leg]) {
@@ -55,10 +55,10 @@ void GaitAdaptation::advanceSwingEvents(const GaitSchedule &gaitSchedule) {
 
     // Extract contact timings from the gait schedule
     const auto modeSchedule = gaitSchedule.getModeSchedule(checkHorizon);
-    const auto contactTimingsPerLeg = switched_model::extractContactTimingsPerLeg(modeSchedule);
+    const auto contactTimingsPerLeg = tbai::mpc::quadruped::extractContactTimingsPerLeg(modeSchedule);
     const auto currentTime = gaitSchedule.getCurrentTime();
 
-    for (size_t leg = 0; leg < switched_model::NUM_CONTACT_POINTS; ++leg) {
+    for (size_t leg = 0; leg < tbai::mpc::quadruped::NUM_CONTACT_POINTS; ++leg) {
         timeUntilNextTouchDownPerLeg_[leg] =
             getTimeOfNextTouchDown(currentTime, contactTimingsPerLeg[leg]) - currentTime;
         timeUntilNextLiftOffPerLeg_[leg] = getTimeOfNextLiftOff(currentTime, contactTimingsPerLeg[leg]) - currentTime;
@@ -127,9 +127,9 @@ void GaitAdaptation::applyAdaptation(GaitSchedule &gaitSchedule,
     }
 }
 
-std::function<void(scalar_t &currentPhase, switched_model::Gait &currentGait, scalar_t currTime,
-                   switched_model::Gait &nextGait)>
-earlyTouchDownAdaptation(const switched_model::feet_array_t<bool> &earlyTouchDownPerLeg) {
+std::function<void(scalar_t &currentPhase, tbai::mpc::quadruped::Gait &currentGait, scalar_t currTime,
+                   tbai::mpc::quadruped::Gait &nextGait)>
+earlyTouchDownAdaptation(const tbai::mpc::quadruped::feet_array_t<bool> &earlyTouchDownPerLeg) {
     return [=](scalar_t &currentPhase, Gait &currentGait, scalar_t currTime, Gait &nextGait) {
         const int currentModeIndex = getModeIndexFromPhase(currentPhase, currentGait);
         for (unsigned int leg = 0; leg < NUM_CONTACT_POINTS; ++leg) {
@@ -169,10 +169,10 @@ int getModeIndexOfNextContactStateOfLeg(bool contact, int startModeIdx, size_t l
 
 void setContactStateOfLegBetweenModes(bool contact, int startModeIdx, int lastModeIdx, size_t leg, Gait &gait) {
     for (int modeIndex = startModeIdx; modeIndex <= lastModeIdx; ++modeIndex) {
-        auto stanceLegs = switched_model::modeNumber2StanceLeg(gait.modeSequence[modeIndex]);
+        auto stanceLegs = tbai::mpc::quadruped::modeNumber2StanceLeg(gait.modeSequence[modeIndex]);
         stanceLegs[leg] = contact;
-        gait.modeSequence[modeIndex] = switched_model::stanceLeg2ModeNumber(stanceLegs);
+        gait.modeSequence[modeIndex] = tbai::mpc::quadruped::stanceLeg2ModeNumber(stanceLegs);
     }
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

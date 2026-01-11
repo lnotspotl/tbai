@@ -15,6 +15,7 @@
 
 namespace tbai {
 namespace mpc {
+namespace quadruped_arm {
 
 /**
  * Whole-Body Controller base class for quadruped with arm.
@@ -218,6 +219,6 @@ class WbcBase {
     std::unique_ptr<tbai::mpc::quadruped_arm::ComModelBase<scalar_t>> comModelPtr_;
     std::unique_ptr<tbai::mpc::quadruped_arm::KinematicsModelBase<scalar_t>> kinematicsPtr_;
 };
-
+}  // namespace quadruped_arm
 }  // namespace mpc
 }  // namespace tbai
