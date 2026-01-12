@@ -8,25 +8,14 @@ project(tbai_deploy_g1)
 # Fetch ONNX Runtime automatically
 include(FetchContent)
 
-set(ONNXRUNTIME_VERSION "1.22.0")
-
-if(APPLE)
-    if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64")
-        set(ONNXRUNTIME_PLATFORM "osx-arm64")
-    else()
-        set(ONNXRUNTIME_PLATFORM "osx-x64")
-    endif()
-    set(ONNXRUNTIME_LIB_NAME "libonnxruntime.dylib")
-elseif(UNIX)
-    set(ONNXRUNTIME_PLATFORM "linux-x64")
-    set(ONNXRUNTIME_LIB_NAME "libonnxruntime.so")
-else()
-    message(FATAL_ERROR "tbai_deploy_g1 only supports Linux and macOS platforms")
+if(NOT UNIX OR APPLE)
+    message(FATAL_ERROR "tbai_deploy_g1 currently only supports Linux platforms")
 endif()
 
-set(ONNXRUNTIME_URL "https://github.com/microsoft/onnxruntime/releases/download/v${ONNXRUNTIME_VERSION}/onnxruntime-${ONNXRUNTIME_PLATFORM}-${ONNXRUNTIME_VERSION}.tgz")
+set(ONNXRUNTIME_VERSION "1.22.0")
+set(ONNXRUNTIME_URL "https://github.com/microsoft/onnxruntime/releases/download/v${ONNXRUNTIME_VERSION}/onnxruntime-linux-x64-${ONNXRUNTIME_VERSION}.tgz")
 
-message(STATUS "Fetching ONNX Runtime v${ONNXRUNTIME_VERSION} for ${ONNXRUNTIME_PLATFORM}...")
+message(STATUS "Fetching ONNX Runtime v${ONNXRUNTIME_VERSION}...")
 
 FetchContent_Declare(
     onnxruntime
@@ -42,7 +31,7 @@ set(ONNXRUNTIME_LIB_DIR "${onnxruntime_SOURCE_DIR}/lib")
 
 add_library(onnxruntime SHARED IMPORTED)
 set_target_properties(onnxruntime PROPERTIES
-    IMPORTED_LOCATION "${ONNXRUNTIME_LIB_DIR}/${ONNXRUNTIME_LIB_NAME}"
+    IMPORTED_LOCATION "${ONNXRUNTIME_LIB_DIR}/libonnxruntime.so"
     INTERFACE_INCLUDE_DIRECTORIES "${ONNXRUNTIME_INCLUDE_DIR}"
 )
 
@@ -98,15 +87,8 @@ install(DIRECTORY "${ONNXRUNTIME_INCLUDE_DIR}/"
 )
 
 # Install ONNX Runtime library
-if(APPLE)
-    install(FILES "${ONNXRUNTIME_LIB_DIR}/libonnxruntime.${ONNXRUNTIME_VERSION}.dylib"
-                  "${ONNXRUNTIME_LIB_DIR}/libonnxruntime.dylib"
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    )
-else()
-    install(FILES "${ONNXRUNTIME_LIB_DIR}/libonnxruntime.so.${ONNXRUNTIME_VERSION}"
-                  "${ONNXRUNTIME_LIB_DIR}/libonnxruntime.so.1"
-                  "${ONNXRUNTIME_LIB_DIR}/libonnxruntime.so"
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    )
-endif()
+install(FILES "${ONNXRUNTIME_LIB_DIR}/libonnxruntime.so.${ONNXRUNTIME_VERSION}"
+              "${ONNXRUNTIME_LIB_DIR}/libonnxruntime.so.1"
+              "${ONNXRUNTIME_LIB_DIR}/libonnxruntime.so"
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
