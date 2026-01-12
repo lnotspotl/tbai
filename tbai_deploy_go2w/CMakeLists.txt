@@ -7,8 +7,11 @@ add_definitions(-DBOOST_BIND_GLOBAL_PLACEHOLDERS)
 
 project(tbai_deploy_go2w)
 
+find_package(Torch REQUIRED)
+
 add_library(tbai_deploy_go2w
     src/Go2WRobotInterface.cpp
+    src/Go2WDreamWaQController.cpp
 )
 set_target_properties(tbai_deploy_go2w PROPERTIES EXPORT_NAME deploy_go2w)
 
@@ -21,7 +24,9 @@ target_include_directories(tbai_deploy_go2w
 target_link_libraries(tbai_deploy_go2w
     PUBLIC
         tbai_core
+        tbai_reference
         unitree_sdk2
+        ${TORCH_LIBRARIES}
 )
 
 ## Installation rules
