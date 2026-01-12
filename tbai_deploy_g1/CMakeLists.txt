@@ -8,6 +8,7 @@ project(tbai_deploy_g1)
 add_library(tbai_deploy_g1
     src/G1RobotInterface.cpp
 )
+set_target_properties(tbai_deploy_g1 PROPERTIES EXPORT_NAME deploy_g1)
 
 target_include_directories(tbai_deploy_g1
     PUBLIC

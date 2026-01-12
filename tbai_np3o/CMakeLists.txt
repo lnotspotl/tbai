@@ -11,6 +11,7 @@ add_library(tbai_np3o
     src/Np3oController.cpp
     src/HistoryBuffer.cpp
 )
+set_target_properties(tbai_np3o PROPERTIES EXPORT_NAME np3o)
 
 find_package(pinocchio REQUIRED)
 
@@ -46,4 +47,10 @@ install(TARGETS tbai_np3o
 
 install(DIRECTORY include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(EXPORT tbai_np3o-targets
+    NAMESPACE tbai::
+    FILE tbai-np3o-targets.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/tbai
 )

@@ -94,6 +94,7 @@ add_library(tbai_quadruped_mpc
     # controller
     src/quadruped_mpc/MpcController.cpp
 )
+set_target_properties(tbai_quadruped_mpc PROPERTIES EXPORT_NAME quadruped_mpc)
 
 target_include_directories(tbai_quadruped_mpc
     PUBLIC
@@ -203,6 +204,7 @@ add_library(tbai_quadruped_arm_mpc
     # controller
     src/quadruped_arm_mpc/MpcController.cpp
 )
+set_target_properties(tbai_quadruped_arm_mpc PROPERTIES EXPORT_NAME quadruped_arm_mpc)
 add_library(tbai::quadruped_arm_mpc ALIAS tbai_quadruped_arm_mpc)
 
 target_include_directories(tbai_quadruped_arm_mpc
@@ -243,6 +245,7 @@ add_library(tbai_arm_mpc
     src/wbc/SqpSolver.cpp
     src/wbc/Task.cpp
 )
+set_target_properties(tbai_arm_mpc PROPERTIES EXPORT_NAME arm_mpc)
 add_library(tbai::arm_mpc ALIAS tbai_arm_mpc)
 
 target_include_directories(tbai_arm_mpc

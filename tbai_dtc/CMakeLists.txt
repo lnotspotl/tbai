@@ -10,6 +10,7 @@ find_package(Torch REQUIRED)
 add_library(tbai_dtc
     src/DtcController.cpp
 )
+set_target_properties(tbai_dtc PROPERTIES EXPORT_NAME dtc)
 
 target_include_directories(tbai_dtc
     PUBLIC

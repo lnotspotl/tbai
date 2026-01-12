@@ -18,6 +18,7 @@ add_library(tbai_core
     src/Logging.cpp
     src/ResourceMonitor.cpp
 )
+set_target_properties(tbai_core PROPERTIES EXPORT_NAME core)
 
 target_include_directories(tbai_core PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

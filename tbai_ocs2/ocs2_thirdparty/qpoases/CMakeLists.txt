@@ -35,7 +35,8 @@ target_include_directories(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
   INTERFACE
-    ${BINARY_DIR}/libs/libqpOASES.so
+    $<BUILD_INTERFACE:${BINARY_DIR}/libs/libqpOASES.so>
+    $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_LIBDIR}/libqpOASES.so>
 )
 
 #############
@@ -45,7 +46,7 @@ target_link_libraries(${PROJECT_NAME}
 include(GNUInstallDirs)
 
 install(TARGETS ${PROJECT_NAME}
-  EXPORT ocs2Targets
+  EXPORT ocs2qpoasesTargets
 )
 
 install(DIRECTORY ${SOURCE_DIR}/include/
@@ -54,4 +55,10 @@ install(DIRECTORY ${SOURCE_DIR}/include/
 
 install(FILES ${BINARY_DIR}/libs/libqpOASES.so
   DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+install(EXPORT ocs2qpoasesTargets
+  FILE tbai-ocs2-qpoases-targets.cmake
+  NAMESPACE ocs2::
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/tbai
 )

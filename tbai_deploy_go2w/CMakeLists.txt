@@ -10,6 +10,7 @@ project(tbai_deploy_go2w)
 add_library(tbai_deploy_go2w
     src/Go2WRobotInterface.cpp
 )
+set_target_properties(tbai_deploy_go2w PROPERTIES EXPORT_NAME deploy_go2w)
 
 target_include_directories(tbai_deploy_go2w
     PUBLIC

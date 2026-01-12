@@ -8,6 +8,7 @@ project(tbai_torch)
 find_package(Torch REQUIRED)
 
 add_library(tbai_torch INTERFACE)
+set_target_properties(tbai_torch PROPERTIES EXPORT_NAME torch)
 
 target_include_directories(tbai_torch
     INTERFACE

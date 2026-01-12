@@ -13,6 +13,7 @@ add_library(tbai_bob
     src/CentralPatternGenerator.cpp
     src/InverseKinematics.cpp
 )
+set_target_properties(tbai_bob PROPERTIES EXPORT_NAME bob)
 
 target_include_directories(tbai_bob
     PUBLIC
@@ -41,4 +42,10 @@ install(TARGETS tbai_bob
 
 install(DIRECTORY include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(EXPORT tbai_bob-targets
+    NAMESPACE tbai::
+    FILE tbai-bob-targets.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/tbai
 )
