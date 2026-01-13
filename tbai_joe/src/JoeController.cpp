@@ -80,9 +80,9 @@ void JoeController::initialize(const std::string &urdfString, const std::string 
 
     // Initialize quadruped interface
     TBAI_LOG_INFO(logger_, "Initializing quadruped interface");
-    quadrupedInterface_ =
-        tbai::mpc::quadruped::getAnymalInterface(urdfString, tbai::mpc::quadruped::loadQuadrupedSettings(taskSettingsFile),
-                                   tbai::mpc::quadruped::frameDeclarationFromFile(frameDeclarationFile));
+    quadrupedInterface_ = tbai::mpc::quadruped::getAnymalInterface(
+        urdfString, tbai::mpc::quadruped::loadQuadrupedSettings(taskSettingsFile),
+        tbai::mpc::quadruped::frameDeclarationFromFile(frameDeclarationFile));
     auto &quadrupedInterface = *quadrupedInterface_;
     comModel_.reset(quadrupedInterface.getComModel().clone());
     kinematicsModel_.reset(quadrupedInterface.getKinematicModel().clone());

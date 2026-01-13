@@ -14,7 +14,8 @@ ArmPreComputation *ArmPreComputation::clone() const {
     return new ArmPreComputation(pinocchioInterface_, pinocchioMapping_.getArmModelInfo());
 }
 
-void ArmPreComputation::request(ocs2::RequestSet request, ocs2::scalar_t t, const ocs2::vector_t &x, const ocs2::vector_t &u) {
+void ArmPreComputation::request(ocs2::RequestSet request, ocs2::scalar_t t, const ocs2::vector_t &x,
+                                const ocs2::vector_t &u) {
     if (!request.containsAny(ocs2::Request::Cost + ocs2::Request::Constraint + ocs2::Request::SoftConstraint)) {
         return;
     }

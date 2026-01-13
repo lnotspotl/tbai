@@ -29,8 +29,7 @@ class G1MimicController : public tbai::Controller {
    public:
     G1MimicController(const std::shared_ptr<tbai::StateSubscriber> &stateSubscriberPtr, const std::string &policyPath,
                       const std::string &motionFilePath, float motionFps = 60.0f, float timeStart = 0.0f,
-                      float timeEnd = -1.0f,
-                      const std::string &controllerName = "G1MimicController");
+                      float timeEnd = -1.0f, const std::string &controllerName = "G1MimicController");
 
     ~G1MimicController();
 

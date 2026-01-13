@@ -48,30 +48,30 @@ void MpcController::initialize(const std::string &urdfString, const std::string 
                                const std::string &targetCommandFile, scalar_t trajdt, size_t trajKnots) {
     // Create quadruped interface
     if (robotName_ == "anymal_d" || robotName_ == "anymal_b" || robotName_ == "anymal_c") {
-        quadrupedInterfacePtr_ =
-            tbai::mpc::quadruped::getAnymalInterface(urdfString, tbai::mpc::quadruped::loadQuadrupedSettings(taskSettingsFile),
-                                       tbai::mpc::quadruped::frameDeclarationFromFile(frameDeclarationFile));
+        quadrupedInterfacePtr_ = tbai::mpc::quadruped::getAnymalInterface(
+            urdfString, tbai::mpc::quadruped::loadQuadrupedSettings(taskSettingsFile),
+            tbai::mpc::quadruped::frameDeclarationFromFile(frameDeclarationFile));
     } else if (robotName_ == "go2") {
-        quadrupedInterfacePtr_ =
-            tbai::mpc::quadruped::getGo2Interface(urdfString, tbai::mpc::quadruped::loadQuadrupedSettings(taskSettingsFile),
-                                    tbai::mpc::quadruped::frameDeclarationFromFile(frameDeclarationFile));
+        quadrupedInterfacePtr_ = tbai::mpc::quadruped::getGo2Interface(
+            urdfString, tbai::mpc::quadruped::loadQuadrupedSettings(taskSettingsFile),
+            tbai::mpc::quadruped::frameDeclarationFromFile(frameDeclarationFile));
     } else if (robotName_ == "spot" || robotName_ == "spot_arm") {
-        quadrupedInterfacePtr_ =
-            tbai::mpc::quadruped::getSpotInterface(urdfString, tbai::mpc::quadruped::loadQuadrupedSettings(taskSettingsFile),
-                                     tbai::mpc::quadruped::frameDeclarationFromFile(frameDeclarationFile));
+        quadrupedInterfacePtr_ = tbai::mpc::quadruped::getSpotInterface(
+            urdfString, tbai::mpc::quadruped::loadQuadrupedSettings(taskSettingsFile),
+            tbai::mpc::quadruped::frameDeclarationFromFile(frameDeclarationFile));
     } else {
         TBAI_THROW("Robot {} not implemented. Available robots: anymal_d, anymal_b, anymal_c, go2, spot, spot_arm",
                    robotName_);
     }
 
     // Create WBC
-    wbcPtr_ =
-        tbai::mpc::quadruped::getWbcUnique(controllerConfigFile, urdfString, quadrupedInterfacePtr_->getComModel(),
-                                quadrupedInterfacePtr_->getKinematicModel(), quadrupedInterfacePtr_->getJointNames());
+    wbcPtr_ = tbai::mpc::quadruped::getWbcUnique(
+        controllerConfigFile, urdfString, quadrupedInterfacePtr_->getComModel(),
+        quadrupedInterfacePtr_->getKinematicModel(), quadrupedInterfacePtr_->getJointNames());
 
     // Create reference trajectory generator
-    auto kinematicsPtr = std::shared_ptr<KinematicsModelBase<scalar_t>>(
-        quadrupedInterfacePtr_->getKinematicModel().clone());
+    auto kinematicsPtr =
+        std::shared_ptr<KinematicsModelBase<scalar_t>>(quadrupedInterfacePtr_->getKinematicModel().clone());
     referenceTrajectoryGeneratorPtr_ = std::make_unique<reference::ReferenceTrajectoryGenerator>(
         targetCommandFile, velocityGeneratorPtr_, std::move(kinematicsPtr), trajdt, trajKnots);
 

@@ -17,13 +17,13 @@ auto ArmPinocchioMappingTpl<SCALAR>::getPinocchioJointPosition(const vector_t &s
 
 template <typename SCALAR>
 auto ArmPinocchioMappingTpl<SCALAR>::getPinocchioJointVelocity(const vector_t &state,
-                                                                  const vector_t &input) const -> vector_t {
+                                                               const vector_t &input) const -> vector_t {
     return input;
 }
 
 template <typename SCALAR>
 auto ArmPinocchioMappingTpl<SCALAR>::getOcs2Jacobian(const vector_t &state, const matrix_t &Jq,
-                                                        const matrix_t &Jv) const -> std::pair<matrix_t, matrix_t> {
+                                                     const matrix_t &Jv) const -> std::pair<matrix_t, matrix_t> {
     return {Jq, Jv};
 }
 

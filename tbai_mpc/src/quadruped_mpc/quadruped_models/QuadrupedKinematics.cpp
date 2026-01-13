@@ -36,7 +36,8 @@ QuadrupedKinematics<SCALAR_T> *QuadrupedKinematics<SCALAR_T>::clone() const {
 }
 
 template <typename SCALAR_T>
-tbai::mpc::quadruped::vector3_s_t<SCALAR_T> QuadrupedKinematics<SCALAR_T>::baseToLegRootInBaseFrame(size_t footIndex) const {
+tbai::mpc::quadruped::vector3_s_t<SCALAR_T> QuadrupedKinematics<SCALAR_T>::baseToLegRootInBaseFrame(
+    size_t footIndex) const {
     return baseToLegRootInBaseFrame_[footIndex];
 }
 

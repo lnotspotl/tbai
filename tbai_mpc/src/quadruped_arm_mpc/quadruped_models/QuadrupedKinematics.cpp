@@ -36,7 +36,8 @@ QuadrupedKinematics<SCALAR_T> *QuadrupedKinematics<SCALAR_T>::clone() const {
 }
 
 template <typename SCALAR_T>
-tbai::mpc::quadruped_arm::vector3_s_t<SCALAR_T> QuadrupedKinematics<SCALAR_T>::baseToLegRootInBaseFrame(size_t footIndex) const {
+tbai::mpc::quadruped_arm::vector3_s_t<SCALAR_T> QuadrupedKinematics<SCALAR_T>::baseToLegRootInBaseFrame(
+    size_t footIndex) const {
     return baseToLegRootInBaseFrame_[footIndex];
 }
 
@@ -99,7 +100,8 @@ tbai::mpc::quadruped_arm::vector3_s_t<SCALAR_T> QuadrupedKinematics<SCALAR_T>::f
 
 template <typename SCALAR_T>
 auto QuadrupedKinematics<SCALAR_T>::collisionSpheresInBaseFrame(
-    const tbai::mpc::quadruped_arm::joint_coordinate_s_t<SCALAR_T> &jointPositions) const -> std::vector<CollisionSphere> {
+    const tbai::mpc::quadruped_arm::joint_coordinate_s_t<SCALAR_T> &jointPositions) const
+    -> std::vector<CollisionSphere> {
     auto &data = pinocchioInterfacePtr_->getData();
     const auto &model = pinocchioInterfacePtr_->getModel();
     const auto pinocchioJointPositions = pinocchioMapping_.getPinocchioJointVector(jointPositions);
@@ -198,9 +200,11 @@ auto QuadrupedKinematics<SCALAR_T>::armEEJacobianInBaseFrame(
     // In OCS2 convention: rows 0-2 are angular, rows 3-5 are linear
     // Swap to match OCS2 convention
     armJacobian.template block<3, tbai::mpc::quadruped_arm::NUM_ARM_JOINTS>(0, 0) =
-        fullJacobian.template block<3, tbai::mpc::quadruped_arm::NUM_ARM_JOINTS>(3, tbai::mpc::quadruped_arm::LEG_JOINT_COORDINATE_SIZE);
+        fullJacobian.template block<3, tbai::mpc::quadruped_arm::NUM_ARM_JOINTS>(
+            3, tbai::mpc::quadruped_arm::LEG_JOINT_COORDINATE_SIZE);
     armJacobian.template block<3, tbai::mpc::quadruped_arm::NUM_ARM_JOINTS>(3, 0) =
-        fullJacobian.template block<3, tbai::mpc::quadruped_arm::NUM_ARM_JOINTS>(0, tbai::mpc::quadruped_arm::LEG_JOINT_COORDINATE_SIZE);
+        fullJacobian.template block<3, tbai::mpc::quadruped_arm::NUM_ARM_JOINTS>(
+            0, tbai::mpc::quadruped_arm::LEG_JOINT_COORDINATE_SIZE);
 
     return armJacobian;
 }

@@ -20,7 +20,8 @@ namespace {
  * Given two rotation matrices, compute the axis-angle error in the local frame.
  */
 template <typename SCALAR_T>
-vector3_s_t<SCALAR_T> rotationMatrixError(const matrix3_s_t<SCALAR_T>& R_current, const matrix3_s_t<SCALAR_T>& R_desired) {
+vector3_s_t<SCALAR_T> rotationMatrixError(const matrix3_s_t<SCALAR_T> &R_current,
+                                          const matrix3_s_t<SCALAR_T> &R_desired) {
     // R_error = R_desired * R_current^T
     matrix3_s_t<SCALAR_T> R_error = R_desired * R_current.transpose();
 

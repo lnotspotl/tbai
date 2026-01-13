@@ -12,7 +12,8 @@ QuadrupedInverseKinematics::QuadrupedInverseKinematics(const FrameDeclaration &f
     auto data = pinocchioInterface.getData();
     const auto &model = pinocchioInterface.getModel();
 
-    tbai::mpc::quadruped_arm::joint_coordinate_t zeroConfiguration(tbai::mpc::quadruped_arm::joint_coordinate_t::Zero());
+    tbai::mpc::quadruped_arm::joint_coordinate_t zeroConfiguration(
+        tbai::mpc::quadruped_arm::joint_coordinate_t::Zero());
     pinocchio::forwardKinematics(model, data, zeroConfiguration);
     pinocchio::updateFramePlacements(model, data);
 
@@ -45,12 +46,14 @@ QuadrupedInverseKinematics *QuadrupedInverseKinematics::clone() const {
 tbai::mpc::quadruped_arm::vector3_t QuadrupedInverseKinematics::getLimbJointPositionsFromPositionBaseToFootInBaseFrame(
     size_t footIndex, const tbai::mpc::quadruped_arm::vector3_t &positionBaseToFootInBaseFrame) const {
     tbai::mpc::quadruped_arm::vector3_t jointAngles{tbai::mpc::quadruped_arm::vector3_t::Zero()};
-    tbai::mpc::quadruped_arm::analytical_inverse_kinematics::anymal::getLimbJointPositionsFromPositionBaseToFootInBaseFrame(
-        jointAngles, positionBaseToFootInBaseFrame, parameters_[footIndex], footIndex);
+    tbai::mpc::quadruped_arm::analytical_inverse_kinematics::anymal::
+        getLimbJointPositionsFromPositionBaseToFootInBaseFrame(jointAngles, positionBaseToFootInBaseFrame,
+                                                               parameters_[footIndex], footIndex);
     return jointAngles;
 }
 
-tbai::mpc::quadruped_arm::vector3_t QuadrupedInverseKinematics::getLimbVelocitiesFromFootVelocityRelativeToBaseInBaseFrame(
+tbai::mpc::quadruped_arm::vector3_t
+QuadrupedInverseKinematics::getLimbVelocitiesFromFootVelocityRelativeToBaseInBaseFrame(
     size_t footIndex, const tbai::mpc::quadruped_arm::vector3_t &footVelocityRelativeToBaseInBaseFrame,
     const joint_jacobian_block_t &jointJacobian, tbai::mpc::quadruped_arm::scalar_t damping) const {
     // v = J * dq, (bottom 3 rows = translational part)

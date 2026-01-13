@@ -24,8 +24,7 @@ std::unique_ptr<WbcBase> getWbcUnique(const std::string &controllerConfigFile, c
 std::shared_ptr<WbcBase> getWbcShared(const std::string &controllerConfigFile, const std::string &urdfString,
                                       const tbai::mpc::quadruped_arm::ComModelBase<scalar_t> &comModel,
                                       const tbai::mpc::quadruped_arm::KinematicsModelBase<scalar_t> &kinematics) {
-    return std::shared_ptr<WbcBase>(
-        getWbcUnique(controllerConfigFile, urdfString, comModel, kinematics).release());
+    return std::shared_ptr<WbcBase>(getWbcUnique(controllerConfigFile, urdfString, comModel, kinematics).release());
 }
 }  // namespace quadruped_arm
 }  // namespace mpc

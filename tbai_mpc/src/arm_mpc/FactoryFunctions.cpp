@@ -23,7 +23,7 @@ ocs2::PinocchioInterface createPinocchioInterface(const std::string &robotUrdfPa
 }
 
 ocs2::PinocchioInterface createPinocchioInterface(const std::string &robotUrdfPath,
-                                            const std::vector<std::string> &jointNames) {
+                                                  const std::vector<std::string> &jointNames) {
     using joint_pair_t = std::pair<const std::string, std::shared_ptr<::urdf::Joint>>;
 
     const auto urdfTree = ::urdf::parseURDFFile(robotUrdfPath);
@@ -38,7 +38,7 @@ ocs2::PinocchioInterface createPinocchioInterface(const std::string &robotUrdfPa
 }
 
 ArmModelInfo createArmModelInfo(const ocs2::PinocchioInterface &interface, const std::string &baseFrame,
-                                      const std::string &eeFrame) {
+                                const std::string &eeFrame) {
     const auto &model = interface.getModel();
 
     ArmModelInfo info;

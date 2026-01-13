@@ -45,8 +45,9 @@ QuadrupedInverseKinematics *QuadrupedInverseKinematics::clone() const {
 tbai::mpc::quadruped::vector3_t QuadrupedInverseKinematics::getLimbJointPositionsFromPositionBaseToFootInBaseFrame(
     size_t footIndex, const tbai::mpc::quadruped::vector3_t &positionBaseToFootInBaseFrame) const {
     tbai::mpc::quadruped::vector3_t jointAngles{tbai::mpc::quadruped::vector3_t::Zero()};
-    tbai::mpc::quadruped::analytical_inverse_kinematics::tbai::mpc::quadruped::getLimbJointPositionsFromPositionBaseToFootInBaseFrame(
-        jointAngles, positionBaseToFootInBaseFrame, parameters_[footIndex], footIndex);
+    tbai::mpc::quadruped::analytical_inverse_kinematics::tbai::mpc::quadruped::
+        getLimbJointPositionsFromPositionBaseToFootInBaseFrame(jointAngles, positionBaseToFootInBaseFrame,
+                                                               parameters_[footIndex], footIndex);
     return jointAngles;
 }
 

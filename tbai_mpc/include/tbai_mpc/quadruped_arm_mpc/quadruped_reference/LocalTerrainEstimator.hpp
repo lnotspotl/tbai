@@ -21,7 +21,8 @@ class LocalTerrainEstimator {
      * Constructor
      * @param kinematicsPtr: Shared pointer to the kinematics model
      */
-    explicit LocalTerrainEstimator(std::shared_ptr<tbai::mpc::quadruped_arm::KinematicsModelBase<ocs2::scalar_t>> kinematicsPtr);
+    explicit LocalTerrainEstimator(
+        std::shared_ptr<tbai::mpc::quadruped_arm::KinematicsModelBase<ocs2::scalar_t>> kinematicsPtr);
 
     /**
      * Updates the terrain estimate based on current footholds from observation

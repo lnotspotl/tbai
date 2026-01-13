@@ -21,7 +21,7 @@ size_t EndEffectorConstraint::getNumConstraints(ocs2::scalar_t time) const {
 }
 
 ocs2::vector_t EndEffectorConstraint::getValue(ocs2::scalar_t time, const ocs2::vector_t &state,
-                                         const ocs2::PreComputation &preComputation) const {
+                                               const ocs2::PreComputation &preComputation) const {
     if (pinocchioEEKinPtr_ != nullptr) {
         const auto &preCompMM = ocs2::cast<ArmPreComputation>(preComputation);
         pinocchioEEKinPtr_->setPinocchioInterface(preCompMM.getPinocchioInterface());
@@ -60,7 +60,8 @@ ocs2::VectorFunctionLinearApproximation EndEffectorConstraint::getLinearApproxim
     return approximation;
 }
 
-auto EndEffectorConstraint::interpolateEndEffectorPose(ocs2::scalar_t time) const -> std::pair<ocs2::vector_t, quaternion_t> {
+auto EndEffectorConstraint::interpolateEndEffectorPose(ocs2::scalar_t time) const
+    -> std::pair<ocs2::vector_t, quaternion_t> {
     const auto &targetTrajectories = referenceManagerPtr_->getTargetTrajectories();
     const auto &timeTrajectory = targetTrajectories.timeTrajectory;
     const auto &stateTrajectory = targetTrajectories.stateTrajectory;

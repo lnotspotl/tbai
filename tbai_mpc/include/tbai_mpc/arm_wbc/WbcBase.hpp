@@ -17,8 +17,8 @@ namespace tbai::mpc::arm {
 
 class WbcBase {
    public:
-    WbcBase(const std::string &configFile, const std::string &urdfString,
-            const tbai::mpc::arm::ArmModelInfo &armInfo, const std::string &configPrefix);
+    WbcBase(const std::string &configFile, const std::string &urdfString, const tbai::mpc::arm::ArmModelInfo &armInfo,
+            const std::string &configPrefix);
 
     virtual ~WbcBase() = default;
 

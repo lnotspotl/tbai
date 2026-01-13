@@ -28,8 +28,7 @@ class SqpWbc : public WbcBase {
                                                      const vector_t &desiredState, const vector_t &desiredInput,
                                                      const size_t desiredMode, const vector_t &desiredJointAcceleration,
                                                      const vector_t &desiredArmEEPosition,
-                                                     const vector_t &desiredArmEEOrientation,
-                                                     bool &isStable) override;
+                                                     const vector_t &desiredArmEEOrientation, bool &isStable) override;
 
    private:
     void loadSettings(const std::string &configFile);

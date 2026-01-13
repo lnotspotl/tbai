@@ -137,7 +137,8 @@ Task WbcBase::createTorqueLimitTask() {
     D.block(0, 0, tbai::mpc::quadruped::JOINT_COORDINATE_SIZE, nDecisionVariables_) << Mj, -JjT;
 
     // lower bound
-    D.block(tbai::mpc::quadruped::JOINT_COORDINATE_SIZE, 0, tbai::mpc::quadruped::JOINT_COORDINATE_SIZE, nDecisionVariables_)
+    D.block(tbai::mpc::quadruped::JOINT_COORDINATE_SIZE, 0, tbai::mpc::quadruped::JOINT_COORDINATE_SIZE,
+            nDecisionVariables_)
         << -Mj,
         JjT;
 

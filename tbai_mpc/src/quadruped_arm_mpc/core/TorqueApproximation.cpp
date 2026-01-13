@@ -8,8 +8,8 @@ namespace tbai::mpc::quadruped_arm {
 
 template <typename SCALAR_T>
 leg_joint_coordinate_s_t<SCALAR_T> torqueApproximation(const leg_joint_coordinate_s_t<SCALAR_T> &legJointPositions,
-                                                        const feet_array_t<vector3_s_t<SCALAR_T>> &contactForcesInBase,
-                                                        const KinematicsModelBase<SCALAR_T> &kinematics) {
+                                                       const feet_array_t<vector3_s_t<SCALAR_T>> &contactForcesInBase,
+                                                       const KinematicsModelBase<SCALAR_T> &kinematics) {
     // Pad leg joint positions with zeros for arm joints (kinematics interface expects full joint vector)
     joint_coordinate_s_t<SCALAR_T> fullJointPositions;
     fullJointPositions.template head<LEG_JOINT_COORDINATE_SIZE>() = legJointPositions;

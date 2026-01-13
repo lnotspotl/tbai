@@ -189,7 +189,8 @@ void SwitchedModelPreComputation::intermediateLinearOutputs(const ad_com_model_t
     outputs.segment<3 * NUM_CONTACT_POINTS>(3 * NUM_CONTACT_POINTS) = fromArray(o_footVelocitiesAsArray);
     // Leg joint torques only - arm joint torques are set to zero
     outputs.segment<LEG_JOINT_COORDINATE_SIZE>(3 * NUM_CONTACT_POINTS + 3 * NUM_CONTACT_POINTS) = legJointTorques;
-    outputs.segment<NUM_ARM_JOINTS>(3 * NUM_CONTACT_POINTS + 3 * NUM_CONTACT_POINTS + LEG_JOINT_COORDINATE_SIZE).setZero();
+    outputs.segment<NUM_ARM_JOINTS>(3 * NUM_CONTACT_POINTS + 3 * NUM_CONTACT_POINTS + LEG_JOINT_COORDINATE_SIZE)
+        .setZero();
 
     int i = 3 * NUM_CONTACT_POINTS + 3 * NUM_CONTACT_POINTS + JOINT_COORDINATE_SIZE;
     for (const auto &sphere : o_collisions) {

@@ -32,8 +32,7 @@
 
 namespace tbai::mpc::arm {
 
-ArmInterface::ArmInterface(const std::string &taskFile, const std::string &libraryFolder,
-                                 const std::string &urdfFile) {
+ArmInterface::ArmInterface(const std::string &taskFile, const std::string &libraryFolder, const std::string &urdfFile) {
     boost::filesystem::path taskFilePath(taskFile);
     if (boost::filesystem::exists(taskFilePath)) {
         std::cerr << "[ArmInterface] Loading task file: " << taskFilePath << std::endl;
@@ -143,11 +142,9 @@ std::unique_ptr<ocs2::StateInputCost> ArmInterface::getQuadraticInputCost(const 
     return std::make_unique<QuadraticInputCost>(std::move(R), manipulatorModelInfo_.stateDim);
 }
 
-std::unique_ptr<ocs2::StateCost> ArmInterface::getEndEffectorConstraint(const ocs2::PinocchioInterface &pinocchioInterface,
-                                                                     const std::string &taskFile,
-                                                                     const std::string &prefix, bool usePreComputation,
-                                                                     const std::string &libraryFolder,
-                                                                     bool recompileLibraries) {
+std::unique_ptr<ocs2::StateCost> ArmInterface::getEndEffectorConstraint(
+    const ocs2::PinocchioInterface &pinocchioInterface, const std::string &taskFile, const std::string &prefix,
+    bool usePreComputation, const std::string &libraryFolder, bool recompileLibraries) {
     ocs2::scalar_t muPosition = 1.0;
     ocs2::scalar_t muOrientation = 1.0;
 
@@ -167,7 +164,7 @@ std::unique_ptr<ocs2::StateCost> ArmInterface::getEndEffectorConstraint(const oc
     if (usePreComputation) {
         ArmPinocchioMapping pinocchioMapping(manipulatorModelInfo_);
         ocs2::PinocchioEndEffectorKinematics eeKinematics(pinocchioInterface, pinocchioMapping,
-                                                    {manipulatorModelInfo_.eeFrame});
+                                                          {manipulatorModelInfo_.eeFrame});
         constraint.reset(new EndEffectorConstraint(eeKinematics, *referenceManagerPtr_));
     } else {
         ArmPinocchioMappingCppAd pinocchioMappingCppAd(manipulatorModelInfo_);
@@ -179,7 +176,8 @@ std::unique_ptr<ocs2::StateCost> ArmInterface::getEndEffectorConstraint(const oc
 
     std::vector<std::unique_ptr<ocs2::PenaltyBase>> penaltyArray(6);
     std::generate_n(penaltyArray.begin(), 3, [&] { return std::make_unique<ocs2::QuadraticPenalty>(muPosition); });
-    std::generate_n(penaltyArray.begin() + 3, 3, [&] { return std::make_unique<ocs2::QuadraticPenalty>(muOrientation); });
+    std::generate_n(penaltyArray.begin() + 3, 3,
+                    [&] { return std::make_unique<ocs2::QuadraticPenalty>(muOrientation); });
 
     return std::make_unique<ocs2::StateSoftConstraint>(std::move(constraint), std::move(penaltyArray));
 }

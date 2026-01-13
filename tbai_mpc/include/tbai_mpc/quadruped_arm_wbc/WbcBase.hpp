@@ -50,14 +50,11 @@ class WbcBase {
      * @param isStable Output stability flag
      * @return Motor commands for 18 joints (12 leg + 6 arm)
      */
-    virtual std::vector<tbai::MotorCommand> getMotorCommands(scalar_t currentTime, const vector_t &currentState,
-                                                             const vector_t &currentInput, const size_t currentMode,
-                                                             const vector_t &desiredState, const vector_t &desiredInput,
-                                                             const size_t desiredMode,
-                                                             const vector_t &desiredJointAcceleration,
-                                                             const vector_t &desiredArmEEPosition,
-                                                             const vector_t &desiredArmEEOrientation,
-                                                             bool &isStable) = 0;
+    virtual std::vector<tbai::MotorCommand> getMotorCommands(
+        scalar_t currentTime, const vector_t &currentState, const vector_t &currentInput, const size_t currentMode,
+        const vector_t &desiredState, const vector_t &desiredInput, const size_t desiredMode,
+        const vector_t &desiredJointAcceleration, const vector_t &desiredArmEEPosition,
+        const vector_t &desiredArmEEOrientation, bool &isStable) = 0;
 
    protected:
     // =============================================

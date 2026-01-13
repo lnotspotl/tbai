@@ -18,7 +18,8 @@ class SqpWbc : public WbcBase {
    public:
     SqpWbc(const std::string &configFile, const std::string &urdfString,
            const tbai::mpc::quadruped::ComModelBase<scalar_t> &comModel,
-           const tbai::mpc::quadruped::KinematicsModelBase<scalar_t> &kinematics, const std::vector<std::string> &jointNames)
+           const tbai::mpc::quadruped::KinematicsModelBase<scalar_t> &kinematics,
+           const std::vector<std::string> &jointNames)
         : WbcBase(configFile, urdfString, comModel, kinematics, "sqpWbc."), jointNames_(jointNames) {
         loadSettings(configFile);
     }

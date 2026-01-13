@@ -1,13 +1,12 @@
 #include "tbai_mpc/quadruped_arm_wbc/WbcBase.hpp"
 
+#include <boost/property_tree/info_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
 #include <ocs2_core/misc/LoadData.h>
 #include <pinocchio/fwd.hpp>
 #include <tbai_mpc/quadruped_arm_mpc/core/MotionPhaseDefinition.h>
 #include <tbai_mpc/quadruped_arm_mpc/core/Rotations.h>
 #include <tbai_mpc/quadruped_arm_mpc/quadruped_models/QuadrupedCom.h>
-
-#include <boost/property_tree/info_parser.hpp>
-#include <boost/property_tree/ptree.hpp>
 
 // pinocchio
 #include <pinocchio/algorithm/crba.hpp>
@@ -23,8 +22,10 @@ namespace quadruped_arm {
 /*********************************************************************************************************************/
 WbcBase::WbcBase(const std::string &configFile, const std::string &urdfString,
                  const tbai::mpc::quadruped_arm::ComModelBase<scalar_t> &comModel,
-                 const tbai::mpc::quadruped_arm::KinematicsModelBase<scalar_t> &kinematics, const std::string &configPrefix)
-    : pinocchioInterfaceMeasured_(tbai::mpc::quadruped_arm::createQuadrupedPinocchioInterfaceFromUrdfString(urdfString)),
+                 const tbai::mpc::quadruped_arm::KinematicsModelBase<scalar_t> &kinematics,
+                 const std::string &configPrefix)
+    : pinocchioInterfaceMeasured_(
+          tbai::mpc::quadruped_arm::createQuadrupedPinocchioInterfaceFromUrdfString(urdfString)),
       comModelPtr_(comModel.clone()),
       kinematicsPtr_(kinematics.clone()) {
     // Base angular + linear velocity, joint velocities (12 leg + 6 arm = 18)
@@ -42,11 +43,10 @@ WbcBase::WbcBase(const std::string &configFile, const std::string &urdfString,
     armJointNames_ = {"arm_sh0", "arm_sh1", "arm_el0", "arm_el1", "arm_wr0", "arm_wr1"};
 
     // All joint names (legs + arm)
-    jointNames_ = {"front_left_hip_x",  "front_left_hip_y",  "front_left_knee",
-                   "front_right_hip_x", "front_right_hip_y", "front_right_knee",
-                   "rear_left_hip_x",   "rear_left_hip_y",   "rear_left_knee",
-                   "rear_right_hip_x",  "rear_right_hip_y",  "rear_right_knee",
-                   "arm_sh0", "arm_sh1", "arm_el0", "arm_el1", "arm_wr0", "arm_wr1"};
+    jointNames_ = {"front_left_hip_x", "front_left_hip_y", "front_left_knee", "front_right_hip_x", "front_right_hip_y",
+                   "front_right_knee", "rear_left_hip_x",  "rear_left_hip_y", "rear_left_knee",    "rear_right_hip_x",
+                   "rear_right_hip_y", "rear_right_knee",  "arm_sh0",         "arm_sh1",           "arm_el0",
+                   "arm_el1",          "arm_wr0",          "arm_wr1"};
 
     Jcontact_ = matrix_t(3 * tbai::mpc::quadruped_arm::NUM_CONTACT_POINTS, nGeneralizedCoordinates_);
     dJcontactdt_ = matrix_t(3 * tbai::mpc::quadruped_arm::NUM_CONTACT_POINTS, nGeneralizedCoordinates_);
@@ -154,7 +154,8 @@ Task WbcBase::createTorqueLimitTask() {
     const vector_t hj = data.nle.segment(6, numLegJoints);
 
     // Contact Jacobian transpose for leg joints only (cols 6:18)
-    const matrix_t JjT = Jcontact_.block(0, 6, 3 * tbai::mpc::quadruped_arm::NUM_CONTACT_POINTS, numLegJoints).transpose();
+    const matrix_t JjT =
+        Jcontact_.block(0, 6, 3 * tbai::mpc::quadruped_arm::NUM_CONTACT_POINTS, numLegJoints).transpose();
 
     const size_t Drows = 2 * numLegJoints;
     matrix_t D = matrix_t::Zero(Drows, nDecisionVariables_);
@@ -165,7 +166,8 @@ Task WbcBase::createTorqueLimitTask() {
 
     // lower bound: -Mj * qddot + JjT * F <= tau_max + hj
     D.block(numLegJoints, 0, numLegJoints, nGeneralizedCoordinates_) = -Mj;
-    D.block(numLegJoints, nGeneralizedCoordinates_, numLegJoints, 3 * tbai::mpc::quadruped_arm::NUM_CONTACT_POINTS) = JjT;
+    D.block(numLegJoints, nGeneralizedCoordinates_, numLegJoints, 3 * tbai::mpc::quadruped_arm::NUM_CONTACT_POINTS) =
+        JjT;
 
     vector_t f = vector_t::Ones(Drows);
 
@@ -506,7 +508,7 @@ Task WbcBase::createArmEndEffectorOrientationTask(const vector_t &desiredEEOrien
 /*********************************************************************************************************************/
 Task WbcBase::createArmJointCenteringTask() {
     // Get current arm joint positions and velocities
-    constexpr size_t numArmJoints = tbai::mpc::quadruped_arm::NUM_ARM_JOINTS;  // 6
+    constexpr size_t numArmJoints = tbai::mpc::quadruped_arm::NUM_ARM_JOINTS;                // 6
     constexpr size_t armStartIdx = 6 + tbai::mpc::quadruped_arm::LEG_JOINT_COORDINATE_SIZE;  // 18
 
     // Extract arm joint positions from qMeasured_ (skip 7 for quaternion base)
@@ -536,7 +538,8 @@ Task WbcBase::createArmTorqueLimitTask() {
     auto &data = pinocchioInterfaceMeasured_.getData();
 
     constexpr size_t numArmJoints = tbai::mpc::quadruped_arm::NUM_ARM_JOINTS;  // 6
-    constexpr size_t armStartIdx = 6 + tbai::mpc::quadruped_arm::LEG_JOINT_COORDINATE_SIZE;  // 18 (in generalized coords)
+    constexpr size_t armStartIdx =
+        6 + tbai::mpc::quadruped_arm::LEG_JOINT_COORDINATE_SIZE;  // 18 (in generalized coords)
 
     // torques_arm = M_arm * qddot + h_arm
     // Arm joints are in rows 18:24 of the M matrix

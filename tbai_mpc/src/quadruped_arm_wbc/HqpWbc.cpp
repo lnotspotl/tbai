@@ -62,13 +62,15 @@ std::vector<tbai::MotorCommand> HqpWbc::getMotorCommands(scalar_t currentTime, c
     const vector_t &udot = hqpSolution.segment(0, nGeneralizedCoordinates_);
 
     // External forces, expressed in the world frame (12D: 4 feet x 3)
-    const vector_t &Fext = hqpSolution.segment(nGeneralizedCoordinates_, 3 * tbai::mpc::quadruped_arm::NUM_CONTACT_POINTS);
+    const vector_t &Fext =
+        hqpSolution.segment(nGeneralizedCoordinates_, 3 * tbai::mpc::quadruped_arm::NUM_CONTACT_POINTS);
 
     // Compute leg joint torques
     auto &data = pinocchioInterfaceMeasured_.getData();
     const matrix_t Mj_leg = data.M.block(6, 0, numLegJoints, nGeneralizedCoordinates_);
     const vector_t hj_leg = data.nle.segment(6, numLegJoints);
-    const matrix_t JjT_leg = Jcontact_.block(0, 6, 3 * tbai::mpc::quadruped_arm::NUM_CONTACT_POINTS, numLegJoints).transpose();
+    const matrix_t JjT_leg =
+        Jcontact_.block(0, 6, 3 * tbai::mpc::quadruped_arm::NUM_CONTACT_POINTS, numLegJoints).transpose();
     vector_t legTorques = Mj_leg * udot + hj_leg - JjT_leg * Fext;
 
     // Compute arm joint torques

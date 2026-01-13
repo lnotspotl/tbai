@@ -13,8 +13,7 @@ namespace tbai::mpc::arm {
 
 class SqpWbc : public WbcBase {
    public:
-    SqpWbc(const std::string &configFile, const std::string &urdfString,
-           const tbai::mpc::arm::ArmModelInfo &armInfo)
+    SqpWbc(const std::string &configFile, const std::string &urdfString, const tbai::mpc::arm::ArmModelInfo &armInfo)
         : WbcBase(configFile, urdfString, armInfo, "sqpWbc.") {
         loadSettings(configFile);
     }

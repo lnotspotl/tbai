@@ -65,8 +65,8 @@ ScalarFunctionQuadraticApproximation FootPlacementCost::getQuadraticApproximatio
             linearStateInequalitySoftConstraint.h = constraintMatrixPtr->b;
             linearStateInequalitySoftConstraint.h.noalias() += constraintMatrixPtr->A * footPosition;
 
-            const auto targetcost = tbai::mpc::quadruped_arm::getQuadraticApproximation(linearStateInequalitySoftConstraint,
-                                                                              footPosition, footJacobian);
+            const auto targetcost = tbai::mpc::quadruped_arm::getQuadraticApproximation(
+                linearStateInequalitySoftConstraint, footPosition, footJacobian);
             cost.f += targetcost.f;
             cost.dfdx += targetcost.dfdx;
             cost.dfdxx += targetcost.dfdxx;

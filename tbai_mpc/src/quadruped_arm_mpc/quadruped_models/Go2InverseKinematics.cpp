@@ -12,7 +12,8 @@ Go2InverseKinematics::Go2InverseKinematics(const FrameDeclaration &frameDeclarat
     auto data = pinocchioInterface.getData();
     const auto &model = pinocchioInterface.getModel();
 
-    tbai::mpc::quadruped_arm::joint_coordinate_t zeroConfiguration(tbai::mpc::quadruped_arm::joint_coordinate_t::Zero());
+    tbai::mpc::quadruped_arm::joint_coordinate_t zeroConfiguration(
+        tbai::mpc::quadruped_arm::joint_coordinate_t::Zero());
     pinocchio::forwardKinematics(model, data, zeroConfiguration);
     pinocchio::updateFramePlacements(model, data);
 
@@ -45,8 +46,9 @@ Go2InverseKinematics *Go2InverseKinematics::clone() const {
 tbai::mpc::quadruped_arm::vector3_t Go2InverseKinematics::getLimbJointPositionsFromPositionBaseToFootInBaseFrame(
     size_t footIndex, const tbai::mpc::quadruped_arm::vector3_t &positionBaseToFootInBaseFrame) const {
     tbai::mpc::quadruped_arm::vector3_t jointAngles{tbai::mpc::quadruped_arm::vector3_t::Zero()};
-    tbai::mpc::quadruped_arm::analytical_inverse_kinematics::go2::getLimbJointPositionsFromPositionBaseToFootInBaseFrame(
-        jointAngles, positionBaseToFootInBaseFrame, parameters_[footIndex], footIndex);
+    tbai::mpc::quadruped_arm::analytical_inverse_kinematics::go2::
+        getLimbJointPositionsFromPositionBaseToFootInBaseFrame(jointAngles, positionBaseToFootInBaseFrame,
+                                                               parameters_[footIndex], footIndex);
     return jointAngles;
 }
 

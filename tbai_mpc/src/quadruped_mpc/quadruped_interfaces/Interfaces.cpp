@@ -10,7 +10,7 @@
 namespace tbai::mpc::quadruped {
 
 std::unique_ptr<tbai::mpc::quadruped::QuadrupedInterface> getAnymalInterface(const std::string &urdf,
-                                                                       const std::string &taskFolder) {
+                                                                             const std::string &taskFolder) {
     std::cerr << "Loading task file from: " << taskFolder << std::endl;
 
     return getAnymalInterface(urdf, tbai::mpc::quadruped::loadQuadrupedSettings(taskFolder + "/task.info"),
@@ -31,12 +31,13 @@ std::unique_ptr<tbai::mpc::quadruped::QuadrupedInterface> getAnymalInterface(
     auto jointNames = getJointNames(frameDeclaration);
     auto baseName = frameDeclaration.root;
 
-    return std::unique_ptr<tbai::mpc::quadruped::QuadrupedInterface>(new tbai::mpc::quadruped::QuadrupedPointfootInterface(
-        *kin, *kinAd, *com, *comAd, invKin.get(), std::move(settings), std::move(jointNames), std::move(baseName)));
+    return std::unique_ptr<tbai::mpc::quadruped::QuadrupedInterface>(
+        new tbai::mpc::quadruped::QuadrupedPointfootInterface(
+            *kin, *kinAd, *com, *comAd, invKin.get(), std::move(settings), std::move(jointNames), std::move(baseName)));
 }
 
 std::unique_ptr<tbai::mpc::quadruped::QuadrupedInterface> getGo2Interface(const std::string &urdf,
-                                                                    const std::string &taskFolder) {
+                                                                          const std::string &taskFolder) {
     std::cerr << "Loading task file from: " << taskFolder << std::endl;
 
     return getGo2Interface(urdf, tbai::mpc::quadruped::loadQuadrupedSettings(taskFolder + "/task.info"),
@@ -57,12 +58,13 @@ std::unique_ptr<tbai::mpc::quadruped::QuadrupedInterface> getGo2Interface(
     auto jointNames = getJointNames(frameDeclaration);
     auto baseName = frameDeclaration.root;
 
-    return std::unique_ptr<tbai::mpc::quadruped::QuadrupedInterface>(new tbai::mpc::quadruped::QuadrupedPointfootInterface(
-        *kin, *kinAd, *com, *comAd, invKin.get(), std::move(settings), std::move(jointNames), std::move(baseName)));
+    return std::unique_ptr<tbai::mpc::quadruped::QuadrupedInterface>(
+        new tbai::mpc::quadruped::QuadrupedPointfootInterface(
+            *kin, *kinAd, *com, *comAd, invKin.get(), std::move(settings), std::move(jointNames), std::move(baseName)));
 }
 
 std::unique_ptr<tbai::mpc::quadruped::QuadrupedInterface> getSpotInterface(const std::string &urdf,
-                                                                     const std::string &taskFolder) {
+                                                                           const std::string &taskFolder) {
     std::cerr << "Loading task file from: " << taskFolder << std::endl;
 
     return getSpotInterface(urdf, tbai::mpc::quadruped::loadQuadrupedSettings(taskFolder + "/task.info"),
@@ -83,8 +85,9 @@ std::unique_ptr<tbai::mpc::quadruped::QuadrupedInterface> getSpotInterface(
     auto jointNames = getJointNames(frameDeclaration);
     auto baseName = frameDeclaration.root;
 
-    return std::unique_ptr<tbai::mpc::quadruped::QuadrupedInterface>(new tbai::mpc::quadruped::QuadrupedPointfootInterface(
-        *kin, *kinAd, *com, *comAd, invKin.get(), std::move(settings), std::move(jointNames), std::move(baseName)));
+    return std::unique_ptr<tbai::mpc::quadruped::QuadrupedInterface>(
+        new tbai::mpc::quadruped::QuadrupedPointfootInterface(
+            *kin, *kinAd, *com, *comAd, invKin.get(), std::move(settings), std::move(jointNames), std::move(baseName)));
 }
 
 }  // namespace tbai::mpc::quadruped

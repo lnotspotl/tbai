@@ -47,8 +47,10 @@ tbai::mpc::quadruped_arm::joint_coordinate_s_t<SCALAR_T> getPinocchioJointVector
         jointPositions.template segment<3>(9);
 
     // Arm joints (6 joints) - copy directly (arm joints come after leg joints)
-    pinocchioJointPositions.template segment<tbai::mpc::quadruped_arm::NUM_ARM_JOINTS>(tbai::mpc::quadruped_arm::LEG_JOINT_COORDINATE_SIZE) =
-        jointPositions.template segment<tbai::mpc::quadruped_arm::NUM_ARM_JOINTS>(tbai::mpc::quadruped_arm::LEG_JOINT_COORDINATE_SIZE);
+    pinocchioJointPositions.template segment<tbai::mpc::quadruped_arm::NUM_ARM_JOINTS>(
+        tbai::mpc::quadruped_arm::LEG_JOINT_COORDINATE_SIZE) =
+        jointPositions.template segment<tbai::mpc::quadruped_arm::NUM_ARM_JOINTS>(
+            tbai::mpc::quadruped_arm::LEG_JOINT_COORDINATE_SIZE);
 
     return pinocchioJointPositions;
 }

@@ -100,11 +100,12 @@ tbai::mpc::quadruped_arm::base_coordinate_s_t<SCALAR_T> QuadrupedCom<SCALAR_T>::
     pinocchioBaseForces.template tail<3>() = forcesOnBaseInBaseFrame.template head<3>();
 
     tbai::mpc::quadruped_arm::vector6_s_t<SCALAR_T> baseForcesInBaseFrame = pinocchioBaseForces - dynamicBias.head(6);
-    baseForcesInBaseFrame.noalias() -=
-        data.M.template block<6, tbai::mpc::quadruped_arm::JOINT_COORDINATE_SIZE>(0, 6) * pinocchioMapping_.getPinocchioJointVector(jointAccelerations);
+    baseForcesInBaseFrame.noalias() -= data.M.template block<6, tbai::mpc::quadruped_arm::JOINT_COORDINATE_SIZE>(0, 6) *
+                                       pinocchioMapping_.getPinocchioJointVector(jointAccelerations);
 
     // M are symmetric but pinocchio only fills in the upper triangle.
-    tbai::mpc::quadruped_arm::matrix6_s_t<SCALAR_T> Mb = data.M.topLeftCorner(6, 6).template selfadjointView<Eigen::Upper>();
+    tbai::mpc::quadruped_arm::matrix6_s_t<SCALAR_T> Mb =
+        data.M.topLeftCorner(6, 6).template selfadjointView<Eigen::Upper>();
     vector_t baseAcceleration = inertiaTensorSolveLinearAngular(Mb, baseForcesInBaseFrame);
 
     vector_t ocs2baseAcceleration(6);

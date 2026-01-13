@@ -48,17 +48,14 @@ void MpcController::initialize(const std::string &urdfString, const std::string 
                                const std::string &targetCommandFile, scalar_t trajdt, size_t trajKnots) {
     // Create quadruped interface
     if (robotName_ == "anymal_d" || robotName_ == "anymal_b" || robotName_ == "anymal_c") {
-        quadrupedInterfacePtr_ =
-            getAnymalInterface(urdfString, loadQuadrupedSettings(taskSettingsFile),
-                                       frameDeclarationFromFile(frameDeclarationFile));
+        quadrupedInterfacePtr_ = getAnymalInterface(urdfString, loadQuadrupedSettings(taskSettingsFile),
+                                                    frameDeclarationFromFile(frameDeclarationFile));
     } else if (robotName_ == "go2") {
-        quadrupedInterfacePtr_ =
-            getGo2Interface(urdfString, loadQuadrupedSettings(taskSettingsFile),
-                                    frameDeclarationFromFile(frameDeclarationFile));
+        quadrupedInterfacePtr_ = getGo2Interface(urdfString, loadQuadrupedSettings(taskSettingsFile),
+                                                 frameDeclarationFromFile(frameDeclarationFile));
     } else if (robotName_ == "spot" || robotName_ == "spot_arm") {
-        quadrupedInterfacePtr_ =
-            getSpotInterface(urdfString, loadQuadrupedSettings(taskSettingsFile),
-                                     frameDeclarationFromFile(frameDeclarationFile));
+        quadrupedInterfacePtr_ = getSpotInterface(urdfString, loadQuadrupedSettings(taskSettingsFile),
+                                                  frameDeclarationFromFile(frameDeclarationFile));
     } else {
         TBAI_THROW("Robot {} not implemented. Available robots: anymal_d, anymal_b, anymal_c, go2, spot, spot_arm",
                    robotName_);
@@ -67,11 +64,11 @@ void MpcController::initialize(const std::string &urdfString, const std::string 
     // Create WBC (arm version - jointNames are stored internally in WbcBase)
     wbcPtr_ =
         tbai::mpc::quadruped_arm::getWbcUnique(controllerConfigFile, urdfString, quadrupedInterfacePtr_->getComModel(),
-                                quadrupedInterfacePtr_->getKinematicModel());
+                                               quadrupedInterfacePtr_->getKinematicModel());
 
     // Create reference trajectory generator
-    auto kinematicsPtr = std::shared_ptr<KinematicsModelBase<scalar_t>>(
-        quadrupedInterfacePtr_->getKinematicModel().clone());
+    auto kinematicsPtr =
+        std::shared_ptr<KinematicsModelBase<scalar_t>>(quadrupedInterfacePtr_->getKinematicModel().clone());
     referenceTrajectoryGeneratorPtr_ = std::make_unique<reference::ReferenceTrajectoryGenerator>(
         targetCommandFile, velocityGeneratorPtr_, std::move(kinematicsPtr), trajdt, trajKnots);
 
@@ -135,9 +132,8 @@ std::vector<MotorCommand> MpcController::getMotorCommands(scalar_t currentTime, 
     const auto armJointPositions = getArmJointPositions(desiredState);
 
     // Compute desired arm EE position from forward kinematics
-    ocs2::vector_t desiredArmEEPosition =
-        quadrupedInterfacePtr_->getKinematicModel().armEEPositionInOriginFrame(basePose, legJointPositions,
-                                                                               armJointPositions);
+    ocs2::vector_t desiredArmEEPosition = quadrupedInterfacePtr_->getKinematicModel().armEEPositionInOriginFrame(
+        basePose, legJointPositions, armJointPositions);
 
     // Compute desired arm EE orientation as quaternion (w, x, y, z)
     auto desiredArmEERotation = quadrupedInterfacePtr_->getKinematicModel().armEEOrientationInOriginFrame(
@@ -146,10 +142,9 @@ std::vector<MotorCommand> MpcController::getMotorCommands(scalar_t currentTime, 
     ocs2::vector_t desiredArmEEOrientation(4);
     desiredArmEEOrientation << desiredArmEEQuat.w(), desiredArmEEQuat.x(), desiredArmEEQuat.y(), desiredArmEEQuat.z();
 
-    auto commands =
-        wbcPtr_->getMotorCommands(tNow_, observation.state, observation.input, observation.mode, desiredState,
-                                  desiredInput, desiredMode, joint_accelerations, desiredArmEEPosition,
-                                  desiredArmEEOrientation, isStable_);
+    auto commands = wbcPtr_->getMotorCommands(tNow_, observation.state, observation.input, observation.mode,
+                                              desiredState, desiredInput, desiredMode, joint_accelerations,
+                                              desiredArmEEPosition, desiredArmEEOrientation, isStable_);
 
     timeSinceLastMpcUpdate_ += dt;
     if (timeSinceLastMpcUpdate_ >= 1.0 / mpcRate_) {
@@ -306,7 +301,8 @@ ocs2::SystemObservation MpcController::generateSystemObservation() const {
     observation.mode = stanceLeg2ModeNumber(contactFlagsArray);
 
     // State: 30D = 12 (base) + 12 (leg joints) + 6 (arm joints)
-    // rbdState layout: [euler(3), pos(3), angvel(3), linvel(3), leg_joints(12), arm_joints(6), leg_vels(12), arm_vels(6)]
+    // rbdState layout: [euler(3), pos(3), angvel(3), linvel(3), leg_joints(12), arm_joints(6), leg_vels(12),
+    // arm_vels(6)]
     constexpr size_t numLegJoints = LEG_JOINT_COORDINATE_SIZE;  // 12
     constexpr size_t numArmJoints = NUM_ARM_JOINTS;             // 6
     constexpr size_t stateSize = STATE_DIM;                     // 30
@@ -314,8 +310,8 @@ ocs2::SystemObservation MpcController::generateSystemObservation() const {
 
     // Set state: [euler(3), pos(3), angvel(3), linvel(3), leg_joints(12), arm_joints(6)]
     observation.state.resize(stateSize);
-    observation.state.head<12>() = rbdState.head<12>();                    // base state
-    observation.state.segment(12, numLegJoints) = rbdState.segment(12, numLegJoints);  // leg joints
+    observation.state.head<12>() = rbdState.head<12>();                                        // base state
+    observation.state.segment(12, numLegJoints) = rbdState.segment(12, numLegJoints);          // leg joints
     observation.state.tail(numArmJoints) = rbdState.segment(12 + numLegJoints, numArmJoints);  // arm joints
 
     // Swap LH and RF for leg joints (indices 15-17 swap with 18-20)

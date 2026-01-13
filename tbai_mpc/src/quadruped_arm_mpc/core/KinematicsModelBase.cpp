@@ -210,9 +210,8 @@ KinematicsModelBase<SCALAR_T>::collisionSpheresInBaseFrame(const joint_coordinat
 
 template <typename SCALAR_T>
 vector3_s_t<SCALAR_T> KinematicsModelBase<SCALAR_T>::armEEPositionInOriginFrame(
-    const base_coordinate_s_t<SCALAR_T>& basePose,
-    const leg_joint_coordinate_s_t<SCALAR_T>& legJointPositions,
-    const arm_joint_s_t<SCALAR_T>& armJointPositions) const {
+    const base_coordinate_s_t<SCALAR_T> &basePose, const leg_joint_coordinate_s_t<SCALAR_T> &legJointPositions,
+    const arm_joint_s_t<SCALAR_T> &armJointPositions) const {
     const vector3_s_t<SCALAR_T> o_basePosition = getPositionInOrigin(basePose);
     const vector3_s_t<SCALAR_T> b_armEEPosition = armEEPositionInBaseFrame(legJointPositions, armJointPositions);
     const vector3_s_t<SCALAR_T> o_armEEPosition =
@@ -225,9 +224,8 @@ vector3_s_t<SCALAR_T> KinematicsModelBase<SCALAR_T>::armEEPositionInOriginFrame(
 ///******************************************************************************************************/
 template <typename SCALAR_T>
 matrix3_s_t<SCALAR_T> KinematicsModelBase<SCALAR_T>::armEEOrientationInOriginFrame(
-    const base_coordinate_s_t<SCALAR_T>& basePose,
-    const leg_joint_coordinate_s_t<SCALAR_T>& legJointPositions,
-    const arm_joint_s_t<SCALAR_T>& armJointPositions) const {
+    const base_coordinate_s_t<SCALAR_T> &basePose, const leg_joint_coordinate_s_t<SCALAR_T> &legJointPositions,
+    const arm_joint_s_t<SCALAR_T> &armJointPositions) const {
     const matrix3_s_t<SCALAR_T> o_R_b = rotationMatrixBaseToOrigin<SCALAR_T>(getOrientation(basePose));
     return o_R_b * armEEOrientationInBaseFrame(legJointPositions, armJointPositions);
 }
@@ -237,9 +235,8 @@ matrix3_s_t<SCALAR_T> KinematicsModelBase<SCALAR_T>::armEEOrientationInOriginFra
 ///******************************************************************************************************/
 template <typename SCALAR_T>
 vector3_s_t<SCALAR_T> KinematicsModelBase<SCALAR_T>::armEEVelocityInBaseFrame(
-    const leg_joint_coordinate_s_t<SCALAR_T>& legJointPositions,
-    const arm_joint_s_t<SCALAR_T>& armJointPositions,
-    const arm_joint_s_t<SCALAR_T>& armJointVelocities) const {
+    const leg_joint_coordinate_s_t<SCALAR_T> &legJointPositions, const arm_joint_s_t<SCALAR_T> &armJointPositions,
+    const arm_joint_s_t<SCALAR_T> &armJointVelocities) const {
     const arm_jacobian_t jacobian = armEEJacobianInBaseFrame(legJointPositions, armJointPositions);
     // Linear velocity is in top 3 rows of Jacobian
     return jacobian.template topRows<3>() * armJointVelocities;
@@ -250,9 +247,8 @@ vector3_s_t<SCALAR_T> KinematicsModelBase<SCALAR_T>::armEEVelocityInBaseFrame(
 ///******************************************************************************************************/
 template <typename SCALAR_T>
 vector3_s_t<SCALAR_T> KinematicsModelBase<SCALAR_T>::armEEAngularVelocityInBaseFrame(
-    const leg_joint_coordinate_s_t<SCALAR_T>& legJointPositions,
-    const arm_joint_s_t<SCALAR_T>& armJointPositions,
-    const arm_joint_s_t<SCALAR_T>& armJointVelocities) const {
+    const leg_joint_coordinate_s_t<SCALAR_T> &legJointPositions, const arm_joint_s_t<SCALAR_T> &armJointPositions,
+    const arm_joint_s_t<SCALAR_T> &armJointVelocities) const {
     const arm_jacobian_t jacobian = armEEJacobianInBaseFrame(legJointPositions, armJointPositions);
     // Angular velocity is in bottom 3 rows of Jacobian
     return jacobian.template bottomRows<3>() * armJointVelocities;

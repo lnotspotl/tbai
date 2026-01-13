@@ -40,7 +40,8 @@ scalar_t CollisionAvoidanceCost::getValue(scalar_t time, const vector_t &state,
                 // linearStateInequalitySoftConstraint.A = Leave empty
                 linearStateInequalitySoftConstraint.h = h_sdf;
 
-                cost += tbai::mpc::quadruped_arm::getValue(linearStateInequalitySoftConstraint, collisionSphere.position);
+                cost +=
+                    tbai::mpc::quadruped_arm::getValue(linearStateInequalitySoftConstraint, collisionSphere.position);
             }
         }
     }

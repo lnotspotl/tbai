@@ -384,7 +384,8 @@ std::vector<tbai::MotorCommand> Go2WDreamWaQController::getMotorCommands(scalar_
         cmd.torque_ff = 0.0;
 
         // Check if joint is a wheel
-        const bool isWheel = std::find(wheelRealIndices_.begin(), wheelRealIndices_.end(), i) != wheelRealIndices_.end();
+        const bool isWheel =
+            std::find(wheelRealIndices_.begin(), wheelRealIndices_.end(), i) != wheelRealIndices_.end();
 
         if (isWheel) {
             // Wheel: velocity control

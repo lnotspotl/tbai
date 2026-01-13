@@ -34,10 +34,11 @@ class ReferenceTrajectoryGenerator {
      * @param trajdt: Time step for reference trajectory (default: 0.1)
      * @param trajKnots: Number of knots in reference trajectory (default: 20)
      */
-    ReferenceTrajectoryGenerator(const std::string &configFile,
-                                 std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> velocityGeneratorPtr,
-                                 std::shared_ptr<tbai::mpc::quadruped_arm::KinematicsModelBase<ocs2::scalar_t>> kinematicsPtr,
-                                 ocs2::scalar_t trajdt = 0.1, size_t trajKnots = 20);
+    ReferenceTrajectoryGenerator(
+        const std::string &configFile,
+        std::shared_ptr<tbai::reference::ReferenceVelocityGenerator> velocityGeneratorPtr,
+        std::shared_ptr<tbai::mpc::quadruped_arm::KinematicsModelBase<ocs2::scalar_t>> kinematicsPtr,
+        ocs2::scalar_t trajdt = 0.1, size_t trajKnots = 20);
 
     virtual ~ReferenceTrajectoryGenerator() = default;
 

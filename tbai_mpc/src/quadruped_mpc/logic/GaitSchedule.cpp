@@ -97,7 +97,8 @@ void GaitSchedule::adaptCurrentGait(const std::function<void(scalar_t &currentPh
 }
 
 ocs2::ModeSchedule GaitSchedule::getModeSchedule(scalar_t timeHorizon) const {
-    return ::tbai::mpc::quadruped::getModeSchedule(phase_, time_, timeHorizon, gaitSchedule_.begin(), gaitSchedule_.end());
+    return ::tbai::mpc::quadruped::getModeSchedule(phase_, time_, timeHorizon, gaitSchedule_.begin(),
+                                                   gaitSchedule_.end());
 }
 
 void GaitSchedule::rolloutGaitScheduleTillTime(scalar_t time) {
