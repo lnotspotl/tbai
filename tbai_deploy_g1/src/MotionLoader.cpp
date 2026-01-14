@@ -128,13 +128,11 @@ quaternion_t MotionLoader::rootQuaternion() const {
 }
 
 quaternion_t MotionLoader::yawQuaternion(const quaternion_t &quat) {
-    // Extract yaw from quaternion and create yaw-only quaternion
-    // Yaw is rotation around Z axis
-    vector3_t euler = quat.toRotationMatrix().eulerAngles(2, 1, 0);  // ZYX order
-    scalar_t yaw = euler[0];
-
-    // Create quaternion from yaw only
-    return quaternion_t(Eigen::AngleAxis<scalar_t>(yaw, vector3_t::UnitZ()));
+    // based on HybridRobotics/motion_tracking_controller
+    scalar_t yaw = std::atan2(scalar_t(2) * (quat.w() * quat.z() + quat.x() * quat.y()),
+                              scalar_t(1) - scalar_t(2) * (quat.y() * quat.y() + quat.z() * quat.z()));
+    scalar_t half_yaw = yaw * scalar_t(0.5);
+    return quaternion_t(std::cos(half_yaw), scalar_t(0), scalar_t(0), std::sin(half_yaw)).normalized();
 }
 
 }  // namespace g1

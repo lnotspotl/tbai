@@ -41,6 +41,7 @@ add_library(tbai_deploy_g1
     src/G1RobotInterface.cpp
     src/G1RLController.cpp
     src/G1MimicController.cpp
+    src/G1BeyondMimicController.cpp
     src/MotionLoader.cpp
 )
 set_target_properties(tbai_deploy_g1 PROPERTIES EXPORT_NAME deploy_g1)

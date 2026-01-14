@@ -80,7 +80,6 @@ void G1RLController::initOnnxRuntime(const std::string &policyPath) {
     ortSession_ = std::make_unique<Ort::Session>(*ortEnv_, policyPath.c_str(), sessionOptions);
     memoryInfo_ = std::make_unique<Ort::MemoryInfo>(Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault));
 
-    // Get input/output names
     Ort::AllocatorWithDefaultOptions allocator;
 
     auto inputNamePtr = ortSession_->GetInputNameAllocated(0, allocator);
@@ -97,59 +96,42 @@ void G1RLController::preStep(scalar_t currentTime, scalar_t dt) {
 }
 
 vector3_t G1RLController::computeProjectedGravity(const quaternion_t &orientation) const {
-    // Project gravity vector [0, 0, -1] into body frame
     vector3_t gravityWorld(0.0, 0.0, -1.0);
     matrix3_t R = orientation.toRotationMatrix();
     return R.transpose() * gravityWorld;
 }
 
 void G1RLController::buildObservation(scalar_t currentTime, scalar_t dt) {
-    // Get state components
     vector3_t rpy = state_.x.segment<3>(0);
     vector3_t baseAngVel = state_.x.segment<3>(6);
     vector_t jointPos = state_.x.segment(12, G1_NUM_JOINTS);
     vector_t jointVel = state_.x.segment(12 + G1_NUM_JOINTS, G1_NUM_JOINTS);
 
-    // Compute quaternion from RPY for projected gravity
-    quaternion_t orientation = tbai::rpy2quat(rpy);
+    quaternion_t orientation = tbai::ocs2rpy2quat(rpy);
 
-    // Get velocity command from reference generator
     auto refVel = refVelGenPtr_->getReferenceVelocity(currentTime, dt);
-    // Clamp velocity commands to policy-expected ranges
-    // From deploy.yaml: lin_vel_x: [-0.5, 1.0], lin_vel_y: [-0.3, 0.3], ang_vel_z: [-0.2, 0.2]
+
     vector3_t velCmd;
     velCmd[0] = std::clamp(refVel.velocity_x, -0.5, 1.0);
     velCmd[1] = std::clamp(refVel.velocity_y, -0.3, 0.3);
     velCmd[2] = std::clamp(refVel.yaw_rate, -0.5, 0.5);
 
-    // Compute each observation term (scaled as per deploy.yaml)
-    // Term 0: base_ang_vel * scale [0.2, 0.2, 0.2]
     vector3_t angVelScaled = baseAngVel * angVelScale_;
 
-    // Term 1: projected_gravity * scale [1.0, 1.0, 1.0]
     vector3_t projGrav = computeProjectedGravity(orientation);
 
-    // Term 2: velocity_commands * scale [1.0, 1.0, 1.0]
-    // (already clamped above)
-
-    // Term 3: joint_pos_rel * scale [1.0, ...] (using joint_ids_map for reordering)
     vector_t jointPosRel(G1_NUM_JOINTS);
     for (int i = 0; i < G1_NUM_JOINTS; ++i) {
         int mappedIdx = jointIdsMap_[i];
         jointPosRel[i] = jointPos[mappedIdx] - defaultJointPos_[i];
     }
 
-    // Term 4: joint_vel_rel * scale [0.05, ...] (using joint_ids_map for reordering)
     vector_t jointVelRel(G1_NUM_JOINTS);
     for (int i = 0; i < G1_NUM_JOINTS; ++i) {
         int mappedIdx = jointIdsMap_[i];
         jointVelRel[i] = jointVel[mappedIdx] * jointVelScale_;
     }
 
-    // Term 5: last_action * scale [1.0, ...]
-    // (lastAction_ is already the raw action from previous step)
-
-    // Add to history buffers (push back, pop front)
     angVelHistory_.push_back(angVelScaled);
     angVelHistory_.pop_front();
 
@@ -172,42 +154,35 @@ void G1RLController::buildObservation(scalar_t currentTime, scalar_t dt) {
 void G1RLController::updateHistory() {
     int idx = 0;
 
-    // Term 0: base_ang_vel (3 * 5 = 15)
     for (int h = 0; h < HISTORY_LENGTH; ++h) {
         fullObservation_.segment<3>(idx) = angVelHistory_[h];
         idx += 3;
     }
 
-    // Term 1: projected_gravity (3 * 5 = 15)
     for (int h = 0; h < HISTORY_LENGTH; ++h) {
         fullObservation_.segment<3>(idx) = projGravHistory_[h];
         idx += 3;
     }
 
-    // Term 2: velocity_commands (3 * 5 = 15)
     for (int h = 0; h < HISTORY_LENGTH; ++h) {
         fullObservation_.segment<3>(idx) = velCmdHistory_[h];
         idx += 3;
     }
 
-    // Term 3: joint_pos_rel (29 * 5 = 145)
     for (int h = 0; h < HISTORY_LENGTH; ++h) {
         fullObservation_.segment(idx, G1_NUM_JOINTS) = jointPosRelHistory_[h];
         idx += G1_NUM_JOINTS;
     }
 
-    // Term 4: joint_vel_rel (29 * 5 = 145)
     for (int h = 0; h < HISTORY_LENGTH; ++h) {
         fullObservation_.segment(idx, G1_NUM_JOINTS) = jointVelRelHistory_[h];
         idx += G1_NUM_JOINTS;
     }
 
-    // Term 5: last_action (29 * 5 = 145)
     for (int h = 0; h < HISTORY_LENGTH; ++h) {
         fullObservation_.segment(idx, G1_NUM_JOINTS) = lastActionHistory_[h];
         idx += G1_NUM_JOINTS;
     }
-    // Total: 15 + 15 + 15 + 145 + 145 + 145 = 480
 }
 
 void G1RLController::runInference() {
@@ -225,13 +200,13 @@ void G1RLController::runInference() {
     auto outputTensors =
         ortSession_->Run(Ort::RunOptions{nullptr}, inputNames_.data(), &inputTensor, 1, outputNames_.data(), 1);
 
-    // Get output
+    // Get actions
     float *outputData = outputTensors[0].GetTensorMutableData<float>();
     for (int i = 0; i < G1_NUM_JOINTS; ++i) {
         action_[i] = static_cast<scalar_t>(outputData[i]);
     }
 
-    // Store for next step
+    // Store actions for next step
     lastAction_ = action_;
 }
 
@@ -252,7 +227,8 @@ std::vector<tbai::MotorCommand> G1RLController::getMotorCommands(scalar_t curren
         // Apply action scaling and offset (scale and offset are in policy order)
         cmd.desired_position = actionScale_[i] * action_[i] + actionOffset_[i];
         cmd.desired_velocity = 0.0;
-        // Stiffness and damping are stored in DDS order (matching the motor indexing)
+
+        // Stiffness and damping are stored in DDS order
         cmd.kp = stiffness_[ddsIdx];
         cmd.kd = damping_[ddsIdx];
         cmd.torque_ff = 0.0;
@@ -272,7 +248,7 @@ bool G1RLController::ok() const {
 }
 
 bool G1RLController::checkStability() const {
-    const scalar_t maxAngle = 1.5708;  // 90 degrees
+    constexpr scalar_t maxAngle = 1.0;  // radians
     scalar_t roll = std::abs(state_.x[0]);
     scalar_t pitch = std::abs(state_.x[1]);
 
@@ -297,7 +273,7 @@ void G1RLController::changeController(const std::string &controllerType, scalar_
     vector3_t baseAngVel = state_.x.segment<3>(6);
     vector_t jointPos = state_.x.segment(12, G1_NUM_JOINTS);
     vector_t jointVel = state_.x.segment(12 + G1_NUM_JOINTS, G1_NUM_JOINTS);
-    quaternion_t orientation = tbai::rpy2quat(rpy);
+    quaternion_t orientation = tbai::ocs2rpy2quat(rpy);
 
     vector3_t angVelScaled = baseAngVel * angVelScale_;
     vector3_t projGrav = computeProjectedGravity(orientation);
@@ -324,7 +300,7 @@ void G1RLController::changeController(const std::string &controllerType, scalar_
         velCmdHistory_.push_back(velCmd);
         jointPosRelHistory_.push_back(jointPosRel);
         jointVelRelHistory_.push_back(jointVelRel);
-        lastActionHistory_.push_back(lastAction_);  // zeros
+        lastActionHistory_.push_back(lastAction_);
     }
 
     TBAI_LOG_INFO(logger_, "Observation history initialized with current state");

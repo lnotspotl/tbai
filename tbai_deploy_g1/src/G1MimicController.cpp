@@ -131,8 +131,8 @@ void G1MimicController::buildObservation(scalar_t currentTime, scalar_t dt) {
     vector_t jointPos = state_.x.segment(12, G1_NUM_JOINTS);
     vector_t jointVel = state_.x.segment(12 + G1_NUM_JOINTS, G1_NUM_JOINTS);
 
-    // Compute root quaternion from RPY
-    quaternion_t rootQuat = tbai::rpy2quat(rpy);
+    // Compute root quaternion from RPY (using OCS2 convention)
+    quaternion_t rootQuat = tbai::ocs2rpy2quat(rpy);
 
     // Get motion target data (already in DFS order)
     vector_t motionJointPosDfs = motionLoader_->jointPos();
@@ -282,9 +282,9 @@ void G1MimicController::changeController(const std::string &controllerType, scal
     // Get current state
     state_ = stateSubscriberPtr_->getLatestState();
 
-    // Compute robot root orientation
+    // Compute robot root orientation (using OCS2 convention)
     vector3_t rpy = state_.x.segment<3>(0);
-    quaternion_t robotRootQuat = tbai::rpy2quat(rpy);
+    quaternion_t robotRootQuat = tbai::ocs2rpy2quat(rpy);
 
     // Get robot torso orientation
     vector_t jointPos = state_.x.segment(12, G1_NUM_JOINTS);
