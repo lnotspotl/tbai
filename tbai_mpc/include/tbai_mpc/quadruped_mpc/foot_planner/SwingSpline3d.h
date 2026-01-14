@@ -8,7 +8,7 @@
 
 #include "tbai_mpc/quadruped_mpc/foot_planner/QuinticSplineSwing.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 struct SwingNode3d {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -53,4 +53,4 @@ class SwingSpline3d {
   QuinticSwing z_;
 };
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

@@ -164,9 +164,9 @@ install(DIRECTORY test/include/${PROJECT_NAME}/
 )
 
 install(EXPORT ocs2Targets
-  FILE ocs2Targets.cmake
-  NAMESPACE ocs2::
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ocs2
+  FILE tbai-ocs2-targets.cmake
+  NAMESPACE tbai::
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/tbai
 )
 
 #############

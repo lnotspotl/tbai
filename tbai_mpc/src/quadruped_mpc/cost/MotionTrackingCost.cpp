@@ -11,7 +11,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <ocs2_core/misc/LoadData.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 namespace {
 
@@ -157,4 +157,4 @@ MotionTrackingCost::Weights loadWeightsFromFile(const std::string &filename, con
     return weights;
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

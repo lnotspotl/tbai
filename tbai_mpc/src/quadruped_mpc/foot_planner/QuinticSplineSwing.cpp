@@ -7,7 +7,7 @@
 #include <Eigen/Sparse>
 #include <ocs2_core/misc/Lookup.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 scalar_t QuinticSpline::position(scalar_t time) const {
     const scalar_t tau1 = normalizedTime(time);
@@ -220,4 +220,4 @@ scalar_t QuinticSwing::jerk(scalar_t time) const {
     return splines[index].jerk(time);
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

@@ -4,7 +4,7 @@
 
 #include "tbai_mpc/quadruped_mpc/foot_planner/SwingSpline3d.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 SwingSpline3d::SwingSpline3d(const SwingNode3d &start, const SwingNode3d &mid, const SwingNode3d &end)
     : SwingSpline3d(std::vector<SwingNode3d>{start, mid, end}) {}
@@ -42,4 +42,4 @@ vector3_t SwingSpline3d::jerk(scalar_t time) const {
     return {x_.jerk(time), y_.jerk(time), z_.jerk(time)};
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

@@ -9,7 +9,7 @@
 #include "tbai_mpc/quadruped_mpc/terrain/SignedDistanceField.h"
 #include "tbai_mpc/quadruped_mpc/terrain/TerrainPlane.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * This abstract class defines the interface for terrain models.
@@ -54,4 +54,4 @@ class TerrainModel {
   virtual std::vector<vector2_t> getHeightProfileAlongLine(const vector3_t& position1InWorld, const vector3_t& position2InWorld) const = 0;
 };
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

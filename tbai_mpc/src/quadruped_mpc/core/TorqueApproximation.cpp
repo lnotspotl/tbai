@@ -4,7 +4,7 @@
 
 #include "tbai_mpc/quadruped_mpc/core/TorqueApproximation.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 template <typename SCALAR_T>
 joint_coordinate_s_t<SCALAR_T> torqueApproximation(const joint_coordinate_s_t<SCALAR_T> &jointPositions,
@@ -30,4 +30,4 @@ template joint_coordinate_s_t<ad_scalar_t> torqueApproximation<ad_scalar_t>(
     const feet_array_t<vector3_s_t<ad_scalar_t>> &contactForcesInBase,
     const KinematicsModelBase<ad_scalar_t> &kinematics);
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

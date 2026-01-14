@@ -7,20 +7,20 @@
 #include "tbai_mpc/quadruped_mpc/QuadrupedPointfootInterface.h"
 #include "tbai_mpc/quadruped_mpc/quadruped_models/AnymalModels.h"
 
-namespace anymal {
+namespace tbai::mpc::quadruped {
 
-std::unique_ptr<switched_model::QuadrupedInterface> getAnymalInterface(const std::string &urdf,
-                                                                       const std::string &taskFolder) {
+std::unique_ptr<tbai::mpc::quadruped::QuadrupedInterface> getAnymalInterface(const std::string &urdf,
+                                                                             const std::string &taskFolder) {
     std::cerr << "Loading task file from: " << taskFolder << std::endl;
 
-    return getAnymalInterface(urdf, switched_model::loadQuadrupedSettings(taskFolder + "/task.info"),
+    return getAnymalInterface(urdf, tbai::mpc::quadruped::loadQuadrupedSettings(taskFolder + "/task.info"),
                               frameDeclarationFromFile(taskFolder + "/frame_declaration.info"));
 }
 
-std::unique_ptr<switched_model::QuadrupedInterface> getAnymalInterface(
-    const std::string &urdf, switched_model::QuadrupedInterface::Settings settings,
+std::unique_ptr<tbai::mpc::quadruped::QuadrupedInterface> getAnymalInterface(
+    const std::string &urdf, tbai::mpc::quadruped::QuadrupedInterface::Settings settings,
     const FrameDeclaration &frameDeclaration) {
-    std::unique_ptr<switched_model::InverseKinematicsModelBase> invKin{nullptr};
+    std::unique_ptr<tbai::mpc::quadruped::InverseKinematicsModelBase> invKin{nullptr};
     if (settings.modelSettings_.analyticalInverseKinematics_) {
         invKin = getAnymalInverseKinematics(frameDeclaration, urdf);
     }
@@ -31,22 +31,23 @@ std::unique_ptr<switched_model::QuadrupedInterface> getAnymalInterface(
     auto jointNames = getJointNames(frameDeclaration);
     auto baseName = frameDeclaration.root;
 
-    return std::unique_ptr<switched_model::QuadrupedInterface>(new switched_model::QuadrupedPointfootInterface(
-        *kin, *kinAd, *com, *comAd, invKin.get(), std::move(settings), std::move(jointNames), std::move(baseName)));
+    return std::unique_ptr<tbai::mpc::quadruped::QuadrupedInterface>(
+        new tbai::mpc::quadruped::QuadrupedPointfootInterface(
+            *kin, *kinAd, *com, *comAd, invKin.get(), std::move(settings), std::move(jointNames), std::move(baseName)));
 }
 
-std::unique_ptr<switched_model::QuadrupedInterface> getGo2Interface(const std::string &urdf,
-                                                                    const std::string &taskFolder) {
+std::unique_ptr<tbai::mpc::quadruped::QuadrupedInterface> getGo2Interface(const std::string &urdf,
+                                                                          const std::string &taskFolder) {
     std::cerr << "Loading task file from: " << taskFolder << std::endl;
 
-    return getGo2Interface(urdf, switched_model::loadQuadrupedSettings(taskFolder + "/task.info"),
+    return getGo2Interface(urdf, tbai::mpc::quadruped::loadQuadrupedSettings(taskFolder + "/task.info"),
                            frameDeclarationFromFile(taskFolder + "/frame_declaration.info"));
 }
 
-std::unique_ptr<switched_model::QuadrupedInterface> getGo2Interface(
-    const std::string &urdf, switched_model::QuadrupedInterface::Settings settings,
+std::unique_ptr<tbai::mpc::quadruped::QuadrupedInterface> getGo2Interface(
+    const std::string &urdf, tbai::mpc::quadruped::QuadrupedInterface::Settings settings,
     const FrameDeclaration &frameDeclaration) {
-    std::unique_ptr<switched_model::InverseKinematicsModelBase> invKin{nullptr};
+    std::unique_ptr<tbai::mpc::quadruped::InverseKinematicsModelBase> invKin{nullptr};
     if (settings.modelSettings_.analyticalInverseKinematics_) {
         invKin = getGo2InverseKinematics(frameDeclaration, urdf);
     }
@@ -57,8 +58,36 @@ std::unique_ptr<switched_model::QuadrupedInterface> getGo2Interface(
     auto jointNames = getJointNames(frameDeclaration);
     auto baseName = frameDeclaration.root;
 
-    return std::unique_ptr<switched_model::QuadrupedInterface>(new switched_model::QuadrupedPointfootInterface(
-        *kin, *kinAd, *com, *comAd, invKin.get(), std::move(settings), std::move(jointNames), std::move(baseName)));
+    return std::unique_ptr<tbai::mpc::quadruped::QuadrupedInterface>(
+        new tbai::mpc::quadruped::QuadrupedPointfootInterface(
+            *kin, *kinAd, *com, *comAd, invKin.get(), std::move(settings), std::move(jointNames), std::move(baseName)));
 }
 
-}  // namespace anymal
+std::unique_ptr<tbai::mpc::quadruped::QuadrupedInterface> getSpotInterface(const std::string &urdf,
+                                                                           const std::string &taskFolder) {
+    std::cerr << "Loading task file from: " << taskFolder << std::endl;
+
+    return getSpotInterface(urdf, tbai::mpc::quadruped::loadQuadrupedSettings(taskFolder + "/task.info"),
+                            frameDeclarationFromFile(taskFolder + "/frame_declaration.info"));
+}
+
+std::unique_ptr<tbai::mpc::quadruped::QuadrupedInterface> getSpotInterface(
+    const std::string &urdf, tbai::mpc::quadruped::QuadrupedInterface::Settings settings,
+    const FrameDeclaration &frameDeclaration) {
+    std::unique_ptr<tbai::mpc::quadruped::InverseKinematicsModelBase> invKin{nullptr};
+    if (settings.modelSettings_.analyticalInverseKinematics_) {
+        invKin = getSpotInverseKinematics(frameDeclaration, urdf);
+    }
+    auto kin = getAnymalKinematics(frameDeclaration, urdf);
+    auto kinAd = getAnymalKinematicsAd(frameDeclaration, urdf);
+    auto com = getAnymalComModel(frameDeclaration, urdf);
+    auto comAd = getAnymalComModelAd(frameDeclaration, urdf);
+    auto jointNames = getJointNames(frameDeclaration);
+    auto baseName = frameDeclaration.root;
+
+    return std::unique_ptr<tbai::mpc::quadruped::QuadrupedInterface>(
+        new tbai::mpc::quadruped::QuadrupedPointfootInterface(
+            *kin, *kinAd, *com, *comAd, invKin.get(), std::move(settings), std::move(jointNames), std::move(baseName)));
+}
+
+}  // namespace tbai::mpc::quadruped

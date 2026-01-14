@@ -5,7 +5,7 @@
 #include <tbai_mpc/quadruped_mpc/core/SwitchedModel.h>
 #include <tbai_mpc/quadruped_mpc/logic/SwitchedModelModeScheduleManager.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * Implements the constraint h(t,x,u) >= 0
@@ -120,4 +120,4 @@ ConeDerivatives frictionConeDerivatives(const Config& config, const vector3_t& f
 
 }  // namespace friction_cone
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

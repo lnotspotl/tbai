@@ -8,7 +8,7 @@
 
 #include <ocs2_core/penalties/penalties/PenaltyBase.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 /**
  * Linear inequality constraint in task space: A * f(x) + b >= 0
  * h(x) = A * f(x) + b
@@ -37,4 +37,4 @@ ScalarFunctionQuadraticApproximation getQuadraticApproximation(const LinearState
 ScalarFunctionQuadraticApproximation getQuadraticApproximation(const SingleLinearStateInequalitySoftConstraint& constraint,
                                                                const vector_t& f, const matrix_t& dfdx);
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

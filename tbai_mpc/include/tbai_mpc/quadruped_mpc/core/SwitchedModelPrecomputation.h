@@ -16,7 +16,7 @@
 #include "tbai_mpc/quadruped_mpc/foot_planner/SwingTrajectoryPlanner.h"
 #include "tbai_mpc/quadruped_mpc/terrain/SignedDistanceField.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 class SwitchedModelPreComputationMockup;
 
@@ -143,4 +143,4 @@ class SwitchedModelPreComputationMockup : public SwitchedModelPreComputation {
   std::vector<matrix_t>& collisionSpheresDerivative() { return collisionSpheresDerivative_; }
 };
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

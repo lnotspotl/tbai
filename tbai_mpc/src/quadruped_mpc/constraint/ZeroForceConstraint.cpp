@@ -4,7 +4,7 @@
 
 #include "tbai_mpc/quadruped_mpc/constraint/ZeroForceConstraint.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 ZeroForceConstraint::ZeroForceConstraint(int legNumber, const SwitchedModelModeScheduleManager &modeScheduleManager)
     : ocs2::StateInputConstraint(ocs2::ConstraintOrder::Linear),
@@ -39,4 +39,4 @@ VectorFunctionLinearApproximation ZeroForceConstraint::getLinearApproximation(
     return linearApproximation;
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

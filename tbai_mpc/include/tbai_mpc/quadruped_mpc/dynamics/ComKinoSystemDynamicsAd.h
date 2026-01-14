@@ -10,7 +10,7 @@
 #include "tbai_mpc/quadruped_mpc/logic/DynamicsParametersSynchronizedModule.h"
 #include "tbai_mpc/quadruped_mpc/logic/SwitchedModelModeScheduleManager.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 class ComKinoSystemDynamicsAd : public ocs2::SystemDynamicsBaseAD {
  public:
@@ -64,4 +64,4 @@ extern template com_state_ad_t ComKinoSystemDynamicsAd::computeComStateDerivativ
                                                                                   const comkino_input_ad_t& comKinoInput,
                                                                                   const ad_parameters_t& parameters);
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

@@ -6,7 +6,7 @@
 
 #include <tbai_mpc/quadruped_mpc/core/Rotations.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 namespace {
 template <typename SCALAR_T>
@@ -97,7 +97,7 @@ com_state_s_t<SCALAR_T> ComKinoSystemDynamicsAd::computeComStateDerivative(
     // pose dynamics
     com_state_s_t<SCALAR_T> stateDerivativeCoM;
     stateDerivativeCoM.segment(0, 3) =
-        switched_model::angularVelocitiesToEulerAngleDerivatives(baseLocalAngularVelocity, baseEulerAngles);
+        tbai::mpc::quadruped::angularVelocitiesToEulerAngleDerivatives(baseLocalAngularVelocity, baseEulerAngles);
     stateDerivativeCoM.segment(3, 3) = rotateVectorBaseToOrigin(baseLocalLinearVelocity, baseEulerAngles);
 
     /*
@@ -116,4 +116,4 @@ template com_state_ad_t ComKinoSystemDynamicsAd::computeComStateDerivative(
     const ComModelBase<ad_scalar_t> &comModel, const KinematicsModelBase<ad_scalar_t> &kinematicsModel,
     const comkino_state_ad_t &comKinoState, const comkino_input_ad_t &comKinoInput, const ad_parameters_t &parameters);
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

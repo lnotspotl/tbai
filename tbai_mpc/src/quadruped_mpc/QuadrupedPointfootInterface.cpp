@@ -8,7 +8,7 @@
 #include <ocs2_oc/approximate_model/LinearQuadraticApproximator.h>
 #include <tbai_mpc/quadruped_mpc/core/TorqueApproximation.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 QuadrupedPointfootInterface::QuadrupedPointfootInterface(const kinematic_model_t &kinematicModel,
                                                          const ad_kinematic_model_t &adKinematicModel,
@@ -19,9 +19,9 @@ QuadrupedPointfootInterface::QuadrupedPointfootInterface(const kinematic_model_t
     : QuadrupedInterface(kinematicModel, adKinematicModel, comModel, adComModel, inverseKinematics, std::move(settings),
                          std::move(jointNames), std::move(baseName)) {
     // nominal values
-    const auto stanceFlags = switched_model::constantFeetArray(true);
+    const auto stanceFlags = tbai::mpc::quadruped::constantFeetArray(true);
     const auto uSystemForWeightCompensation =
-        weightCompensatingInputs(getComModel(), stanceFlags, switched_model::vector3_t::Zero());
+        weightCompensatingInputs(getComModel(), stanceFlags, tbai::mpc::quadruped::vector3_t::Zero());
     const auto jointTorquesForWeightCompensation = torqueApproximation(
         getJointPositions(getInitialState()),
         toArray<scalar_t>(uSystemForWeightCompensation.head<3 * NUM_CONTACT_POINTS>()), kinematicModel);
@@ -72,4 +72,4 @@ QuadrupedPointfootInterface::QuadrupedPointfootInterface(const kinematic_model_t
     timeTriggeredRolloutPtr_.reset(new ocs2::TimeTriggeredRollout(*problemPtr_->dynamicsPtr, rolloutSettings()));
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

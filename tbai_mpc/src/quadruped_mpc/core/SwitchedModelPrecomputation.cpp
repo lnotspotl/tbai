@@ -7,7 +7,7 @@
 #include <tbai_mpc/quadruped_mpc/core/Rotations.h>
 #include <tbai_mpc/quadruped_mpc/core/TorqueApproximation.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 SwitchedModelPreComputation::SwitchedModelPreComputation(const SwingTrajectoryPlanner &swingTrajectoryPlanner,
                                                          const kinematic_model_t &kinematicModel,
@@ -306,4 +306,4 @@ void SwitchedModelPreComputation::updatePrejumpLinearOutputDerivatives(scalar_t 
     }
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

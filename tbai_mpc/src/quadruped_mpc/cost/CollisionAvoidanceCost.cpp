@@ -7,7 +7,7 @@
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModelPrecomputation.h"
 #include "tbai_mpc/quadruped_mpc/cost/LinearStateInequalitySoftconstraint.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 CollisionAvoidanceCost::CollisionAvoidanceCost(ocs2::RelaxedBarrierPenalty::Config settings)
     : penalty_(new ocs2::RelaxedBarrierPenalty(settings)) {}
@@ -40,7 +40,7 @@ scalar_t CollisionAvoidanceCost::getValue(scalar_t time, const vector_t &state,
                 // linearStateInequalitySoftConstraint.A = Leave empty
                 linearStateInequalitySoftConstraint.h = h_sdf;
 
-                cost += switched_model::getValue(linearStateInequalitySoftConstraint, collisionSphere.position);
+                cost += tbai::mpc::quadruped::getValue(linearStateInequalitySoftConstraint, collisionSphere.position);
             }
         }
     }
@@ -76,7 +76,7 @@ ScalarFunctionQuadraticApproximation CollisionAvoidanceCost::getQuadraticApproxi
                 linearStateInequalitySoftConstraint.A = sdfFirstOrder.second.transpose();
                 linearStateInequalitySoftConstraint.h = h_sdf;
 
-                const auto targetcost = switched_model::getQuadraticApproximation(
+                const auto targetcost = tbai::mpc::quadruped::getQuadraticApproximation(
                     linearStateInequalitySoftConstraint, collisionSphere.position, collisionSphereDerivative);
                 cost.f += targetcost.f;
                 cost.dfdx += targetcost.dfdx;
@@ -88,4 +88,4 @@ ScalarFunctionQuadraticApproximation CollisionAvoidanceCost::getQuadraticApproxi
     return cost;
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

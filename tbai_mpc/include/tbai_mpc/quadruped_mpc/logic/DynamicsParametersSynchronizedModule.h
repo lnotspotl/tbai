@@ -5,7 +5,7 @@
 
 #include "tbai_mpc/quadruped_mpc/dynamics/ComKinoDynamicsParameters.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 class DynamicsParametersSynchronizedModule : public ocs2::SolverSynchronizedModule {
  public:
@@ -30,4 +30,4 @@ class DynamicsParametersSynchronizedModule : public ocs2::SolverSynchronizedModu
   ocs2::Synchronized<ComKinoSystemDynamicsParameters<scalar_t>> newDynamicsParameters_;
 };
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

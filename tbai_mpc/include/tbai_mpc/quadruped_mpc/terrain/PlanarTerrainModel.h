@@ -8,7 +8,7 @@
 #include "tbai_mpc/quadruped_mpc/terrain/PlanarSignedDistanceField.h"
 #include "tbai_mpc/quadruped_mpc/terrain/TerrainModel.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * This class models the terrain as a single infinite plane.
@@ -33,4 +33,4 @@ class PlanarTerrainModel : public TerrainModel {
   PlanarSignedDistanceField sdf_;
 };
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

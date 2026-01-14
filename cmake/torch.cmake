@@ -1,4 +1,5 @@
 include(FetchContent)
+include(GNUInstallDirs)
 
 option(TBAI_FORCE_TORCH_FETCH "Force fetching libtorch from PyTorch website" OFF)
 
@@ -90,4 +91,8 @@ install(DIRECTORY ${TORCH_SOURCE_DIR}/lib/
 
 install(DIRECTORY ${TORCH_SOURCE_DIR}/include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(DIRECTORY ${TORCH_SOURCE_DIR}/share/cmake/
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/cmake
 )

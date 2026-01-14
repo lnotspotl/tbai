@@ -9,7 +9,7 @@
 #include <tbai_mpc/quadruped_mpc/core/SwitchedModel.h>
 #include <tbai_mpc/quadruped_mpc/terrain/TerrainPlane.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * Creates a desired position at a height above the given terrain. The x-y coordinated remain the same
@@ -73,4 +73,4 @@ vector3_t alignDesiredOrientationToTerrain(const vector3_t& desiredEulerXYZ, con
  */
 vector3_t advanceOrientationInWorld(const vector3_t& eulerXYZ, const vector3_t& unitRotationAxisInWorld, double angle);
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

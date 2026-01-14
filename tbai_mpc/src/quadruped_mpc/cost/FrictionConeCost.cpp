@@ -7,7 +7,7 @@
 #include <tbai_mpc/quadruped_mpc/core/Rotations.h>
 #include <tbai_mpc/quadruped_mpc/core/SwitchedModelPrecomputation.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 FrictionConeCost::FrictionConeCost(friction_cone::Config config,
                                    const SwitchedModelModeScheduleManager &modeScheduleManager,
@@ -106,4 +106,4 @@ ScalarFunctionQuadraticApproximation FrictionConeCost::getQuadraticApproximation
     return penaltyApproximation;
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

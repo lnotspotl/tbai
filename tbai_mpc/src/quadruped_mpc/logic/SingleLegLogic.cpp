@@ -6,7 +6,7 @@
 
 #include "tbai_mpc/quadruped_mpc/core/MotionPhaseDefinition.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 feet_array_t<std::vector<ContactTiming>> extractContactTimingsPerLeg(const ocs2::ModeSchedule &modeSchedule) {
     feet_array_t<std::vector<ContactTiming>> contactTimingsPerLeg;
@@ -93,4 +93,4 @@ feet_array_t<std::vector<bool>> extractContactFlags(const std::vector<size_t> &m
     return contactFlagStock;
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

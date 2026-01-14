@@ -5,7 +5,7 @@
 #include <tbai_mpc/quadruped_mpc/constraint/FrictionConeConstraint.h>
 #include <tbai_mpc/quadruped_mpc/core/Rotations.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 namespace friction_cone {
 scalar_t frictionConeConstraint(const Config &config, const vector3_t &forcesInTerrainFrame) {
@@ -78,4 +78,4 @@ ConeDerivatives frictionConeDerivatives(const Config &config, const vector3_t &f
 }
 }  // namespace friction_cone
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

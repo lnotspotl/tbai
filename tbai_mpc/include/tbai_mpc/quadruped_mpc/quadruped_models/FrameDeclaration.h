@@ -6,13 +6,13 @@
 
 #include <tbai_mpc/quadruped_mpc/core/SwitchedModel.h>
 
-namespace anymal {
+namespace tbai::mpc::quadruped {
 
 struct CollisionDeclaration {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   std::string link;
-  switched_model::scalar_t radius;
-  switched_model::vector3_t offset;
+  tbai::mpc::quadruped::scalar_t radius;
+  tbai::mpc::quadruped::vector3_t offset;
 };
 
 struct LimbFrames {
@@ -23,7 +23,7 @@ struct LimbFrames {
 
 struct FrameDeclaration {
   std::string root;
-  switched_model::feet_array_t<LimbFrames> legs;
+  tbai::mpc::quadruped::feet_array_t<LimbFrames> legs;
   std::vector<CollisionDeclaration> collisions;
 };
 
@@ -33,4 +33,4 @@ LimbFrames limbFramesFromFile(const std::string& file, const std::string& field)
 
 FrameDeclaration frameDeclarationFromFile(const std::string& file);
 
-}  // namespace anymal
+}  // namespace tbai::mpc::quadruped

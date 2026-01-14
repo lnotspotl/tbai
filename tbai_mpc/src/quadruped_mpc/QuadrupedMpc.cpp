@@ -7,7 +7,7 @@
 #include <ocs2_ddp/GaussNewtonDDP_MPC.h>
 #include <ocs2_sqp/SqpMpc.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 std::unique_ptr<ocs2::MPC_BASE> getDdpMpc(const QuadrupedInterface &quadrupedInterface,
                                           const ocs2::mpc::Settings &mpcSettings,
@@ -30,4 +30,4 @@ std::unique_ptr<ocs2::MPC_BASE> getSqpMpc(const QuadrupedInterface &quadrupedInt
     return mpcPtr;
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

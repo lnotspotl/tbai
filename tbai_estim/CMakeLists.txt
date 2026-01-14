@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(tbai_estim)
 
-add_library(tbai_estim 
+add_library(tbai_estim
     # Muse estimator
     src/muse/MuseEstimator.cpp
 
@@ -17,6 +17,7 @@ add_library(tbai_estim
     src/inekf/InEKFEstimator.cpp
 
 )
+set_target_properties(tbai_estim PROPERTIES EXPORT_NAME estim)
 target_link_libraries(tbai_estim PUBLIC tbai_core)
 target_include_directories(tbai_estim
     PUBLIC

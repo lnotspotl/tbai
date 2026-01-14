@@ -8,7 +8,7 @@
 
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModel.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 struct ContactTiming {
   scalar_t start;
@@ -69,4 +69,4 @@ std::vector<ContactTiming> extractContactTimings(const std::vector<scalar_t>& ev
  */
 feet_array_t<std::vector<bool>> extractContactFlags(const std::vector<size_t>& modeSequence);
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

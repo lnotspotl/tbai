@@ -6,11 +6,11 @@
 
 #include "tbai_mpc/quadruped_mpc/quadruped_models/QuadrupedPinocchioMapping.h"
 
-namespace anymal {
+namespace tbai::mpc::quadruped {
 namespace tpl {
 
 template <typename SCALAR_T>
-class QuadrupedCom : public switched_model::ComModelBase<SCALAR_T> {
+class QuadrupedCom : public tbai::mpc::quadruped::ComModelBase<SCALAR_T> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -21,29 +21,29 @@ class QuadrupedCom : public switched_model::ComModelBase<SCALAR_T> {
 
   SCALAR_T totalMass() const override { return totalMass_; }
 
-  switched_model::vector3_s_t<SCALAR_T> centerOfMassInBaseFrame(const switched_model::joint_coordinate_s_t<SCALAR_T>& jointPositions) const;
+  tbai::mpc::quadruped::vector3_s_t<SCALAR_T> centerOfMassInBaseFrame(const tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T>& jointPositions) const;
 
-  switched_model::vector3_s_t<SCALAR_T> centerOfMassInWorldFrame(const switched_model::base_coordinate_s_t<SCALAR_T>& basePose,
-                                                     const switched_model::joint_coordinate_s_t<SCALAR_T>& jointPositions) const;
+  tbai::mpc::quadruped::vector3_s_t<SCALAR_T> centerOfMassInWorldFrame(const tbai::mpc::quadruped::base_coordinate_s_t<SCALAR_T>& basePose,
+                                                     const tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T>& jointPositions) const;
 
-  switched_model::base_coordinate_s_t<SCALAR_T> calculateBaseLocalAccelerations(
-      const switched_model::base_coordinate_s_t<SCALAR_T>& basePose,
-      const switched_model::base_coordinate_s_t<SCALAR_T>& baseLocalVelocities,
-      const switched_model::joint_coordinate_s_t<SCALAR_T>& jointPositions,
-      const switched_model::joint_coordinate_s_t<SCALAR_T>& jointVelocities,
-      const switched_model::joint_coordinate_s_t<SCALAR_T>& jointAccelerations,
-      const switched_model::base_coordinate_s_t<SCALAR_T>& forcesOnBaseInBaseFrame) const override;
+  tbai::mpc::quadruped::base_coordinate_s_t<SCALAR_T> calculateBaseLocalAccelerations(
+      const tbai::mpc::quadruped::base_coordinate_s_t<SCALAR_T>& basePose,
+      const tbai::mpc::quadruped::base_coordinate_s_t<SCALAR_T>& baseLocalVelocities,
+      const tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T>& jointPositions,
+      const tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T>& jointVelocities,
+      const tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T>& jointAccelerations,
+      const tbai::mpc::quadruped::base_coordinate_s_t<SCALAR_T>& forcesOnBaseInBaseFrame) const override;
 
  private:
   QuadrupedCom(const QuadrupedCom& rhs);
 
   Eigen::Matrix<SCALAR_T, Eigen::Dynamic, 1> getPinnochioConfiguration(
-      const switched_model::base_coordinate_s_t<SCALAR_T>& basePose,
-      const switched_model::joint_coordinate_s_t<SCALAR_T>& jointPositions) const;
+      const tbai::mpc::quadruped::base_coordinate_s_t<SCALAR_T>& basePose,
+      const tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T>& jointPositions) const;
 
   Eigen::Matrix<SCALAR_T, Eigen::Dynamic, 1> getPinnochioVelocity(
-      const switched_model::base_coordinate_s_t<SCALAR_T>& baseLocalVelocities,
-      const switched_model::joint_coordinate_s_t<SCALAR_T>& jointVelocities) const;
+      const tbai::mpc::quadruped::base_coordinate_s_t<SCALAR_T>& baseLocalVelocities,
+      const tbai::mpc::quadruped::joint_coordinate_s_t<SCALAR_T>& jointVelocities) const;
 
   using PinocchioInterface_s_t = ocs2::PinocchioInterfaceTpl<SCALAR_T>;
 
@@ -70,10 +70,10 @@ ocs2::PinocchioInterface createQuadrupedPinocchioInterfaceFromUrdfString(const s
 using QuadrupedCom = tpl::QuadrupedCom<ocs2::scalar_t>;
 using QuadrupedComAd = tpl::QuadrupedCom<ocs2::ad_scalar_t>;
 
-}  // namespace anymal
+}  // namespace tbai::mpc::quadruped
 
 /**
  *  Explicit instantiation, for instantiation additional types, include the implementation file instead of this one.
  */
-extern template class anymal::tpl::QuadrupedCom<ocs2::scalar_t>;
-extern template class anymal::tpl::QuadrupedCom<ocs2::ad_scalar_t>;
+extern template class tbai::mpc::quadruped::tpl::QuadrupedCom<ocs2::scalar_t>;
+extern template class tbai::mpc::quadruped::tpl::QuadrupedCom<ocs2::ad_scalar_t>;

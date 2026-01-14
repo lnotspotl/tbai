@@ -61,7 +61,7 @@ if(OCS2_BUILD_TESTS)
   include(GoogleTest)
 endif()
 
-# Add subdirectories
+# Add all subfolders
 add_subdirectory(ocs2_thirdparty)
 add_subdirectory(ocs2_core)
 add_subdirectory(ocs2_frank_wolfe)
@@ -79,24 +79,3 @@ add_subdirectory(ocs2_slp)
 add_subdirectory(ocs2_ipm)
 add_subdirectory(ocs2_ocs2)
 add_subdirectory(ocs2_pinocchio)
-
-# Install cmake config files
-include(CMakePackageConfigHelpers)
-
-write_basic_package_version_file(
-  "${CMAKE_CURRENT_BINARY_DIR}/ocs2ConfigVersion.cmake"
-  VERSION ${PROJECT_VERSION}
-  COMPATIBILITY SameMajorVersion
-)
-
-configure_package_config_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ocs2Config.cmake.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/ocs2Config.cmake"
-  INSTALL_DESTINATION lib/cmake/ocs2
-)
-
-install(FILES
-  "${CMAKE_CURRENT_BINARY_DIR}/ocs2Config.cmake"
-  "${CMAKE_CURRENT_BINARY_DIR}/ocs2ConfigVersion.cmake"
-  DESTINATION lib/cmake/ocs2
-)

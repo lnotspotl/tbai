@@ -10,7 +10,7 @@
 
 #include "tbai_mpc/quadruped_mpc/QuadrupedInterface.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 class QuadrupedPointfootInterface : public QuadrupedInterface {
  public:
@@ -37,4 +37,4 @@ class QuadrupedPointfootInterface : public QuadrupedInterface {
   ScalarFunctionQuadraticApproximation nominalCostApproximation_;
 };
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

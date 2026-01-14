@@ -32,7 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ocs2_core/misc/Display.h>
 #include <ocs2_core/misc/LoadData.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 std::ostream &operator<<(std::ostream &stream, const ModeSequenceTemplate &modeSequenceTemplate) {
     stream << "Template switching times: {" << ocs2::toDelimitedString(modeSequenceTemplate.switchingTimes) << "}\n";
@@ -97,4 +97,4 @@ ocs2::ModeSchedule loadModeSchedule(const std::string &filename, const std::stri
     return {eventTimes, modeSequence};
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

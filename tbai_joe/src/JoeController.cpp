@@ -31,7 +31,7 @@ namespace tbai {
 namespace joe {
 
 namespace LinearInterpolation = ocs2::LinearInterpolation;
-using namespace switched_model;
+using namespace tbai::mpc::quadruped;
 
 JoeController::JoeController(const std::string &robotName,
                              const std::shared_ptr<tbai::StateSubscriber> &stateSubscriber,
@@ -80,8 +80,9 @@ void JoeController::initialize(const std::string &urdfString, const std::string 
 
     // Initialize quadruped interface
     TBAI_LOG_INFO(logger_, "Initializing quadruped interface");
-    quadrupedInterface_ = anymal::getAnymalInterface(urdfString, switched_model::loadQuadrupedSettings(taskSettingsFile),
-                                                     anymal::frameDeclarationFromFile(frameDeclarationFile));
+    quadrupedInterface_ = tbai::mpc::quadruped::getAnymalInterface(
+        urdfString, tbai::mpc::quadruped::loadQuadrupedSettings(taskSettingsFile),
+        tbai::mpc::quadruped::frameDeclarationFromFile(frameDeclarationFile));
     auto &quadrupedInterface = *quadrupedInterface_;
     comModel_.reset(quadrupedInterface.getComModel().clone());
     kinematicsModel_.reset(quadrupedInterface.getKinematicModel().clone());
@@ -194,7 +195,7 @@ contact_flag_t JoeController::getDesiredContactFlags(scalar_t currentTime, scala
     auto &solution = mrt_->getPolicy();
     auto &modeSchedule = solution.modeSchedule_;
     size_t mode = modeSchedule.modeAtTime(currentTime);
-    auto contacts = switched_model::modeNumber2StanceLeg(mode);
+    auto contacts = tbai::mpc::quadruped::modeNumber2StanceLeg(mode);
     // flip
     std::swap(contacts[1], contacts[2]);
     return contacts;
@@ -254,8 +255,8 @@ std::vector<vector3_t> JoeController::getCurrentFeetPositions(scalar_t currentTi
     SystemObservation sysobs = generateSystemObservation();
     vector_t currentState = sysobs.state;
     auto &kin = *kinematicsModel_;
-    auto basePoseOcs2 = switched_model::getBasePose(currentState);
-    auto jointAnglesOcs2 = switched_model::getJointPositions(currentState);
+    auto basePoseOcs2 = tbai::mpc::quadruped::getBasePose(currentState);
+    auto jointAnglesOcs2 = tbai::mpc::quadruped::getJointPositions(currentState);
     std::vector<vector3_t> feetPositions(4);
     for (int legidx = 0; legidx < 4; ++legidx) {
         auto footPosition = kin.footPositionInOriginFrame(legidx, basePoseOcs2, jointAnglesOcs2);
@@ -269,10 +270,10 @@ std::vector<vector3_t> JoeController::getCurrentFeetVelocities(scalar_t currentT
     vector_t currentState = sysobs.state;
     vector_t currentInput = sysobs.input;
     auto &kin = *kinematicsModel_;
-    auto basePoseOcs2 = switched_model::getBasePose(currentState);
-    auto baseTwistOcs2 = switched_model::getBaseLocalVelocities(currentState);
-    auto jointAnglesOcs2 = switched_model::getJointPositions(currentState);
-    auto jointVelocitiesOcs2 = switched_model::getJointVelocities(currentInput);
+    auto basePoseOcs2 = tbai::mpc::quadruped::getBasePose(currentState);
+    auto baseTwistOcs2 = tbai::mpc::quadruped::getBaseLocalVelocities(currentState);
+    auto jointAnglesOcs2 = tbai::mpc::quadruped::getJointPositions(currentState);
+    auto jointVelocitiesOcs2 = tbai::mpc::quadruped::getJointVelocities(currentInput);
     std::vector<vector3_t> feetVelocities(4);
     for (int legidx = 0; legidx < 4; ++legidx) {
         auto footVelocity =
@@ -287,8 +288,8 @@ std::vector<vector3_t> JoeController::getDesiredFeetPositions(scalar_t currentTi
     vector_t optimizedState =
         LinearInterpolation::interpolate(currentTime, solution.timeTrajectory_, solution.stateTrajectory_);
     auto &kin = *kinematicsModel_;
-    auto basePoseOcs2 = switched_model::getBasePose(optimizedState);
-    auto jointAnglesOcs2 = switched_model::getJointPositions(optimizedState);
+    auto basePoseOcs2 = tbai::mpc::quadruped::getBasePose(optimizedState);
+    auto jointAnglesOcs2 = tbai::mpc::quadruped::getJointPositions(optimizedState);
     std::vector<vector3_t> feetPositions(4);
     for (int legidx = 0; legidx < 4; ++legidx) {
         auto footPosition = kin.footPositionInOriginFrame(legidx, basePoseOcs2, jointAnglesOcs2);
@@ -304,10 +305,10 @@ std::vector<vector3_t> JoeController::getDesiredFeetVelocities(scalar_t currentT
     vector_t optimizedInput =
         LinearInterpolation::interpolate(currentTime, solution.timeTrajectory_, solution.inputTrajectory_);
     auto &kin = *kinematicsModel_;
-    auto basePoseOcs2 = switched_model::getBasePose(optimizedState);
-    auto baseTwistOcs2 = switched_model::getBaseLocalVelocities(optimizedState);
-    auto jointAnglesOcs2 = switched_model::getJointPositions(optimizedState);
-    auto jointVelocitiesOcs2 = switched_model::getJointVelocities(optimizedInput);
+    auto basePoseOcs2 = tbai::mpc::quadruped::getBasePose(optimizedState);
+    auto baseTwistOcs2 = tbai::mpc::quadruped::getBaseLocalVelocities(optimizedState);
+    auto jointAnglesOcs2 = tbai::mpc::quadruped::getJointPositions(optimizedState);
+    auto jointVelocitiesOcs2 = tbai::mpc::quadruped::getJointVelocities(optimizedInput);
     std::vector<vector3_t> feetVelocities(4);
     for (int legidx = 0; legidx < 4; ++legidx) {
         auto footVelocity =
@@ -329,14 +330,14 @@ void JoeController::computeBaseKinematicsAndDynamics(scalar_t currentTime, scala
     vector_t desiredInput = LinearInterpolation::interpolate(currentTime + ISAAC_SIM_DT, solution.timeTrajectory_,
                                                              solution.inputTrajectory_);
 
-    auto *quadcomPtr = dynamic_cast<anymal::QuadrupedCom *>(comModel_.get());
+    auto *quadcomPtr = dynamic_cast<tbai::mpc::quadruped::QuadrupedCom *>(comModel_.get());
     auto &quadcom = *quadcomPtr;
     auto &kin = *kinematicsModel_;
 
-    auto basePoseOcs2 = switched_model::getBasePose(desiredState);
-    auto jointAnglesOcs2 = switched_model::getJointPositions(desiredState);
-    auto baseVelocityOcs2 = switched_model::getBaseLocalVelocities(desiredState);
-    auto jointVelocitiesOcs2 = switched_model::getJointVelocities(desiredInput);
+    auto basePoseOcs2 = tbai::mpc::quadruped::getBasePose(desiredState);
+    auto jointAnglesOcs2 = tbai::mpc::quadruped::getJointPositions(desiredState);
+    auto baseVelocityOcs2 = tbai::mpc::quadruped::getBaseLocalVelocities(desiredState);
+    auto jointVelocitiesOcs2 = tbai::mpc::quadruped::getJointVelocities(desiredInput);
 
     auto qPinocchio = quadcom.getPinnochioConfiguration(basePoseOcs2, jointAnglesOcs2);
     auto vPinocchio = quadcom.getPinnochioVelocity(baseVelocityOcs2, jointVelocitiesOcs2);
@@ -347,9 +348,9 @@ void JoeController::computeBaseKinematicsAndDynamics(scalar_t currentTime, scala
 
     const vector_t &basePosett = desiredState.head<6>();
     const vector_t &baseVelocitytt = desiredState.segment<6>(6);
-    const vector_t &jointPositionstt = desiredState.tail<switched_model::JOINT_COORDINATE_SIZE>();
-    const vector_t &jointVelocitiestt = desiredInput.tail<switched_model::JOINT_COORDINATE_SIZE>();
-    const vector_t &jointAccelerationstt = vector_t::Zero(switched_model::JOINT_COORDINATE_SIZE);
+    const vector_t &jointPositionstt = desiredState.tail<tbai::mpc::quadruped::JOINT_COORDINATE_SIZE>();
+    const vector_t &jointVelocitiestt = desiredInput.tail<tbai::mpc::quadruped::JOINT_COORDINATE_SIZE>();
+    const vector_t &jointAccelerationstt = vector_t::Zero(tbai::mpc::quadruped::JOINT_COORDINATE_SIZE);
 
     // forcesOnBaseInBaseFrame = [torque (3); force (3)]
     vector_t forcesOnBaseInBaseFrame = vector_t::Zero(6);
@@ -439,8 +440,8 @@ vector_t JoeController::getPlanarFootholdsObservation(scalar_t currentTime, scal
         vector_t optimizedState =
             LinearInterpolation::interpolate(eventTime, solution.timeTrajectory_, solution.stateTrajectory_);
         auto &kin = *kinematicsModel_;
-        auto basePoseOcs2 = switched_model::getBasePose(optimizedState);
-        auto jointAnglesOcs2 = switched_model::getJointPositions(optimizedState);
+        auto basePoseOcs2 = tbai::mpc::quadruped::getBasePose(optimizedState);
+        auto jointAnglesOcs2 = tbai::mpc::quadruped::getJointPositions(optimizedState);
         vector3_t futureFootPosition = kin.footPositionInOriginFrame(legidx, basePoseOcs2, jointAnglesOcs2);
         vector3_t currentFootPosition = currentFootPositions[legidx];
 
@@ -466,11 +467,11 @@ vector_t JoeController::getDesiredJointAnglesObservation(scalar_t currentTime, s
         auto optimizedState = LinearInterpolation::interpolate(currentTime + timeLeft, solution.timeTrajectory_,
                                                                solution.stateTrajectory_);
 
-        auto *quadcomPtr = dynamic_cast<anymal::QuadrupedCom *>(comModel_.get());
+        auto *quadcomPtr = dynamic_cast<tbai::mpc::quadruped::QuadrupedCom *>(comModel_.get());
         auto &kin = *kinematicsModel_;
 
-        auto basePoseOcs2 = switched_model::getBasePose(optimizedState);
-        auto jointAnglesOcs2 = switched_model::getJointPositions(optimizedState);
+        auto basePoseOcs2 = tbai::mpc::quadruped::getBasePose(optimizedState);
+        auto jointAnglesOcs2 = tbai::mpc::quadruped::getJointPositions(optimizedState);
 
         std::swap(jointAnglesOcs2(3 + 0), jointAnglesOcs2(3 + 3));
         std::swap(jointAnglesOcs2(3 + 1), jointAnglesOcs2(3 + 4));
@@ -492,8 +493,8 @@ vector_t JoeController::getCurrentDesiredJointAnglesObservation(scalar_t current
     auto optimizedState = LinearInterpolation::interpolate(currentTime + ISAAC_SIM_DT, solution.timeTrajectory_,
                                                            solution.stateTrajectory_);
 
-    auto basePoseOcs2 = switched_model::getBasePose(optimizedState);
-    auto jointAnglesOcs2 = switched_model::getJointPositions(optimizedState);
+    auto basePoseOcs2 = tbai::mpc::quadruped::getBasePose(optimizedState);
+    auto jointAnglesOcs2 = tbai::mpc::quadruped::getJointPositions(optimizedState);
 
     std::swap(jointAnglesOcs2(3 + 0), jointAnglesOcs2(3 + 3));
     std::swap(jointAnglesOcs2(3 + 1), jointAnglesOcs2(3 + 4));
@@ -690,8 +691,8 @@ vector_t JoeController::getHeightSamplesObservation(scalar_t currentTime, scalar
         vector_t optimizedState =
             LinearInterpolation::interpolate(eventTime, solution.timeTrajectory_, solution.stateTrajectory_);
         auto &kin = *kinematicsModel_;
-        auto basePoseOcs2 = switched_model::getBasePose(optimizedState);
-        auto jointAnglesOcs2 = switched_model::getJointPositions(optimizedState);
+        auto basePoseOcs2 = tbai::mpc::quadruped::getBasePose(optimizedState);
+        auto jointAnglesOcs2 = tbai::mpc::quadruped::getJointPositions(optimizedState);
         vector3_t futureFootPosition = kin.footPositionInOriginFrame(legidx, basePoseOcs2, jointAnglesOcs2);
         vector3_t currentFootPosition = currentFootPositions[legidx];
 
@@ -800,7 +801,7 @@ ocs2::SystemObservation JoeController::generateSystemObservation() {
     // Set mode
     auto contactFlags = state.contactFlags;
     std::array<bool, 4> contactFlagsArray = {contactFlags[0], contactFlags[1], contactFlags[2], contactFlags[3]};
-    observation.mode = switched_model::stanceLeg2ModeNumber(contactFlagsArray);
+    observation.mode = tbai::mpc::quadruped::stanceLeg2ModeNumber(contactFlagsArray);
 
     // Set state
     observation.state = rbdState.head<3 + 3 + 3 + 3 + 12>();

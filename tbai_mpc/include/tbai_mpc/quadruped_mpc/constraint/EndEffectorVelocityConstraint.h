@@ -4,7 +4,7 @@
 
 #include <tbai_mpc/quadruped_mpc/logic/SwitchedModelModeScheduleManager.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * Implements the constraint that the velocity of the foot w.r.t. the world, that is tangent to the surface normal,
@@ -39,4 +39,4 @@ class EndEffectorVelocityConstraint final : public ocs2::StateInputConstraint {
   int legNumber_;
   const SwitchedModelModeScheduleManager* modeScheduleManager_;
 };
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

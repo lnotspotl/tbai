@@ -2,11 +2,6 @@
 
 include(CMakeFindDependencyMacro)
 
-find_dependency(Boost REQUIRED COMPONENTS system filesystem log_setup log)
-find_dependency(Eigen3 3.3 REQUIRED NO_MODULE)
-find_dependency(Threads REQUIRED)
-find_dependency(OpenMP REQUIRED)
-
 include("${CMAKE_CURRENT_LIST_DIR}/ocs2Targets.cmake")
 
 check_required_components(ocs2)

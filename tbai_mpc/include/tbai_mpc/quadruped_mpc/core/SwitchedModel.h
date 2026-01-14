@@ -7,7 +7,7 @@
 #include <ocs2_core/automatic_differentiation/CppAdInterface.h>
 #include <ocs2_core/automatic_differentiation/Types.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 /**
  * Switched model definition:
  *
@@ -29,7 +29,7 @@ constexpr size_t JOINT_COORDINATE_SIZE = 12;
 constexpr size_t STATE_DIM = 2 * BASE_COORDINATE_SIZE + JOINT_COORDINATE_SIZE;  // 24
 constexpr size_t INPUT_DIM = 3 * NUM_CONTACT_POINTS + JOINT_COORDINATE_SIZE;    // 24
 
-/* Import ocs2 types into the switched_model namespace */
+/* Import ocs2 types into the tbai::mpc::quadruped namespace */
 using ocs2::ad_matrix_t;
 using ocs2::ad_scalar_t;
 using ocs2::ad_vector_t;
@@ -225,4 +225,4 @@ inline int numberOfOpenContacts(const contact_flag_t& contactFlags) {
   return NUM_CONTACT_POINTS - numberOfClosedContacts(contactFlags);
 }
 
-}  // end of namespace switched_model
+}  // end of namespace tbai::mpc::quadruped

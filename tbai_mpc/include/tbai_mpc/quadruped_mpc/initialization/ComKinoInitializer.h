@@ -6,7 +6,7 @@
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModel.h"
 #include "tbai_mpc/quadruped_mpc/logic/SwitchedModelModeScheduleManager.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 class ComKinoInitializer : public ocs2::Initializer {
  public:
@@ -28,4 +28,4 @@ class ComKinoInitializer : public ocs2::Initializer {
   const SwitchedModelModeScheduleManager* modeScheduleManagerPtr_;
 };
 
-}  // end of namespace switched_model
+}  // end of namespace tbai::mpc::quadruped

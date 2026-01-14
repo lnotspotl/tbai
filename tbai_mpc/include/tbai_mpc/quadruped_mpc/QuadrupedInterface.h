@@ -22,7 +22,7 @@
 #include <tbai_mpc/quadruped_mpc/logic/DynamicsParametersSynchronizedModule.h>
 #include <tbai_mpc/quadruped_mpc/logic/SwitchedModelModeScheduleManager.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 class QuadrupedInterface : public ocs2::RobotInterface {
  public:
@@ -152,4 +152,4 @@ class QuadrupedInterface : public ocs2::RobotInterface {
 /** Load the general quadruped settings from file. */
 QuadrupedInterface::Settings loadQuadrupedSettings(const std::string& pathToConfigFile);
 
-}  // end of namespace switched_model
+}  // end of namespace tbai::mpc::quadruped

@@ -11,7 +11,7 @@
 #include "tbai_mpc/quadruped_mpc/core/MotionPhaseDefinition.h"
 #include <ocs2_core/misc/Display.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 bool isValidGait(const Gait &gait) {
     bool validGait = true;
@@ -72,4 +72,4 @@ std::ostream &operator<<(std::ostream &stream, const Gait &gait) {
     return stream;
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

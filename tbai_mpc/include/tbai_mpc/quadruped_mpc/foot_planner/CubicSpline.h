@@ -9,7 +9,7 @@
 
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModel.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 class CubicSpline {
  public:
@@ -49,4 +49,4 @@ class CubicSpline {
   scalar_t dc3_;  // derivative w.r.t. dt_
 };
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

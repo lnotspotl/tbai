@@ -1,0 +1,57 @@
+#pragma once
+
+#include "tbai_mpc/quadruped_arm_mpc/analytical_inverse_kinematics/LegInverseKinematicParameters.h"
+
+namespace tbai::mpc::quadruped_arm {
+namespace analytical_inverse_kinematics {
+
+namespace anymal {
+
+/**
+ * Computes the inverse kinematics for a single leg given the position in base frame
+ * @param legJoints : will be filled with the resulting [HAA, HFE, KFE] joint angles
+ * @param positionBaseToFootInBaseFrame : position of the foot in base frame to compute the IK for.
+ * @param parameters : precomputed inverse kinematics parameters
+ * @param limb : limb number in {LF = 0, RF, LH, RH}
+ */
+void getLimbJointPositionsFromPositionBaseToFootInBaseFrame(Eigen::Vector3d &legJoints,
+                                                            const Eigen::Vector3d &positionBaseToFootInBaseFrame,
+                                                            const LegInverseKinematicParameters &parameters,
+                                                            size_t limb);
+
+}  // namespace anymal
+
+namespace go2 {
+
+/**
+ * Computes the inverse kinematics for a single leg given the position in base frame
+ * @param legJoints : will be filled with the resulting [HAA, HFE, KFE] joint angles
+ * @param positionBaseToFootInBaseFrame : position of the foot in base frame to compute the IK for.
+ * @param parameters : precomputed inverse kinematics parameters
+ * @param limb : limb number in {LF = 0, RF, LH, RH}
+ */
+void getLimbJointPositionsFromPositionBaseToFootInBaseFrame(Eigen::Vector3d &legJoints,
+                                                            const Eigen::Vector3d &positionBaseToFootInBaseFrame,
+                                                            const LegInverseKinematicParameters &parameters,
+                                                            size_t limb);
+
+}  // namespace go2
+
+namespace spot {
+
+/**
+ * Computes the inverse kinematics for a single leg given the position in base frame
+ * @param legJoints : will be filled with the resulting [HAA, HFE, KFE] joint angles
+ * @param positionBaseToFootInBaseFrame : position of the foot in base frame to compute the IK for.
+ * @param parameters : precomputed inverse kinematics parameters
+ * @param limb : limb number in {LF = 0, RF, LH, RH}
+ */
+void getLimbJointPositionsFromPositionBaseToFootInBaseFrame(Eigen::Vector3d &legJoints,
+                                                            const Eigen::Vector3d &positionBaseToFootInBaseFrame,
+                                                            const LegInverseKinematicParameters &parameters,
+                                                            size_t limb);
+
+}  // namespace spot
+
+}  // namespace analytical_inverse_kinematics
+}  // namespace tbai::mpc::quadruped_arm

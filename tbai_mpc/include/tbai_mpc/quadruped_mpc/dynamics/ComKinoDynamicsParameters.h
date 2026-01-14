@@ -6,7 +6,7 @@
 
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModel.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * Parameters of the system dynamics (constant over the MPC horizon)
@@ -38,4 +38,4 @@ struct ComKinoSystemDynamicsParameters {
 extern template class ComKinoSystemDynamicsParameters<scalar_t>;
 extern template class ComKinoSystemDynamicsParameters<ad_scalar_t>;
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

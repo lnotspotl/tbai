@@ -9,7 +9,7 @@
 #include "tbai_mpc/quadruped_mpc/logic/GaitSchedule.h"
 #include "tbai_mpc/quadruped_mpc/terrain/TerrainPlane.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * Manages the Target Trajectories and ModeSchedule for switched model.
@@ -40,4 +40,4 @@ class SwitchedModelModeScheduleManager : public ocs2::ReferenceManager {
   ocs2::Synchronized<TerrainModel> terrainModel_;
 };
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

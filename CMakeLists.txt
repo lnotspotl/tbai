@@ -17,10 +17,15 @@ option(TBAI_BUILD_OCS2 "Build the ocs2" ON)
 option(TBAI_BUILD_MPC "Build the mpc" ON)
 option(TBAI_BUILD_DTC "Build the dtc" ON)
 option(TBAI_BUILD_JOE "Build the joe" ON)
+option(TBAI_FETCH_TORCH "Fetch libtorch" OFF)
 
 project(tbai VERSION 2.0.0)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+if(TBAI_FETCH_TORCH)
+  include(cmake/torch.cmake)
+endif()
 
 if(TBAI_BUILD_TESTS)
   enable_testing()

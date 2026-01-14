@@ -7,7 +7,7 @@
 #include "tbai_mpc/quadruped_mpc/core/KinematicsModelBase.h"
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModel.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * Approximate joint torques with J(q)^T F, i.e. neglecting leg dynamics.
@@ -25,4 +25,4 @@ extern template joint_coordinate_s_t<ad_scalar_t> torqueApproximation<ad_scalar_
     const joint_coordinate_s_t<ad_scalar_t>& jointPositions, const feet_array_t<vector3_s_t<ad_scalar_t>>& contactForcesInBase,
     const KinematicsModelBase<ad_scalar_t>& kinematics);
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

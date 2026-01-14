@@ -8,6 +8,7 @@ project(tbai_static)
 add_library(tbai_static
     src/StaticController.cpp
 )
+set_target_properties(tbai_static PROPERTIES EXPORT_NAME static)
 
 target_include_directories(tbai_static
     PUBLIC

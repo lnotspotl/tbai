@@ -5,7 +5,7 @@
 #include <tbai_mpc/quadruped_mpc/core/SwitchedModel.h>
 #include <tbai_mpc/quadruped_mpc/logic/SwitchedModelModeScheduleManager.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * Implements the constraint that the contact forces of the foot must be zero for a foot in swing.
@@ -33,4 +33,4 @@ class ZeroForceConstraint final : public ocs2::StateInputConstraint {
   const SwitchedModelModeScheduleManager* modeScheduleManager_;
 };
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

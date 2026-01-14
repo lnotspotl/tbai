@@ -11,7 +11,7 @@
 
 #include "tbai_mpc/quadruped_mpc/terrain/TerrainPlane.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 struct ConvexTerrain {
   /// Plane coordinate defining the origin of the terrain
@@ -93,4 +93,4 @@ inline vector3_t projectToConvex3dPolygon(const ConvexTerrain& convexTerrain, co
   return positionInWorldFrameFromPositionInTerrain(local_q, convexTerrain.plane);
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

@@ -7,6 +7,7 @@ project(tbai_reference)
 
 # Create a header-only library
 add_library(tbai_reference INTERFACE)
+set_target_properties(tbai_reference PROPERTIES EXPORT_NAME reference)
 
 # Set include directories
 target_include_directories(tbai_reference

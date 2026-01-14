@@ -10,7 +10,7 @@
 #include <tbai_mpc/quadruped_mpc/logic/Gait.h>
 #include <tbai_mpc/quadruped_mpc/logic/GaitSchedule.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 struct GaitAdaptationSettings {
   scalar_t earlyTouchDownTimeWindow = 0.1;
@@ -59,8 +59,8 @@ class GaitAdaptation {
 /**
  * Removes the first swing phase for all legs flagged with earlyTouchdown
  */
-std::function<void(scalar_t& currentPhase, switched_model::Gait& currentGait, scalar_t currTime, switched_model::Gait& nextGait)>
-earlyTouchDownAdaptation(const switched_model::feet_array_t<bool>& earlyTouchDownPerLeg);
+std::function<void(scalar_t& currentPhase, tbai::mpc::quadruped::Gait& currentGait, scalar_t currTime, tbai::mpc::quadruped::Gait& nextGait)>
+earlyTouchDownAdaptation(const tbai::mpc::quadruped::feet_array_t<bool>& earlyTouchDownPerLeg);
 
 /** Gets the mode index of the next phase with the specified contact state, returns the size of the modesequence of no such contact state
  * was found */
@@ -69,4 +69,4 @@ int getModeIndexOfNextContactStateOfLeg(bool contact, int startModeIdx, size_t l
 /** Adapts the mode sequence between the two mode ids of a specific leg to be with the specified flag. */
 void setContactStateOfLegBetweenModes(bool contact, int startModeIdx, int lastModeIdx, size_t leg, Gait& gait);
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

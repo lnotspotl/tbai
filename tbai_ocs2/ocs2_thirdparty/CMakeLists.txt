@@ -36,7 +36,7 @@ install(DIRECTORY include/
 )
 
 install(EXPORT ocs2ThirdpartyTargets
-  FILE ocs2ThirdpartyTargets.cmake
+  FILE tbai-ocs2-thirdparty-targets.cmake
   NAMESPACE ocs2::
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ocs2
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/tbai
 )

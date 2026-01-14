@@ -6,7 +6,7 @@
 
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModel.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * Planar terrain represented by a single coordinate frame.
@@ -131,4 +131,4 @@ inline vector3_t projectVectorInWorldOntoPlaneAlongGravity(const vector3_t& vect
 
 TerrainPlane loadTerrainPlane(const std::string& filename, bool verbose);
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

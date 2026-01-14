@@ -1,6 +1,6 @@
 #include "tbai_mpc/quadruped_mpc/analytical_inverse_kinematics/LegInverseKinematicParameters.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 namespace analytical_inverse_kinematics {
 
 LegInverseKinematicParameters::LegInverseKinematicParameters(const Eigen::Vector3d &positionBaseToHipInBaseFrame,
@@ -47,4 +47,4 @@ void LegInverseKinematicParameters::initialize() {
 }
 
 }  // namespace analytical_inverse_kinematics
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

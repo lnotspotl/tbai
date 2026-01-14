@@ -6,7 +6,7 @@
 
 #include "tbai_mpc/quadruped_mpc/core/Rotations.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 namespace {
 scalar_t computeInwardStepDistance(const vector3_t &footPositionInHip, const vector3_t &gravityNormalInHip) {
@@ -33,4 +33,4 @@ scalar_t computeKinematicPenalty(const vector3_t &footPositionInWorld, const vec
     return computeKinematicPenalty(footPositionInHip, gravityNormalInHip, config);
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

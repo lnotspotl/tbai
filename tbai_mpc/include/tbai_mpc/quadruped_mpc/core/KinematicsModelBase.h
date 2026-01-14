@@ -11,7 +11,7 @@
 
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModel.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * ModelKinematics Base Class
@@ -99,4 +99,4 @@ class KinematicsModelBase {
 extern template class KinematicsModelBase<scalar_t>;
 extern template class KinematicsModelBase<ocs2::CppAdInterface::ad_scalar_t>;
 
-}  // end of namespace switched_model
+}  // end of namespace tbai::mpc::quadruped

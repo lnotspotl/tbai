@@ -11,7 +11,7 @@
 
 #include "tbai_mpc/quadruped_mpc/QuadrupedInterface.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /** Constructs an DDP MPC object */
 std::unique_ptr<ocs2::MPC_BASE> getDdpMpc(const QuadrupedInterface& quadrupedInterface, const ocs2::mpc::Settings& mpcSettings,
@@ -21,4 +21,4 @@ std::unique_ptr<ocs2::MPC_BASE> getDdpMpc(const QuadrupedInterface& quadrupedInt
 std::unique_ptr<ocs2::MPC_BASE> getSqpMpc(const QuadrupedInterface& quadrupedInterface, const ocs2::mpc::Settings& mpcSettings,
                                           const ocs2::sqp::Settings& sqpSettings);
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

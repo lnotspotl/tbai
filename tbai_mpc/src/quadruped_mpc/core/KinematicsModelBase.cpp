@@ -9,7 +9,7 @@
 
 #include <tbai_mpc/quadruped_mpc/core/Rotations.h>
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 template <typename SCALAR_T>
 vector3_s_t<SCALAR_T> KinematicsModelBase<SCALAR_T>::legRootInOriginFrame(
@@ -203,4 +203,4 @@ KinematicsModelBase<SCALAR_T>::collisionSpheresInBaseFrame(const joint_coordinat
 template class KinematicsModelBase<scalar_t>;
 template class KinematicsModelBase<ocs2::CppAdInterface::ad_scalar_t>;
 
-}  // end of namespace switched_model
+}  // end of namespace tbai::mpc::quadruped

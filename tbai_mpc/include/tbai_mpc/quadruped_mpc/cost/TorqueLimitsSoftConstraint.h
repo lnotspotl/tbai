@@ -9,7 +9,7 @@
 
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModel.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * Implements the a penalty cost to keep the joints within upper and lower bounds. Unbounded joints are specified through a high numeric
@@ -54,4 +54,4 @@ class TorqueLimitsSoftConstraint final : public ocs2::StateInputCost {
   scalar_t offset_;
 };
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

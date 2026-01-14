@@ -2,7 +2,7 @@
 
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModel.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 ComKinoInitializer::ComKinoInitializer(const com_model_t &comModel,
                                        const SwitchedModelModeScheduleManager &modeScheduleManager)
@@ -29,4 +29,4 @@ void ComKinoInitializer::compute(scalar_t time, const vector_t &state, scalar_t 
     nextState = state;
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

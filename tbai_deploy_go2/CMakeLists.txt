@@ -9,6 +9,7 @@ add_library(tbai_deploy_go2
     src/Go2RobotInterface.cpp
     src/Go2JoystickInterface.cpp
 )
+set_target_properties(tbai_deploy_go2 PROPERTIES EXPORT_NAME deploy_go2)
 
 target_include_directories(tbai_deploy_go2
     PUBLIC

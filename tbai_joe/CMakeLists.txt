@@ -10,6 +10,7 @@ find_package(Torch REQUIRED)
 add_library(tbai_joe
     src/JoeController.cpp
 )
+set_target_properties(tbai_joe PROPERTIES EXPORT_NAME joe)
 
 target_include_directories(tbai_joe
     PUBLIC
@@ -21,7 +22,7 @@ target_link_libraries(tbai_joe
     PUBLIC
         tbai_core
         tbai_torch
-        tbai_mpc
+        tbai_quadruped_mpc
         tbai_reference
         ocs2_core
         ocs2_mpc

@@ -6,7 +6,7 @@
 
 #include "tbai_mpc/quadruped_mpc/core/SwitchedModel.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * Configuration for the kinematic penalty taking into account:
@@ -42,4 +42,4 @@ scalar_t computeKinematicPenalty(const vector3_t& footPositionInHip, const vecto
 scalar_t computeKinematicPenalty(const vector3_t& footPositionInWorld, const vector3_t& hipPositionInWorld,
                                  const matrix3_t& rotationHipToWorld, const ApproximateKinematicsConfig& config);
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

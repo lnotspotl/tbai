@@ -10,7 +10,7 @@
 #include "tbai_mpc/quadruped_mpc/terrain/TerrainModel.h"
 #include "tbai_mpc/quadruped_mpc/terrain/TerrainPlane.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 /**
  * Linear inequality constraint A_p * p_world + b >=  0
@@ -178,4 +178,4 @@ class ExternalSwingPhase final : public FootPhase {
   std::vector<vector3_t> velocityTrajectory_;
 };
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped

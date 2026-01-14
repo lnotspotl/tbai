@@ -4,7 +4,7 @@
 
 #include "tbai_mpc/quadruped_mpc/quadruped_commands/TerrainAdaptation.h"
 
-namespace switched_model {
+namespace tbai::mpc::quadruped {
 
 vector3_t adaptDesiredPositionHeightToTerrain(const vector3_t &desiredPosition, const TerrainPlane &terrainPlane,
                                               scalar_t desiredHeight) {
@@ -80,4 +80,4 @@ vector3_t advanceOrientationInWorld(const vector3_t &eulerXYZ, const vector3_t &
     return advancedEulerXYZ;
 }
 
-}  // namespace switched_model
+}  // namespace tbai::mpc::quadruped
