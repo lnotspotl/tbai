@@ -20,6 +20,15 @@ mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j10
 ```
 
+### Tbai as a framework
+
+<div align="center">
+  
+<img src="https://github.com/user-attachments/assets/41d7fb3b-afdb-46a5-bd05-25ceaaef0682" width="60%" alt="tbai"/>
+
+</div>
+
+
 #### Environment Variables used throughout `tbai`
 
 | Environment Variable | Type | Default | Description | Usage |
