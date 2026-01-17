@@ -81,6 +81,9 @@ class StaticController : public tbai::Controller {
     /** Current controller type */
     std::string currentControllerType_;
 
+    /** Initial controller type */
+    std::string initialControllerType_;
+
     /** Logger */
     std::shared_ptr<spdlog::logger> logger_;
 

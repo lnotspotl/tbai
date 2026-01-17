@@ -27,7 +27,7 @@ std::vector<MotorCommand> StaticController::getMotorCommands(scalar_t currentTim
     // Change to SIT controller on the first call
     if (first_) {
         first_ = false;
-        changeController("SIT", currentTime);
+        changeController(initialControllerType_, currentTime);
     }
 
     if (alpha_ != -1.0) {
@@ -100,6 +100,8 @@ void StaticController::loadSettings() {
     jointNames_ = tbai::fromGlobalConfig<std::vector<std::string>>("joint_names");
     interpolationTime_ = tbai::fromGlobalConfig<scalar_t>("static_controller/interpolation_time");
     fixedBase_ = tbai::fromGlobalConfig<bool>("fixed_base", false);
+
+    initialControllerType_ = tbai::fromGlobalConfig<std::string>("static_controller/initial_controller_type", "SIT");
 }
 
 /*********************************************************************************************************************/
